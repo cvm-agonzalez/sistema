@@ -1,5 +1,0 @@
-[09-Jan-2016 05:01:58 America/Argentina/Buenos_Aires] PHP Parse error:  syntax error, unexpected 'json_encode' (T_STRING) in /home/vmhostin/public_html/images/server.php on line 10
-[09-Jan-2016 05:01:59 America/Argentina/Buenos_Aires] PHP Warning:  getimagesize(): Filename cannot be empty in /home/vmhostin/public_html/images/image_carnet.php on line 6
-[09-Jan-2016 05:01:59 America/Argentina/Buenos_Aires] PHP Warning:  imagecreatefromjpeg(): Filename cannot be empty in /home/vmhostin/public_html/images/image_carnet.php on line 9
-[09-Jan-2016 05:01:59 America/Argentina/Buenos_Aires] PHP Warning:  imagecopyresampled() expects parameter 2 to be resource, boolean given in /home/vmhostin/public_html/images/image_carnet.php on line 25
-[09-Jan-2016 05:01:59 America/Argentina/Buenos_Aires] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/vmhostin/public_html/images/image_carnet.php:6) in /home/vmhostin/public_html/images/image_carnet.php on line 28
