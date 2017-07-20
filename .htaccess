@@ -1,3 +1,4 @@
+AddType text/css .css
 RewriteEngine on
 RewriteCond $1 !^(index\.php|images|bower_components|views|fonts|i18n|scripts|styles|robots\.txt|info\.php)
-RewriteRule ^(.*)$ /index.php?/$1 [L]
+RewriteRule ^(.*)$ /CVM_online/index.php?/$1 [L]

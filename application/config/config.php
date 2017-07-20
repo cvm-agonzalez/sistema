@@ -14,7 +14,8 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://clubvillamitre.com/';
+//$config['base_url']	= 'http://clubvillamitre.com/';
+$config['base_url']	= 'http://localhost/CVM_online';
 
 /*
 |--------------------------------------------------------------------------

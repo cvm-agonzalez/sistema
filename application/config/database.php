@@ -48,6 +48,9 @@
 $active_group = 'default';
 $active_record = TRUE;
 
+/*
+Seteo del sitio hosteado en hostingbahia
+
 $db['default']['hostname'] = 'localhost';
 $db['default']['username'] = 'vmhostin_root';
 $db['default']['password'] = 'HBvm123456';
@@ -63,6 +66,23 @@ $db['default']['dbcollat'] = 'utf8_general_ci';
 $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
+*/
+$db['default']['hostname'] = 'localhost';
+$db['default']['username'] = 'cvm';
+$db['default']['password'] = 'cvm';
+$db['default']['database'] = 'cvm_nixel';
+$db['default']['dbdriver'] = 'mysql';
+$db['default']['dbprefix'] = '';
+$db['default']['pconnect'] = TRUE;
+$db['default']['db_debug'] = TRUE;
+$db['default']['cache_on'] = FALSE;
+$db['default']['cachedir'] = '';
+$db['default']['char_set'] = 'utf8';
+$db['default']['dbcollat'] = 'utf8_general_ci';
+$db['default']['swap_pre'] = '';
+$db['default']['autoinit'] = TRUE;
+$db['default']['stricton'] = FALSE;
+
 
 
 /* End of file database.php */
