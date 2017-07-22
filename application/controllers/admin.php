@@ -18,6 +18,7 @@ class Admin extends CI_Controller {
     public function no_facturado($value='')
     {
 // probando
+	echo "prueba";
         $this->db->where('socios.suspendido', 0);
         $this->db->where('socios.estado', 1);
         $this->db->where('socios.tutor', 0);
