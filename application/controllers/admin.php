@@ -4,25 +4,23 @@ class Admin extends CI_Controller {
 
     public function __construct()
     {
-        parent::__construct();        
+        parent::__construct();
         $this->load->library(array('session','form_validation'));
-        $this->load->helper(array('url','form','date'));       
+        $this->load->helper(array('url','form','date'));
         $this->load->model('login_model');
-        $this->load->database('default');  
-        $this->date_facturacion = 25;          
+        $this->load->database('default');
+        $this->date_facturacion = 25;
         if( !$this->session->userdata('is_logued_in') && ( $this->uri->segment(2) != 'login' && $this->uri->segment(2) ) ){
             redirect(base_url().'admin');
-        }    
-    }    
+        }
+    }
 
     public function no_facturado($value='')
     {
-// probando
-	echo "prueba";
         $this->db->where('socios.suspendido', 0);
         $this->db->where('socios.estado', 1);
         $this->db->where('socios.tutor', 0);
-        $query = $this->db->get('socios');        
+        $query = $this->db->get('socios');
         if( $query->num_rows() == 0 ){ return false; }
         $socios = $query->result();
         $no_facturados = $facturados = array();
@@ -30,7 +28,7 @@ class Admin extends CI_Controller {
             $this->db->where('sid', $socio->Id);
             $this->db->like('date', '2016-03-01','after');
             $query = $this->db->get('facturacion');
-            
+
             if( $query->num_rows() == 0 ){
                 $no_facturados[] = $socio->Id;
             }else{
@@ -50,9 +48,9 @@ class Admin extends CI_Controller {
             $this->db->update('socios', array('facturado'=>0));
         }
     }
-    
+
     public function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
-                $this->load->library('PHPExcel');                
+                $this->load->library('PHPExcel');
                 $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
                                              ->setLastModifiedBy("Club Villa Mitre")
                                              ->setTitle($titulo)
@@ -61,21 +59,21 @@ class Admin extends CI_Controller {
 		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
 		$letras=$letras."AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK,AL,AM,AN,AO,AP,AQ,AR,AS,AT,AU,AV,AW,AX,AY,AZ";
 		$letras=$letras."BA,BB,BC,BD,BE,BF,BG,BH,BI,BJ,BK,BL,BM,BN,BO,BP,BQ,BR,BS,BT,BU,BV,BW,BX,BY,BZ";
-	
+
 		$letra=explode(",",$letras);
 		$cant_col=count($headers);
 		$letra_ini=$letra[0];
 		$letra_fin=$letra[$cant_col];
 
 		$str_style=$letra_ini."1:".$letra_fin."1";
-                
+
                 $this->phpexcel->getActiveSheet()->getStyle("$str_style")->getFill()->applyFromArray(
                     array(
                         'type'       => PHPExcel_Style_Fill::FILL_SOLID,
                         'startcolor' => array('rgb' => 'E9E9E9'),
                     )
                 );
-                 
+
 
 		if ( $fila1 ) {
                 	$this->phpexcel->setActiveSheetIndex(0)
@@ -98,7 +96,7 @@ class Admin extends CI_Controller {
     		);
 
 
-                foreach ($datos as $dato) {                    
+                foreach ($datos as $dato) {
                 	$this->phpexcel->setActiveSheetIndex(0);
 
 			$this->phpexcel->getActiveSheet()->fromArray(
@@ -108,10 +106,10 @@ class Admin extends CI_Controller {
                      				//    we want to set these values (default is A1)
     			);
                         $cont ++;
-                } 
+                }
                 // Renombramos la hoja de trabajo
                 $this->phpexcel->getActiveSheet()->setTitle("$titulo");
-                 
+
                 foreach(range('A',"$letra_fin") as $columnID) {
                     $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
                         ->setAutoSize(true);
@@ -120,12 +118,12 @@ class Admin extends CI_Controller {
                 // de trabajo número 0 sera la primera en mostrarse
                 // al abrir el documento
                 $this->phpexcel->setActiveSheetIndex(0);
-                 
+
                 // redireccionamos la salida al navegador del cliente (Excel2007)
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename="'.$archivo.'.xlsx"');
                 header('Cache-Control: max-age=0');
-                 
+
                 $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
                 $objWriter->save('php://output');
     }
@@ -177,7 +175,7 @@ class Admin extends CI_Controller {
 	$nombre_archivo = $_FILES['userfile']['name'];
 	$tipo_archivo = $_FILES['userfile']['type'];
 	$tamano_archivo = $_FILES['userfile']['size'];
-	
+
 	$socios=false;
 	//compruebo si las características del archivo son las que deseo
 	if (!((strpos($nombre_archivo, "csv") || strpos($nombre_archivo, "txt")) && ($tamano_archivo < 100000))) {
@@ -196,7 +194,7 @@ class Admin extends CI_Controller {
 
 			$col1=trim($campos[0],"\n\t\r");
 			var_dump($col1);
-			
+
                 	// Con los datos del archivo busco en la BD
 			if ( $dato1col == "sid" ) {
 				$socio=$this->socios_model->get_socio($col1);
@@ -227,7 +225,7 @@ class Admin extends CI_Controller {
             					'actividad' => 0
             					);
 				}
-				
+
 			} else {
 					$socios[] = array(
             					'sid' => $col1,
@@ -238,7 +236,7 @@ class Admin extends CI_Controller {
             					);
 			}
 			$serial++;
-    
+
 		}
 	}
 	return $socios;
@@ -270,7 +268,7 @@ class Admin extends CI_Controller {
 				if ( $campos[1] == "------------------" ) {
 					break;
 				}
-				// Apellido y Nombre del TarjetaHabiente 
+				// Apellido y Nombre del TarjetaHabiente
 				$campos[2] = substr($linea,32,30);
 				// Importe
 				$campos[3] = substr($linea,128,10);
@@ -286,11 +284,11 @@ class Admin extends CI_Controller {
 				$importe=$campos[3];
 				$apynom=$campos[2];
 				$mensaje=$campos[4];
-            
+
 				if ( trim($mensaje) == "DEBITO EXITOSO" ) {
 					$by=array("id_marca"=>$id_marca, "nro_tarjeta"=>$nro_tarjeta);
 					$debtarj=$this->debtarj_model->get_debtarj_by($by);
-	
+
 					foreach ( $debtarj as $debtj) {
 						if ( $debtj ) {
 							$id_debito=$debtj->id;
@@ -298,7 +296,7 @@ class Admin extends CI_Controller {
 							if ( $debito && $debito->importe == $importe ) {
 								$serial++;
 								$total=$total+$importe;
-				
+
 								$id_debito = $debito->id;
 								$this->debtarj_model->upd_acred($id_debito, $fecha_acred);
 							}
@@ -347,14 +345,14 @@ class Admin extends CI_Controller {
 				while ( substr_count($importe, '.') > 1 ) {
 					$pos=strpos($importe,'.');
 					$importe=substr($importe,0,$pos).substr($importe,$pos+1);
-				} 
-            
+				}
+
 				// Conversion fecha
 				$dxx=date('d M Y',strtotime($fecha2));
 				$fecha_debito=date('Y-m-d',strtotime($dxx));
 				$dxx=date('d M Y',strtotime($fecha1));
 				$fecha_acred=date('Y-m-d',strtotime($dxx));
-			
+
                 		// Con los datos del archivo busco en la BD
                 		$nro_tarjeta=substr($xnro_tarjeta,14,4);
 
@@ -390,7 +388,7 @@ class Admin extends CI_Controller {
                 if($actividad->estado != 0){
                     $actividades = $actividades.' '.$actividad->nombre;
                 }
-            }                                            
+            }
 /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
             $array_ahg = $this->pagos_model->get_monto_socio($socio['datos']->Id);
             $datos[] = array(
@@ -402,7 +400,7 @@ class Admin extends CI_Controller {
             );
 /* Fin Modificacion AHG */
         }
-        
+
         $datos = json_encode($datos);
         echo $datos;
     }
@@ -437,10 +435,10 @@ class Admin extends CI_Controller {
     }
 
     public function index() {
-	if(!$this->session->userdata('is_logued_in')){			
+	if(!$this->session->userdata('is_logued_in')){
 		$data['token'] = $this->token();
-           	$data['baseurl'] = base_url();								
-		$this->load->view('login-form',$data);				
+           	$data['baseurl'] = base_url();
+		$this->load->view('login-form',$data);
 	}else{
             	redirect(base_url()."admin/socios");
 	}
@@ -450,17 +448,17 @@ class Admin extends CI_Controller {
         $data['username'] = $this->session->userdata('username');
         $data['baseurl'] = base_url();
         $data['section'] = 'morosos';
-        $this->load->view('admin',$data);    
+        $this->load->view('admin',$data);
     }
 
 	public function login()
 	{
-		
-        //if($this->input->post('token') && $this->input->post('token') == $this->session->userdata('token'))        
+
+        //if($this->input->post('token') && $this->input->post('token') == $this->session->userdata('token'))
         //{
             $this->form_validation->set_rules('username', 'nombre de usuario', 'required|trim|min_length[2]|max_length[150]|xss_clean');
             $this->form_validation->set_rules('password', 'password', 'required|trim|min_length[5]|max_length[150]|xss_clean');
-             //lanzamos mensajes de error si es que los hay          
+             //lanzamos mensajes de error si es que los hay
             if($this->form_validation->run() == FALSE)
             {
             	$this->session->set_flashdata('usuario_incorrecto','Falta ingresar algún dato.');
@@ -468,7 +466,7 @@ class Admin extends CI_Controller {
             }else{
                 $username = $this->input->post('username');
                 $password = sha1($this->input->post('password'));
-                $check_user = $this->login_model->login_user($username,$password);                
+                $check_user = $this->login_model->login_user($username,$password);
                 if($check_user == TRUE)
                 {
                     $data = array(
@@ -477,7 +475,7 @@ class Admin extends CI_Controller {
                     'rango'        =>        $check_user->rango,
                     'mail'        =>        $check_user->mail,
                     'username'         =>         $check_user->user
-                    );                     
+                    );
                     $this->session->set_userdata($data);
                     //$this->login_model->update_lCon();
                     redirect(base_url().'admin');
@@ -504,7 +502,7 @@ class Admin extends CI_Controller {
     {
         $this->session->sess_destroy();
         redirect(base_url().'admin');
-    }    
+    }
 
     public function admins($action='',$id='')
     {
@@ -536,15 +534,15 @@ class Admin extends CI_Controller {
 
                 $this->admins_model->update_admin($id,$admin);
                 redirect(base_url().'admin/admins','refresh');
-                
+
                 break;
 
             case 'eliminar':
                 $admin = array('estado' => 0 );
-                $this->admins_model->update_admin($id,$admin);                
+                $this->admins_model->update_admin($id,$admin);
                 redirect(base_url().'admin/admins','refresh');
                 break;
-            
+
             default:
                 $data['listaAdmin'] = $this->admins_model->get_admins();
                 $data['section'] = 'admins';
@@ -554,7 +552,7 @@ class Admin extends CI_Controller {
     }
 
     public function socios()
-    {   
+    {
         switch ($this->uri->segment(3)) {
             /**
 
@@ -575,7 +573,7 @@ class Admin extends CI_Controller {
                 if(!$this->uri->segment(4)){return false;}
                 $this->load->library('email');
 
-                $config['charset'] = 'utf-8';                
+                $config['charset'] = 'utf-8';
                 $config['mailtype'] = 'html';
 
                 $this->email->initialize($config);
@@ -587,21 +585,21 @@ class Admin extends CI_Controller {
 
                 $cuerpo = '<h3><strong>Titular:</strong> '.$cuota['titular'].'</h3>';
                 $cuerpo .= '<h5><strong>Categor&iacute;a:</strong> '.$cuota['categoria'].'</h5>';
-                
+
                 if($cuota['categoria'] == 'Grupo Familiar'){
-               
+
                     $cuerpo .= '<h5><strong>Integrantes</strong></h5><ul>';
-                    foreach ($cuota['familiares'] as $familiar) {          
-                        $cuerpo .= '<li>'.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'</li>';                    
-                    }                    
-                    $cuerpo .= '</ul>';            
+                    foreach ($cuota['familiares'] as $familiar) {
+                        $cuerpo .= '<li>'.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'</li>';
+                    }
+                    $cuerpo .= '</ul>';
                 }
-                
+
                 $cuerpo .= '<table class="table table-hover" width="50%;" border="1">
                     <thead>
-                        <tr>                        
+                        <tr>
                             <th align="left">Descripci&oacute;n</th>
-                            <th align="left">Monto</th>                        
+                            <th align="left">Monto</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -613,52 +611,52 @@ class Admin extends CI_Controller {
                         $cuerpo .= '<tr>
                             <td>Cuota Mensual '.$actividad->nombre.'</td>
                             <td>$'.$actividad->precio.'</td>
-                        </tr>';                        
-                        } 
+                        </tr>';
+                        }
                         if($cuota['familiares'] != 0){
                             foreach ($cuota['familiares'] as $familiar) {
-                                foreach($familiar['actividades']['actividad'] as $actividad){                           
-                                
-                                $cuerpo .= '<tr>                    
+                                foreach($familiar['actividades']['actividad'] as $actividad){
+
+                                $cuerpo .= '<tr>
                                     <td>Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.' ]</td>
                                     <td>$ '.$actividad->precio.'</td>
                                 </tr>';
-                                }                                   
+                                }
                             }
                         }
                         if($cuota['excedente'] >= 1){
-                        
-                        $cuerpo .='<tr>                    
+
+                        $cuerpo .='<tr>
                                     <td>Socio Extra (x'.$cuota['excedente'].')</td>
                                     <td>$'.$cuota['monto_excedente'].'</td>
-                                </tr>';                        
+                                </tr>';
                         }
                         if($cuota['financiacion']){
-                            foreach ($cuota['financiacion'] as $plan) {                 
-                        
-                                $cuerpo .= '<tr>                    
+                            foreach ($cuota['financiacion'] as $plan) {
+
+                                $cuerpo .= '<tr>
                                     <td>Financiación de Deuda ('.$plan->detalle.')</td>
                                     <td>$'.round($plan->monto/$plan->cuotas,2).'</td>
                                 </tr>';
-                        
+
                             }
                         }
-                        if($cuota['descuento'] != 0.00){                        
-                            $cuerpo .= '<tr>                    
+                        if($cuota['descuento'] != 0.00){
+                            $cuerpo .= '<tr>
                                     <td>Descuento</td>
                                     <td>$'.$cuota['descuento'].'</td>
-                                </tr>';                        
+                                </tr>';
                         }
                         $cuerpo .= '
                     </tbody>
                     <tfoot>
-                        <tr>                        
+                        <tr>
                             <th>Total</th>
-                            <th>$'.$cuota['total'].'</th>                        
+                            <th>$'.$cuota['total'].'</th>
                         </tr>
                     </tfoot>
                 </table>';
-                
+
                 // cupon
                 $this->load->model('pagos_model');
                 $cupon = $this->pagos_model->get_cupon($mail['sid']);
@@ -698,10 +696,10 @@ class Admin extends CI_Controller {
                 //echo($cuerpo);
                 //die;
                 $this->email->from('pagos@clubvillamitre.com');
-                $this->email->to($mail['mail']);                 
+                $this->email->to($mail['mail']);
 
-                $this->email->subject('Resumen de Cuenta');                
-                $this->email->message($cuerpo);  
+                $this->email->subject('Resumen de Cuenta');
+                $this->email->message($cuerpo);
 
                 $regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
 
@@ -713,7 +711,7 @@ class Admin extends CI_Controller {
                 }
                     $data['baseurl'] = base_url();
                     $data['section'] = 'socios-resumen_enviado';
-                    $this->load->view('admin',$data);                
+                    $this->load->view('admin',$data);
                 break;
             /**
 
@@ -725,7 +723,7 @@ class Admin extends CI_Controller {
                     if($socio){
                         redirect(base_url().'admin/socios/resumen/'.$socio[0]->Id);
                     }else{
-                        redirect(base_url().'admin/socios');   
+                        redirect(base_url().'admin/socios');
                     }
                 }else{
                     redirect(base_url().'admin/socios');
@@ -739,9 +737,9 @@ class Admin extends CI_Controller {
                 $data['socio'] = '';
                 $this->load->model("general_model");
                 $data['categorias'] = $this->general_model->get_cats();
-                
+
                 $this->load->model("socios_model");
-                $data['socios'] = $this->socios_model->get_socios();                
+                $data['socios'] = $this->socios_model->get_socios();
                 $this->load->view('admin',$data);
                 break;
 
@@ -749,14 +747,14 @@ class Admin extends CI_Controller {
                 $data['username'] = $this->session->userdata('username');
                 $data['baseurl'] = base_url();
                 $datos = array();
-                foreach($_POST as $key => $val)  
-                {  
-                    $datos[$key] = $this->input->post($key);  
-                }     
+                foreach($_POST as $key => $val)
+                {
+                    $datos[$key] = $this->input->post($key);
+                }
                 if($datos['socio_n'] >= 28852){
                     $datos['socio_n'] = '';
                     $error = "?e=socio_n";
-                }  
+                }
                 $datos['r1'] = $datos['r1-id'];
                 $datos['r2'] = $datos['r2-id'];
                 $datos['tutor'] = $datos['r3-id'];
@@ -764,18 +762,18 @@ class Admin extends CI_Controller {
                 unset($datos['r2-id']);
                 unset($datos['r3-id']);
                 unset($datos['r3']);
-                if(isset($datos['deuda'])){                    
+                if(isset($datos['deuda'])){
                     $deuda = $datos['deuda'];
                     unset($datos['deuda']);
                 }
                 $this->load->model("socios_model");
-                
+
                 if($prev_user = $this->socios_model->checkDNI($datos['dni'])){
                     //el dni esta repetido, incluimos la vista de listado con el usuario coincidente
-                    $data['username'] = $this->session->userdata('username');               
+                    $data['username'] = $this->session->userdata('username');
                     $data['prev_user'] = $prev_user;
                     $data['baseurl'] = base_url();
-                    $data['section'] = 'socio-dni-repetido';                    
+                    $data['section'] = 'socio-dni-repetido';
                     $this->load->view('admin',$data);
                 }else{
                     //llamamos al modelo en insertamos los datos
@@ -783,17 +781,17 @@ class Admin extends CI_Controller {
                     //$datos['nacimiento'] = $fecha[2].'-'.$fecha[1].'-'.$fecha[0];
                     unset($datos['files']);
                     $uid = $this->socios_model->register($datos);
-                    if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){                    
+                    if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){
                         rename("images/temp/".$this->session->userdata('img_token').".jpg","images/socios/".$uid.".jpg");
                     }
-                    //guardamos la variable con la data de la foto en una imagen 
+                    //guardamos la variable con la data de la foto en una imagen
                     if($deuda){
                         //llamamos a la vista de financiar deuda para este usuario con el monto ingresado
                         $this->socios_model->insert_deuda($uid,$deuda);
                     }
 
-                    if(date('d') < $this->date_facturacion){ //si la fecha es anterior a la definida                        
-                        if($datos['tutor'] == 0){ // y no es un integrante de grupo familiar                        
+                    if(date('d') < $this->date_facturacion){ //si la fecha es anterior a la definida
+                        if($datos['tutor'] == 0){ // y no es un integrante de grupo familiar
                             $this->load->model('pagos_model');
                             $cuota = $this->pagos_model->get_monto_socio($uid);
 
@@ -812,13 +810,13 @@ class Admin extends CI_Controller {
                             $descripcion .= '$ '.$cuota['cuota'].'<br>';
 
                             $pago = array(
-                                'sid' => $uid, 
+                                'sid' => $uid,
                                 'tutor_id' => $uid,
-                                'aid' => 0, 
+                                'aid' => 0,
                                 'generadoel' => date('Y-m-d'),
                                 'descripcion' => $descripcion,
-                                'monto' => $cuota['cuota'],                
-                                'tipo' => 1,                
+                                'monto' => $cuota['cuota'],
+                                'tipo' => 1,
                                 );
 
 	                        // Si tiene la cuota social bonificada la doy por paga (estado=0)
@@ -829,7 +827,7 @@ class Admin extends CI_Controller {
                             	$this->pagos_model->insert_pago_nuevo($pago);
 
                             $facturacion = array(
-                                'sid' => $uid, 
+                                'sid' => $uid,
                                 'descripcion'=>$descripcion,
                                 'debe' => $cuota['cuota'],
                                 'haber' => 0,
@@ -839,7 +837,7 @@ class Admin extends CI_Controller {
                         }
                     }
                     redirect(base_url()."admin/socios/registrado/".$uid);
-                    
+
                 }
                 break;
 
@@ -857,7 +855,7 @@ class Admin extends CI_Controller {
                 if(!$tutor['dni'] || $prev_user = $this->socios_model->checkDNI($tutor['dni'])){
                     //el dni esta repetido, enviamos DNI para que jquery se encargue
                     echo "DNI";
-                }else{                    
+                }else{
                     $uid = $this->socios_model->register($tutor);
                     $data = array("Id"=>$uid,"nombre"=>$tutor['nombre'],"apellido"=>$tutor['apellido'],"dni"=>$tutor['dni']);
                     echo (json_encode($data));
@@ -891,14 +889,14 @@ class Admin extends CI_Controller {
 
             case 'editar':
                 $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();                
+                $data['baseurl'] = base_url();
                 $data['section'] = 'socios-editar';
                 $this->load->model("general_model");
                 $data['categorias'] = $this->general_model->get_cats();
                // $data['localidad'] = $this->general_model->get_ciudades();
                 $this->load->model("socios_model");
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
-                if($data['socio']){                   
+                if($data['socio']){
                     $data['contacto1'] = $this->socios_model->get_socio($data['socio']->r1);
                     $data['contacto2'] = $this->socios_model->get_socio($data['socio']->r2);
                     $data['tutor'] = $this->socios_model->get_socio($data['socio']->tutor);
@@ -906,29 +904,29 @@ class Admin extends CI_Controller {
                         $data['socio']->socio_n = $this->uri->segment(4);
                     }
                 }else{
-                    
+
                 }
-                
+
                 $this->load->view('admin',$data);
                 break;
 
             case 'guardar':
-                $id = $this->uri->segment(4); // id del socio                
-                foreach($_POST as $key => $val)  
-                {  
-                    $datos[$key] = $this->input->post($key);  
+                $id = $this->uri->segment(4); // id del socio
+                foreach($_POST as $key => $val)
+                {
+                    $datos[$key] = $this->input->post($key);
                 }
 
 
 		if ( $datos['r3-id'] == $id ) {
 			$data['mensaje'] = "No puede ponerse como tutor al mismo socio....";
                     	$data['baseurl'] = base_url();
-                    	$data['volver'] = base_url().'admin/socios';                    
-                    	$data['section'] = 'ppal-mensaje';                    
+                    	$data['volver'] = base_url().'admin/socios';
+                    	$data['section'] = 'ppal-mensaje';
                     	$this->load->view('admin',$data);
 		} else {
                 	$this->load->model("socios_model");
-                	$socio_n = $this->socios_model->check_u_n($datos['socio_n']);                
+                	$socio_n = $this->socios_model->check_u_n($datos['socio_n']);
                 	if($datos['socio_n'] == 0){
 				$datos['socio_n'] = '';
                 	}
@@ -944,15 +942,15 @@ class Admin extends CI_Controller {
                 	unset($datos['r2-id']);
                 	unset($datos['r3-id']);
                 	unset($datos['r3']);
-               	 
+
                 	if($prev_user = $this->socios_model->checkDNI($datos['dni'],$id)){
-                    		//el dni esta repetido, incluimos la vista de listado con el usuario coincidente                
-                    		$data['username'] = $this->session->userdata('username');               
+                    		//el dni esta repetido, incluimos la vista de listado con el usuario coincidente
+                    		$data['username'] = $this->session->userdata('username');
                     		$data['prev_user'] = $prev_user;
                     		$data['baseurl'] = base_url();
-                    		$data['section'] = 'socio-dni-repetido';                    
+                    		$data['section'] = 'socio-dni-repetido';
                     		$this->load->view('admin',$data);
-                	} else {                    
+                	} else {
                     		$token = $this->session->userdata('img_token');
                     		if(file_exists("images/temp/".$token.".jpg")){
                         		rename("images/temp/".$this->session->userdata('img_token').".jpg","images/socios/".$id.".jpg");
@@ -961,15 +959,15 @@ class Admin extends CI_Controller {
                     		$this->socios_model->update_socio($id,$datos);
                     		if(!isset($error)){
                         		$error = '';
-                    		}               
+                    		}
                     		redirect(base_url()."admin/socios/registrado/".$id.$error);
                 	}
 		}
-               	 
+
                 break;
-                
-            case 'borrar':                
-                $data['baseurl'] = base_url();                
+
+            case 'borrar':
+                $data['baseurl'] = base_url();
                 $this->load->model("socios_model");
                 $this->socios_model->borrar_socio($this->uri->segment(4));
                 redirect(base_url()."admin/socios");
@@ -980,7 +978,7 @@ class Admin extends CI_Controller {
                 $data['username'] = $this->session->userdata('username');
                 $data['baseurl'] = base_url();
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
-                $data['facturacion'] = $this->pagos_model->get_facturacion($this->uri->segment(4));                
+                $data['facturacion'] = $this->pagos_model->get_facturacion($this->uri->segment(4));
                 $data['cuota'] = $this->pagos_model->get_monto_socio($this->uri->segment(4));
 		if ( $this->uri->segment(5) ) {
 			if ( $this->uri->segment(5) == "excel" ) {
@@ -1000,8 +998,8 @@ class Admin extends CI_Controller {
 				break;
 			}
 		}
-                $data['section'] = 'socios-resumen';          
-                $this->load->view('admin',$data); 
+                $data['section'] = 'socios-resumen';
+                $this->load->view('admin',$data);
                 break;
             case 'resumen2':
                 $this->load->model('socios_model');
@@ -1014,15 +1012,15 @@ class Admin extends CI_Controller {
             	$array_ahg = $this->pagos_model->get_monto_socio($this->uri->segment(4));
                 $data['cuota'] = $array_ahg['total'];
 /* Fin Modificacion AHG */
-                $data['section'] = 'socios-resumen2';          
-                $this->load->view('socios-resumen2',$data); 
+                $data['section'] = 'socios-resumen2';
+                $this->load->view('socios-resumen2',$data);
                 break;
              case 'resumen-deuda':
                 $data['username'] = $this->session->userdata('username');
                 $data['baseurl'] = base_url();
                 $data['deuda'] = 'only';
-                $data['section'] = 'socios-resumen';                
-                $this->load->view('admin',$data); 
+                $data['section'] = 'socios-resumen';
+                $this->load->view('admin',$data);
                 break;
 
              case 'resumen-sindeuda':
@@ -1121,7 +1119,7 @@ class Admin extends CI_Controller {
                 	$datos['actividad_destino'] = $this->input->post('actividad');
 			        $datos['estado'] = 1;
                		$data['datos'] = $datos;
-		
+
                 	if($datos['descripcion']){
                     		$this->load->model('rifas_model');
                     		$aid = $this->rifas_model->grabar_rifas($datos);
@@ -1214,7 +1212,7 @@ class Admin extends CI_Controller {
                         $this->load->model("pagos_model");
 			// Si me viene el parametro de forzar ...
 			if ( $this->uri->segment(6) ) {
-				$this->debtarj_model->anula_periodo_marca($periodo, $id_marca); 
+				$this->debtarj_model->anula_periodo_marca($periodo, $id_marca);
 			} else {
 			// Chequeo si el periodo esta generado y quiero volver a generarlo
 				if ( $this->debtarj_model->exist_periodo_marca($periodo, $id_marca) ) {
@@ -1254,12 +1252,12 @@ class Admin extends CI_Controller {
                                                 	$ts = date('Y-m-d H:i:s');
                                                 	// Inserto el debito del mes
                                                 	$this->debtarj_model->insert_debito($id_debito, $fecha, $importe );
-	
+
                                                 	// Actualizo el ultimo periodo y fecha de generacion
                                                 	$debtarj->ult_periodo_generado=$periodo;
                                                 	$debtarj->ult_fecha_generacion=$fecha;
                                                 	$this->debtarj_model->actualizar($debtarj->id, $debtarj);
-		
+
 							$asoc_gen++;
 							$total_gen = $total_gen + $importe;
                                         	} else {
@@ -1272,7 +1270,7 @@ class Admin extends CI_Controller {
 							default: $estado = "INDEFINIDO"; break;
 						}
 						$mensaje="No se genera porque tiene estado $estado \n";
-					} 
+					}
 					$result[]=array('renglon'=>$renglon++,'sid'=>$debtarj->sid,'mensaje'=>$mensaje);
                                 }
                         }
@@ -1290,7 +1288,7 @@ class Admin extends CI_Controller {
 			$this->debtarj_model->insert_periodo_marca($datos);
 
                  	$data['username'] = $this->session->userdata('username');
-                 	$data['baseurl'] = base_url();                
+                 	$data['baseurl'] = base_url();
                	 	$data['result'] = $result;
 
 	                $data['section'] = "gen-debtarj-result";
@@ -1304,7 +1302,7 @@ class Admin extends CI_Controller {
 
 			$resultado=false;
 			switch ( $id_marca ) {
-				case 1: 
+				case 1:
 					$ok=$this->_genera_VISA($id_marca, $periodo);
 					break;
 				case 2:
@@ -1335,7 +1333,7 @@ class Admin extends CI_Controller {
                  $this->load->model('debtarj_model');
                  $this->load->model('tarjeta_model');
                  $data['username'] = $this->session->userdata('username');
-                 $data['baseurl'] = base_url();                
+                 $data['baseurl'] = base_url();
                	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
                	 $data['debitos_gen'] = $this->debtarj_model->get_debitos_gen();
                	 $mes = date('m');
@@ -1347,14 +1345,14 @@ class Admin extends CI_Controller {
 		 } else {
                	 	$data['ult_debito'] = $ultd;
 		 }
-		
+
                  if ( $this->uri->segment(4) ) {
 			$data['flag'] = 1;
 			$data['ult_debito'] = $this->uri->segment(5);
 		 } else {
 			$data['flag'] = 0;
 		 }
-                 $data['section'] = "gen-debtarj";                
+                 $data['section'] = "gen-debtarj";
                  $this->load->view('admin',$data);
                 break;
             case 'load-debtarj':
@@ -1362,14 +1360,14 @@ class Admin extends CI_Controller {
                  $this->load->model('tarjeta_model');
                	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
                  $data['username'] = $this->session->userdata('username');
-                 $data['baseurl'] = base_url();                
-                 $data['section'] = "load-debtarj";                
+                 $data['baseurl'] = base_url();
+                 $data['section'] = "load-debtarj";
                  $this->load->view('admin',$data);
                 break;
             case 'list-debtarj':
                  $this->load->model('debtarj_model');
                  $data['username'] = $this->session->userdata('username');
-                 $data['baseurl'] = base_url();                
+                 $data['baseurl'] = base_url();
                  if ( $this->uri->segment(4) ) {
                  	if ( $this->uri->segment(4) == "excel" ) {
 				$result = $this->arma_listdebitos();
@@ -1390,7 +1388,7 @@ class Admin extends CI_Controller {
                                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 			}
 		 } else {
-                 	$data['section'] = "list-debtarj";                
+                 	$data['section'] = "list-debtarj";
                  	$this->load->view('admin',$data);
 		 }
                 break;
@@ -1427,7 +1425,7 @@ class Admin extends CI_Controller {
                     		}
 			}
 			break;
- 
+
                 case 'stopdebit':
                         $this->load->model('debtarj_model');
                         $this->debtarj_model->stopdebit($this->uri->segment(4));
@@ -1489,7 +1487,7 @@ class Admin extends CI_Controller {
 	}
     }
 
-    
+
     function _genera_VISA($id_marca, $periodo) {
 	try {
        	$this->load->model("tarjeta_model");
@@ -1512,11 +1510,11 @@ class Admin extends CI_Controller {
 			    if ( $fila < 10 ) {
 				    $serial="   0000000".$fila;
 			    } elseif ( $fila < 100 ) {
-				    $serial="   000000".$fila; 
+				    $serial="   000000".$fila;
 			    } else {
 				    $serial="   00000".$fila;
 			    }
-    
+
 			    $importe=$debito['importe'];
 // Si el debito se genero en 0 no grabamos en ASCII
                             if ( $importe > 0 ) {
@@ -1525,7 +1523,7 @@ class Admin extends CI_Controller {
 			         if ( $importe < 1000 ) {
 				      $impo="0000000".$importe;
 			         } elseif ( $importe < 10000 ) {
-				      $impo="000000".$importe; 
+				      $impo="000000".$importe;
 			         } elseif ( $importe < 100000 ) {
 				      $impo="00000".$importe;
 			         } elseif ( $importe < 1000000 ) {
@@ -1535,16 +1533,16 @@ class Admin extends CI_Controller {
 			         } elseif ( $importe < 100000000 ) {
 				      $impo="00".$importe;
 			         }
-    
+
 			         $nro_soc=$debito['sid'];
 			         if ( $nro_soc < 10000 ) {
 				      $nro_socio="00000000000".$nro_soc;
 			         } elseif ( $nro_soc < 100000 ) {
-				      $nro_socio="0000000000".$nro_soc; 
+				      $nro_socio="0000000000".$nro_soc;
 			         } elseif ( $nro_soc < 1000000 ) {
 				      $nro_socio="000000000".$nro_soc;
 			         }
-    
+
 			         echo "1".$nro_tarjeta.$serial.$fecha."000500000".$impo.$nro_socio."                             *\r\n";
         			 $this->debtarj_model->upd_debito_rng($debito['id_debito'], $fila);
 			         $fila++;
@@ -1778,10 +1776,10 @@ class Admin extends CI_Controller {
                 $this->load->model("socios_model");
                 $act = $this->actividades_model->act_alta($data);
                 $facturar = $this->uri->segment(6);
-                if(date('d') < $this->date_facturacion && $facturar == 'true'){ //si la fecha es anterior a la definida                        
+                if(date('d') < $this->date_facturacion && $facturar == 'true'){ //si la fecha es anterior a la definida
 
                     $actividad = $this->actividades_model->get_actividad($data['aid']);
-                    $this->load->model('pagos_model');                
+                    $this->load->model('pagos_model');
 
                     $socio = $this->socios_model->get_socio($data['sid']);
                     if($socio->tutor != 0){
@@ -1792,11 +1790,11 @@ class Admin extends CI_Controller {
 
 		    // Si la actividad tiene cuota inicial la registro primero
 		    if ( $actividad->cuota_inicial > 0 ) {
-                    	$descripcion = 'Cuota Inicial '.$actividad->nombre.' - $ '.$actividad->cuota_inicial;                                
+                    	$descripcion = 'Cuota Inicial '.$actividad->nombre.' - $ '.$actividad->cuota_inicial;
                     	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->cuota_inicial,'Cuota Inicial '.$actividad->nombre,$actividad->Id);
 		    }
 
-                    $descripcion = 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;                                
+                    $descripcion = 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
 
                     $this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->Id);
 
@@ -1804,11 +1802,11 @@ class Admin extends CI_Controller {
                     if($socio->tutor == 0){
                         $total = $this->pagos_model->get_socio_total($data['sid']);
                     }else{
-                        $total = $this->pagos_model->get_socio_total($socio->tutor );                        
+                        $total = $this->pagos_model->get_socio_total($socio->tutor );
                     }
 
                     $facturacion = array(
-                        'sid' => $tutor_id, 
+                        'sid' => $tutor_id,
                         'descripcion'=>$descripcion,
                         'debe' => $actividad->precio,
                         'haber' => 0,
@@ -1818,7 +1816,7 @@ class Admin extends CI_Controller {
 		    */
                 }
                 echo $act;
-                break;   
+                break;
 
             case 'load-asoc-activ':
                 $this->load->model('actividades_model');
@@ -1944,7 +1942,7 @@ class Admin extends CI_Controller {
                 $data['baseurl'] = base_url();
                 $this->load->model('actividades_model');
                 $data['actividades'] = $this->actividades_model->get_actividades();
-                $data['actividades_asoc'] = $this->actividades_model->get_act_asoc($data['sid']);                
+                $data['actividades_asoc'] = $this->actividades_model->get_act_asoc($data['sid']);
                 $this->load->view('actividades-lista',$data);
                 break;
 
@@ -1966,7 +1964,7 @@ class Admin extends CI_Controller {
                 $data['socio'] = $this->socios_model->get_socio($data['sid']);
                 $data['section'] = 'actividades-asociar';
                 $data['baseurl'] = base_url();
-                $this->load->view("admin",$data);            
+                $this->load->view("admin",$data);
                 break;
             case 'agregar':
                 $data['username'] = $this->session->userdata('username');
@@ -1976,20 +1974,20 @@ class Admin extends CI_Controller {
                 $data['profesores'] = $this->actividades_model->get_profesores();
                 $data['lugares'] = $this->actividades_model->get_lugares();
                 $data['comisiones'] = $this->actividades_model->get_comisiones();
-                $this->load->view('admin',$data); 
+                $this->load->view('admin',$data);
                 break;
-            
+
             case 'nueva':
-                foreach($_POST as $key => $val)  
-                    {  
-                        $datos[$key] = $this->input->post($key);  
+                foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
                     }
                 if($datos['nombre']){
                     $this->load->model('actividades_model');
                     $aid = $this->actividades_model->reg_actividad($datos);
                     redirect(base_url()."admin/actividades/guardada/".$aid);
                 }else{
-                    redirect(base_url()."admin/actividades"); 
+                    redirect(base_url()."admin/actividades");
                 }
                 break;
 
@@ -2005,16 +2003,16 @@ class Admin extends CI_Controller {
                 $this->load->model('actividades_model');
                 $data['actividad'] = $this->actividades_model->get_actividad($this->uri->segment(4));
                 $data['profesores'] = $this->actividades_model->get_profesores();
-                $data['lugares'] = $this->actividades_model->get_lugares();                
+                $data['lugares'] = $this->actividades_model->get_lugares();
                 $data['comisiones'] = $this->actividades_model->get_comisiones();
                 $data['section'] = 'actividades-editar';
-                $this->load->view('admin',$data); 
+                $this->load->view('admin',$data);
                 break;
 
             case 'guardar':
-                foreach($_POST as $key => $val)  
-                {  
-                    $datos[$key] = $this->input->post($key);  
+                foreach($_POST as $key => $val)
+                {
+                    $datos[$key] = $this->input->post($key);
                 }
                 if($datos['nombre']){
                     $this->load->model("actividades_model");
@@ -2029,9 +2027,9 @@ class Admin extends CI_Controller {
                 break;
             case 'profesores':
                 if($this->uri->segment(4) == 'nuevo'){
-                    foreach($_POST as $key => $val)  
-                    {  
-                        $datos[$key] = $this->input->post($key);  
+                    foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
                     }
                     if($datos['nombre'] && $datos['apellido']){
                         $this->load->model("actividades_model");
@@ -2041,9 +2039,9 @@ class Admin extends CI_Controller {
                         redirect(base_url()."admin/actividades/profesores");
                     }
                 }else if($this->uri->segment(4) == 'guardar'){
-                    foreach($_POST as $key => $val)  
-                    {  
-                        $datos[$key] = $this->input->post($key);  
+                    foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
                     }
                     if($datos['nombre'] && $datos['apellido']){
                         $this->load->model("actividades_model");
@@ -2055,7 +2053,7 @@ class Admin extends CI_Controller {
                     $data['section'] = 'profesores-editar';
                     $this->load->model('actividades_model');
                     $data['profesor'] = $this->actividades_model->get_profesor($this->uri->segment(5));
-                    $this->load->view('admin',$data);  
+                    $this->load->view('admin',$data);
                 }else if($this->uri->segment(4) == 'guardado'){
                     $data['pid'] = $this->uri->segment(5);
                     $data['section'] = 'profesores-guardado';
@@ -2072,14 +2070,14 @@ class Admin extends CI_Controller {
                     $this->load->model('actividades_model');
                     $data['profesores'] = $this->actividades_model->get_profesores();
                     $this->load->view('admin',$data);
-                } 
+                }
                 break;
 
             case 'lugares':
                 if($this->uri->segment(4) == 'nuevo'){
-                    foreach($_POST as $key => $val)  
-                    {  
-                        $datos[$key] = $this->input->post($key);  
+                    foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
                     }
                     if($datos['nombre']){
                         $this->load->model("actividades_model");
@@ -2089,9 +2087,9 @@ class Admin extends CI_Controller {
                         redirect(base_url()."admin/actividades/lugares");
                     }
                 }else if($this->uri->segment(4) == 'guardar'){
-                    foreach($_POST as $key => $val)  
-                    {  
-                        $datos[$key] = $this->input->post($key);  
+                    foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
                     }
                     if($datos['nombre']){
                         $this->load->model("actividades_model");
@@ -2103,7 +2101,7 @@ class Admin extends CI_Controller {
                     $data['section'] = 'lugares-editar';
                     $this->load->model('actividades_model');
                     $data['lugar'] = $this->actividades_model->get_lugar($this->uri->segment(5));
-                    $this->load->view('admin',$data);  
+                    $this->load->view('admin',$data);
                 }else if($this->uri->segment(4) == 'guardado'){
                     $data['pid'] = $this->uri->segment(5);
                     $data['section'] = 'lugares-guardado';
@@ -2120,14 +2118,14 @@ class Admin extends CI_Controller {
                     $this->load->model('actividades_model');
                     $data['lugares'] = $this->actividades_model->get_lugares();
                     $this->load->view('admin',$data);
-                } 
+                }
                 break;
 
             case 'becar':
                 $id = $this->input->post('id');
                 $beca = $this->input->post('beca');
                 $this->load->model('actividades_model');
-                
+
 $this->actividades_model->becar($id,$beca);
                 break;
 
@@ -2140,8 +2138,8 @@ $this->actividades_model->becar($id,$beca);
                 $data['actividades'] = $this->actividades_model->get_actividades();
                 $this->load->view('admin',$data);
                 break;
-        }            
-    }    
+        }
+    }
 
     public function pagos()
     {
@@ -2159,7 +2157,7 @@ $this->actividades_model->becar($id,$beca);
                         $this->load->model('pagos_model');
                         $this->load->model('actividades_model');
                         $data['username'] = $this->session->userdata('username');
-                        $data['baseurl'] = base_url();                
+                        $data['baseurl'] = base_url();
                         $data['socio'] = $this->socios_model->get_socio($sid);
                         $data['facturacion'] = $this->pagos_model->get_facturacion($sid);
 
@@ -2180,7 +2178,7 @@ $this->actividades_model->becar($id,$beca);
                             if($data['sid']){
                                 $this->load->model('pagos_model');
                                 $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
-                            }                        
+                            }
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $this->load->view('admin',$data);
                     break;
@@ -2197,8 +2195,8 @@ $this->actividades_model->becar($id,$beca);
                 switch($this->uri->segment(4)){
                     case 'imprimir':
                         $this->load->model('pagos_model');
-                        $data['baseurl'] = base_url();                        
-                        $data['cupon'] = $this->pagos_model->get_cupon_by_id($this->uri->segment(5));                        
+                        $data['baseurl'] = base_url();
+                        $data['cupon'] = $this->pagos_model->get_cupon_by_id($this->uri->segment(5));
                         $this->load->view('cupon-imprimir',$data);
                         break;
                     case 'get':
@@ -2214,7 +2212,7 @@ $this->actividades_model->becar($id,$beca);
                             $this->load->model('socios_model');
                             $socio = $this->socios_model->get_socio($_POST['id']);
                             $cupon = $this->cuentadigital($_POST['id'],$socio->nombre.' '.$socio->apellido,$_POST['monto']);
-                            if($cupon){                                    
+                            if($cupon){
                                 $this->load->model('pagos_model');
                                 $cupon_id = $this->pagos_model->generar_cupon($_POST['id'],$_POST['monto'],$cupon);
                                 $data = base64_decode($cupon['image']);
@@ -2240,22 +2238,22 @@ $this->actividades_model->becar($id,$beca);
                         if($data['sid']){
                             $this->load->model('pagos_model');
                             $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
-                        }                        
+                        }
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $this->load->view('admin',$data);
                         break;
-                    } 
+                    }
                     break;
-            
+
             case 'deuda':
                 switch ($this->uri->segment(4)) {
                     case 'get':
-                        $this->load->model('pagos_model'); 
+                        $this->load->model('pagos_model');
                         $data['deuda'] = $this->pagos_model->get_deuda($this->uri->segment(5));
                         $data['planes'] = $this->pagos_model->get_planes($this->uri->segment(5));
                         $this->load->view('pagos-deuda-get',$data);
                         break;
-                    
+
                     case 'financiar':
                         $socio = $this->input->post('sid');
                         $monto = $this->input->post('monto');
@@ -2281,8 +2279,8 @@ $this->actividades_model->becar($id,$beca);
                         $this->load->model('socios_model');
                         $data['sid'] = $this->uri->segment(4);
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
-                        $data['section'] = 'pagos-deuda';                
-                        $this->load->view('admin',$data);                        
+                        $data['section'] = 'pagos-deuda';
+                        $this->load->view('admin',$data);
                         break;
                 }
                 break;
@@ -2319,14 +2317,14 @@ $this->actividades_model->becar($id,$beca);
                 redirect(base_url().'admin/pagos/editar/'.$socio_id,'refresh');
                 break;
 
-            default:                            
+            default:
                 $data['username'] = $this->session->userdata('username');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'listado_imprimir';
 /*
                 $this->load->model('pagos_model');
                 $comision = null;
-                $actividad = null;                            
+                $actividad = null;
                 $data['morosos'] = $this->pagos_model->get_morosos($comision, $actividad);
                 $this->load->model('actividades_model');
                 $data['comision_sel'] = $comision;
@@ -2337,7 +2335,7 @@ $this->actividades_model->becar($id,$beca);
                 $this->load->view('admin',$data);
                 break;
         }
-     
+
     }
 
     public function estadisticas()
@@ -2351,7 +2349,7 @@ $this->actividades_model->becar($id,$beca);
             $data['facturacion_anual'] = $this->estadisticas_model->facturacion_anual();
             $data['section'] = 'estadisticas-facturacion';
             $this->load->view('admin',$data);
-            
+
         }else{
             $data['username'] = $this->session->userdata('username');
             $data['baseurl'] = base_url();
@@ -2359,7 +2357,7 @@ $this->actividades_model->becar($id,$beca);
             $data['actividades_anual'] = $this->estadisticas_model->actividades_anual();
             $data['section'] = 'estadisticas-actividades';
             $this->load->view('admin',$data);
-        }      
+        }
     }
     public function configuracion()
     {
@@ -2381,7 +2379,7 @@ $this->actividades_model->becar($id,$beca);
 
             default:
                 $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();        
+                $data['baseurl'] = base_url();
                 $data['section'] = 'configuracion';
                 $this->load->model("general_model");
                 $data['config'] = $this->general_model->get_config();
@@ -2396,20 +2394,20 @@ $this->actividades_model->becar($id,$beca);
             $this->load->library('email');
 
             $this->email->from($this->session->userdata('mail'), $this->session->userdata('username'));
-            $this->email->to('sistemas@nixel.com.ar');             
+            $this->email->to('sistemas@nixel.com.ar');
 
             $this->email->subject('Solicitud de Soporte: CVM');
-            $this->email->message($_POST['consulta']);  
+            $this->email->message($_POST['consulta']);
 
             $this->email->send();
-        
+
             $data['username'] = $this->session->userdata('username');
-            $data['baseurl'] = base_url();        
+            $data['baseurl'] = base_url();
             $data['section'] = 'soporte-enviado';
             $this->load->view('admin',$data);
         }else{
             $data['username'] = $this->session->userdata('username');
-            $data['baseurl'] = base_url();        
+            $data['baseurl'] = base_url();
             $data['section'] = 'soporte';
             $this->load->view('admin',$data);
         }
@@ -2420,7 +2418,7 @@ $this->actividades_model->becar($id,$beca);
         return $fecha[2].'/'.$fecha[1].'/'.$fecha[0];
     }
 
-    function cuentadigital($sid, $nombre, $precio, $venc=null) 
+    function cuentadigital($sid, $nombre, $precio, $venc=null)
     {
         $this->config->load("cuentadigital");
         $cuenta_id = $this->config->item('cd_id');
@@ -2432,9 +2430,9 @@ $this->actividades_model->becar($id,$beca);
         if(!$venc){
             $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
         }else{
-            $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&venc='.$venc.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';    
+            $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&venc='.$venc.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
         }
-        
+
         do{
             $count++;
             $a = file_get_contents($url);
@@ -2454,10 +2452,10 @@ $this->actividades_model->becar($id,$beca);
                 $result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
                 //$result = $xml->INVOICE->INVOICEURL;
 
-            }        
+            }
             if ($count > 5) { $repetir = false; };
 
-        } while ( $repetir );    
+        } while ( $repetir );
             return $result;
     }
 
@@ -2468,23 +2466,23 @@ $this->actividades_model->becar($id,$beca);
                 $this->load->model('general_model');
                 $data['envio'] = $this->general_model->get_envio($id);
                 $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();        
+                $data['baseurl'] = base_url();
                 $data['section'] = 'envios-enviar';
                 $this->load->view('admin',$data);
                 break;
 
-            case 'send':                
+            case 'send':
                 $this->load->model('general_model');
                 $envio_info = $this->general_model->get_envio($id);
                 $envio = $this->general_model->get_envio_data($id);
                 if($envio){
-                    $this->load->library('email');                                        
+                    $this->load->library('email');
                     $this->email->from('avisos@clubvillamitre.com', 'Club Villa Mitre');
                     $this->email->to($envio->email);
                     $this->email->subject($envio_info->titulo);
                     $this->email->message($envio_info->body);
                     $this->email->send();
-                    
+
                     //echo $this->email->print_debugger();
 
                     $this->general_model->enviado($envio->Id);
@@ -2504,7 +2502,7 @@ $this->actividades_model->becar($id,$beca);
                 $data['actividades'] = $this->actividades_model->get_actividades();
                 $data['profesores'] = $this->actividades_model->get_profesores();
                 $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();        
+                $data['baseurl'] = base_url();
                 $data['section'] = 'envios-nuevo';
                 $this->load->view('admin',$data);
                 break;
@@ -2520,8 +2518,8 @@ $this->actividades_model->becar($id,$beca);
                 $grupo = $this->input->post('grupo');
                 $data = $this->input->post('data');
                 $envio = array(
-                    'titulo' => $titulo, 
-                    'grupo' => $grupo, 
+                    'titulo' => $titulo,
+                    'grupo' => $grupo,
                     'data' => json_encode($data),
                     );
                 $this->load->model('general_model');
@@ -2533,12 +2531,12 @@ $this->actividades_model->becar($id,$beca);
                     foreach ($socios as $socio) {
                         if (valid_email(@$socio->mail)){
                             $emails[] = $socio->mail;
-                        }                        
+                        }
                     }
                     $emails = array_unique($emails);
                     foreach ($emails as $email) {
                         $envio_data = array(
-                            'eid' => $id, 
+                            'eid' => $id,
                             'email' => $email
                             );
                         $this->general_model->insert_envios_data($envio_data);
@@ -2550,7 +2548,7 @@ $this->actividades_model->becar($id,$beca);
                         $data['body'] = false;
                         $data['titulo'] = $titulo;
                         $data['total'] = count($emails);
-                        $this->load->view("envios-text",$data);                        
+                        $this->load->view("envios-text",$data);
                     }
                 }else{
                     echo 'no_mails';
@@ -2572,7 +2570,7 @@ $this->actividades_model->becar($id,$beca);
                 $data['actividades'] = $this->actividades_model->get_actividades();
                 $data['profesores'] = $this->actividades_model->get_profesores();
                 $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();        
+                $data['baseurl'] = base_url();
                 $data['section'] = 'envios-editar';
                 $this->load->view('admin',$data);
                 break;
@@ -2582,14 +2580,14 @@ $this->actividades_model->becar($id,$beca);
                 $grupo = $this->input->post('grupo');
                 $data = $this->input->post('data');
                 $envio = array(
-                    'titulo' => $titulo, 
-                    'grupo' => $grupo, 
+                    'titulo' => $titulo,
+                    'grupo' => $grupo,
                     'data' => json_encode($data),
                     );
                 $this->load->model('general_model');
                 $old_envio = $this->general_model->get_envio($id);
                 $this->general_model->update_envio($id,$envio);
-                if($old_envio->grupo != $grupo){                    
+                if($old_envio->grupo != $grupo){
                     $this->general_model->clear_envio_data($id);
                     $socios = $this->general_model->get_socios_by($grupo,$data);
                     $this->load->helper('email');
@@ -2598,12 +2596,12 @@ $this->actividades_model->becar($id,$beca);
                         foreach ($socios as $socio) {
                             if (valid_email(@$socio->mail)){
                                 $emails[] = $socio->mail;
-                            }                        
+                            }
                         }
                         $emails = array_unique($emails);
                         foreach ($emails as $email) {
                             $envio_data = array(
-                                'eid' => $id, 
+                                'eid' => $id,
                                 'email' => $email
                                 );
                             $this->general_model->insert_envios_data($envio_data);
@@ -2621,7 +2619,7 @@ $this->actividades_model->becar($id,$beca);
                         echo 'no_mails';
                     }
                 }else{
-                    $envios_data = $this->general_model->get_envios_data($id);                    
+                    $envios_data = $this->general_model->get_envios_data($id);
                     $data['id'] = $id;
                     $data['titulo'] = $titulo;
                     $data['body'] = $old_envio->body;
@@ -2629,12 +2627,12 @@ $this->actividades_model->becar($id,$beca);
                     $this->load->view("envios-text",$data);
                 }
                 break;
-            
+
             default:
                 $this->load->model('general_model');
                 $data['envios'] = $this->general_model->get_envios();
                 $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();        
+                $data['baseurl'] = base_url();
                 $data['section'] = 'envios';
                 $this->load->view('admin',$data);
                 break;
