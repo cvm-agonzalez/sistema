@@ -1,21 +1,21 @@
 <?
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * 
+ *
  */
 class Pagos_model extends CI_Model {
-    
+
     public function __construct() {
         parent::__construct();
         $this->load->database('default');
     }
-    
+
     public function get_cupon($sid){
-        $this->load->model("socios_model"); 
+        $this->load->model("socios_model");
         $socio = $this->socios_model->get_socio($sid);
         if($socio->tutor != 0){
             $grupo_familiar = true;
-            //si el socio pertenece a un grupo familiar buscamos el cupon del tutor            
+            //si el socio pertenece a un grupo familiar buscamos el cupon del tutor
             return $this->get_cupon($socio->tutor);
         }
 
@@ -39,7 +39,7 @@ class Pagos_model extends CI_Model {
         return $cupon;
     }
 
-    public function get_monto_socio($sid){ // devuelve el importe que deberá pagar un socio o su tutor, en caso de pertenecer a un grupo familiar        
+    public function get_monto_socio($sid){ // devuelve el importe que deberá pagar un socio o su tutor, en caso de pertenecer a un grupo familiar
         $grupo_familiar = $tutor = false;
         $monto = 0;
         //obtenemos el precio de cada categoria
@@ -49,20 +49,20 @@ class Pagos_model extends CI_Model {
         $precio_excedente = $cats['3']->precio_unit;
 
         //buscamos si el socio pertenece a un grupo familiar
-        $this->load->model("socios_model"); 
+        $this->load->model("socios_model");
         $socio = $this->socios_model->get_socio($sid);
 
         if($socio->tutor != 0){
             $grupo_familiar = true;
-            //si el usuario pertenece a un grupo familiar buscamos el monto del tutor            
+            //si el usuario pertenece a un grupo familiar buscamos el monto del tutor
             return $this->get_monto_socio($socio->tutor);
-        }   
+        }
 
         //buscamos si el usuario es tutor de grupo familiar
         $query = $this->db->get_where('socios',array('tutor'=>$sid,'estado'=>'1'));
         if($query->num_rows() != 0){
             $tutor = true;
-            $familiares_a_cargo = $query->result();  
+            $familiares_a_cargo = $query->result();
             $fam_actividades = array();
             $total_familiares = (count($familiares_a_cargo) + 1);  //la cantidad de familiares a cargo mas el tutor
             $familiares = array();
@@ -76,37 +76,37 @@ class Pagos_model extends CI_Model {
             //buscamos los familiares excedentes
             $excedente = $total_familiares - 4; // 4 = total del grupo familiar
             $monto_excedente = 0;
-            for ($i=0; $i < $excedente; $i++) { 
+            for ($i=0; $i < $excedente; $i++) {
                 $monto_excedente = $monto_excedente + $precio_excedente;
             }
-                    
+
             $monto = $cats['3']->precio - ($cats['3']->precio * $socio->descuento / 100); //valor de la cuota de grupo familiar
             $total = $monto + ( $monto_excedente - ($monto_excedente * $socio->descuento / 100) ); //cuota mensual mas el excedente en caso de ser mas socios de lo permitido en el girpo fliar
-            foreach ($socio_actividades['actividad'] as $actividad) {                
+            foreach ($socio_actividades['actividad'] as $actividad) {
 		// actividades del titular del grupo familiar
 		if ( $actividad->monto_porcentaje == 0 ) {
-                	$total = $total + ( $actividad->precio - $actividad->descuento ); 
+                	$total = $total + ( $actividad->precio - $actividad->descuento );
 		} else {
-                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) ); 
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
 		}
             }
             foreach ($familiares as $familiar) {
                 foreach($familiar['actividades']['actividad'] as $actividad){
 		//actividades del los socios del grupo famlilar
 		    if ( $actividad->monto_porcentaje == 0 ) {
-                    	$total = $total + ( $actividad->precio - $actividad->descuento ); 
+                    	$total = $total + ( $actividad->precio - $actividad->descuento );
 		    } else {
-                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) ); 
+                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
 		    }
                 }
             }
 
-            $financiacion = $this->get_financiado_mensual($socio->Id);            
+            $financiacion = $this->get_financiado_mensual($socio->Id);
             $f_total = 0;
             if($financiacion){
                 foreach ($financiacion as $plan) {
                     $f_total = $f_total + round($plan->monto/$plan->cuotas,2);
-                }                
+                }
             }
 
             $total = $total + $f_total;
@@ -133,13 +133,13 @@ class Pagos_model extends CI_Model {
             foreach ($socio_actividades['actividad'] as $actividad) {
 		//actividades del socio
 		if ( $actividad->monto_porcentaje == 0 ) {
-                	$total = $total + ( $actividad->precio - $actividad->descuento ) ; 
+                	$total = $total + ( $actividad->precio - $actividad->descuento ) ;
 		} else {
-                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) ; 
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) ;
 		}
             }
 
-            $financiacion = $this->get_financiado_mensual($socio->Id);            
+            $financiacion = $this->get_financiado_mensual($socio->Id);
             $f_total = 0;
             if($financiacion){
                 foreach ($financiacion as $plan) {
@@ -164,7 +164,7 @@ class Pagos_model extends CI_Model {
                 "cuota_neta"=>$cats[$socio->categoria-1]->precio
             );
         return $cuota;
-        }                
+        }
     }
     function get_actividades_socio($sid){
         $this->load->model("socios_model");  //buscamos datos del socio
@@ -173,18 +173,18 @@ class Pagos_model extends CI_Model {
         $actividades = $this->actividades_model->get_act_asoc($sid);
         $act = array();
         foreach ($actividades as $actividad) {
-                
+
                     if($actividad->estado != '0'){
                         $act[] = $actividad;
                     }
-                }        
-        $actividades_socio = array('actividad' =>$act);  
+                }
+        $actividades_socio = array('actividad' =>$act);
         return $actividades_socio; // devolvemos los datos de la actividad y el usuario correspondiente
     }
     function generar_cupon($sid, $monto,$cupon)
     {
         $this->db->where('sid',$sid); // ponemos en 0 todos los cupones de este socio
-        $this->db->update('cupones',array('estado'=>'0'));        
+        $this->db->update('cupones',array('estado'=>'0'));
         $data = array(
                 'sid' => $sid,
                 'monto' => $monto,
@@ -196,7 +196,7 @@ class Pagos_model extends CI_Model {
     }
     public function get_socio_total($sid)
     {
-        $this->db->where('sid',$sid);        
+        $this->db->where('sid',$sid);
         $this->db->order_by('Id','desc');
         $fact = $this->db->get('facturacion');
         if($fact->num_rows() == 0){return false;}
@@ -210,12 +210,12 @@ class Pagos_model extends CI_Model {
     }
 
     public function get_socio_total2($sid)
-    {        
-        $this->db->where('tutor_id',$sid);        
+    {
+        $this->db->where('tutor_id',$sid);
         $this->db->where('tipo !=',5);
-        $this->db->where('estado',1);    
+        $this->db->where('estado',1);
         $query = $this->db->get('pagos');
-        if($query->num_rows() == 0){return false;} 
+        if($query->num_rows() == 0){return false;}
         $total = 0;
         foreach ($query->result() as $pago) {
             $total = $total + $pago->monto;
@@ -253,7 +253,7 @@ class Pagos_model extends CI_Model {
     function get_cobcols($periodo)
     {
         $query = $this->db->get_where('facturacion_col',array('periodo'=>$periodo));
-	
+
 	$registros=array();
         foreach ($query->result() as $fact) {
 
@@ -280,7 +280,7 @@ class Pagos_model extends CI_Model {
                 );
 		$registros[]=$registro;
         }
-	
+
 	return $registros;
     }
 
@@ -301,7 +301,7 @@ class Pagos_model extends CI_Model {
 	$mes=substr($periodo,5,2);
 	$ahora=date($anio.'-'.$mes.'-'.'01 00:00:00');
         $this->db->where('YEAR(date)' , $anio);
-        $this->db->where('MONTH(date)' , $mes);        
+        $this->db->where('MONTH(date)' , $mes);
 
         $query = $this->db->get('facturacion_cron');
         if($query->num_rows() == 0){
@@ -322,7 +322,7 @@ class Pagos_model extends CI_Model {
 	$anio=substr($periodo,0,4);
 	$mes=substr($periodo,5,2);
         $this->db->where('YEAR(date)' , $anio);
-        $this->db->where('MONTH(date)' , $mes);        
+        $this->db->where('MONTH(date)' , $mes);
 	$query = $this->db->get('facturacion_cron');
 	if ( $query->num_rows() == 0 ) {
 		return false;
@@ -370,8 +370,8 @@ class Pagos_model extends CI_Model {
     }
     public function get_facturacion($sid)
     {
-        $this->db->order_by('DATE(date)','desc');      
-        $this->db->order_by('Id','desc');      
+        $this->db->order_by('DATE(date)','desc');
+        $this->db->order_by('Id','desc');
         $this->db->where("sid", $sid);
         $query = $this->db->get('facturacion');
         return $query->result();
@@ -395,7 +395,7 @@ class Pagos_model extends CI_Model {
 
     public function insert_pago_col($pago)
     {
-        $total = $this->get_deuda($pago['sid']);        
+        $total = $this->get_deuda($pago['sid']);
         $total = $total + $pago['monto'];
         $descripcion = "Pago acreditado desde: La Coope <br>Fecha: ".$pago['fecha'].' '.$pago['hora'];
         $this->db->insert('facturacion',array('sid'=>$pago['sid'],'haber'=>$pago['monto'],'total'=>$total,'descripcion'=>$descripcion));
@@ -404,7 +404,7 @@ class Pagos_model extends CI_Model {
 
     public function insert_pago($pago)
     {
-        $total = $this->get_deuda($pago['sid']);        
+        $total = $this->get_deuda($pago['sid']);
         $total = $total + $pago['monto'];
         $descripcion = "Pago acreditado desde: CuentaDigital <br>Fecha: ".$pago['fecha'].' '.$pago['hora'];
         $this->db->insert('facturacion',array('sid'=>$pago['sid'],'haber'=>$pago['monto'],'total'=>$total,'descripcion'=>$descripcion));
@@ -413,8 +413,8 @@ class Pagos_model extends CI_Model {
 
     public function registrar_pago($tipo,$sid,$monto,$des,$actividad)
     {
-        $total = $this->get_socio_total($sid);  
-            
+        $total = $this->get_socio_total($sid);
+
         if($tipo == 'debe'){
             $debe = $monto;
             $haber = '0.00';
@@ -427,8 +427,8 @@ class Pagos_model extends CI_Model {
                 $tipo = 4;
             }
             $pago = array(
-                'sid' => $sid,  
-                'tutor_id' => $sid,                  
+                'sid' => $sid,
+                'tutor_id' => $sid,
                 'aid' => $aid,
                 'generadoel' => date('Y-m-d'),
                 'descripcion' => $des,
@@ -457,7 +457,21 @@ class Pagos_model extends CI_Model {
         return $data;
     }
 
-    public function get_deuda($sid){        
+    public function get_deuda_monto($sid){
+      $this->db->select('p.tutor_id sid, SUM(p.monto-p.pagado) deuda');
+      $this->db->where('p.estado',1);
+      $this->db->where('p.aid',0);
+      $this->db->where('p.tutor_id',$sid);
+      $this->db->where('DATE_FORMAT(p.generadoel,"%Y%m") < DATE_FORMAT(CURDATE(),"%Y%m")');
+      $this->db->group_by('p.tutor_id');
+      $this->db->having('SUM(p.monto-p.pagado) > 0');
+      $query = $this->db->get('pagos as p');
+      if($query->num_rows() == 0){ return false;}
+      $deuda = $query->row()->deuda;
+      return $deuda;
+    }
+
+    public function get_deuda($sid){
         $this->db->where('sid',$sid);
         $this->db->order_by('Id','desc');
         $query = $this->db->get('facturacion');
@@ -469,7 +483,7 @@ class Pagos_model extends CI_Model {
     public function financiar_deuda($socio,$monto,$cuotas,$detalle){
         $inicio = date('Y-m').'-1';
         $nuevafecha = strtotime ( '+'.$cuotas.' month' , strtotime ( $inicio ) ) ;
-        $fin = date ( 'Y-m-d' , $nuevafecha );   
+        $fin = date ( 'Y-m-d' , $nuevafecha );
         $financiacion = array(
             'sid' => $socio,
             'cuotas' => $cuotas,
@@ -498,7 +512,7 @@ class Pagos_model extends CI_Model {
         $fecha = date('Y-m-d');
         $this->db->where('sid',$sid);
         $this->db->where('inicio <=',$fecha);
-        $this->db->where('fin >',$fecha);        
+        $this->db->where('fin >',$fecha);
         $this->db->where('estado',1);
         $query = $this->db->get('financiacion');
         if($query->num_rows() == 0){return false;}
@@ -507,14 +521,14 @@ class Pagos_model extends CI_Model {
         return $planes;
     }
 
-    public function update_cuota($id){        
-        $this->db->where('Id',$id);        
+    public function update_cuota($id){
+        $this->db->where('Id',$id);
         $this->db->where('estado',1);
         $this->db->set('actual','actual+1',false);
         $this->db->update('financiacion');
     }
 
-    public function get_morosos($comision=null,$actividad=null){        
+    public function get_morosos($comision=null,$actividad=null){
 
 	// Cargo en la variables actividades el filtro en f() de lo que llego por parametros
 	// Si viene seteada una comision con todas las actividades de esa comision
@@ -558,7 +572,7 @@ class Pagos_model extends CI_Model {
     $morosos = $query->result();
 
 	// Seteo un array vacio para meter toda la info
-	// Ciclo los morosos para buscar la info especifica 
+	// Ciclo los morosos para buscar la info especifica
 	$result_morosos=array();
 	foreach ( $morosos as $moroso ) {
 		$sid=$moroso->sid;
@@ -602,7 +616,7 @@ class Pagos_model extends CI_Model {
         $this->db->group_by('p.tutor_id, p.aid');
         $query = $this->db->get('pagos as p');
         if ( $query->num_rows() == 0 ) {
-            $result=array ( 
+            $result=array (
 				'dni' => $socio->dni,
 				'sid' => $sid,
 				'apynom' => $socio->nombre.", ".$socio->apellido,
@@ -639,7 +653,7 @@ class Pagos_model extends CI_Model {
                     $gcuota=0;
                     $dcuota=0;
                 }
-				$result=array ( 
+				$result=array (
 					'dni' => $socio->dni,
 					'sid' => $sid,
 					'apynom' => $socio->nombre.", ".$socio->apellido,
@@ -668,19 +682,19 @@ class Pagos_model extends CI_Model {
         $query = $this->db->get('actividades_asociadas');
         $asoc = $query->result();
         $query->free_result();
-        
+
         $this->load->model("socios_model");
 
         foreach ($asoc as $a) {
-            $socio = $this->socios_model->get_socio($a->sid);    
-            $a->Id = $socio->Id;        
+            $socio = $this->socios_model->get_socio($a->sid);
+            $a->Id = $socio->Id;
             $a->socio = @$socio->nombre.' '.@$socio->apellido;
             $a->telefono = @$socio->telefono;
             $a->nacimiento = @$socio->nacimiento;
             $a->dni = @$socio->dni;
             $a->suspendido = @$socio->suspendido;
             $a->observaciones = @$socio->observaciones;
-            $a->act_nombre = $this->actividades_model->get_actividad($a->aid)->nombre;            
+            $a->act_nombre = $this->actividades_model->get_actividad($a->aid)->nombre;
             //@$a->deuda = $this->pagos_model->get_deuda($socio->Id);
             //@$a->deuda = $this->pagos_model->get_ultimo_pago_actividad($a->aid,$socio->Id);
             @$a->deuda = $this->pagos_model->get_deuda_actividad($a->aid,$socio->Id);
@@ -691,7 +705,7 @@ class Pagos_model extends CI_Model {
             @$a->monto_adeudado = $this->pagos_model->get_socio_total($socio->Id);
         }
         return $asoc;
-    } 
+    }
 
     public function get_pagos_profesor($id)
     {
@@ -701,7 +715,7 @@ class Pagos_model extends CI_Model {
         $socios = array();
         foreach ($actividades as $actividad) {
             $socios[] = $this->get_pagos_actividad($actividad->Id);
-        }        
+        }
         return $socios;
     }
 
@@ -751,7 +765,7 @@ class Pagos_model extends CI_Model {
 	} else {
 		$pagos = 0;
 	}
-	
+
 	return $pagos;
     }
 
@@ -774,7 +788,7 @@ class Pagos_model extends CI_Model {
     }
 
     public function get_ingresos($fecha1='',$fecha2='')
-    {    
+    {
         /*$this->db->order_by('facturacion.date','asc');
         $this->db->where('facturacion.date >=',$fecha1.' 0:00:00');
         $this->db->where('facturacion.date <=',$fecha2.' 23:59:59');
@@ -785,7 +799,7 @@ class Pagos_model extends CI_Model {
         $ingresos = $query->result();
         foreach ($ingresos as $ingreso) {
             $cuota = $acts = array();
-            $this->db->where('estado',0);            
+            $this->db->where('estado',0);
             $this->db->where('sid',$ingreso->sid);
             $this->db->where('pagadoel >=',$fecha1.' 0:00:00');
             $this->db->where('pagadoel <=',$fecha2.' 23:59:59');
@@ -799,13 +813,13 @@ class Pagos_model extends CI_Model {
                         $acts[] = $pago;
                     }
                 }
-                $ingreso->cuota = $cuota;                
-                $ingreso->acts = $acts;                
+                $ingreso->cuota = $cuota;
+                $ingreso->acts = $acts;
             }
         }
         $query->free_result();*/
 
-        //$this->db->where('estado',0);            
+        //$this->db->where('estado',0);
         //$this->db->where('sid',$ingreso->sid);
         $this->load->model('socios_model');
         $this->db->where('pagadoel >=',$fecha1.' 0:00:00');
@@ -816,12 +830,12 @@ class Pagos_model extends CI_Model {
         $pagos = $query->result();
         foreach ($pagos as $pago) {
             $pago->socio = $this->socios_model->get_socio($pago->tutor_id);
-        }        
+        }
         return $pagos;
     }
 
      public function get_ingresos_cuentadigital($fecha1='',$fecha2='')
-    {            
+    {
         $this->load->model('socios_model');
         $this->db->where('fecha >=',$fecha1.' 0:00:00');
         $this->db->where('fecha <=',$fecha2.' 23:59:59');
@@ -830,7 +844,7 @@ class Pagos_model extends CI_Model {
         $pagos = $query->result();
         foreach ($pagos as $pago) {
             $pago->socio = $this->socios_model->get_socio($pago->sid);
-        }        
+        }
         return $pagos;
     }
 
@@ -855,16 +869,16 @@ class Pagos_model extends CI_Model {
             if($categoria != ''){
                 if(date('Y',strtotime($pago->socio->nacimiento)) != $categoria){
                     continue;
-                }                
-            }    
-            $res[] = $pago;           
-        }                 
+                }
+            }
+            $res[] = $pago;
+        }
         return $res;
     }
 
     public function get_cobros_cuota($fecha1='',$fecha2='',$categoria=false)
-    {        
-        $this->load->model('socios_model');        
+    {
+        $this->load->model('socios_model');
         //$this->db->select('sid');
         //$this->db->distinct();
         $this->db->where('estado',0);
@@ -881,10 +895,10 @@ class Pagos_model extends CI_Model {
             if($categoria != ''){
                 if(date('Y',strtotime($pago->socio->nacimiento)) != $categoria){
                     continue;
-                }                
-            }    
-            $res[] = $pago;           
-        }                 
+                }
+            }
+            $res[] = $pago;
+        }
         return $res;
     }
 
@@ -907,9 +921,9 @@ class Pagos_model extends CI_Model {
         $query = $this->db->get('pagos');
         if($query->num_rows() == 0){
             $pago = array(
-                'sid' => $sid, 
+                'sid' => $sid,
                 'tutor_id' => $sid,
-                'aid' => 0, 
+                'aid' => 0,
                 'generadoel' => date('Y-m-d'),
                 'descripcion' => "A favor",
                 'monto' => 0,
@@ -917,22 +931,22 @@ class Pagos_model extends CI_Model {
             );
             $this->insert_pago_nuevo($pago);
             $a_favor = 0;
-        }else{            
-            $a_favor = $query->row()->monto;            
+        }else{
+            $a_favor = $query->row()->monto;
         }
         $monto = $monto + $a_favor*-1;
-        
+
 
         $this->db->order_by('generadoel','asc');
         $this->db->order_by('tipo','asc');
-        $this->db->where('tipo !=',5);        
-        $this->db->where('monto >',0);        
+        $this->db->where('tipo !=',5);
+        $this->db->where('monto >',0);
         $this->db->where('tutor_id',$sid);
         $this->db->where('estado',1);
         $query = $this->db->get('pagos');
         foreach ($query->result() as $pago) {
             if($monto > 0){
-                if( ($pago->monto - $pago->pagado) <= $monto){ 
+                if( ($pago->monto - $pago->pagado) <= $monto){
                     if($pago->pagado == 0){
                         $pagado = $pago->monto;
                         $monto = $monto - $pagado;
@@ -940,7 +954,7 @@ class Pagos_model extends CI_Model {
                         $pagado = $pago->monto;
                         $monto = $monto - ($pago->monto - $pago->pagado);
                     }
-                    $this->db->where('Id',$pago->Id);   
+                    $this->db->where('Id',$pago->Id);
                     $this->db->update('pagos',array('pagado'=>$pagado,'estado'=>0,'pagadoel'=>date('Y-m-d H:i:s')));
                 }else{
                     if($pago->pagado == 0){
@@ -950,8 +964,8 @@ class Pagos_model extends CI_Model {
                     }
                     $this->db->where('Id',$pago->Id);
                     $this->db->update('pagos',array('pagado'=>$pagado,'pagadoel'=>date('Y-m-d H:i:s')));
-                    $monto = 0;        
-                }                
+                    $monto = 0;
+                }
             }
         }
 
@@ -1046,18 +1060,18 @@ class Pagos_model extends CI_Model {
         $query = $this->db->get('actividades_asociadas');
         $asoc = $query->result();
         $query->free_result();
-        
+
         $this->load->model("socios_model");
 
         foreach ($asoc as $a) {
-            $socio = $this->socios_model->get_socio($a->sid); 
-            $a->Id = $socio->Id;           
+            $socio = $this->socios_model->get_socio($a->sid);
+            $a->Id = $socio->Id;
             $a->socio = @$socio->nombre.' '.@$socio->apellido;
             $a->telefono = @$socio->telefono;
             $a->nacimiento = @$socio->nacimiento;
             $a->dni = @$socio->dni;
             $a->suspendido = @$socio->suspendido;
-            $a->act_nombre = $this->actividades_model->get_actividad($a->aid)->nombre;            
+            $a->act_nombre = $this->actividades_model->get_actividad($a->aid)->nombre;
             //@$a->deuda = $this->pagos_model->get_deuda($socio->Id);
             $a->deuda = 0;
             $this->db->where('sid',$a->Id);
@@ -1067,14 +1081,14 @@ class Pagos_model extends CI_Model {
             //$this->db->where('generadoel <','2015-05-01 00:00:00');
             $query = $this->db->get('pagos');
             if($query->num_rows != 0){
-                $a->deuda = $query->row()->estado;                
+                $a->deuda = $query->row()->estado;
             }
         }
         return $asoc;
     }
 
     public function get_socios_financiados()
-    {        
+    {
         $this->db->where('fn.estado',1);
         $this->db->join('socios','socios.Id = fn.sid');
         $query = $this->db->get('financiacion as fn');
@@ -1123,7 +1137,7 @@ class Pagos_model extends CI_Model {
         }
         return $sin_actividades;
     }
-    
+
     public function insert_cuentadigital($pago='')
     {
         $this->db->insert('cuentadigital',$pago);
@@ -1156,7 +1170,7 @@ class Pagos_model extends CI_Model {
             $this->db->where('tutor_id', $pago->tutor_id);
             $this->db->where('tipo', 5);
             $this->db->set('monto', 'monto-'.$a_favor, FALSE);
-            $this->db->update('pagos');            
+            $this->db->update('pagos');
         }
 
         //actualizamos facturacion
@@ -1166,7 +1180,7 @@ class Pagos_model extends CI_Model {
                 case 1:
                     $descripcion = 'Cuota Social - '.date('d/m/Y',strtotime($pago->generadoel));
                     break;
-                
+
                 case 2:
                     $descripcion = 'Recargo por Mora - '.date('d/m/Y',strtotime($pago->generadoel));
                     break;
@@ -1177,11 +1191,11 @@ class Pagos_model extends CI_Model {
 
                 case 4:
                     $descripcion = 'Actividad: '.$pago->nombre.' - '.date('d/m/Y',strtotime($pago->generadoel));
-                    break;      
+                    break;
             }
             $total = $this->get_socio_total($pago->tutor_id);
             $facturacion = array(
-                'sid' => $pago->tutor_id, 
+                'sid' => $pago->tutor_id,
                 'descripcion'=> "CORRECCIÓN MANUAL DE PAGOS: ".$descripcion,
                 'debe'=>0,
                 'haber'=>$facturacion,
@@ -1197,7 +1211,7 @@ class Pagos_model extends CI_Model {
     }
 
     public function get_facturacion_all()
-    {        
+    {
         $this->db->order_by('facturacion.Id', 'asc');
         //$this->db->join('socios', 'socios.Id = facturacion.sid', 'left');
         $query = $this->db->get('facturacion');
@@ -1207,4 +1221,3 @@ class Pagos_model extends CI_Model {
         return $foo;
     }
 }
-

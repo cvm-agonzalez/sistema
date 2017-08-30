@@ -382,23 +382,25 @@ class Admin extends CI_Controller {
         $this->load->model("socios_model");
         $this->load->model("pagos_model");
         $data['socios'] = $this->socios_model->listar();
+
+
         foreach ($data['socios'] as $socio){
-            $actividades = '';
-            foreach ($socio['actividades'] as $actividad) {
-                if($actividad->estado != 0){
-                    $actividades = $actividades.' '.$actividad->nombre;
-                }
-            }
-/* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-            $array_ahg = $this->pagos_model->get_monto_socio($socio['datos']->Id);
+//		var_dump($socio['cuota']);
+	    $xestado = "XXXX";
+	    if ( $socio['datos']->suspendido == 1 ) {
+		$xestado = "SUSP";
+	    } else {
+		$xestado = "ACTI";
+ 	    }
             $datos[] = array(
             'id' => $socio['datos']->Id,
             'name' => $socio['datos']->nombre.' '.$socio['datos']->apellido,
             'dni'=>$socio['datos']->dni,
-            'price' => $array_ahg['total'],
-            'actividades' => $actividades
+            'price' => $socio['cuota']['total'],
+	    'estado' => $xestado,
+	    'deuda' => $socio['datos']->deuda,
+            'actividades' => $socio['datos']->actividades
             );
-/* Fin Modificacion AHG */
         }
 
         $datos = json_encode($datos);
@@ -557,18 +559,118 @@ class Admin extends CI_Controller {
             /**
 
             **/
+            case 'reinscribir':
+                $id_socio = $this->uri->segment(4);
+                $this->load->model('socios_model');
+                $socio = $this->socios_model->get_socio_full($id_socio);
+                if ( $socio->categoria == 1 || $socio->categoria == 4 || $socio->categoria == 6 || $socio->categoria == 7 ) {
+                        $data['mensaje1'] = "La categoria de ese socio no admite reinscripcion....";
+                        $data['baseurl'] = base_url();
+                        $data['section'] = 'ppal-mensaje';
+                        $this->load->view('admin',$data);
+                } else {
+                        $this->load->model('pagos_model');
+                        $deuda = $this->pagos_model->get_deuda_monto($id_socio);
+                        if ( $deuda ) {
+				if ( $deuda > 0 ) {
+                                	// Armar el movimiento de
+					$pago_deuda=$deuda*0.80;
+                        		$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Campaña Reinscripcion Set2017');
+					// Si estaba suspendido lo reactivo
+					if ( $socio->suspendido == 1 ) {
+						$this->socios_model->suspender($id_socio,'no');
+					}
+                                	redirect(base_url().'admin/socios/resumen/'.$id_socio);
+				} else {
+                                	$data['mensaje1'] = "Ese socio no tiene deuda....";
+                                	$data['baseurl'] = base_url();
+                                	$data['section'] = 'ppal-mensaje';
+                                	$this->load->view('admin',$data);
+				}
+                        } else {
+                                $data['mensaje1'] = "Ese socio no tiene deuda....";
+                                $data['baseurl'] = base_url();
+                                $data['section'] = 'ppal-mensaje';
+                                $this->load->view('admin',$data);
+                        }
+                }
+                break;
+
 
             case 'suspender':
+                $id_socio = $this->uri->segment(4);
                 $this->load->model('socios_model');
-                $this->socios_model->suspender($this->uri->segment(4));
-                redirect(base_url().'admin/socios/resumen/'.$this->uri->segment(4));
+		$socio = $this->socios_model->get_socio($id_socio);
+		$msj = 0;
+		// Verifico si ya esta suspendido
+		if ( $socio->suspendido == 1 ) {
+			$data['mensaje1'] = "Este socio ya esta Suspendido";
+			$data['baseurl'] = base_url();
+			$data['section'] = 'ppal-mensaje';
+			$this->load->view('admin',$data);
+		} else {
+			// Verifico si tiene deuda
+                	$this->load->model('pagos_model');
+			$deuda = $this->pagos_model->get_deuda_monto($id_socio);
+                	if ( $deuda ) {
+				if ( $deuda > 0 ) {
+					$msj = 1;
+					$data['mensaje2'] = "Este socio tiene deuda por cuota social de $ ".$deuda;
+				}
+			}
+
+			// Verifico si tiene Debito Automatico
+                	$this->load->model('debtarj_model');
+			$debtarj = $this->debtarj_model->get_debtarj_by_sid($id_socio);
+                	if ( $debtarj ) {
+				$msj = 1;
+				$data['mensaje3'] = "Este socio tiene Debito Automatico de Tarjeta ";
+			}
+
+		
+			// Si tiene Deuda o Debito Automativo aviso
+			if ($msj > 0) {
+				$data['mensaje1'] = "Esta seguro de SUSPENDER a este socio ???";
+				$data['baseurl'] = base_url();
+				$data['msj_boton2'] = 'Igual Suspende';
+				$data['url_boton2'] = base_url().'admin/socios/suspender-do/'.$id_socio;
+				$data['section'] = 'ppal-mensaje';
+				$this->load->view('admin',$data);
+			} else {
+                		redirect(base_url().'admin/socios/suspender-do/'.$id_socio);
+			}
+		}
+                break;
+
+
+            case 'suspender-do':
+                $id_socio = $this->uri->segment(4);
+                $this->load->model('socios_model');
+                $this->load->model('pagos_model');
+                $this->socios_model->suspender($id_socio);
+                $this->pagos_model->registrar_pago('debe',$id_socio,0.00,'Suspensión por falta de Pago');
+                redirect(base_url().'admin/socios/resumen/'.$id_socio);
                 break;
 
             case 'desuspender':
+                $id_socio = $this->uri->segment(4);
                 $this->load->model('socios_model');
-                $this->socios_model->suspender($this->uri->segment(4),'no');
-                redirect(base_url().'admin/socios/resumen/'.$this->uri->segment(4));
+                $this->load->model('pagos_model');
+		$socio = $this->socios_model->get_socio($id_socio);
+		// Verifico si ya esta suspendido
+		if ( $socio->suspendido == 0 ) {
+			$data['mensaje1'] = "Este socio NO esta Suspendido";
+			$data['mensaje2'] = var_dump($socio);
+			$data['baseurl'] = base_url();
+			$data['section'] = 'ppal-mensaje';
+			$this->load->view('admin',$data);
+		} else {
+                	$this->socios_model->suspender($this->uri->segment(4),'no');
+                	$this->pagos_model->registrar_pago('debe',$id_socio,0.00,'Des-suspensión por Sistema');
+                	redirect(base_url().'admin/socios/resumen/'.$id_socio);
+		}
                 break;
+
             case 'enviar_resumen':
                 if(!$this->uri->segment(4)){return false;}
                 $this->load->library('email');
@@ -919,9 +1021,8 @@ class Admin extends CI_Controller {
 
 
 		if ( $datos['r3-id'] == $id ) {
-			$data['mensaje'] = "No puede ponerse como tutor al mismo socio....";
+			$data['mensaje1'] = "No puede ponerse como tutor al mismo socio....";
                     	$data['baseurl'] = base_url();
-                    	$data['volver'] = base_url().'admin/socios';
                     	$data['section'] = 'ppal-mensaje';
                     	$this->load->view('admin',$data);
 		} else {
@@ -1042,8 +1143,8 @@ class Admin extends CI_Controller {
                 $data['username'] = $this->session->userdata('username');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'socios';
-                $this->load->model("socios_model");
-                $data['socios'] = $this->socios_model->listar();
+                //$this->load->model("socios_model");
+                //$data['socios'] = $this->socios_model->listar();
                 $this->load->view('admin',$data);
                 break;
         }
@@ -1191,16 +1292,16 @@ class Admin extends CI_Controller {
 
                         $data['baseurl'] = base_url();
 			if ( $result ) {
-                                $data['mensaje'] = "Archivo procesado correctamente";
+                                $data['mensaje1'] = "Archivo procesado correctamente";
 				$data['datos_gen'] = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
 				$data['debitos_error'] = $this->debtarj_model->get_deberr_by_marca_periodo($id_marca, $periodo);
                         	$data['id_marca'] = $id_marca;
                         	$data['fecha_debito'] = $fecha_debito;
-                        	$data['volver'] = base_url()."admin/debtarj";
+                        	$data['url_boton'] = base_url()."admin/debtarj";
+                        	$data['msj_boton'] = "Vuelve Listado de Debitos";
                         	$data['section'] = 'load-debtarj-result';
                         } else {
-                                $data['mensaje'] = "No se pudo procesar archivo";
-                        	$data['volver'] = base_url()."admin/debtarj";
+                                $data['mensaje1'] = "No se pudo procesar archivo";
                         	$data['section'] = 'ppal-mensaje';
                         }
                         $this->load->view("admin",$data);
@@ -1856,11 +1957,12 @@ class Admin extends CI_Controller {
 		} else {
                 	$data['baseurl'] = base_url();
 			if ( $fuente == "txt" ) {
-				$data['mensaje'] = "No se pudo procesar el archivo";
+				$data['mensaje1'] = "No se pudo procesar el archivo";
 			} else {
-				$data['mensaje'] = "No existen asociados en BD con esa actividad relacionada";
+				$data['mensaje1'] = "No existen asociados en BD con esa actividad relacionada";
 			}
-			$data['volver'] = base_url()."admin/actividades/load-asoc-activ";
+			$data['msj_boton'] = "Volver a cargar planilla";
+			$data['url_boton'] = base_url()."admin/actividades/load-asoc-activ";
                 	$data['section'] = 'ppal-mensaje';
                 	$this->load->view("admin",$data);
 		}
