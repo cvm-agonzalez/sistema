@@ -29,6 +29,7 @@ class Socios_model extends CI_Model {
             return $query->result();
         }
     }
+
     public function listar(){
 /*	Cambiado por el SQL con JOIN para optimizar lecturas Ago2017 */
         $this->load->model('pagos_model');

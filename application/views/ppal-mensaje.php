@@ -9,9 +9,11 @@
 			<? if (isset($mensaje3)) { ?> <h4><?print_r($mensaje3)?></h4> <? }; ?>
 			<? if (isset($mensaje4)) { ?> <h4><?print_r($mensaje4)?></h4> <? }; ?>
                 </div>
+
 		<a class="btn btn-primary" href="javascript:history.back(-1);" title="Ir la página anterior">Volver</a>
 		<? if ( isset($msj_boton) ) { ?> <a class="btn btn-primary" href="<?=$url_boton?>"><? echo $msj_boton ?></a> <? }; ?>
 		<? if ( isset($msj_boton2) ) { ?> <a class="btn btn-primary" href="<?=$url_boton2?>"><? echo $msj_boton2 ?></a> <? }; ?>
+
             </div>
         </div>
     </div>

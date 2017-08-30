@@ -640,6 +640,7 @@ class Admin extends CI_Controller {
                 		redirect(base_url().'admin/socios/suspender-do/'.$id_socio);
 			}
 		}
+
                 break;
 
 

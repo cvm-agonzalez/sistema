@@ -469,6 +469,7 @@ class Pagos_model extends CI_Model {
       if($query->num_rows() == 0){ return false;}
       $deuda = $query->row()->deuda;
       return $deuda;
+
     }
 
     public function get_deuda($sid){

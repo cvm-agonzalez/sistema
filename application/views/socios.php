@@ -79,6 +79,7 @@
                 </tr>
             </thead>            
             <tbody>
+
                 <div>
                 <tr data-ng-repeat="store in currentPageStores">
                     <td class="fa"><a href="#" id="td_socio_{{store.id}}" ng-click="showInfo(this, store.id,'<?=$baseurl?>')" class="fa-plus-square-o"></a></td>
@@ -93,6 +94,7 @@
                     </td>
                 </tr>                
                 </div>
+
             </tbody>
         </table>
         <footer class="table-footer">
