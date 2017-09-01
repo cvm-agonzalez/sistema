@@ -1,6 +1,6 @@
                     <div class="page page-profile">
                         <div class="panel panel-default">
-                            <div class="panel-heading"><strong><span class="fa fa-group"></span> COMISIONES</strong></div>
+                            <div class="panel-heading"><strong><span class="fa fa-group"></span> USUARIOS</strong></div>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -31,7 +31,7 @@
                     </div>
 <section class="page page-profile">
     <div class="panel panel-default">
-        <div class="panel-heading"><strong><span class="fa fa-plus"></span> Agregar Comisión</strong></div>
+        <div class="panel-heading"><strong><span class="fa fa-plus"></span> Agregar Usuario de Comision</strong></div>
         <div class="panel-body">
             <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/profesores/nuevo" method="post">
 
@@ -69,6 +69,19 @@
                     <label for="" class="col-sm-2">Celular</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control" name="celular">
+                    </div>
+                </div> 
+                <div class="form-group">
+                    <label for="" class="col-sm-2">Comisión</label>
+                    <div class="col-sm-10">
+			<select name="comision" id="comision" >
+				<?
+				foreach ($comisiones as $comision) {                                       
+				?>
+                          		<option value="<?=$comision->id?>" ><?=$comision->descripcion?></option>
+				
+				<? } ?>
+			</select>
                     </div>
                 </div> 
                 <div class="form-group">

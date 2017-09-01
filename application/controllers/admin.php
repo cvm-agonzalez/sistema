@@ -2151,6 +2151,7 @@ class Admin extends CI_Controller {
                         $pid = $this->actividades_model->reg_profesor($datos);
                         redirect(base_url()."admin/actividades/profesores/guardado/".$pid);
                     }else{
+                        $data['comisiones'] = $this->actividades_model->get_comisiones();
                         redirect(base_url()."admin/actividades/profesores");
                     }
                 }else if($this->uri->segment(4) == 'guardar'){
@@ -2168,6 +2169,7 @@ class Admin extends CI_Controller {
                     $data['section'] = 'profesores-editar';
                     $this->load->model('actividades_model');
                     $data['profesor'] = $this->actividades_model->get_profesor($this->uri->segment(5));
+                    $data['comisiones'] = $this->actividades_model->get_comisiones();
                     $this->load->view('admin',$data);
                 }else if($this->uri->segment(4) == 'guardado'){
                     $data['pid'] = $this->uri->segment(5);
@@ -2184,6 +2186,7 @@ class Admin extends CI_Controller {
                     $data['section'] = 'actividades-profesores';
                     $this->load->model('actividades_model');
                     $data['profesores'] = $this->actividades_model->get_profesores();
+                    $data['comisiones'] = $this->actividades_model->get_comisiones();
                     $this->load->view('admin',$data);
                 }
                 break;
