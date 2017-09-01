@@ -214,12 +214,18 @@ COMISIONES
 
     public function get_actividades_comision()
     {
-        $this->db->where('profesor',$this->session->userdata('Id'));
+        $this->db->where('Id',$this->session->userdata('Id'));
+        $query = $this->db->get('profesores');
+        if($query->num_rows() == 0){return false;}
+        $profesor = $query->row();
+
+        $this->db->where('comision',$profesor->comision);
         $query = $this->db->get('actividades');
         if($query->num_rows() == 0){return false;}
         $actividades = $query->result();
         $query->free_result();
         return $actividades;
+
     }
 
     public function get_reporte($aid='')

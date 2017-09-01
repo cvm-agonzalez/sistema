@@ -44,5 +44,18 @@ class Login_model extends CI_Model {
         $query->free_result();
         return $comision;
     }    
+    public function upd_pwd_comision($email,$old_pass,$new_pass)
+    {
+        $this->db->where('mail',$email);
+        $this->db->where('pass',$old_pass);
+        $this->db->where('estado',1);
+        $query = $this->db->get('profesores');
+        if($query->num_rows() == 0){return false;}
+
+        $qry="UPDATE profesores SET pass='$new_pass' WHERE mail='$email';";
+        $this->db->query($qry);
+        return true;
+    }
+
 }
 ?>

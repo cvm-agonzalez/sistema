@@ -46,6 +46,7 @@
 	            <th>Fecha de Nacimiento</th>	                      
 	            <th>Deuda</th>
 	            <th>Último pago</th>
+	            <th>Opciones</th>
 	        </tr>
 	    </thead>
 	    <tbody>
@@ -72,6 +73,7 @@
 					?>
 				</td>
 				<td><?=$socio->ultimo_pago?></td>				
+				<td><a href="<?=base_url()?>estado/ver/<?=$socio->info->dni ?>">Ver Resumen</a> </td>
 			</tr>
 			<?
 				}

@@ -29,15 +29,26 @@ class Socios_model extends CI_Model {
             return $query->result();
         }
     }
+
     public function listar(){
-        $query = $this->db->get_where('socios', array('estado' =>'1'));
+/*	Cambiado por el SQL con JOIN para optimizar lecturas Ago2017 */
+        $this->load->model('pagos_model');
+	$qry="SELECT s.*, GROUP_CONCAT(DISTINCT a.nombre) actividades, SUM(p.monto-p.pagado) deuda
+		FROM socios s
+        		LEFT JOIN actividades_asociadas aa ON ( s.Id = aa.sid AND aa.estado = 1 )
+        		LEFT JOIN actividades a ON ( aa.aid = a.Id )
+        		LEFT JOIN pagos p ON ( s.Id = p.tutor_id AND p.aid = 0 AND p.estado = 1 AND DATE_FORMAT(p.generadoel,'%Y%m') < DATE_FORMAT(CURDATE(),'%Y%m') )
+		WHERE s.estado = 1 
+		GROUP BY s.Id; ";
+        $resultado = $this->db->query($qry)->result();
         $socios = array();
-        $this->load->model("actividades_model");        
-        $cont = 0;
-        foreach ($query->result() as $socio){
+        foreach ( $resultado as $socio ) {
             $socios[$socio->Id]['datos'] = $socio;
-            $socios[$socio->Id]['actividades'] = $this->actividades_model->get_act_asoc($socio->Id);        
+            $cuota = $this->pagos_model->get_monto_socio($socio->Id);
+	    if ( !$cuota ) { $cuota = 0; };
+            $socios[$socio->Id]['cuota'] = $cuota;
         }        
+
         return $socios;
     }
     public function get_socio($id)
@@ -61,6 +72,14 @@ class Socios_model extends CI_Model {
         $query = $this->db->get_where('socios',array('estado'=>1));
         return $query->result();
     }
+
+    public function get_socio_full($id)
+    {
+            $query = $this->db->get_where('socios',array('Id' => $id),1);
+            if($query->num_rows() == 0){return false;}
+            return $query->row();
+    }
+
     public function get_socio_by($by)
     {
         $by['estado'] = 1;
@@ -180,8 +199,9 @@ class Socios_model extends CI_Model {
 
     public function suspender($id,$si='si'){
         if($si == 'si'){
+	    $hoy = date("Y-m-d");
             $this->db->where('Id',$id);
-            $this->db->update('socios',array('suspendido'=>1));
+            $this->db->update('socios',array('suspendido'=>1, 'fecha_baja'=>$hoy));
         }else{
             $this->db->where('Id',$id);
             $this->db->update('socios',array('suspendido'=>0));

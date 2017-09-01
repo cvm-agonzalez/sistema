@@ -44,6 +44,7 @@ function is_active($seccion1,$seccion2)
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav pull-right">
+            <li class=""><a href="<?=base_url()?>comisiones/cambio_pwd">Cambio Password</a></li>
             <li class=""><a href="<?=base_url()?>comisiones/logout">Cerrar Sesión</a></li>                      
           </ul>
         </div><!--/.nav-collapse -->

@@ -167,6 +167,57 @@ class Comisiones extends CI_Controller {
 		}
 	}
 
+    public function cambio_pwd()
+    {
+
+        if ( $this->uri->segment(3) ) {
+            $data['flag'] = 1;
+            switch ( $this->uri->segment(3) ) {
+                case 1: $data['mensaje'] = "Diferencia entre las dos nuevas contraseñas"; break;
+                case 2: $data['mensaje'] = "Ingreso mal la vieja contraseña"; break;
+                case 3: $data['mensaje'] = "La nueva contraseña tiene que tener al menos 6 caracteres"; break;
+            }
+        } else {
+            $data['flag'] = 0;
+        }
+
+        $this->load->view('comisiones/cambio_pwd', $data);
+    }
+
+    public function upd_pwd()
+    {
+        $this->load->model('Login_model');
+
+        $old_pwd=$_POST['old_pwd'];
+        $new_pwd1=$_POST['new_pwd1'];
+        $new_pwd2=$_POST['new_pwd2'];
+
+        $user = $this->session->userdata('username');
+        $mail = $this->session->userdata('email');
+
+        if ( !$user = $this->Login_model->log_comision($mail,$old_pwd) ) {
+            redirect(base_url().'comisiones/cambio_pwd/2');
+        }
+
+        if ( $new_pwd1 != $new_pwd2 ) {
+            redirect(base_url().'comisiones/cambio_pwd/1');
+        }
+
+        if ( strlen($new_pwd1) < 7 ) {
+            redirect(base_url().'comisiones/cambio_pwd/3');
+        }
+
+        if ( $user ) {
+            $this->Login_model->upd_pwd_comision($mail, $old_pwd, $new_pwd1);
+            $this->logout();
+            return true;
+        }
+   
+
+    }
+
+
+
 	public function logout($value='')
 	{
 		$this->session->sess_destroy();	

@@ -47,6 +47,24 @@
                               data-ng-class="{active: row == '-price'}"></span>
                     </div></th>
                     <th><div class="th">
+                        Estado
+                        <span class="glyphicon glyphicon-chevron-up"
+                              data-ng-click=" order('estado') "
+                              data-ng-class="{active: row == 'estado'}"></span>
+                        <span class="glyphicon glyphicon-chevron-down"
+                              data-ng-click=" order('-estado') "
+                              data-ng-class="{active: row == '-estado'}"></span>
+                    </div></th>
+                    <th><div class="th">
+                        Deuda Cta Social
+                        <span class="glyphicon glyphicon-chevron-up"
+                              data-ng-click=" order('deuda') "
+                              data-ng-class="{active: row == 'deuda'}"></span>
+                        <span class="glyphicon glyphicon-chevron-down"
+                              data-ng-click=" order('-deuda') "
+                              data-ng-class="{active: row == '-deuda'}"></span>
+                    </div></th>
+                    <th><div class="th">
                         Actividades asociadas
                         <span class="glyphicon glyphicon-chevron-up"
                               data-ng-click=" order('actividades') "
@@ -61,11 +79,14 @@
                 </tr>
             </thead>            
             <tbody>
+
                 <div>
                 <tr data-ng-repeat="store in currentPageStores">
                     <td class="fa"><a href="#" id="td_socio_{{store.id}}" ng-click="showInfo(this, store.id,'<?=$baseurl?>')" class="fa-plus-square-o"></a></td>
                     <td><a href="<?=base_url()?>admin/socios/resumen/{{store.id}}">{{store.name}} ({{store.dni}})</a></td>
-                    <td>$ {{store.price}}</td>
+                    <td align="right">$ {{store.price}}</td>
+                    <td align="center">{{store.estado}}</td>
+                    <td align="right">$ {{store.deuda}}</td>
                     <td>{{store.actividades}}</td>
                     <td>
                         <a href="<?=base_url()?>admin/socios/editar/{{store.id}}">Editar</a> |
@@ -73,6 +94,7 @@
                     </td>
                 </tr>                
                 </div>
+
             </tbody>
         </table>
         <footer class="table-footer">
