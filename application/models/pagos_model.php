@@ -457,6 +457,25 @@ class Pagos_model extends CI_Model {
         return $data;
     }
 
+    public function get_reinscripcion($sid){
+      $this->db->where('sid',$sid);
+      $query = $this->db->get('reinscripcion_2017');
+      if($query->num_rows() == 0){ return false;}
+      $reinscripcion = $query->row();
+      return $reinscripcion;
+    }
+
+    public function reinscripcion($sid){
+        $now = date ( 'Y-m-d H:i:s' );
+
+        $reins = array(
+            'sid' => $sid,
+            'ts' => $now
+            );
+        $this->db->insert('reinscripcion_2017',$reins);
+
+    }
+
     public function get_deuda_monto($sid){
       $this->db->select('p.tutor_id sid, SUM(p.monto-p.pagado) deuda');
       $this->db->where('p.estado',1);

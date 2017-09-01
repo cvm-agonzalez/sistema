@@ -570,29 +570,41 @@ class Admin extends CI_Controller {
                         $this->load->view('admin',$data);
                 } else {
                         $this->load->model('pagos_model');
-                        $deuda = $this->pagos_model->get_deuda_monto($id_socio);
-                        if ( $deuda ) {
-				if ( $deuda > 0 ) {
-                                	// Armar el movimiento de
-					$pago_deuda=$deuda*0.80;
-                        		$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Campaña Reinscripcion Set2017');
-					// Si estaba suspendido lo reactivo
-					if ( $socio->suspendido == 1 ) {
-						$this->socios_model->suspender($id_socio,'no');
+			// Verifico si ya esta reinscripto
+                        $reinscripcion = $this->pagos_model->get_reinscripcion($id_socio);
+			if ( $reinscripcion ) {
+                                $data['mensaje1'] = "Ese socio ya se reinscribio el ".$reinscripcion->ts;
+                                $data['baseurl'] = base_url();
+                                $data['section'] = 'ppal-mensaje';
+                                $this->load->view('admin',$data);
+			} else {
+                        	$deuda = $this->pagos_model->get_deuda_monto($id_socio);
+                        	if ( $deuda ) {
+					if ( $deuda > 0 ) {
+                                		// Armar el movimiento de condonacion
+						$pago_deuda=$deuda*0.80;
+                        			$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Campaña Reinscripcion Set2017');
+						// Si estaba suspendido lo reactivo
+						if ( $socio->suspendido == 1 ) {
+							$this->socios_model->suspender($id_socio,'no');
+						}
+						// Grabo el registro de reinscripcion
+						$this->pagos_model->reinscripcion($id_socio);
+	
+                                		redirect(base_url().'admin/socios/resumen/'.$id_socio);
+					} else {
+                                		$data['mensaje1'] = "Ese socio no tiene deuda....";
+                                		$data['baseurl'] = base_url();
+                                		$data['section'] = 'ppal-mensaje';
+                                		$this->load->view('admin',$data);
 					}
-                                	redirect(base_url().'admin/socios/resumen/'.$id_socio);
-				} else {
+                        	} else {
                                 	$data['mensaje1'] = "Ese socio no tiene deuda....";
                                 	$data['baseurl'] = base_url();
                                 	$data['section'] = 'ppal-mensaje';
                                 	$this->load->view('admin',$data);
-				}
-                        } else {
-                                $data['mensaje1'] = "Ese socio no tiene deuda....";
-                                $data['baseurl'] = base_url();
-                                $data['section'] = 'ppal-mensaje';
-                                $this->load->view('admin',$data);
-                        }
+                        	}
+			}
                 }
                 break;
 
