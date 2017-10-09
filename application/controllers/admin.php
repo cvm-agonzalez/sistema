@@ -583,15 +583,27 @@ class Admin extends CI_Controller {
 					if ( $deuda > 0 ) {
                                 		// Armar el movimiento de condonacion
 						$pago_deuda=$deuda*0.80;
-                        			$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Campaña Reinscripcion Set2017');
+                        			$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Campaña Reinscripcion Set2017',0,1);
+
 						// Si estaba suspendido lo reactivo
 						if ( $socio->suspendido == 1 ) {
 							$this->socios_model->suspender($id_socio,'no');
 						}
+
+						// Verifico si tiene la cuota del mes y sino la facturo
+						$cta_mes = $this->pagos_model->busca_fact_mes($id_socio);
+						if ( !$cta_mes ) {
+                					$this->load->model('general_model');
+							$categoria = $this->general_model->get_cat($socio->categoria);
+							$mes=date('Ym');
+                        				$this->pagos_model->registrar_pago('debe',$id_socio,$categoria->precio,'Cuota Mes '.$mes,'cs',0);
+						}
+
 						// Grabo el registro de reinscripcion
 						$this->pagos_model->reinscripcion($id_socio);
 	
                                 		redirect(base_url().'admin/socios/resumen/'.$id_socio);
+
 					} else {
                                 		$data['mensaje1'] = "Ese socio no tiene deuda....";
                                 		$data['baseurl'] = base_url();
@@ -2266,7 +2278,7 @@ $this->actividades_model->becar($id,$beca);
                 switch($this->uri->segment(4)){
                     case 'do':
                         $this->load->model("pagos_model");
-                        $data = $this->pagos_model->registrar_pago($_POST['tipo'],$_POST['sid'],$_POST['monto'],$_POST['des'],$_POST['actividad']);
+                        $data = $this->pagos_model->registrar_pago($_POST['tipo'],$_POST['sid'],$_POST['monto'],$_POST['des'],$_POST['actividad'],$_POST['ajuing']);
                         echo $data;
                     break;
                     case 'get':

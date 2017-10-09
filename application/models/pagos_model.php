@@ -166,6 +166,7 @@ class Pagos_model extends CI_Model {
         return $cuota;
         }
     }
+
     function get_actividades_socio($sid){
         $this->load->model("socios_model");  //buscamos datos del socio
         $socio = $this->socios_model->get_socio($sid);
@@ -411,7 +412,7 @@ class Pagos_model extends CI_Model {
 
     }
 
-    public function registrar_pago($tipo,$sid,$monto,$des,$actividad)
+    public function registrar_pago($tipo,$sid,$monto,$des,$actividad,$ajuste)
     {
         $total = $this->get_socio_total($sid);
 
@@ -441,7 +442,7 @@ class Pagos_model extends CI_Model {
             $haber = $monto;
             $debe = '0.00';
             $total = $total + $haber;
-            $this->registrar_pago2($sid,$monto);
+            $this->registrar_pago2($sid,$monto,$ajuste);
         }
         $data = array(
                 "sid" => $sid,
@@ -463,6 +464,17 @@ class Pagos_model extends CI_Model {
       if($query->num_rows() == 0){ return false;}
       $reinscripcion = $query->row();
       return $reinscripcion;
+    }
+
+    public function busca_fact_mes($sid){
+      $mes = date('Ym');
+      $this->db->where('sid',$sid);
+      $this->db->where('aid',0);
+      $this->db->where('DATE_FORMAT(generadoel,"%Y%m")',$mes);
+      $query = $this->db->get('pagos');
+      if($query->num_rows() == 0){ return false;}
+      $fact_mes = $query->row();
+      return $fact_mes;
     }
 
     public function reinscripcion($sid){
@@ -932,7 +944,7 @@ class Pagos_model extends CI_Model {
     }
 
 
-    public function registrar_pago2($sid=false,$monto='0')
+    public function registrar_pago2($sid=false,$monto='0',$ajuste='0')
     {
         if(!$sid){return false;}
         //$this->load->model('pagos_model');
@@ -947,7 +959,8 @@ class Pagos_model extends CI_Model {
                 'generadoel' => date('Y-m-d'),
                 'descripcion' => "A favor",
                 'monto' => 0,
-                'tipo' => 5,
+		'ajuste' => 0,
+                'tipo' => 5
             );
             $this->insert_pago_nuevo($pago);
             $a_favor = 0;
@@ -975,7 +988,7 @@ class Pagos_model extends CI_Model {
                         $monto = $monto - ($pago->monto - $pago->pagado);
                     }
                     $this->db->where('Id',$pago->Id);
-                    $this->db->update('pagos',array('pagado'=>$pagado,'estado'=>0,'pagadoel'=>date('Y-m-d H:i:s')));
+                    $this->db->update('pagos',array('pagado'=>$pagado,'estado'=>0,'pagadoel'=>date('Y-m-d H:i:s'),'ajuste'=>$ajuste));
                 }else{
                     if($pago->pagado == 0){
                         $pagado = $monto;
@@ -983,7 +996,7 @@ class Pagos_model extends CI_Model {
                         $pagado = $pago->pagado+$monto;
                     }
                     $this->db->where('Id',$pago->Id);
-                    $this->db->update('pagos',array('pagado'=>$pagado,'pagadoel'=>date('Y-m-d H:i:s')));
+                    $this->db->update('pagos',array('pagado'=>$pagado,'pagadoel'=>date('Y-m-d H:i:s'),'ajuste'=>$ajuste));
                     $monto = 0;
                 }
             }

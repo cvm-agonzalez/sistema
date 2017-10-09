@@ -681,34 +681,67 @@ class Cron extends CI_Controller {
 
 	function pagos(){
 		$this->load->model("pagos_model");
-		if($this->pagos_model->check_cron_pagos()){exit('Esta tarea ya fue ejecutada hoy.');}	 
 
-		$ayer = date('Ymd',strtotime("-1 day"));
-		$fecha = date('Y-m-d');
+		// Si me vino una fecha en el URL fuerzo la generacion de esa fecha en particular sin controlar cron
+        	if ($this->uri->segment(3)) {
+			$ayer = $this->uri->segment(3);
+		} else {
+			$ayer = date('Ymd',strtotime("-1 day"));
+			$fecha = date('Y-m-d');
+			if($this->pagos_model->check_cron_pagos()){exit('Esta tarea ya fue ejecutada hoy.');}	 
+		}
 
-		// Busco los pagos del sitio de Cuenta Digital
-		$pagos = $this->get_pagos($ayer);
-		// Si bajo algo del sitio
-		if($pagos) {
-			// Ciclo los pagos encontrados
-			foreach ($pagos as $pago) {
-				$data = $this->pagos_model->insert_pago($pago);
-				$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
+
+		// Veo si tiene algun condicional enviado en la URL para hacer o no generacion
+		// Sino viene segmento 4 (default) genera todo
+		// Si viene en segmento 4 CD o TODO genero Cuenta Digital
+		$ctrl_gen="";
+		if ( $this->uri->segment(4) ) {
+			$ctrl_gen=$this->uri->segment(4);
+			if !( $ctrl_gen == "TODO" || $ctrl_gen == "CD" || $ctrl_gen = "COL" ) {
+				echo "EL PARAMETRO PARA GENERAR ES INCORRECTO";
+				exit;
+			}
+		} else {
+			$ctrl_gen="TODO";
+		}
+		
+		if ( $ctrl_gen == "TODO" || $ctrl_gen = "CD" ) {
+			// Busco los pagos del sitio de Cuenta Digital
+			$pagos = $this->get_pagos($ayer);
+			// Si bajo algo del sitio
+			if($pagos) {
+				// Ciclo los pagos encontrados
+				foreach ($pagos as $pago) {
+					$data = $this->pagos_model->insert_pago($pago);
+					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
+				}
 			}
 		}
 
-		// Busco los pagos registrados en COL
-		$pagos_COL = $this->get_pagos_COL($ayer);
-		// Si bajo algo del sitio
-		if($pagos_COL) {
-			// Ciclo los pagos encontrados
-			foreach ($pagos_COL as $pago) {
-				var_dump($pago);
-				$data = $this->pagos_model->insert_pago_col($pago);
-				$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
+		
+		if ( $ctrl_gen == "TODO" || $ctrl_gen = "COL" ) {
+			// Busco los pagos registrados en COL
+			$pagos_COL = $this->get_pagos_COL($ayer);
+			// Si bajo algo del sitio
+			if($pagos_COL) {
+				// Ciclo los pagos encontrados
+				foreach ($pagos_COL as $pago) {
+					// Si vino en la URL que genera solo un local descarto el resto
+					if ( $this->uri->segment(5) ) {
+						if ( $this->uri->segment(5) != $pago->suc_pago ) {
+							continue;
+						}
+					}
+					$data = $this->pagos_model->insert_pago_col($pago);
+					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
+				}
 			}
 		}
-		$this->pagos_model->insert_pagos_cron($fecha); 
+
+		if (!$this->uri->segment(3)) {
+			$this->pagos_model->insert_pagos_cron($fecha); 
+		}
 	}
 
 	function get_pagos($fecha) {           
