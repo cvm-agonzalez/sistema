@@ -684,8 +684,11 @@ class Cron extends CI_Controller {
 
 		// Si me vino una fecha en el URL fuerzo la generacion de esa fecha en particular sin controlar cron
         	if ($this->uri->segment(3)) {
+			echo "asigno fecha de parametro \n";
 			$ayer = $this->uri->segment(3);
+			echo "ayer = $ayer \n";
 		} else {
+			echo "tomo el date\n";
 			$ayer = date('Ymd',strtotime("-1 day"));
 			$fecha = date('Y-m-d');
 			if($this->pagos_model->check_cron_pagos()){exit('Esta tarea ya fue ejecutada hoy.');}	 
@@ -698,15 +701,17 @@ class Cron extends CI_Controller {
 		$ctrl_gen="";
 		if ( $this->uri->segment(4) ) {
 			$ctrl_gen=$this->uri->segment(4);
-			if !( $ctrl_gen == "TODO" || $ctrl_gen == "CD" || $ctrl_gen = "COL" ) {
+			echo "Controlo generacion vino -> $ctrl_gen";
+			if ( !($ctrl_gen == "TODO" || $ctrl_gen == "CD" || $ctrl_gen = "COL") ) {
 				echo "EL PARAMETRO PARA GENERAR ES INCORRECTO";
 				exit;
 			}
 		} else {
+			echo "Generacion default busca TODO\n";
 			$ctrl_gen="TODO";
 		}
 		
-		if ( $ctrl_gen == "TODO" || $ctrl_gen = "CD" ) {
+		if ( $ctrl_gen == "TODO" || $ctrl_gen == "CD" ) {
 			// Busco los pagos del sitio de Cuenta Digital
 			$pagos = $this->get_pagos($ayer);
 			// Si bajo algo del sitio
@@ -720,19 +725,21 @@ class Cron extends CI_Controller {
 		}
 
 		
-		if ( $ctrl_gen == "TODO" || $ctrl_gen = "COL" ) {
+		if ( $ctrl_gen == "TODO" || $ctrl_gen == "COL" ) {
+			echo "genero COL";
+			if ( $this->uri->segment(5) ) {
+				echo "vino parametro 5 = ".$this->uri->segment(5)." \n";
+				$suc_filtro=$this->uri->segment(5);
+			} else {
+				$suc_filtro=0;
+			}
 			// Busco los pagos registrados en COL
-			$pagos_COL = $this->get_pagos_COL($ayer);
+			$pagos_COL = $this->get_pagos_COL($ayer,$suc_filtro);
 			// Si bajo algo del sitio
 			if($pagos_COL) {
 				// Ciclo los pagos encontrados
 				foreach ($pagos_COL as $pago) {
 					// Si vino en la URL que genera solo un local descarto el resto
-					if ( $this->uri->segment(5) ) {
-						if ( $this->uri->segment(5) != $pago->suc_pago ) {
-							continue;
-						}
-					}
 					$data = $this->pagos_model->insert_pago_col($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
 				}
@@ -787,7 +794,7 @@ class Cron extends CI_Controller {
 		}
 	}
 
-	function get_pagos_COL($fecha) {           
+	function get_pagos_COL($fecha,$suc_filtro) {           
                 $url = 'https://extranet.cooperativaobrera.coop/xml/Consorcios/index/30553537602/13809/'.$fecha;
                 if($a = file_get_contents($url)){
 			$data = explode("\n",$a);
@@ -812,6 +819,12 @@ class Cron extends CI_Controller {
 					$hora=date('H:m');
             
 					//echo $xfecha1."#".$xfecha."#".$periodo."#".$fecha_pago2."#".$nro_cupon."#".$nro_socio."#".$fecha_pago."#".$suc."#".$hora."#".$importe."\n";
+					// Si viene una sucursal de filtro salteo las sucursales distintas
+					if ( $suc_filtro > 0 ) {
+						if ( $suc != $suc_filtro ) {
+							continue;
+						}
+					}
 
 					$pago[] = array(
 						"fecha" => date('d-m-Y',strtotime($fecha_pago2)),
