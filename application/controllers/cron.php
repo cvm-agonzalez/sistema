@@ -1052,6 +1052,7 @@ class Cron extends CI_Controller {
         }else{
             error_log( date('d/m/Y G:i:s').": Se encontraron ".$query->num_rows()." correos. Enviando... \n", 3, "cron_envios.log");
             $this->load->library('email');
+	    $enviados=0;
             foreach ($query->result() as $email) {
                 $this->email->from('pagos@clubvillamitre.com','Club Villa Mitre');
                 $this->email->to($email->email);                 
@@ -1063,12 +1064,14 @@ class Cron extends CI_Controller {
                     error_log( date('d/m/Y G:i:s').": Enviado: ".$email->email." \n", 3, "cron_envios.log");
                     $this->db->where('Id',$email->Id);
                     $this->db->update('facturacion_mails',array('estado'=>1));
+		    $enviados++;
                 }
-                //if(preg_match($regex, $mail['mail'])){
-                //}
-                //mail
             }
             error_log( date('d/m/Y G:i:s').": Envio Finalizado \n", 3, "cron_envios.log");
+		// envio email de aviso a mi cuenta ahg
+            // Me mando email de aviso que el proceso termino OK
+            mail('agonzalez.lacoope@gmail.com', "El proceso de Envio de Emails finalizo correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de envios de email finalizó correctamente y se enviaron $enviados emails.....".$xahora."\n");
+
             
         }
     }
