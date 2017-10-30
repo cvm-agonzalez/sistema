@@ -97,8 +97,35 @@ class Socios_model extends CI_Model {
     }
 
     public function update_socio($id,$data){
+	if ( $categ = $this->get_cat($id, $data) ) {
+		var_dump($categ);
+		if ( $categ->id_ant != $data['categoria'] ) {
+        		$this->load->model('pagos_model');
+	                $this->pagos_model->registrar_pago('debe',$id,0.00,'Cambio de Categoria de '.$categ->descr_ant.' a '.$categ->descr_new);
+		}
+	}
         $this->db->where('Id', $id);
         $this->db->update('socios', $data); 
+    }
+
+    public function get_cat($id, $data){
+	$cat_new=$data['categoria'];
+	$query="SELECT s.categoria id_ant, c1.nomb descr_ant, $cat_new id_new, c2.nomb descr_new
+		FROM socios s
+			JOIN categorias c1 ON ( s.categoria = c1.Id )
+			JOIN categorias c2 ON ( $cat_new = c2.Id )
+		WHERE s.Id = $id; ";
+        $result = $this->db->query($query)->result(); 
+        if ( $result ) {
+	    $cat = array( 'id_ant' => $result['id_ant'],
+			'descr_ant' => $result['descr_ant'],
+			'id_new' => $result['id_new'],
+			'descr_new' => $result['descr_new']
+		);
+            return $cat;
+        }else{
+            return false;
+        }
     }
 
     public function update_lCon()
@@ -109,6 +136,7 @@ class Socios_model extends CI_Model {
         $this->db->where('Id',$uid);
         $this->db->update('admin',$data);
     }
+
     public function es_tutor($sid){    
         $query = $this->db->get_where('socios', array('estado' =>'1','tutor =' => $sid));
         if($query->num_rows() == 0){

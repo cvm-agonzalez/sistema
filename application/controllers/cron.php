@@ -568,8 +568,15 @@ class Cron extends CI_Controller {
         fclose($log);      
         fclose($col);      
 
+	$totales=$this->pagos_model->get_facturacion_cron($xperiodo);
+	if ( $totales ) {
+		$info_total="Los totales facturados son: <br> Socios Suspendidos: $totales->socios_suspendidos <br> Socios Pasados a Mayores: $totales->socios_cambio_mayor <br> Socios Facturados: $totales->socios_facturados por un total de $ $totales->total_facturado <br> Socios en Debito Tarjeta: $totales->socios_debito por un total de $ $totales->total_debito <br> Mandado a Cobranza COL: $totales->socios_col socios por un total de $ $totales->total_col";
+	} else {
+		$info_total="No encontre registro en facturacion_cron !!!!";
+	}
+
 	// Me mando email de aviso que el proceso termino OK
-        mail('agonzalez.lacoope@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora);
+        mail('agonzalez.lacoope@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
 	}
 
     public function email_a_suspendidos()

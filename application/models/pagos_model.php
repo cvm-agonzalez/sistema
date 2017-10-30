@@ -299,7 +299,7 @@ class Pagos_model extends CI_Model {
     public function check_cron($periodo)
     { //comprueba si ya se ejecuto la tarea este mes o si esta en curso
 	$anio=substr($periodo,0,4);
-	$mes=substr($periodo,5,2);
+	$mes=substr($periodo,4,2);
 	$ahora=date($anio.'-'.$mes.'-'.'01 00:00:00');
         $this->db->where('YEAR(date)' , $anio);
         $this->db->where('MONTH(date)' , $mes);
@@ -321,7 +321,7 @@ class Pagos_model extends CI_Model {
     public function update_facturacion_cron($periodo, $tipo, $cant, $importe)
     {
 	$anio=substr($periodo,0,4);
-	$mes=substr($periodo,5,2);
+	$mes=substr($periodo,4,2);
         $this->db->where('YEAR(date)' , $anio);
         $this->db->where('MONTH(date)' , $mes);
 	$query = $this->db->get('facturacion_cron');
@@ -365,6 +365,21 @@ class Pagos_model extends CI_Model {
 		}
 	}
     }
+
+    public function get_facturacion_cron($periodo)
+    {
+        $anio=substr($periodo,0,4);
+        $mes=substr($periodo,4,2);
+        $this->db->where('YEAR(date)' , $anio);
+        $this->db->where('MONTH(date)' , $mes);
+        $query = $this->db->get('facturacion_cron');
+        if ( $query->num_rows() == 0 ) {
+                return false;
+        } else {
+		return $query->row();
+	}
+     }
+
 
     public function insert_facturacion_cron()
     {
