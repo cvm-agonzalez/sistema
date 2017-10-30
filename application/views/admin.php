@@ -1050,7 +1050,7 @@ $("#debtarj_botones_form button").on("click", function(){
 
         $(document).on("click","#imprimir_carnet",function(){            
             var id = $(this).data('id');
-            window.open('<?=base_url()?>imprimir/carnet/'+id,'','width=800,height=600');
+            window.open('<?=base_url()?>imprimir/carnet/'+id,'','menubar=yes,toolbar=yes,width=800,height=600');
         })
         
         $("#grupo-select").change(function(){

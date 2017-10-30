@@ -49,6 +49,21 @@
                         <input type="text" class="form-control" name="celular" value="<?=$profesor->celular?>">
                     </div>
                 </div> 
+
+                <div class="form-group">
+                    <label for="" class="col-sm-2">Comisión</label>
+                    <div class="col-sm-10">
+                        <select name="comision" id="comision" >
+                                <?
+                                foreach ($comisiones as $comision) {
+                                ?>
+					<option value="<?=$comision->id?>"  <? if($comision->id == $profesor->comision){echo 'selected';} ?>><?=$comision->descripcion?></option>
+
+                                <? } ?>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="" class="col-sm-2">Email</label>
                     <div class="col-sm-10">

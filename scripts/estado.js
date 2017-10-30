@@ -3,9 +3,6 @@ var socio_input;
 var btn = $("#s_btn");
 $(document).ready(function(){
 	$(document).on('submit',"#search_form",function(e){
-
-		confirm("submit".$("#socio_input").val());
-
 		btn.button('loading');
 		socio_input = $("#socio_input").val();
 		$.post(base_url+'estado/get_socio',{socio_input:socio_input})
