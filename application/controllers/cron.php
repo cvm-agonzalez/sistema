@@ -38,6 +38,21 @@ class Cron extends CI_Controller {
         }
     }
 
+    function depuracion_files(){ // esta funcion depura archivos viejos
+        $this->load->model("pagos_model");
+	$cupones = $this->pagos_model->get_cupones_old();
+	$cant=0;
+	foreach ( $cupones as $cupon ) {
+		$cant++;
+		if ( $cant < 30 ) {
+			echo "Cupon $cant a depurar, id = ".$cupon->Id;
+                	$cupon = 'images/cupones/'.$cupon->Id.'.png';
+			unlink($cupon);
+		}
+        }
+	echo "Hay $cant cupones para depurar";
+    }
+
     function facturacion(){ // esta funcion genera la facturacion del mes el dia 1
         $this->load->model("pagos_model");
 	$this->load->model("socios_model");
@@ -648,6 +663,7 @@ class Cron extends CI_Controller {
     public function suspender($log)
     {
         $this->load->model('socios_model');
+	$this->load->model('pagos_model');
         $socios = $this->socios_model->get_socios_pagan();
 	$cant = 0 ;
         foreach ($socios as $socio) {
@@ -677,8 +693,13 @@ class Cron extends CI_Controller {
 		if ( $isusp == 1 ) {
                 	$this->db->where('Id',$socio->Id);
                 	$this->db->update('socios', array('suspendido'=>1));
+
+
                 	$txt = date('H:i:s').": Socio Suspendido #".$socio->Id." ".TRIM($socio->apellido).", ".TRIM($socio->nombre)." DNI= ".$socio->dni." atraso de ".$meses_atraso." ultimo pago ".$ds_ult. " \n";
                 	fwrite($log, $txt);   
+
+        		$this->pagos_model->registrar_pago('debe',$socio->Id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0);
+
 			$cant++;
 		}
             }
@@ -1052,23 +1073,32 @@ class Cron extends CI_Controller {
         }else{
             error_log( date('d/m/Y G:i:s').": Se encontraron ".$query->num_rows()." correos. Enviando... \n", 3, "cron_envios.log");
             $this->load->library('email');
+	    $enviados=0;
             foreach ($query->result() as $email) {
                 $this->email->from('pagos@clubvillamitre.com','Club Villa Mitre');
                 $this->email->to($email->email);                 
 
-                $this->email->subject('Resumen de Cuenta');                
-                $this->email->message($email->body);  
+                $asunto='Resumen de Cuenta al '.date('d/m/Y');
+                $this->email->subject($asunto);                
+                $this->email->message($email->body); 
+                error_log( date('d/m/Y G:i:s').": Enviando: ".$email->email, 3, "cron_envios.log");
 
                 if($this->email->send()){
-                    error_log( date('d/m/Y G:i:s').": Enviado: ".$email->email." \n", 3, "cron_envios.log");
+                    error_log( " ----> Enviado OK "." \n", 3, "cron_envios.log");
+
                     $this->db->where('Id',$email->Id);
                     $this->db->update('facturacion_mails',array('estado'=>1));
-                }
-                //if(preg_match($regex, $mail['mail'])){
-                //}
-                //mail
+		    $enviados++;
+                } else {
+                    $msg_error=$this->email->print_debugger();
+                    error_log( " ----> Error de Envio:".$msg_error." \n", 3, "cron_envios.log");
+		}
             }
             error_log( date('d/m/Y G:i:s').": Envio Finalizado \n", 3, "cron_envios.log");
+		// envio email de aviso a mi cuenta ahg
+            // Me mando email de aviso que el proceso termino OK
+            mail('agonzalez.lacoope@gmail.com', "El proceso de Envio de Emails finalizo correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de envios de email finalizó correctamente y se enviaron $enviados emails.....".$xahora."\n");
+
             
         }
     }

@@ -29,6 +29,16 @@ class Pagos_model extends CI_Model {
         }
     }
 
+    public function get_cupones_old() 
+    {
+        $this->db->where('estado',0);
+        $this->db->where('DATE(date) < DATE_SUB(CURDATE(), INTERVAL 360 DAY)');
+        $query = $this->db->get('cupones');
+        if($query->num_rows() == 0){return false;}
+        $cupones = $query->result();
+        return $cupones;
+    }
+
     public function get_cupon_by_id($id='')
     {
         $this->db->where('Id',$id);
