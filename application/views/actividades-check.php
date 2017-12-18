@@ -36,6 +36,7 @@
 		</div>
 
                     <a class="btn btn-primary" href="<?=$baseurl?>admin/actividades/baja-relacionadas">Da de Baja las Relacionadas</a> 
+                    <a class="btn btn-primary" href="<?=$baseurl?>admin/actividades/bajarel-contrafact">Baja y contramovimiento</a> 
                     <a class="btn btn-primary" href="<?=$baseurl?>admin/actividades/alta-sin-relacionar">Relaciona las que no Estan</a> 
                     <a class="btn btn-success" href="<?=$baseurl?>admin">Volver a pantalla principal</a>                        
                 </div>

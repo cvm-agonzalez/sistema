@@ -177,6 +177,144 @@ class Pagos_model extends CI_Model {
         }
     }
 
+    public function get_monto_socio2($sid){ // devuelve el importe que deberá pagar un socio o su tutor, en caso de pertenecer a un grupo familiar
+        $grupo_familiar = $tutor = false;
+        $monto = 0;
+        //obtenemos el precio de cada categoria
+        $this->load->model("general_model");
+        $cats = $this->general_model->get_cats();
+
+        $precio_excedente = $cats['3']->precio_unit;
+
+        //buscamos si el socio pertenece a un grupo familiar
+        $this->load->model("socios_model");
+        $socio = $this->socios_model->get_socio($sid);
+
+        if($socio->tutor != 0){
+            $grupo_familiar = true;
+            //si el usuario pertenece a un grupo familiar buscamos el monto del tutor
+            return $this->get_monto_socio2($socio->tutor);
+        }
+
+        //buscamos si el usuario es tutor de grupo familiar
+        $query = $this->db->get_where('socios',array('tutor'=>$sid,'estado'=>'1'));
+        if($query->num_rows() != 0){
+            $tutor = true;
+            $familiares_a_cargo = $query->result();
+            $fam_actividades = array();
+            $total_familiares = (count($familiares_a_cargo) + 1);  //la cantidad de familiares a cargo mas el tutor
+            $familiares = array();
+            foreach ($familiares_a_cargo as $familiar) { // buscamos las actividades de cada familiar
+                $fam_actividades = $this->get_actividades_socio($familiar->Id);
+                $familiares[] = array('datos' => $familiar, 'actividades' => $fam_actividades);
+            }
+
+            //buscamos las actividades del socio titular
+            $socio_actividades =  $this->get_actividades_socio($sid);
+            //buscamos los familiares excedentes
+            $excedente = $total_familiares - 4; // 4 = total del grupo familiar
+            $monto_excedente = 0;
+            for ($i=0; $i < $excedente; $i++) {
+                $monto_excedente = $monto_excedente + $precio_excedente;
+            }
+
+            $monto = $cats['3']->precio - ($cats['3']->precio * $socio->descuento / 100); //valor de la cuota de grupo familiar
+            $total = $monto + ( $monto_excedente - ($monto_excedente * $socio->descuento / 100) ); //cuota mensual mas el excedente en caso de ser mas socios de lo permitido en el girpo fliar
+            foreach ($socio_actividades['actividad'] as $actividad) {
+		if ( $actividad->Id >= 36 && $actividad->Id <= 43 ) {
+			continue;
+		}
+		// actividades del titular del grupo familiar
+		if ( $actividad->monto_porcentaje == 0 ) {
+                	$total = $total + ( $actividad->precio - $actividad->descuento );
+		} else {
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		}
+            }
+            foreach ($familiares as $familiar) {
+                foreach($familiar['actividades']['actividad'] as $actividad){
+	                if ( $actividad->Id >= 36 && $actividad->Id <= 43 ) {
+				continue;
+                	}
+
+			//actividades del los socios del grupo famlilar
+		    if ( $actividad->monto_porcentaje == 0 ) {
+                    	$total = $total + ( $actividad->precio - $actividad->descuento );
+		    } else {
+                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		    }
+                }
+            }
+
+            $financiacion = $this->get_financiado_mensual($socio->Id);
+            $f_total = 0;
+            if($financiacion){
+                foreach ($financiacion as $plan) {
+                    $f_total = $f_total + round($plan->monto/$plan->cuotas,2);
+                }
+            }
+
+            $total = $total + $f_total;
+            $cuota = array(
+                "tid" => $sid,
+                "titular" => $socio->apellido.' '.$socio->nombre,
+                "total" => $total,
+                "categoria" => 'Grupo Familiar',
+                "cuota" => $monto,
+                "familiares" => $familiares,
+                "actividades" => $socio_actividades,
+                "excedente" => $excedente,
+                "monto_excedente" => $monto_excedente- ($monto_excedente * $socio->descuento / 100),
+                "financiacion" => $financiacion,
+                "descuento" => $socio->descuento,
+                "cuota_neta"=>$cats[3]->precio
+            );
+            return $cuota;
+
+        }else{ //si no esta en un grupo familiar
+            $socio_actividades =  $this->get_actividades_socio($sid); //buscamos las actividades del socio
+            $socio_cuota = $cats[$socio->categoria-1]->precio - ($cats[$socio->categoria-1]->precio * $socio->descuento / 100); //precio de la cuota
+            $total = $socio_cuota; //cuota mensual
+            foreach ($socio_actividades['actividad'] as $actividad) {
+		if ( $actividad->Id >= 36 && $actividad->Id <= 43 ) {
+			continue;
+		}
+		//actividades del socio
+		if ( $actividad->monto_porcentaje == 0 ) {
+                	$total = $total + ( $actividad->precio - $actividad->descuento ) ;
+		} else {
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) ;
+		}
+            }
+
+            $financiacion = $this->get_financiado_mensual($socio->Id);
+            $f_total = 0;
+            if($financiacion){
+                foreach ($financiacion as $plan) {
+                    $f_total = $f_total + round($plan->monto/$plan->cuotas,2);
+                }
+            }
+
+
+            $total = $total + $f_total;
+            $cuota = array(
+                "tid" => $sid,
+                "titular" => $socio->apellido.' '.$socio->nombre,
+                "total" => $total,
+                "categoria" => $cats[$socio->categoria-1]->nomb,
+                "cuota" => $socio_cuota,
+                "familiares" => '0',
+                "actividades" => $socio_actividades,
+                "excedente" => '0',
+                "monto_excedente" => '0',
+                "financiacion" => $financiacion,
+                "descuento" => $socio->descuento,
+                "cuota_neta"=>$cats[$socio->categoria-1]->precio
+            );
+        return $cuota;
+        }
+    }
+
     function get_actividades_socio($sid){
         $this->load->model("socios_model");  //buscamos datos del socio
         $socio = $this->socios_model->get_socio($sid);
@@ -849,7 +987,7 @@ class Pagos_model extends CI_Model {
         /*$this->db->order_by('facturacion.date','asc');
         $this->db->where('facturacion.date >=',$fecha1.' 0:00:00');
         $this->db->where('facturacion.date <=',$fecha2.' 23:59:59');
-        $this->db->where('facturacion.haber >',0);
+        $this->db->where('facturacion.haber >',-1);
         $this->db->join('socios','socios.Id = facturacion.sid');
         $query = $this->db->get('facturacion');
         if($query->num_rows() == 0){return false;}
@@ -1212,6 +1350,44 @@ class Pagos_model extends CI_Model {
         $pagos = $query->result();
         $query->free_result();
         return $pagos;
+    }
+
+    public function revertir_fact($sid, $aid, $periodo) {
+	// Busco el registro metido en la tabla pagos
+        $this->db->where('pagos.aid',$aid);
+        $this->db->where('pagos.sid',$sid);
+        $this->db->where('DATE_FORMAT(pagos.generadoel,"%Y%m")',$periodo);
+        $query = $this->db->get('pagos');
+        if( $query->num_rows() == 0 ){ return false; }
+        $pago = $query->row();
+	
+	$monto = $pago->monto;
+	
+	if ( $pago->pagado == 0 ) {
+		$this->db->where('Id',$pago->Id);
+		$this->db->update('pagos',array('pagado'=>$monto,'estado'=>0,'pagadoel'=>date('Y-m-d H:i:s'),'ajuste'=>1));
+	} else {
+		$pagado = $pago->pagado;
+		$this->db->where('Id',$pago->Id);
+		$this->db->update('pagos',array('pagado'=>$monto,'estado'=>0,'pagadoel'=>date('Y-m-d H:i:s'),'ajuste'=>1));
+		// Pongo a favor lo que tenia pagado
+		$this->db->where('tutor_id', $pago->tutor_id);
+		$this->db->where('tipo', 5);
+		$this->db->set('monto', 'monto-'.$pagado, FALSE);
+		$this->db->update('pagos');
+	}
+	
+	// Meto un ajuste del monto de lo generado
+	$total = $this->get_socio_total($pago->tutor_id);
+	$facturacion = array(
+		'sid' => $pago->tutor_id,
+		'descripcion'=> "REVERSION FACTURACION",
+		'debe'=>0,
+		'haber'=>$monto,
+		'total'=>$total+$monto
+	);
+	$this->db->insert('facturacion', $facturacion);
+
     }
 
     public function eliminar_pago($id)
