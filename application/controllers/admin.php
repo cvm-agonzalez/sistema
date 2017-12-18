@@ -1083,6 +1083,7 @@ class Admin extends CI_Controller {
                     		}
                     		unset($datos['files']);
                     		$this->socios_model->update_socio($id,$datos);
+
                     		if(!isset($error)){
                         		$error = '';
                     		}
@@ -1356,7 +1357,7 @@ class Admin extends CI_Controller {
 					$mensaje="";
 					if ( $debtarj->estado == 1 ) {
                                         	// Busco la cuota social del mes
-                                        	$cuota_socio = $this->pagos_model->get_monto_socio($debtarj->sid);
+                                        	$cuota_socio = $this->pagos_model->get_monto_socio2($debtarj->sid);
                                         	// Busco el saldo del asociado
                                         	$saldo = $this->pagos_model->get_saldo($debtarj->sid);
                                         	// Si tiene saldo a favor lo descuento, sino la cuota mensual
@@ -2064,6 +2065,36 @@ class Admin extends CI_Controller {
                 $this->load->view("admin",$data);
                 break;
 
+            case 'bajarel-contrafact':
+/* TODO - hacer que baje la relacion y que busque lo facturado para anularlo y ajustar el pago */
+                $this->load->model('actividades_model');
+                $this->load->model('socios_model');
+                $this->load->model('pagos_model');
+		$periodo=date('Ym');
+                $asociados = $this->actividades_model->get_asocact_exist(1);
+                $asoc_relac=array();
+                foreach ( $asociados as $asociado ) {
+                        $sid=$asociado->sid;
+                        $aid=$asociado->aid;
+                        $socio=$this->socios_model->get_socio($sid);
+                	$this->actividades_model->act_baja_asoc($sid, $aid);
+
+			// Si el socio esta activo revierto facturacion
+			if ( $socio->suspendido == 0 ) {
+                		$this->pagos_model->revertir_fact($sid, $aid, $periodo);
+
+                        	$relac = array ( 'sid' => $sid, 'apynom' => $socio->nombre.' '.$socio->apellido, 'dni'=>$socio->dni, 'accion' => 'Borre Relacion y reverti facturacion' );
+                        	$asoc_relac[]=$relac;
+			}
+                }
+
+                $data['asociados'] = $asoc_relac;
+                $data['baseurl'] = base_url();
+                $data['section'] = 'actividades-relacion';
+                $this->load->view("admin",$data);
+
+                break;
+
             case 'get':
                 $data['sid'] = $this->uri->segment(4);
                 $data['baseurl'] = base_url();
@@ -2152,6 +2183,55 @@ class Admin extends CI_Controller {
                 $this->actividades_model->del_actividad($this->uri->segment(4));
                 redirect(base_url()."admin/actividades");
                 break;
+
+            case 'comisiones':
+                if($this->uri->segment(4) == 'nuevo'){
+                    foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
+                    }
+                    if($datos['descripcion'] ){
+                        $this->load->model("actividades_model");
+                        $pid = $this->actividades_model->grabar_comision($datos);
+                        redirect(base_url()."admin/actividades/comisiones/guardado/".$pid);
+                    }else{
+                        $data['comisiones'] = $this->actividades_model->get_comisiones();
+                        redirect(base_url()."admin/actividades/comisiones");
+                    }
+                }else if($this->uri->segment(4) == 'guardar'){
+                    foreach($_POST as $key => $val)
+                    {
+                        $datos[$key] = $this->input->post($key);
+                    }
+                    if($datos['descripcion']){
+                        $this->load->model("actividades_model");
+                        $this->actividades_model->actualizar_comisiones($datos,$this->uri->segment(5));
+                        redirect(base_url()."admin/actividades/comisiones/guardado/".$this->uri->segment(5));
+                    }
+                }else if($this->uri->segment(4) == 'editar'){
+                    $data['baseurl'] = base_url();
+                    $data['section'] = 'comisiones-editar';
+                    $this->load->model('actividades_model');
+                    $data['comision'] = $this->actividades_model->get_comision($this->uri->segment(5));
+                    $this->load->view('admin',$data);
+                }else if($this->uri->segment(4) == 'guardado'){
+                    $data['pid'] = $this->uri->segment(5);
+                    $data['section'] = 'comisiones-guardado';
+                    $data['baseurl'] = base_url();
+                    $this->load->view("admin",$data);
+                }else if($this->uri->segment(4) == 'eliminar'){
+                    $this->load->model("actividades_model");
+                    $this->actividades_model->borrar_comision($this->uri->segment(5));
+                    redirect(base_url()."admin/actividades/comisiones");
+                }else{
+                    $data['username'] = $this->session->userdata('username');
+                    $data['baseurl'] = base_url();
+                    $data['section'] = 'actividades-comisiones';
+                    $this->load->model('actividades_model');
+                    $data['comisiones'] = $this->actividades_model->get_comisiones();
+                    $this->load->view('admin',$data);
+                }
+		break;
             case 'profesores':
                 if($this->uri->segment(4) == 'nuevo'){
                     foreach($_POST as $key => $val)
