@@ -2085,6 +2085,9 @@ class Admin extends CI_Controller {
 
                         	$relac = array ( 'sid' => $sid, 'apynom' => $socio->nombre.' '.$socio->apellido, 'dni'=>$socio->dni, 'accion' => 'Borre Relacion y reverti facturacion' );
                         	$asoc_relac[]=$relac;
+			} else {
+                        	$relac = array ( 'sid' => $sid, 'apynom' => $socio->nombre.' '.$socio->apellido, 'dni'=>$socio->dni, 'accion' => 'SOLO Borre Relacion-Estaba SUSPENDIDO' );
+                        	$asoc_relac[]=$relac;
 			}
                 }
 
