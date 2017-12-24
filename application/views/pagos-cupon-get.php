@@ -46,7 +46,7 @@
 	                <tr>                    
 	                    <? if($actividad->descuento > 0){ ?>
                         <td>Cuota Mensual <?=$actividad->nombre?> - $ <?=$actividad->precio?> <label class="label label-info"><?=$actividad->descuento?><? if ($actividad->monto_porcentaje == 0 ) { echo '$ BECADOS'; } else { echo '% BECADO'; } ?></label></td>
-                        <td>$<? if ( $actividad->monto_porcentaje == 0 ) { echo $actividad->precio - $actividad->descuento; } else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
+                        <td>$<? if ( $actividad->monto_porcentaje == 0 ) { if ( $actividad->precio == 0 ) { echo '0.00'; } else { echo $actividad->precio - $actividad->descuento; } ;} else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
                         <? }else{ ?>                   
                         <td>Cuota Mensual <?=$actividad->nombre?></td>
                         <td>$<?=$actividad->precio?><td>
@@ -61,7 +61,7 @@
 			               	<tr> 
 			               		<? if($actividad->descuento > 0){ ?>
                                     <td>Cuota Mensual <?=$actividad->nombre?> [<?=$familiar['datos']->nombre.' '.$familiar['datos']->apellido?> ] - $ <?=$actividad->precio?> <label class="label label-info"><?=$actividad->descuento?><? if ($actividad->monto_porcentaje == 0 ) { echo '$ BECADOS'; } else { echo '% BECADO'; } ?></label></td>
-                        	    <td>$<? if ( $actividad->monto_porcentaje == 0 ) { echo $actividad->precio - $actividad->descuento; } else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
+                        	    <td>$<? if ( $actividad->monto_porcentaje == 0 ) { if ( $actividad->precio == 0 ) { echo '0.00'; } else { echo $actividad->precio - $actividad->descuento; } ;} else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
                                     <? }else{ ?>                   
                                     <td>Cuota Mensual <?=$actividad->nombre?> [<?=$familiar['datos']->nombre.' '.$familiar['datos']->apellido?> ]</td>
                                     <td>$<?=$actividad->precio?><td>
@@ -158,7 +158,7 @@
 	                <tr>                    
 	                    <? if($actividad->descuento > 0){ ?>
                         <td>Cuota Mensual <?=$actividad->nombre?> - $ <?=$actividad->precio?> <label class="label label-info"><?=$actividad->descuento?><? if ($actividad->monto_porcentaje == 0 ) { echo '$ BECADOS'; } else { echo '% BECADO'; } ?></label></td>
-                        <td>$<? if ( $actividad->monto_porcentaje == 0 ) { echo $actividad->precio - $actividad->descuento; } else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
+                        <td>$<? if ( $actividad->monto_porcentaje == 0 ) { if ( $actividad->precio == 0 ) { echo '0.00'; } else { echo $actividad->precio - $actividad->descuento; } ; } else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
                         <? }else{ ?>                   
                         <td>Cuota Mensual <?=$actividad->nombre?></td>
                         <td>$<?=$actividad->precio?><td>
@@ -173,7 +173,7 @@
 			               	<tr> 
 			               		<? if($actividad->descuento > 0){ ?>
                                     <td>Cuota Mensual <?=$actividad->nombre?> [<?=$familiar['datos']->nombre.' '.$familiar['datos']->apellido?> ] - $ <?=$actividad->precio?> <label class="label label-info"><?=$actividad->descuento?><? if ($actividad->monto_porcentaje == 0 ) { echo '$ BECADOS'; } else { echo '% BECADO'; } ?></label></td>
-                        	    <td>$<? if ( $actividad->monto_porcentaje == 0 ) { echo $actividad->precio - $actividad->descuento; } else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
+                        	    <td>$<? if ( $actividad->monto_porcentaje == 0 ) { if ( $actividad->precio == 0 ) { echo '0.00'; } else { echo $actividad->precio - $actividad->descuento; } ; }  else { echo $actividad->precio - ($actividad->precio * $actividad->descuento / 100); } ?><td>
                                     <? }else{ ?>                   
                                     <td>Cuota Mensual <?=$actividad->nombre?> [<?=$familiar['datos']->nombre.' '.$familiar['datos']->apellido?> ]</td>
                                     <td>$<?=$actividad->precio?><td>

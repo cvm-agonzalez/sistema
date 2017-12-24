@@ -45,7 +45,6 @@ class Cron extends CI_Controller {
 	foreach ( $cupones as $cupon ) {
 		$cant++;
 		if ( $cant < 30 ) {
-			echo "Cupon $cant a depurar, id = ".$cupon->Id;
                 	$cupon = 'images/cupones/'.$cupon->Id.'.png';
 			unlink($cupon);
 		}
@@ -200,7 +199,11 @@ class Cron extends CI_Controller {
                     	$valor = $actividad->precio;
                 	if($actividad->descuento > 0){
 				if ( $actividad->monto_porcentaje == 0 ) {
-                    			$valor = $actividad->precio - $actividad->descuento;
+					if ( $actividad->precio > 0 ) {
+                    				$valor = $actividad->precio - $actividad->descuento;
+					} else {
+						$valor = 0;
+					}
                     			$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
 				} else {
                     			$valor = $actividad->precio - ($actividad->precio * $actividad->descuento / 100);
@@ -246,7 +249,11 @@ class Cron extends CI_Controller {
 					$valor = $actividad->precio;
                     			if($actividad->descuento > 0){
                     				if($actividad->monto_porcentaje == 0){
-                        				$valor = $actividad->precio - $actividad->descuento;
+							if ( $actividad->precio > 0 {
+                        					$valor = $actividad->precio - $actividad->descuento;
+							} else { 
+								$valor = 0;
+							}
                         				$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
 						} else {
                         				$valor = $actividad->precio - ($actividad->precio * $actividad->descuento / 100);
@@ -274,6 +281,13 @@ class Cron extends CI_Controller {
                         			'monto' => $valor,
                         			'tipo' => 4,
                         			);
+			
+					// Si tiene la actividad bonificada la doy por paga (estado=0)
+                			if($pago['monto'] <= 0){                    
+						$pago['estado'] = 0;
+                    				$pago['pagadoel'] = $xahora;
+                			}
+
                     			$this->pagos_model->insert_pago_nuevo($pago);
                			}
                		}
