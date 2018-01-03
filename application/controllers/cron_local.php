@@ -52,12 +52,8 @@ class Cron extends CI_Controller {
 	echo "Hay $cant cupones para depurar";
     }
 
-    function facturacion(){ // esta funcion genera la facturacion del mes el dia
-    
-    echo "facturacion\n";
-exit();
-
-    $this->load->model("pagos_model");
+    function facturacion(){ // esta funcion genera la facturacion del mes el dia 1
+        $this->load->model("pagos_model");
 	$this->load->model("socios_model");
 	$this->load->model("debtarj_model");
 	$this->load->model("tarjeta_model");
@@ -67,8 +63,6 @@ exit();
 	} else {
 		$xhoy=date('Y-m-d');
 	}
-	
-	echo $xhoy;
 
 	// Periodo y fechas del proceso.....
 	$xanio=date('Y', strtotime($xhoy));
@@ -82,11 +76,9 @@ exit();
         $file = './application/logs/facturacion-'.$xanio.'-'.$xmes.'.log';        
         $file_col = './application/logs/cobranza_col-'.$xanio.'-'.$xmes.'.csv';        
         if( !file_exists($file) ){
-            echo "existe";
             $log = fopen($file,'w');
             $col = fopen($file_col,'w');
         }else{
-            echo "creo";
             $log = fopen($file,'a');
             $col = fopen($file_col,'a');
         }
@@ -257,7 +249,7 @@ exit();
 					$valor = $actividad->precio;
                     			if($actividad->descuento > 0){
                     				if($actividad->monto_porcentaje == 0){
-							if ( $actividad->precio > 0 ) {
+							if ( $actividad->precio > 0 {
                         					$valor = $actividad->precio - $actividad->descuento;
 							} else { 
 								$valor = 0;
@@ -764,20 +756,12 @@ exit();
 		if ( $ctrl_gen == "TODO" || $ctrl_gen == "CD" ) {
 			// Busco los pagos del sitio de Cuenta Digital
 			$pagos = $this->get_pagos($ayer);
-
-			$cant_cd = 0;
-			$total_cd = 0;
-
 			// Si bajo algo del sitio
 			if($pagos) {
 				// Ciclo los pagos encontrados
 				foreach ($pagos as $pago) {
 					$data = $this->pagos_model->insert_pago($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
-
-					// Acumulo para email
-					$cant_cd++;
-					$total_cd=$total_cd+$pago['monto'];
 				}
 			}
 		}
@@ -793,10 +777,6 @@ exit();
 			}
 			// Busco los pagos registrados en COL
 			$pagos_COL = $this->get_pagos_COL($ayer,$suc_filtro);
-
-			$cant_col = 0;
-			$total_col = 0;
-
 			// Si bajo algo del sitio
 			if($pagos_COL) {
 				// Ciclo los pagos encontrados
@@ -804,10 +784,6 @@ exit();
 					// Si vino en la URL que genera solo un local descarto el resto
 					$data = $this->pagos_model->insert_pago_col($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
-
-					// Acumulo para email
-					$cant_col++;
-					$total_col=$total_col+$pago['monto'];
 				}
 			}
 		}
@@ -815,11 +791,6 @@ exit();
 		if (!$this->uri->segment(3)) {
 			$this->pagos_model->insert_pagos_cron($fecha); 
 		}
-
-        // Me mando email de aviso que el proceso termino OK
-	$info_total="Procese fecha de cobro = $fecha \n Procese $cant_cd pagos de CuentaDigital por un total de $ $total_cd \n Procese $cant_col pagos de LaCoope por un total de $ $total_col.";
-        mail('agonzalez.lacoope@gmail.com', "El proceso de Imputación de Pagos finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".$xahora."\n".$info_total);
-
 	}
 
 	function get_pagos($fecha) {           
