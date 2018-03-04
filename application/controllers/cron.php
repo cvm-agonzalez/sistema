@@ -95,6 +95,7 @@ class Cron extends CI_Controller {
             fwrite($log, $txt);            
             exit();
         }
+/*
         if($cron_state == 'iniciado'){
             $txt = date('H:i:s').": Inicio de Cron... \n";
             fwrite($log, $txt);                        
@@ -124,6 +125,7 @@ class Cron extends CI_Controller {
             $txt = date('H:i:s').": Reanudando Cron... \n";
             fwrite($log, $txt);
         }
+*/
 
 	// Busco los socios que tienen que pagar
 	$socios = $this->socios_model->get_socios_pagan(true);
@@ -323,6 +325,8 @@ class Cron extends CI_Controller {
             	if($planes){
 			// Ciclo cada plan
     			foreach ($planes as $plan) {                
+                		$this->pagos_model->update_cuota($plan->Id);
+
                     		$descripcion .= 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$plan->actual.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
                     		$des = 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$plan->actual.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
 				// Inserto el pago del plan de financiacion (tipo=3)
@@ -338,7 +342,7 @@ class Cron extends CI_Controller {
                     		$this->pagos_model->insert_pago_nuevo($pago);
 
     				$deuda_financiada = $deuda_financiada + round($plan->monto/$plan->cuotas,2);
-                		$this->pagos_model->update_cuota($plan->Id);
+
     			}
                 	$deuda_financiada = round($deuda_financiada,2);
             	}else{
