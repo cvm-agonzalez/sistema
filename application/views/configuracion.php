@@ -47,12 +47,12 @@
                   <tbody>
                     <tr>
 
-                      <? $cont = 0; foreach ($cats as $categoria) { if($categoria->nomb != 'Tutor'){ ?>                     
+                      <? $cont = 0; foreach ($cats as $categoria) { ?>                     
                       <th><?=$categoria->nomb?></th>                      
-                      <? $cont ++; }} ?>
+                      <? $cont ++; } ?>
                     </tr>
                     <tr>   
-                      <?foreach ($cats as $categoria) { if($categoria->nomb != 'Tutor'){ ?>                       
+                      <?foreach ($cats as $categoria) { ?>                       
                       <td style="width:<?=100/$cont;?>%;">
                         <div class="input-group"><span class="input-group-addon">$</span>
                           <input type="text" class="form-control" id="cat-precio" data-id="<?=$categoria->Id?>" value="<?=$categoria->precio?>">
@@ -64,7 +64,7 @@
                           <? } ?>
                         </div>
                       </td>
-                      <? }  } ?>
+                      <? }  ?>
                     </tr>
                   </tbody>
                 </table>

@@ -590,7 +590,12 @@ AHG Comentado 20170105 porque no se usa..... creo
             }
         $data['cupon'] = $this->pagos_model->get_cupon($id);
         }
-        $this->load->view('imprimir-carnet',$data);
+        $fmto = $this->uri->segment(4);
+	if ( !$fmto ) {
+        	$this->load->view('imprimir-carnet',$data);
+	} else {
+        	$this->load->view('imprimir-carnet2',$data);
+	}
     }
 
     function cuentadigital($sid, $nombre, $precio, $venc=null) 

@@ -334,6 +334,7 @@ class Admin extends CI_Controller {
 		$total=0;
 		foreach ($lineas as $num_linea => $linea) {
 			if ( $cont++ > 3 ) {
+
 				$campos = explode(',', $linea);
 
 				$fecha1=$campos[0];
@@ -582,8 +583,8 @@ class Admin extends CI_Controller {
                         	if ( $deuda ) {
 					if ( $deuda > 0 ) {
                                 		// Armar el movimiento de condonacion
-						$pago_deuda=$deuda*0.80;
-                        			$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Campaña Reinscripcion Set2017',0,1);
+						$pago_deuda=$deuda*0.50;
+                        			$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Reinscripcion Mar2018',0,1);
 
 						// Si estaba suspendido lo reactivo
 						if ( $socio->suspendido == 1 ) {
@@ -639,7 +640,7 @@ class Admin extends CI_Controller {
                 	if ( $deuda ) {
 				if ( $deuda > 0 ) {
 					$msj = 1;
-					$data['mensaje2'] = "Este socio tiene deuda por cuota social de $ ".$deuda;
+					$data['mensaje2'] = "Este socio tiene deuda por $ ".$deuda;
 				}
 			}
 
@@ -651,7 +652,13 @@ class Admin extends CI_Controller {
 				$data['mensaje3'] = "Este socio tiene Debito Automatico de Tarjeta ";
 			}
 
-		
+                        $financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+                        if ( $financiacion ) {
+				$fin=$financiacion[0];
+                                $msj = 1;
+                                $data['mensaje4'] = "Este socio tiene un plan de financiacion con ".($fin->cuotas-$fin->actual)." cuotas pendientes";
+                        }
+
 			// Si tiene Deuda o Debito Automativo aviso
 			if ($msj > 0) {
 				$data['mensaje1'] = "Esta seguro de SUSPENDER a este socio ???";
@@ -672,8 +679,16 @@ class Admin extends CI_Controller {
                 $id_socio = $this->uri->segment(4);
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
+                        $financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+                        if ( $financiacion ) {
+				$fin=$financiacion[0];
+				$deuda_fin=$fin->monto-($fin->actual*($fin->monto/$fin->cuotas));
+                		$this->pagos_model->registrar_pago('debe',$id_socio,$deuda_fin,'Plan Financiacion Cuotas Impagas');
+                		$this->pagos_model->cancelar_plan($fin->Id);
+                        }
+
                 $this->socios_model->suspender($id_socio);
-                $this->pagos_model->registrar_pago('debe',$id_socio,0.00,'Suspensión por falta de Pago');
+                $this->pagos_model->registrar_pago('debe',$id_socio,0.00,'Suspensión Manual desde el Sistema');
                 redirect(base_url().'admin/socios/resumen/'.$id_socio);
                 break;
 
@@ -1301,9 +1316,9 @@ class Admin extends CI_Controller {
                                 $headers[]="Apellido";
                                 $headers[]="Nombre";
                                 $headers[]="Marca";
+                                $headers[]="Renglon";
                                 $headers[]="Nro Tarjeta";
                                 $headers[]="Importe";
-                                $headers[]="Observacion";
                                 $datos=$result;
                                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
                                 break;
@@ -1366,11 +1381,25 @@ class Admin extends CI_Controller {
                                         	} else {
                                                 	$importe = $cuota_socio['total'] ;
                                         	}
+
+                                        	// Busco si tiene financiacion activa
+                        			$financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+						$cuota_fin=0;
+                        			if ( $financiacion ) {
+                                			$fin=$financiacion[0];
+							$cuota_fin=($fin->monto/$fin->cuotas);
+							// Sumo al importe a debitar la cuota de la financiacion
+							$importe = $importe + $cuota_fin;
+						}
                                         	// Si quedo algo a pagar lo debito
 						$cta=$cuota_socio['total'];
                                         	if ( $importe > 0 ) {
 							if ( $saldo != 0 ) {
-								$mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo\n";
+								if ( $cuota_fin > 0 ) {
+									$mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo y cuota de financiacion de $cuota_fin\n";
+								} else {
+									$mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo\n";
+								}
 							} else {
 								$mensaje="Tiene cuota mensual de $ $cta \n";
 							}
@@ -2487,10 +2516,43 @@ $this->actividades_model->becar($id,$beca);
                         break;
 
                     default:
+
+                	$id_socio = $this->uri->segment(4);
+	                $this->load->model('socios_model');
+                	$socio = $this->socios_model->get_socio_full($id_socio);
+                        $this->load->model('pagos_model');
+			// Verifico si ya esta reinscripto
+                        $financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+			if ( $financiacion ) {
+                                $data['mensaje1'] = "Ese socio ya tiene plan de financiacion activo ";
+                                $data['baseurl'] = base_url();
+                                $data['section'] = 'ppal-mensaje';
+                                $this->load->view('admin',$data);
+				break;
+			} else {
+                        	$deuda = $this->pagos_model->get_deuda_monto($id_socio);
+                        	if ( $deuda ) {
+					if ( $deuda <= 0 ) {
+                                		$data['mensaje1'] = "Ese socio no tiene deuda....";
+                                		$data['baseurl'] = base_url();
+                                		$data['section'] = 'ppal-mensaje';
+                                		$this->load->view('admin',$data);
+						break;
+					}
+                        	} else {
+                                	$data['mensaje1'] = "Ese socio no tiene deuda....";
+                                	$data['baseurl'] = base_url();
+                                	$data['section'] = 'ppal-mensaje';
+                                	$this->load->view('admin',$data);
+					break;
+                        	}
+			}
+
+
                         $data['username'] = $this->session->userdata('username');
                         $data['baseurl'] = base_url();
                         $this->load->model('socios_model');
-                        $data['sid'] = $this->uri->segment(4);
+                        $data['sid'] = $id_socio;
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $data['section'] = 'pagos-deuda';
                         $this->load->view('admin',$data);
@@ -2607,7 +2669,7 @@ $this->actividades_model->becar($id,$beca);
             $this->load->library('email');
 
             $this->email->from($this->session->userdata('mail'), $this->session->userdata('username'));
-            $this->email->to('sistemas@nixel.com.ar');
+            $this->email->to('cvm.agonzalez@gmail.com');
 
             $this->email->subject('Solicitud de Soporte: CVM');
             $this->email->message($_POST['consulta']);

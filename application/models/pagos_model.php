@@ -682,9 +682,8 @@ class Pagos_model extends CI_Model {
     }
 
     public function financiar_deuda($socio,$monto,$cuotas,$detalle){
-        $inicio = date('Y-m').'-1';
-        $nuevafecha = strtotime ( '+'.$cuotas.' month' , strtotime ( $inicio ) ) ;
-        $fin = date ( 'Y-m-d' , $nuevafecha );
+        $inicio = date('Y-m-d');
+        $fin = $inicio;
         $financiacion = array(
             'sid' => $socio,
             'cuotas' => $cuotas,
@@ -694,6 +693,9 @@ class Pagos_model extends CI_Model {
             'detalle'=>$detalle
             );
         $this->db->insert('financiacion',$financiacion);
+
+	$credito=$monto-($monto/$cuotas);
+	$this->registrar_pago('haber',$socio,$credito,'Refinanciacion de $ '.$monto.' de deuda en '.$cuotas.' cuotas',0,1);
     }
 
     public function get_planes($sid){
@@ -710,10 +712,7 @@ class Pagos_model extends CI_Model {
     }
 
     public function get_financiado_mensual($sid){
-        $fecha = date('Y-m-d');
         $this->db->where('sid',$sid);
-        $this->db->where('inicio <=',$fecha);
-        $this->db->where('fin >',$fecha);
         $this->db->where('estado',1);
         $query = $this->db->get('financiacion');
         if($query->num_rows() == 0){return false;}
@@ -725,8 +724,23 @@ class Pagos_model extends CI_Model {
     public function update_cuota($id){
         $this->db->where('Id',$id);
         $this->db->where('estado',1);
-        $this->db->set('actual','actual+1',false);
-        $this->db->update('financiacion');
+        $query = $this->db->get('financiacion');
+        if($query->num_rows() == 0){return false;}
+        $plan = $query->row();
+
+	$hoy = date('Y-m-d');
+        $this->db->where('Id',$id);
+        $this->db->where('estado',1);
+	if ( $plan->actual+1 >= $plan->cuotas ) {
+        	$this->db->set('actual','actual+1',false);
+        	$this->db->set('fin',"'".$hoy."'",false);
+        	$this->db->set('estado',2,false);
+        	$this->db->update('financiacion');
+	} else {
+        	$this->db->set('actual','actual+1',false);
+        	$this->db->set('fin',"'".$hoy."'",false);
+        	$this->db->update('financiacion');
+	}
     }
 
     public function get_morosos($comision=null,$actividad=null){

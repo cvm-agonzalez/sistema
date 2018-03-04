@@ -47,7 +47,7 @@
 	        	<td>$ <?=$ingreso->monto?></td>
 	        	<td>$ <?=$ingreso->pagado?></td>
 	        	<td>#<?=$ingreso->sid?> - <?=$ingreso->socio->nombre?> <?=$ingreso->socio->apellido?></td>	        
-	        	<td><?=$ingreso->socio->observaciones?></td>	        
+	        	<td><?if($ingreso->ajuste==1){echo 'Ajuste Contable de Sistema'.$ingreso->socio->observaciones;} else { echo $ingreso->socio->observaciones;}?></td>	        
 	        	
 	        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->socio->Id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        
 	        </tr>

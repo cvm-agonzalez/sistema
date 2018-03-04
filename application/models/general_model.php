@@ -40,9 +40,10 @@ class General_model extends CI_Model {
     }
 
     public function save_cat_config($precios,$fam){
-        for ($i=1; $i < 6; $i++) { 
+        for ($i=1; $i < count($precios)+1; $i++) { 
             $this->db->where('Id',$i);
             $this->db->update('categorias',array('precio'=>$precios[$i-1]));
+	
         }
         $this->db->where('Id','4');
         $this->db->update('categorias',array('precio_unit'=>$fam));

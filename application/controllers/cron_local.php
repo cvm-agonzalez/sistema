@@ -52,10 +52,8 @@ class Cron extends CI_Controller {
 	echo "Hay $cant cupones para depurar";
     }
 
-    function facturacion(){ // esta funcion genera la facturacion del mes el dia
-    
-
-    $this->load->model("pagos_model");
+    function facturacion(){ // esta funcion genera la facturacion del mes el dia 1
+        $this->load->model("pagos_model");
 	$this->load->model("socios_model");
 	$this->load->model("debtarj_model");
 	$this->load->model("tarjeta_model");
@@ -65,8 +63,6 @@ class Cron extends CI_Controller {
 	} else {
 		$xhoy=date('Y-m-d');
 	}
-	
-	echo $xhoy;
 
 	// Periodo y fechas del proceso.....
 	$xanio=date('Y', strtotime($xhoy));
@@ -80,11 +76,9 @@ class Cron extends CI_Controller {
         $file = './application/logs/facturacion-'.$xanio.'-'.$xmes.'.log';        
         $file_col = './application/logs/cobranza_col-'.$xanio.'-'.$xmes.'.csv';        
         if( !file_exists($file) ){
-            echo "existe";
             $log = fopen($file,'w');
             $col = fopen($file_col,'w');
         }else{
-            echo "creo";
             $log = fopen($file,'a');
             $col = fopen($file_col,'a');
         }
@@ -95,7 +89,6 @@ class Cron extends CI_Controller {
             fwrite($log, $txt);            
             exit();
         }
-/*
         if($cron_state == 'iniciado'){
             $txt = date('H:i:s').": Inicio de Cron... \n";
             fwrite($log, $txt);                        
@@ -125,7 +118,6 @@ class Cron extends CI_Controller {
             $txt = date('H:i:s').": Reanudando Cron... \n";
             fwrite($log, $txt);
         }
-*/
 
 	// Busco los socios que tienen que pagar
 	$socios = $this->socios_model->get_socios_pagan(true);
@@ -257,7 +249,7 @@ class Cron extends CI_Controller {
 					$valor = $actividad->precio;
                     			if($actividad->descuento > 0){
                     				if($actividad->monto_porcentaje == 0){
-							if ( $actividad->precio > 0 ) {
+							if ( $actividad->precio > 0 {
                         					$valor = $actividad->precio - $actividad->descuento;
 							} else { 
 								$valor = 0;
@@ -325,8 +317,6 @@ class Cron extends CI_Controller {
             	if($planes){
 			// Ciclo cada plan
     			foreach ($planes as $plan) {                
-                		$this->pagos_model->update_cuota($plan->Id);
-
                     		$descripcion .= 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$plan->actual.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
                     		$des = 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$plan->actual.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
 				// Inserto el pago del plan de financiacion (tipo=3)
@@ -342,7 +332,7 @@ class Cron extends CI_Controller {
                     		$this->pagos_model->insert_pago_nuevo($pago);
 
     				$deuda_financiada = $deuda_financiada + round($plan->monto/$plan->cuotas,2);
-
+                		$this->pagos_model->update_cuota($plan->Id);
     			}
                 	$deuda_financiada = round($deuda_financiada,2);
             	}else{
@@ -615,7 +605,7 @@ class Cron extends CI_Controller {
 	}
 
 	// Me mando email de aviso que el proceso termino OK
-        mail('cvm.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
+        mail('agonzalez.lacoope@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
 	}
 
     public function email_a_suspendidos()
@@ -731,175 +721,6 @@ class Cron extends CI_Controller {
 	return $cant;
     }
 
-	function controles(){
-
-        $this->load->database('default');
-
-		$txt_ctrl="CONTROLES CORRIDOS EL ".date('Y-m-d H:i:s')."\n";
-
-/* Control de que el saldo de facturacion sea igual al de pagos */
-		$txt_ctrl=$txt_ctrl."CONTROL DE SALDOS DE FACTURACION VS PAGOS \n";
-		$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_saldo_fact;";
-        	$this->db->query($qry);
-		$qry = "CREATE TEMPORARY TABLE tmp_saldo_fact
-			SELECT sid, SUM( debe - haber ) saldo, sum(debe) debe, sum(haber) haber
-			FROM facturacion 
-			GROUP BY 1;";
-        	$this->db->query($qry);
-
-		$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_saldo_pago;";
-        	$this->db->query($qry);
-		$qry = "CREATE TEMPORARY TABLE tmp_saldo_pago
-			SELECT tutor_id sid, SUM(monto-pagado) saldo, sum(if(tipo<>5,monto,0)) generado, sum(if(tipo=5,monto,0)) afavor, sum(pagado) pagado, SUM(if(tipo<>5 AND estado=1,1,0)) sin_imputar
-			FROM pagos
-			GROUP BY 1;";
-        	$this->db->query($qry);
-			
-		$qry = "SELECT s.Id sid, s.dni, s.nombre, s.apellido, f.saldo saldo_fact, f.debe, f.haber, p.saldo saldo_pago, p.generado, p.afavor, p.pagado, p.sin_imputar, sdt.id_marca
-			FROM tmp_saldo_fact f
-        			LEFT JOIN socios s ON ( f.sid = s.id )
-        			LEFT JOIN tmp_saldo_pago p ON ( f.sid = p.sid )
-        			LEFT JOIN socios_debito_tarj sdt ON ( f.sid = sdt.sid )
-			WHERE f.saldo <> p.saldo; ";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"Los saldos de facturacion y pagos COINCIDEN \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Saldo Fact \t Debe \t Haber \t Saldo Pago \t Generado \t A Favor \t Pagado \t Sin Imputar \t IdMarca \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->sid."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->saldo_fact."\t".$fila->debe."\t".$fila->haber."\t".$fila->saldo_pago."\t".$fila->generado."\t".$fila->afavor."\t".$fila->pagado."\t".$fila->sin_imputar."\t".$fila->id_marca."\n";
-        		}
-		}
-
-/* Control de que el saldo del ultimo renglon de facturacion sea igual a la suma de movimientos */
-		$txt_ctrl=$txt_ctrl."CONTROL DE SALDOS DE FACTURACION VS ULTIMA FILA DE FACTURACION \n";
-		$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_ultid; ";
-        	$this->db->query($qry);
-		$qry = "CREATE TEMPORARY TABLE tmp_ultid
-			SELECT sid, MAX(id) max_id
-			FROM facturacion
-			GROUP BY 1; ";
-        	$this->db->query($qry);
-
-		$qry = "SELECT t.sid, s.dni, s.nombre, s.apellido, t.saldo saldo_fact, t.debe, t.haber, f.total ult_fila
-			FROM tmp_saldo_fact t
-        			JOIN socios s ON ( t.sid = s.Id )
-        			JOIN tmp_ultid u USING (sid)
-        			JOIN facturacion f ON ( f.id = u.max_id )
-			WHERE t.saldo <> -f.total; ";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"Los saldos de facturacion y el ultimo renglon COINCIDEN \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Saldo Fact \t Debe \t Haber \t Ultima Fila \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->sid."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->saldo_fact."\t".$fila->debe."\t".$fila->haber."\t".$fila->ult_fila."\n";
-        		}
-		}
-
-/* Control de que no haya socios con registros impagos y saldo a favor */
-		$txt_ctrl=$txt_ctrl."CONTROL DE SALDOS A FAVOR Y REGISTROS IMPAGOS \n";
-		$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_afavor; ";
-        	$this->db->query($qry);
-		$qry = "CREATE TEMPORARY TABLE tmp_afavor
-			SELECT p.tutor_id , p.monto
-			FROM pagos p
-			WHERE p.tipo = 5 AND p.monto < 0; ";
-        	$this->db->query($qry);
-
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
-			FROM pagos p
-        			JOIN tmp_afavor a USING ( tutor_id )
-        			JOIN socios s ON ( p.tutor_id = s.Id )
-			WHERE p.estado = 1 AND p.tipo <> 5; ";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"No existen socios con saldo a favor y pagos pendientes \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
-        		}
-		}
-
-/* Control de que no haya socios con registros estado=1 y todo pagado */
-		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS PENDIENTES Y TODO PAGADO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
-			FROM pagos p
-				JOIN socios s ON ( p.tutor_id = s.Id )
-			WHERE p.estado = 1 AND p.pagado >= p.monto AND p.tipo <> 5 AND p.monto > 0; ";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"No existen pagos pendientes de socios con todo pagado \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
-        		}
-		}
-
-/* Control de que no haya socios con registros estado=0 y sin todo pagado */
-		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS con ESTADO=0 Y SIN TODO PAGADO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
-			FROM pagos p
-				JOIN socios s ON ( p.tutor_id = s.Id )
-			WHERE p.estado = 0 AND p.pagado < p.monto AND p.tipo <> 5 AND p.monto > 0; ";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"No existen pagos con estado=0 y sin todo pagado \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
-        		}
-		}
-
-
-/* Control de que no haya socios con pagado > monto */
-		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS MAYORES AL MONTO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
-			FROM pagos p
-				JOIN socios s ON ( p.tutor_id = s.Id )
-			WHERE p.estado = 0 AND pagado > monto;";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"No existen pagos con mayor pagado que el monto \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
-        		}
-		}
-
-/* Control de que no haya registros estado=1 y monto=pagado=0 */
-		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS PENDIENTES PERO QUE TIENEN TODO PAGADO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
-			FROM pagos p
-        			JOIN socios s ON ( p.tutor_id = s.id )
-			WHERE p.estado = 1 AND p.pagado = p.monto AND p.tipo <> 5; ";
-        	$resultado = $this->db->query($qry);
-
-		if ( $resultado->num_rows() == 0 ) {
-			"No existen pagos pendientes con todo pagado \n";
-		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
-			foreach ( $resultado->result() as $fila ) {
-				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
-        		}
-		}
-
-
-		// Me mando email de aviso que el proceso termino OK
-        	mail('cvm.agonzalez@gmail.com', "El proceso de Controles Diario finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".date('Y-m-d H:i:s')."\n".$txt_ctrl);
-
-	}
-       
 	function pagos(){
 		$this->load->model("pagos_model");
 
@@ -935,20 +756,12 @@ class Cron extends CI_Controller {
 		if ( $ctrl_gen == "TODO" || $ctrl_gen == "CD" ) {
 			// Busco los pagos del sitio de Cuenta Digital
 			$pagos = $this->get_pagos($ayer);
-
-			$cant_cd = 0;
-			$total_cd = 0;
-
 			// Si bajo algo del sitio
 			if($pagos) {
 				// Ciclo los pagos encontrados
 				foreach ($pagos as $pago) {
 					$data = $this->pagos_model->insert_pago($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
-
-					// Acumulo para email
-					$cant_cd++;
-					$total_cd=$total_cd+$pago['monto'];
 				}
 			}
 		}
@@ -964,10 +777,6 @@ class Cron extends CI_Controller {
 			}
 			// Busco los pagos registrados en COL
 			$pagos_COL = $this->get_pagos_COL($ayer,$suc_filtro);
-
-			$cant_col = 0;
-			$total_col = 0;
-
 			// Si bajo algo del sitio
 			if($pagos_COL) {
 				// Ciclo los pagos encontrados
@@ -975,10 +784,6 @@ class Cron extends CI_Controller {
 					// Si vino en la URL que genera solo un local descarto el resto
 					$data = $this->pagos_model->insert_pago_col($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
-
-					// Acumulo para email
-					$cant_col++;
-					$total_col=$total_col+$pago['monto'];
 				}
 			}
 		}
@@ -986,11 +791,6 @@ class Cron extends CI_Controller {
 		if (!$this->uri->segment(3)) {
 			$this->pagos_model->insert_pagos_cron($fecha); 
 		}
-
-        // Me mando email de aviso que el proceso termino OK
-	$info_total="Procese fecha de cobro = $ayer \n Procese $cant_cd pagos de CuentaDigital por un total de $ $total_cd \n Procese $cant_col pagos de LaCoope por un total de $ $total_col.";
-        mail('cvm.agonzalez@gmail.com', "El proceso de Imputación de Pagos finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".$xahora."\n".$info_total);
-
 	}
 
 	function get_pagos($fecha) {           
@@ -1029,7 +829,7 @@ class Cron extends CI_Controller {
 		} else {
 			if($a === FALSE) {
                 		mail("soporte@hostingbahia.com.ar","Fallo en Cron VM",date('Y-m-d H:i:s'));
-                		mail("cvm.agonzalez@gmail.com","Fallo en Cron VM",date('Y-m-d H:i:s'));
+                		mail("agonzalez.lacoope@gmail.com","Fallo en Cron VM",date('Y-m-d H:i:s'));
                 		exit();
 			}
 			return false;
@@ -1311,7 +1111,7 @@ class Cron extends CI_Controller {
             error_log( date('d/m/Y G:i:s').": Envio Finalizado \n", 3, "cron_envios.log");
 		// envio email de aviso a mi cuenta ahg
             // Me mando email de aviso que el proceso termino OK
-            mail('cvm.agonzalez@gmail.com', "El proceso de Envio de Emails finalizo correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de envios de email finalizó correctamente y se enviaron $enviados emails.....".$xahora."\n");
+            mail('agonzalez.lacoope@gmail.com', "El proceso de Envio de Emails finalizo correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de envios de email finalizó correctamente y se enviaron $enviados emails.....".$xahora."\n");
 
             
         }

@@ -22,7 +22,7 @@ class Estado extends CI_Controller {
 		$data = array();
 	        $data['socio'] = $socio;
 
-		$this->load->view('estado/index', $data, FALSE);
+		$this->load->view('estado/index2', $data, FALSE);
 
 		if($socio){
 			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($socio->Id);
