@@ -920,6 +920,15 @@ $("#load-asoc-activ-form").submit(function(){
 	return true;
 
 })
+$("#estad-activ-form").submit(function(){
+        var actividad = $("#actividad").val();
+        var url = "<?=$baseurl?>admin/estadisticas/cobranza" + "/" + actividad;
+
+        $("#estad-activ-form").attr("action",url);
+        $("#estad-activ-form").submit();
+
+	return true;
+})
 
 $("#load-debtarj-form").submit(function(){
         var marca = $("#marca").val();
