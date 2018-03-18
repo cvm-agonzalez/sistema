@@ -2616,22 +2616,41 @@ $this->actividades_model->becar($id,$beca);
     public function estadisticas()
     {
         $this->load->model('estadisticas_model');
-        if($this->uri->segment(3) == 'facturacion')
-        {
-            $data['username'] = $this->session->userdata('username');
-            $data['baseurl'] = base_url();
-            $data['facturacion_mensual'] = $this->estadisticas_model->facturacion_mensual();
-            $data['facturacion_anual'] = $this->estadisticas_model->facturacion_anual();
-            $data['section'] = 'estadisticas-facturacion';
-            $this->load->view('admin',$data);
-
-        }else{
-            $data['username'] = $this->session->userdata('username');
-            $data['baseurl'] = base_url();
-            $data['actividades_mensual'] = $this->estadisticas_model->actividades_mensual();
-            $data['actividades_anual'] = $this->estadisticas_model->actividades_anual();
-            $data['section'] = 'estadisticas-actividades';
-            $this->load->view('admin',$data);
+        $opcion=$this->uri->segment(3);
+	switch ( $opcion ) {
+        	case 'facturacion':
+			$data['username'] = $this->session->userdata('username');
+			$data['baseurl'] = base_url();
+			$data['facturacion_mensual'] = $this->estadisticas_model->facturacion_mensual();
+			$data['facturacion_anual'] = $this->estadisticas_model->facturacion_anual();
+			$data['section'] = 'estadisticas-facturacion';
+			$this->load->view('admin',$data);
+			break;
+        	case 'cobranza':
+			if ( $this->uri->segment(4) ) {
+				$id_actividad =$this->uri->segment(4);
+                		$this->load->model('actividades_model');
+                		$data['actividades'] = $this->actividades_model->get_actividades();
+				$data['username'] = $this->session->userdata('username');
+				$data['baseurl'] = base_url();
+				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_actividad);
+				$data['section'] = 'estadisticas-cobranza';
+				$data['id_actividad'] = $id_actividad;
+				$this->load->view('admin',$data);
+				break;
+			} else {
+                		$this->load->model('actividades_model');
+                		$data['actividades'] = $this->actividades_model->get_actividades();
+				$data['username'] = $this->session->userdata('username');
+				$data['baseurl'] = base_url();
+				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla();
+				$data['id_actividad'] = -1;
+				$data['section'] = 'estadisticas-cobranza';
+				$this->load->view('admin',$data);
+				break;
+			}
+        	case 'ingresos':
+			break;
         }
     }
     public function configuracion()
