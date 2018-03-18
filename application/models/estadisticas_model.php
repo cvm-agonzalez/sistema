@@ -18,22 +18,22 @@ class Estadisticas_model extends CI_Model {
                 $n_anio = date ( 'Y' , $nuevafecha ); 
 
                 $facturacion = 0;
-                $this->db->select_sum('debe');
-                $this->db->where($n_mes, 'MONTH(date)' , FALSE);
-                $this->db->where($n_anio, 'YEAR(date)' , FALSE);
-                $query = $this->db->get('facturacion');
+                $this->db->select_sum('monto');
+                $this->db->where($n_mes, 'MONTH(generadoel)' , FALSE);
+                $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
+                $query = $this->db->get('pagos');
                 if($query->num_rows() != 0){
-                    $facturacion = $query->row()->debe;                    
+                    $facturacion = $query->row()->monto;                    
                 }
                 if(!$facturacion){ $facturacion = 0;}
 
                 $pagos = 0;
-                $this->db->select_sum('haber');
-                $this->db->where($n_mes, 'MONTH(date)' , FALSE);
-                $this->db->where($n_anio, 'YEAR(date)' , FALSE);
-                $query = $this->db->get('facturacion');
+                $this->db->select_sum('pagado');
+                $this->db->where($n_mes, 'MONTH(generadoel)' , FALSE);
+                $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
+                $query = $this->db->get('pagos');
                 if($query->num_rows() != 0){
-                    $pagos = $query->row()->haber;                    
+                    $pagos = $query->row()->pagado;                    
                 }
                 if(!$pagos){ $pagos = 0;}
 
@@ -52,22 +52,22 @@ class Estadisticas_model extends CI_Model {
                 $n_anio = date ( 'Y' , $nuevafecha ); 
 
                 $facturacion = 0;
-                $this->db->select_sum('debe');
+                $this->db->select_sum('monto');
                 //$this->db->where($n_mes, 'MONTH(date)' , FALSE);
-                $this->db->where($n_anio, 'YEAR(date)' , FALSE);
-                $query = $this->db->get('facturacion');
+                $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
+                $query = $this->db->get('pagos');
                 if($query->num_rows() != 0){
-                    $facturacion = $query->row()->debe;                    
+                    $facturacion = $query->row()->monto;                    
                 }
                 if(!$facturacion){ $facturacion = 0;}
 
                 $pagos = 0;
-                $this->db->select_sum('haber');
+                $this->db->select_sum('pagado');
                 //$this->db->where($n_mes, 'MONTH(date)' , FALSE);
-                $this->db->where($n_anio, 'YEAR(date)' , FALSE);
-                $query = $this->db->get('facturacion');
+                $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
+                $query = $this->db->get('pagos');
                 if($query->num_rows() != 0){
-                    $pagos = $query->row()->haber;                    
+                    $pagos = $query->row()->pagado;                    
                 }
                 if(!$pagos){ $pagos = 0;}
 
@@ -75,6 +75,37 @@ class Estadisticas_model extends CI_Model {
             }
         $ret .= "]";
         return $ret;
+    }
+
+
+    public function cobranza_tabla($id_actividad=-1){        
+	$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_cobranza;";
+        $this->db->query($qry);
+
+	$qry = "CREATE TEMPORARY TABLE tmp_cobranza
+		SELECT DATE_FORMAT(p.generadoel, '%Y%m') periodo, COUNT(DISTINCT p.tutor_id) socios, COUNT(*) cuotas, SUM(p.monto) facturado,
+			SUM(IF(p.estado=0 AND DATE_FORMAT(p.pagadoel, '%Y%m') = DATE_FORMAT(p.generadoel, '%Y%m'), p.pagado, 0 )) pagado_mes,
+			SUM(IF(p.estado=0 AND DATE_FORMAT(p.pagadoel, '%Y%m') > DATE_FORMAT(p.generadoel, '%Y%m'), p.pagado, 0 )) pagado_mora,
+			SUM(IF(p.estado=1 AND p.pagado > 0,  p.pagado, 0 )) pago_parcial,
+			SUM(IF(p.estado=1 AND p.pagado = 0,  p.monto, 0 )) impago
+		FROM pagos p
+		WHERE DATE_FORMAT(p.generadoel,'%Y%m') >= DATE_FORMAT( DATE_SUB(CURDATE(), INTERVAL 1 YEAR), '%Y%m' ) ";
+	if ( $id_actividad > -1 ) {
+		$qry .= "AND p.aid = $id_actividad ";
+	}
+	$qry .= "GROUP BY 1; ";
+        $this->db->query($qry);
+
+	$qry = "SELECT t.periodo, t.socios, t.cuotas, t.facturado, t.pagado_mes, 
+			ROUND((t.pagado_mes/t.facturado)*100,2) porc_cobranza,
+			t.pagado_mora, 
+			ROUND((t.pagado_mora/t.facturado)*100,2) porc_mora,
+			t.pago_parcial, t.impago,
+			ROUND((t.impago/t.facturado)*100,2) porc_impago
+		FROM tmp_cobranza t; ";
+
+        $resultado = $this->db->query($qry)->result();
+        return $resultado;
     }
 
     public function actividades_mensual(){        
