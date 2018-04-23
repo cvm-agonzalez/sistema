@@ -4,9 +4,9 @@
         <div class="panel-body">
             <div class="row">
                 <div class="col-lg-12">
-                    <h4>La Comisión se guardó correctamente.</h4>
-                    <a class="btn btn-primary" href="<?=$baseurl?>admin/actividades/profesores">Volver al Listado de Comisiones</a> 
-                    <a class="btn btn-success" href="<?=$baseurl?>admin/actividades/profesores/editar/<?=$pid?>">Editar esta Comisión</a>                        
+                    <h4>El Profesor se guardó correctamente.</h4>
+                    <a class="btn btn-primary" href="<?=$baseurl?>admin/actividades/profesores">Volver al Listado de Profesores</a> 
+                    <a class="btn btn-success" href="<?=$baseurl?>admin/actividades/profesores/editar/<?=$pid?>">Editar esta Profesor</a>                        
                 </div>
             </div>
         </div>

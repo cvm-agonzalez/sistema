@@ -57,10 +57,13 @@ ENVIOS
         return $this->db->insert_id();
     }
 
-    public function get_socios_by($grupo,$data='')
+    public function get_socios_by($grupo,$data='',$activ)
     {
         if($grupo == 1){
             $this->db->where('estado',1);            
+	    if ( $activ == 1 ) {
+		$this->db->where('suspendido',0);
+	    } 
             $query = $this->db->get('socios');
             if($query->num_rows() == 0){return false;}
             $socios = $query->result();
@@ -71,6 +74,9 @@ ENVIOS
                         $this->db->or_where('categoria',$id);
                     }
                     $this->db->where('estado',1);            
+		    if ( $activ == 1 ) {
+			$this->db->where('suspendido',0);
+	    	    } 
                     $query = $this->db->get('socios');
                     if($query->num_rows() == 0){return false;}
                     $socios = $query->result();
@@ -80,35 +86,44 @@ ENVIOS
                     foreach ($data as $id) {        
                         $this->db->or_where('aid',$id);
                     }
+                    $this->db->where('estado',1);
                     $query = $this->db->get('actividades_asociadas');
                     if($query->num_rows() == 0){return false;}
                     $actividades = $query->result();
                     $socios = array();
                     $this->load->model('socios_model');
                     foreach ($actividades as $actividad) {
-                        $socios[] = $this->socios_model->get_socio($actividad->sid);
+                        $soc = $this->socios_model->get_socio($actividad->sid);
+			if ( $activ == 1 ) {
+				if ( $soc->suspendido == 0 ) {
+                        		$socios[] = $soc;
+				}
+			} else {
+                        		$socios[] = $soc;
+			}
                     }
                     break;
 
-                case 'comisiones':
-                    foreach ($data as $id) {        
-                        $this->db->or_where('profesor',$id);
-                    }
-                    $query = $this->db->get('actividades');
-                    if($query->num_rows() == 0){return false;}
-                    $actividades = $query->result();                    
-                    foreach ($actividades as $id) {        
-                        $this->db->or_where('aid',$id->Id);
-                    }
-                    $query = $this->db->get('actividades_asociadas');
-                    if($query->num_rows() == 0){return false;}
-                    $actividades = $query->result();
-                    $socios = array();
+                case 'socconactiv':
                     $this->load->model('socios_model');
-                    foreach ($actividades as $actividad) {
-                        $socios[] = $this->socios_model->get_socio($actividad->sid);
-                    }
+		    $socios=$this->socios_model->get_socios_conact($activ);
                     break;
+
+                case 'socsinactiv':
+                    $this->load->model('socios_model');
+		    $socios=$this->socios_model->get_socios_sinact($activ);
+                    break;
+
+                case 'soccomision':
+                    $this->load->model('socios_model');
+		    $socios=$this->socios_model->get_socios_comision($data, $activ);
+                    break;
+
+                case 'titcomision':
+                    $this->load->model('socios_model');
+		    $socios=$this->socios_model->get_socios_titu_comision($data, $activ);
+                    break;
+
             }
         }
         return $socios;

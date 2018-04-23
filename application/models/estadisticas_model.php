@@ -78,19 +78,31 @@ class Estadisticas_model extends CI_Model {
     }
 
 
-    public function cobranza_tabla($id_actividad=-1){        
+    public function cobranza_tabla($id_actividad=-1, $id_comision=0){        
 	$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_cobranza;";
         $this->db->query($qry);
 
+	if ( $id_comision > 0 ) {
+		$qry1 ="DROP TEMPORARY TABLE IF EXISTS tmp_actividades; ";
+        	$this->db->query($qry1);
+		$qry1 ="CREATE TEMPORARY TABLE tmp_actividades ( INDEX ( aid ) )
+			SELECT a.Id as aid FROM actividades a WHERE a.comision = $id_comision; ";
+        	$this->db->query($qry1);
+	}
+
 	$qry = "CREATE TEMPORARY TABLE tmp_cobranza
 		SELECT DATE_FORMAT(p.generadoel, '%Y%m') periodo, COUNT(DISTINCT p.tutor_id) socios, COUNT(*) cuotas, SUM(p.monto) facturado,
+			$id_actividad id_act,
 			SUM(IF(p.estado=0 AND DATE_FORMAT(p.pagadoel, '%Y%m') = DATE_FORMAT(p.generadoel, '%Y%m'), p.pagado, 0 )) pagado_mes,
 			SUM(IF(p.estado=0 AND DATE_FORMAT(p.pagadoel, '%Y%m') > DATE_FORMAT(p.generadoel, '%Y%m'), p.pagado, 0 )) pagado_mora,
 			SUM(IF(p.estado=1 AND p.pagado > 0,  p.pagado, 0 )) pago_parcial,
 			SUM(IF(p.estado=1 AND p.pagado = 0,  p.monto, 0 )) impago
-		FROM pagos p
-		WHERE DATE_FORMAT(p.generadoel,'%Y%m') >= DATE_FORMAT( DATE_SUB(CURDATE(), INTERVAL 1 YEAR), '%Y%m' ) ";
-	if ( $id_actividad > -1 ) {
+		FROM pagos p ";
+	if ( $id_comision > 0 ) {
+		$qry .= "	LEFT JOIN tmp_actividades USING ( aid ) ";
+	}
+	$qry .= "WHERE DATE_FORMAT(p.generadoel,'%Y%m') >= DATE_FORMAT( DATE_SUB(CURDATE(), INTERVAL 1 YEAR), '%Y%m' ) ";
+	if ( $id_actividad >= 0 && $id_comision == 0 ) {
 		$qry .= "AND p.aid = $id_actividad ";
 	}
 	$qry .= "GROUP BY 1; ";

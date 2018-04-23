@@ -429,6 +429,7 @@ class Admin extends CI_Controller {
             'name' => $actividad->nombre,
             'price' => $actividad->precio,
             'cta_inic' => $actividad->cuota_inicial,
+            'seguro' => $actividad->seguro,
             'estado' => $estado,
             'solo_socios' => $solo_socio
             );
@@ -1950,26 +1951,17 @@ class Admin extends CI_Controller {
                     	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->cuota_inicial,'Cuota Inicial '.$actividad->nombre,$actividad->Id);
 		    }
 
+
                     $descripcion = 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
 
                     $this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->Id);
 
-	            /* 20170102 Al cambiar por la funcion de registrar_pago ya hace el insert en facturacion
-                    if($socio->tutor == 0){
-                        $total = $this->pagos_model->get_socio_total($data['sid']);
-                    }else{
-                        $total = $this->pagos_model->get_socio_total($socio->tutor );
-                    }
+		    // Si la actividad tiene seguro lo registro
+		    if ( $actividad->seguro > 0 ) {
+                    	$descripcion = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+                    	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->Id);
+		    }
 
-                    $facturacion = array(
-                        'sid' => $tutor_id,
-                        'descripcion'=>$descripcion,
-                        'debe' => $actividad->precio,
-                        'haber' => 0,
-                        'total' => $total - $actividad->precio
-                        );
-                    $this->pagos_model->insert_facturacion($facturacion);
-		    */
                 }
                 echo $act;
                 break;
@@ -2052,7 +2044,8 @@ class Admin extends CI_Controller {
                     	if($socio->tutor == 0){
                         	$total = $this->pagos_model->get_socio_total($data['sid']);
                     	} else {
-                        	$total = $this->pagos_model->get_socio_total($socio->tutor );          		      }
+                        	$total = $this->pagos_model->get_socio_total($socio->tutor );          		      
+			}
 
                     	$facturacion = array(
                         	'sid' => $tutor_id,
@@ -2062,6 +2055,24 @@ class Admin extends CI_Controller {
                         	'total' => $total - $actividad->precio
                         	);
                     	$this->pagos_model->insert_facturacion($facturacion);
+			
+			if ( $activdad->seguro > 0 ) {
+                    		$descripcion = 'Seguro '.$actividad->seguro.' - $ '.$actividad->seguro;
+                    		$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->Id);
+                    		if($socio->tutor == 0){
+                        		$total = $this->pagos_model->get_socio_total($data['sid']);
+                    		} else {
+                        		$total = $this->pagos_model->get_socio_total($socio->tutor );          		      
+				}
+                    		$facturacion = array(
+                        		'sid' => $tutor_id,
+                        		'descripcion'=>$descripcion,
+                        		'debe' => $actividad->seguro,
+                        		'haber' => 0,
+                        		'total' => $total - $actividad->seguro
+                        	);
+                    		$this->pagos_model->insert_facturacion($facturacion);
+			}
 
 			$relac = array ( 'sid' => $sid, 'apynom' => $socio->nombre.' '.$socio->apellido, 'dni'=>$socio->dni, 'accion' => 'Relacione' );
 			$asoc_relac[]=$relac;
@@ -2794,7 +2805,7 @@ $this->actividades_model->becar($id,$beca);
                 $this->load->model('actividades_model');
                 $data['categorias'] = $this->general_model->get_cats();
                 $data['actividades'] = $this->actividades_model->get_actividades();
-                $data['profesores'] = $this->actividades_model->get_profesores();
+                $data['comisiones'] = $this->actividades_model->get_comisiones();
                 $data['username'] = $this->session->userdata('username');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'envios-nuevo';
@@ -2811,14 +2822,16 @@ $this->actividades_model->becar($id,$beca);
                 $titulo = $this->input->post('titulo');
                 $grupo = $this->input->post('grupo');
                 $data = $this->input->post('data');
+                $activ = $this->input->post('activ');
                 $envio = array(
                     'titulo' => $titulo,
                     'grupo' => $grupo,
                     'data' => json_encode($data),
+                    'activos' => $activ
                     );
                 $this->load->model('general_model');
                 $id = $this->general_model->insert_envio($envio);
-                $socios = $this->general_model->get_socios_by($grupo,$data);
+                $socios = $this->general_model->get_socios_by($grupo,$data,$activ);
                 $this->load->helper('email');
                 if($socios){
                     $emails = array();

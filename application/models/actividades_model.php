@@ -115,6 +115,7 @@ class Actividades_model extends CI_Model {
                     $actividad->alta = $this->show_date($asoc->date_alta);
                     $actividad->baja = $this->show_date($asoc->date);
                 }
+                $actividad->federado = $asoc->federado;
                 $actividad->descuento = $asoc->descuento;
                 $actividad->monto_porcentaje = $asoc->monto_porcentaje;
                 return $actividad;
@@ -139,6 +140,7 @@ class Actividades_model extends CI_Model {
                     $actividad->alta = $this->show_date($asoc->date_alta);
                     $actividad->baja = $this->show_date($asoc->date);
                 }
+                $actividad->federado = $asoc->federado;
                 $actividad->descuento = $asoc->descuento;
                 $actividad->monto_porcentaje = $asoc->monto_porcentaje;
                 $act_asoc[] = $actividad;
@@ -171,6 +173,7 @@ class Actividades_model extends CI_Model {
                     			$actividad->alta = $this->show_date($asoc->date_alta);
                     			$actividad->baja = $this->show_date($asoc->date);
                 		}
+                		$actividad->federado = $asoc->federado;
                 		$actividad->descuento = $asoc->descuento;
                 		$actividad->monto_porcentaje = $asoc->monto_porcentaje;
                 		$act_asoc[] = $actividad;
@@ -238,6 +241,57 @@ class Actividades_model extends CI_Model {
         $query = $this->db->update("actividades_asociadas",array('monto_porcentaje'=>'1'));
         return true;
     } 
+
+    public function get_socactiv($id_actividad=-1,$id_comision=0,$mora=0){
+        $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_socios_activos;";
+        $this->db->query($qry);
+
+        if ( $id_comision > 0 ) {
+                $qry1 ="DROP TEMPORARY TABLE IF EXISTS tmp_actividades; ";
+                $this->db->query($qry1);
+                $qry1 ="CREATE TEMPORARY TABLE tmp_actividades ( INDEX ( aid ) )
+                        SELECT a.Id as aid FROM actividades a WHERE a.comision = $id_comision; ";
+                $this->db->query($qry1);
+        }
+
+        $qry = "CREATE TEMPORARY TABLE tmp_socios_activos
+		SELECT aa.aid, a.nombre descr_act, s.*
+                FROM actividades_asociadas aa 
+			JOIN socios s ON aa.sid = s.Id 
+			JOIN actividades a ON aa.aid = a.Id ";
+        if ( $id_comision > 0 ) {
+                $qry .= "       JOIN tmp_actividades USING ( aid ) ";
+        }
+        $qry .= "WHERE aa.estado = 1 ";
+        if ( $id_actividad >= 0 && $id_comision == 0 ) {
+                $qry .= "AND aa.aid = $id_actividad ";
+        }
+	$qry .= "ORDER BY aa.aid, s.Id; ";
+        $this->db->query($qry);
+
+        $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_pagos;";
+        $this->db->query($qry);
+
+        $qry = "CREATE TEMPORARY TABLE tmp_pagos
+		SELECT ta.Id sid, SUM(monto-pagado) saldo, MAX(pagadoel) ult_pago
+                FROM tmp_socios_activos ta
+			JOIN pagos p ON ( ta.Id = p.tutor_id )
+		GROUP BY 1; ";
+        $this->db->query($qry);
+
+        $qry = "SELECT ta.*, IFNULL(tp.saldo,0) mora, IFNULL(tp.ult_pago,'') ult_pago
+		FROM tmp_socios_activos ta		
+			LEFT JOIN tmp_pagos tp ON ta.Id = tp.sid ";
+	if ( $mora == 0 ) {
+		$qry .= "; ";
+	} else {
+		$qry .= "WHERE tp.saldo > 0; ";
+	}
+	
+        $socactiv = $this->db->query($qry);
+        return $socactiv->result();
+
+    }
 
     public function get_socios_actividad($id){
         $this->load->model('socios_model');

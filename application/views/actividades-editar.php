@@ -56,6 +56,12 @@
                     </div>
                 </div>                                 
                 <div class="form-group">
+                    <label for="" class="col-sm-2">Seguro</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" value="<?=$actividad->seguro?>" name="seguro">
+                    </div>
+                </div>                                 
+                <div class="form-group">
                     <label for="" class="col-sm-2">Estado</label>
                     <div class="col-sm-10">
                         <select name="estado" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">

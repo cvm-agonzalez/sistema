@@ -331,6 +331,28 @@ class Debtarj_model extends CI_Model {
         return $debitos;
     }
 
+    public function get_debitos_by_periodo($periodo)
+    {
+	$anio=substr($periodo,0,4);
+	$mes=substr($periodo,4,2);
+	$xhasta=date('Y-m-d', strtotime($anio.'-'.$mes.'-01'));
+	$mes1=$mes-1;
+	if ( $mes1 == 0 ) {
+		$anio=$anio-1;
+		$mes1=12;
+	}
+	$xdesde=date('Y-m-d', strtotime($anio.'-'.$mes1.'-01'));
+
+        $this->db->where('fecha_debito >', $xdesde);
+        $this->db->where('fecha_debito <', $xhasta);
+        $this->db->where('estado >', 0);
+        $this->db->order_by('fecha_debito','desc');
+        $query = $this->db->get('socios_debitos');
+        if( $query->num_rows() == 0 ){ return false; }
+        $debitos = $query->result();
+        return $debitos;
+    }
+
 
 }  
 ?>

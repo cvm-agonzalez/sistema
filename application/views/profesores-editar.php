@@ -1,12 +1,12 @@
                     
 <section class="page page-profile">
     <div class="panel panel-default">
-        <div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Comisión</strong></div>
+        <div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Profesor</strong></div>
         <div class="panel-body">
             <?
             if(!$profesor){
             ?>
-            La comisión que esta intentando editar no existe en nuestra base de datos.<br><br>
+            El Profesor que esta intentando editar no existe en nuestra base de datos.<br><br>
             <a href="<?=$baseurl?>admin/actividades/profesores" class="btn btn-primary">Volver a Profesores</a>
             <?
             }else{
@@ -29,6 +29,12 @@
                     <label for="" class="col-sm-2">DNI</label>
                     <div class="col-sm-10">
                         <input type="number" class="form-control" name="dni" value="<?=$profesor->dni?>" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2">SID</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" name="sid" value="<?=$profesor->sid?>" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -63,6 +69,21 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label for="" class="col-sm-2">Puesto en la Comisión</label>
+                    <div class="col-sm-10">
+                        <select name="puesto" id="puesto" >
+                                <option value="0" >Operador</option>
+                                <option value="1" >Presidente</option>
+                                <option value="2" >VicePresidente</option>
+                                <option value="3" >Tesorero</option>
+                                <option value="4" >Secretario</option>
+                                <option value="5" >Otro</option>
+                        </select>
+                    </div>
+                </div>
+
 
                 <div class="form-group">
                     <label for="" class="col-sm-2">Email</label>

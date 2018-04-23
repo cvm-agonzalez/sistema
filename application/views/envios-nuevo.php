@@ -13,12 +13,23 @@
                         <input type="text" id="envio-titulo" class="form-control" required autofocus>
                      </div>
                      <div class="form-group">
+                        <label>Activos/Suspendidos</label>
+                        <select class="form-control" id="activ-select" >
+                           <option value=" ">Elegir</option>
+                           <option value="1">Solo Activos</option>
+                           <option value="2">Activos mas Suspendidos</option>
+                        </select>
+                     </div>
+                     <div class="form-group">
                         <label>Grupo</label>
                         <select class="form-control" id="grupo-select">
                            <option value="1">Todos los socios</option>
                            <option value="categorias">Seleccionar por Categoría</option>
                            <option value="actividades">Seleccionar por Actividad</option>
-                           <option value="comisiones">Seleccionar por Comisión</option>
+                           <option value="socconactiv">Seleccionar Socios con Actividad</option>
+                           <option value="socsinactiv">Seleccionar Socios sin Actividad</option>
+                           <option value="soccomision">Socios por Comisión</option>
+                           <option value="titcomision">Integrantes de la Comisión</option>
                         </select>
                      </div>
                      <div class="form-group" id="grupo-categorias" style="display:none;">
@@ -49,9 +60,9 @@
                         <label>Comisiones</label>
                         <select class="form-control" id="comisiones-select" multiple>
                            <?
-                           foreach ($profesores as $profesor) {                           
+                           foreach ($comisiones as $comision) {                           
                            ?>
-                           <option value="<?=$profesor->Id?>"><?=$profesor->nombre?> <?=$profesor->apellido?></option>                           
+                           <option value="<?=$comision->id?>"><?=$comision->descripcion?></option>                           
                            <?
                            }
                            ?>

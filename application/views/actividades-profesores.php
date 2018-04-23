@@ -54,6 +54,12 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="" class="col-sm-2">SID</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" name="sid" required>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="" class="col-sm-2">Dirección</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control" name="direccion">
@@ -81,6 +87,19 @@
                           		<option value="<?=$comision->id?>" ><?=$comision->descripcion?></option>
 				
 				<? } ?>
+			</select>
+                    </div>
+                </div> 
+                <div class="form-group">
+                    <label for="" class="col-sm-2">Puesto en la Comisión</label>
+                    <div class="col-sm-10">
+			<select name="puesto" id="puesto" >
+                        	<option value="0" >Operador</option>
+                        	<option value="1" >Presidente</option>
+                        	<option value="2" >VicePresidente</option>
+                        	<option value="3" >Tesorero</option>
+                        	<option value="4" >Secretario</option>
+                        	<option value="5" >Otro</option>
 			</select>
                     </div>
                 </div> 
