@@ -2638,8 +2638,8 @@ $this->actividades_model->becar($id,$beca);
 			$this->load->view('admin',$data);
 			break;
         	case 'cobranza':
-			if ( $this->uri->segment(4) ) {
-				$id_actividad =$this->uri->segment(4);
+			if ( $this->uri->segment(4) || $this->uri->segment(4) == 0 ) {
+				$id_actividad = $this->uri->segment(4);
                 		$this->load->model('actividades_model');
                 		$data['actividades'] = $this->actividades_model->get_actividades();
 				$data['username'] = $this->session->userdata('username');
