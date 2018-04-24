@@ -929,6 +929,15 @@ $("#estad-activ-form").submit(function(){
 
 	return true;
 })
+$("#comi-activ-form").submit(function(){
+        var actividad = $("#actividad").val();
+        var url = "<?=$baseurl?>comisiones/facturacion" + "/" + actividad;
+
+        $("#comi-activ-form").attr("action",url);
+        $("#comi-activ-form").submit();
+
+        return true;
+})
 
 $("#load-debtarj-form").submit(function(){
         var marca = $("#marca").val();
@@ -1067,6 +1076,11 @@ $("#debtarj_botones_form button").on("click", function(){
             $("#grupo-categorias").slideUp();
             $("#grupo-actividades").slideUp();
             $("#grupo-comisiones").slideUp();
+
+		if ( grupo == "soccomision" || grupo == "titcomision" ) {
+            		$("#grupo-comisiones").slideDown();
+		} 
+
             $("#grupo-"+grupo).slideDown();
         })
         <?
@@ -1075,11 +1089,23 @@ $("#debtarj_botones_form button").on("click", function(){
         $("#envios-step1").submit(function(){
             $("#envios-continuar").prop('disabled',true);
             $("#envios-continuar").html('Procesando <i class="fa fa-spin fa-spinner"></i>')
+            var activ = $("#activ-select").val();
+	    if ( activ == " " ) { 
+		alert ("Debe Elegir una condicion de estado"); 
+            	$("#envios-continuar").prop('disabled',false);
+            	$("#envios-continuar").html('Procesando <i class="fa fa-arrow-right"></i>')
+		return false; 
+		}
             var grupo = $("#grupo-select").val();
             var data;
             var titulo = $("#envio-titulo").val();
-            data = $("#"+grupo+"-select").val();
-            $.post("<?=base_url()?>admin/envios/agregar",{titulo:titulo,grupo:grupo,data:data})
+	    if ( grupo == "soccomision" || grupo == "titcomision" ) {
+			data = $("#comisiones-select").val(); 
+		} else {
+            		data = $("#"+grupo+"-select").val();
+		}
+
+            $.post("<?=base_url()?>admin/envios/agregar",{titulo:titulo,grupo:grupo,data:data,activ:activ})
             .done(function(data){
                 if(data == 'no_mails'){
                     $("#step2").html('<div class="alert alert-danger">No se encontraron socios para el grupo seleccionado.</div>');

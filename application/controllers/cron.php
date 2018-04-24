@@ -95,10 +95,13 @@ class Cron extends CI_Controller {
             fwrite($log, $txt);            
             exit();
         }
-/*
+  
         if($cron_state == 'iniciado'){
             $txt = date('H:i:s').": Inicio de Cron... \n";
             fwrite($log, $txt);                        
+
+	    $debitos=$this->debitos_tarjetas($xperiodo, $log); // aplicamos todos los pagos de los debitos realizados en el mes
+	    $this->pagos_model->update_facturacion_cron($xperiodo,4,$debitos['cant'],$debitos['importe']);
 
             $soc_susp=$this->suspender($log); // suspendemos socios que deban mas de 4 meses de cuota social
 	    // Actualizo el registro de facturacion_cron con los socios suspendidos
@@ -125,7 +128,7 @@ class Cron extends CI_Controller {
             $txt = date('H:i:s').": Reanudando Cron... \n";
             fwrite($log, $txt);
         }
-*/
+  
 
 	// Busco los socios que tienen que pagar
 	$socios = $this->socios_model->get_socios_pagan(true);
@@ -245,6 +248,24 @@ class Cron extends CI_Controller {
                     		$pago['pagadoel'] = $xahora;
                 	}
                 	$this->pagos_model->insert_pago_nuevo($pago);
+
+			// Si la actividad tiene seguro facturo el seguro
+			if ( $actividad->seguro > 0 ) {
+                		$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+				$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+
+				// Inserto el pago del seguro
+                		$pago = array(
+                    			'sid' => $socio->Id,
+                    			'tutor_id' => $socio->Id,
+                    			'aid' => $actividad->Id,
+                 			'generadoel' => $xhoy,
+                    			'descripcion' => $des,
+                    			'monto' => $actividad->seguro,
+                    			'tipo' => 4,
+                    		);
+                		$this->pagos_model->insert_pago_nuevo($pago);
+			}
 	        } 
 
 		// Si tiene familiares a cargo
@@ -297,6 +318,25 @@ class Cron extends CI_Controller {
                 			}
 
                     			$this->pagos_model->insert_pago_nuevo($pago);
+
+                        		// Si la actividad tiene seguro facturo el seguro
+                        		if ( $actividad->seguro > 0 ) {
+                                		$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+                                		$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+		
+                                		// Inserto el pago del seguro
+                                		$pago = array(
+                                        		'sid' => $socio->Id,
+                                        		'tutor_id' => $socio->Id,
+                                        		'aid' => $actividad->Id,
+                                        		'generadoel' => $xhoy,
+                                        		'descripcion' => $des,
+                                        		'monto' => $actividad->seguro,
+                                        		'tipo' => 4,
+                                		);
+                                		$this->pagos_model->insert_pago_nuevo($pago);
+                        		}
+
                			}
                		}
            	}
@@ -327,8 +367,9 @@ class Cron extends CI_Controller {
     			foreach ($planes as $plan) {                
                 		$this->pagos_model->update_cuota($plan->Id);
 
-                    		$descripcion .= 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$plan->actual.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
-                    		$des = 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$plan->actual.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
+				$ncuota=$plan->actual+1;
+                    		$descripcion .= 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$ncuota.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
+                    		$des = 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$ncuota.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
 				// Inserto el pago del plan de financiacion (tipo=3)
                     		$pago = array(
                         		'sid' => $socio->Id,  
@@ -370,56 +411,6 @@ class Cron extends CI_Controller {
 
 		// Actualizo en facturacion_cron el asociado facturado
 		$this->pagos_model->update_facturacion_cron($xperiodo,3, 1, $cuota['total']);
-
-		// Si el asociado tiene cargado debito automatico de tarjeta inserto el pago 
-	
-		$debtarj=$this->debtarj_model->get_debtarj_by_sid($socio->Id);
-		if ( $debtarj ) {
-			$id_debito = $debtarj->id;
-			$ult_periodo = $debtarj->ult_periodo_generado;
-			$ult_fecha = $debtarj->ult_fecha_generacion;
-			if ( $ult_periodo == $xperiodo ) {
-				$debito = $this->debtarj_model->get_debitos_by_socio($id_debito);
-				if ( $debito ) {
-					$fecha_deb = $debito->fecha_debito;
-					$importe = $debito->importe;
-					if ( $fecha_deb == $ult_fecha ) {
-	
-                				// Le resta el pago debitado a la tarjeta al saldo 
-                				$saldo_cc = $total + $importe;
-						$tarjeta=$this->tarjeta_model->get($debtarj->id_marca);
-						$descripcion = "Pago por Debito en Tarjeta $tarjeta->descripcion";
-                				$data = array(
-                        				"sid" => $socio->Id,
-							"date" => $xhoy,
-                        				"descripcion" => $descripcion,
-                        				"debe" => '0',
-                        				"haber" => $importe,
-                        				"total" => $saldo_cc
-                				);
-
-                                		$this->pagos_model->insert_facturacion($data);
-                                		$this->pagos_model->registrar_pago2($socio->Id,$importe);
-            					$txt = date('H:i:s')." Registre debito tarjeta para el asociado $socio->Id por un monto de $importe \n";
-            					fwrite($log, $txt);            
-						// Actualizo en facturacion_cron con el asociado debitado
-						$this->pagos_model->update_facturacion_cron($xperiodo,4, 1, $importe);
-					} else {
-            					$txt = date('H:i:s')." El asociado $socio->Id tiene debito en tarjeta pero la fecha de ultimo debito no coincide con el movimiento \n";
-            					fwrite($log, $txt);            
-			}
-				} else {
-            				$txt = date('H:i:s')." El asociado $socio->Id tiene debito en tarjeta pero no encontre el registro en socios_debitos \n";
-            				fwrite($log, $txt);            
-				}
-				
-			} else {
-            			$txt = date('H:i:s')." El asociado $socio->Id tiene debito en tarjeta pero no coincide el ultimo periodo generado \n";
-            			fwrite($log, $txt);            
-			
-			}
-		}
-			
 
 		// armo mail
 		$mail = $this->socios_model->get_resumen_mail($socio->Id);
@@ -684,6 +675,76 @@ class Cron extends CI_Controller {
         }
     }
 
+    public function debitos_tarjetas($xperiodo, $log) {
+
+		$anio=substr($xperiodo,0,4);
+        	$mes=substr($xperiodo,4,2);
+        	$xhoy=date('Y-m-d', strtotime($anio.'-'.$mes.'-01'));
+		
+		$this->load->model("debtarj_model");
+		$debitos=$this->debtarj_model->get_debitos_by_periodo($xperiodo);
+
+		$cant=0;
+		$totdeb=0;
+
+		foreach ( $debitos as $debito ) {
+
+			$id_debito = $debito->id_debito;
+			$fecha_debito = $debito->fecha_debito;
+			$fecha_acreditacion = $debito->fecha_acreditacion;
+			$importe = $debito->importe;
+			$estado = $debito->estado;
+			$nro_renglon = $debito->nro_renglon;
+		
+			$debtarj = $this->debtarj_model->get_debtarj($id_debito);
+
+			$id_socio = $debtarj->sid;
+			$ult_periodo = $debtarj->ult_periodo_generado;
+			$ult_fecha = $debtarj->ult_fecha_generacion;
+
+			// Busco el saldo actual del socio
+			$total = $this->pagos_model->get_socio_total($id_socio);
+                        $saldo_cc = $total + $importe;
+
+                        // Le resta el pago debitado a la tarjeta al saldo 
+                        $tarjeta=$this->tarjeta_model->get($debtarj->id_marca);
+                        $descripcion = "Pago por Debito en Tarjeta $tarjeta->descripcion";
+                        $data = array(
+				"sid" => $id_socio,
+				"date" => $xhoy,
+				"descripcion" => $descripcion,
+				"debe" => '0',
+				"haber" => $importe,
+				"total" => $saldo_cc
+			);
+
+
+                        $this->pagos_model->insert_facturacion($data);
+                        $this->pagos_model->registrar_pago2($id_socio, $importe);
+
+			$cant=$cant+1;
+			$totdeb=$totdeb+$importe;
+
+			if ( $ult_periodo == $xperiodo ) {
+				if ( $fecha_debito == $ult_fecha ) {
+	
+            				$txt = date('H:i:s')." Registre debito tarjeta para el asociado $id_socio por un monto de $importe \n";
+            				fwrite($log, $txt);            
+				} else {
+            				$txt = date('H:i:s')." Registre debito pero el asociado $id_socio tiene la fecha de ultimo debito no coincide con el movimiento \n";
+            				fwrite($log, $txt);            
+				}
+			} else {
+            			$txt = date('H:i:s')." El asociado $socio->Id tiene debito en tarjeta pero no coincide el ultimo periodo generado \n";
+            			fwrite($log, $txt);            
+			
+			}
+		}
+		
+	$totales = array( "cant" => $cant, "importe" => $totdeb );
+	return $totales;
+
+    }
     public function suspender($log)
     {
         $this->load->model('socios_model');

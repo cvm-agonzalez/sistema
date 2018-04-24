@@ -18,8 +18,12 @@
                            <option value="1">Todos los socios</option>
                            <option value="categorias" <? if($envio->grupo == 'categorias'){ echo 'selected'; } ?>>Seleccionar por Categoría</option>
                            <option value="actividades" <? if($envio->grupo == 'actividades'){ echo 'selected'; } ?>>Seleccionar por Actividad</option>
-                           <option value="comisiones" <? if($envio->grupo == 'comisiones'){ echo 'selected'; } ?>>Seleccionar por Comisión</option>
+                           <option value="socconactiv" <? if($envio->grupo == 'socconactiv'){ echo 'selected'; } ?>>Seleccionar Socios con Actividad</option>
+                           <option value="socsinactiv" <? if($envio->grupo == 'socsinactiv'){ echo 'selected'; } ?>>Seleccionar Socios sin Actividad</option>
+                           <option value="soccomision" <? if($envio->grupo == 'soccomision'){ echo 'selected'; } ?>>Socios por Comisión</option>
+                           <option value="titcomision" <? if($envio->grupo == 'titcomision'){ echo 'selected'; } ?>>Integrantes de la Comisión</option>
                         </select>
+
                      </div>
                      <? $grupo_data = json_decode($envio->data); ?>
                      <div class="form-group" id="grupo-categorias" <? if($envio->grupo != 'categorias'){ echo 'style="display:none;"'; } ?>>
@@ -50,9 +54,9 @@
                         <label>Comisiones</label>
                         <select class="form-control" id="comisiones-select" multiple>
                            <?
-                           foreach ($profesores as $profesor) {                           
+                           foreach ($comisiones as $comision) {                           
                            ?>
-                           <option value="<?=$profesor->Id?>" <? if($envio->grupo == 'comisiones' && in_array($profesor->Id, $grupo_data)){ echo 'selected'; } ?>><?=$profesor->nombre?> <?=$profesor->apellido?></option>                           
+                           <option value="<?=$comision->Id?>" <? if( ( $envio->grupo == 'soccomision' || $envio->grupo == 'titcomision' ) && in_array($comision->Id, $grupo_data)){ echo 'selected'; } ?>><?=$comsion->descripcion?> </option>                           
                            <?
                            }
                            ?>

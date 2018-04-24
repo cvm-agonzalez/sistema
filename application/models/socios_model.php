@@ -54,7 +54,6 @@ class Socios_model extends CI_Model {
     public function get_socio($id)
     {
         if(!$id || $id == '0'){
-            
             $socio = new stdClass();
             $socio->Id=0;
             $socio->nombre=0;
@@ -67,6 +66,79 @@ class Socios_model extends CI_Model {
             return $query->row();
         }
     }
+
+    public function get_socios_comision($comision, $activ)
+    {
+	$query="SELECT s.* 
+		FROM socios s 
+			JOIN actividades_asociadas aa ON ( s.Id = aa.sid AND aa.estado = 1 ) 
+			JOIN actividades a ON ( a.Id = aa.aid ) 
+		WHERE a.comision IN ( ";
+	
+	$cont = 0;
+	foreach ( $comision as $id_comision ) {
+		if ( $cont > 0 ) { $query .= ", "; };
+		$query .= ' '.$id_comision.' ';
+		$cont++;
+	}
+	$query .= " ) "; 
+	if ( $activ == 1 ) {
+		$query .= " AND s.suspendido = 0; ";
+	} else {
+		$query .= " ; ";
+	}
+        $result = $this->db->query($query)->result(); 
+        return $result;
+    }
+
+    public function get_socios_titu_comision($comision, $activ)
+    {
+	$query="SELECT s.* 
+		FROM socios s 
+			JOIN profesores p ON ( s.Id = p.sid )
+		WHERE p.comision IN ( ";
+	
+        $cont = 0;
+        foreach ( $comision as $id_comision ) {
+                if ( $cont > 0 ) { $query .= ", "; };
+                $query .= ' '.$id_comision.' ';
+                $cont++;
+        }
+        $query .= " ) ";
+        if ( $activ == 1 ) {
+                $query .= " AND s.suspendido = 0; ";
+        } else {
+                $query .= " ; ";
+        }
+
+        $result = $this->db->query($query)->result(); 
+        return $result;
+    }
+
+    public function get_socios_conact($activ)
+    {
+	$query="SELECT s.* FROM socios s LEFT JOIN actividades_asociadas aa ON ( s.Id = aa.sid AND aa.estado = 1 ) WHERE aa.sid = s.Id "; 
+	if ( $activ == 1 ) {
+		$query .= " AND s.suspendido = 0; ";
+	} else {
+		$query .= " ; ";
+	}
+        $result = $this->db->query($query)->result(); 
+        return $result;
+    }
+
+    public function get_socios_sinact($activ)
+    {
+	$query="SELECT s.* FROM socios s LEFT JOIN actividades_asociadas aa ON ( s.Id = aa.sid AND aa.estado = 1 ) WHERE aa.sid is NULL "; 
+	if ( $activ == 1 ) {
+		$query .= " AND s.suspendido = 0; ";
+	} else {
+		$query .= " ; ";
+	}
+        $result = $this->db->query($query)->result(); 
+        return $result;
+    }
+
     public function get_socios()
     {
         $query = $this->db->get_where('socios',array('estado'=>1));
@@ -234,7 +306,7 @@ class Socios_model extends CI_Model {
             $this->db->update('socios',array('suspendido'=>1, 'fecha_baja'=>$hoy));
         }else{
             $this->db->where('Id',$id);
-            $this->db->update('socios',array('suspendido'=>0));
+            $this->db->update('socios',array('suspendido'=>0, 'fecha_baja'=>null));
         }
     }
 
