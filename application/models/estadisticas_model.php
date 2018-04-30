@@ -78,7 +78,7 @@ class Estadisticas_model extends CI_Model {
     }
 
 
-    public function cobranza_tabla($id_actividad=-1, $id_comision=0){        
+    public function cobranza_tabla($id_actividad='-1', $id_comision='0'){        
 	$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_cobranza;";
         $this->db->query($qry);
 
@@ -101,9 +101,23 @@ class Estadisticas_model extends CI_Model {
 	if ( $id_comision > 0 ) {
 		$qry .= "	LEFT JOIN tmp_actividades USING ( aid ) ";
 	}
+	if ( $id_actividad == -2 ) {
+		$qry .= "	LEFT JOIN actividades_asociadas aa ON ( p.tutor_id = aa.sid AND aa.estado = 1 ) ";
+	}
 	$qry .= "WHERE DATE_FORMAT(p.generadoel,'%Y%m') >= DATE_FORMAT( DATE_SUB(CURDATE(), INTERVAL 1 YEAR), '%Y%m' ) ";
-	if ( $id_actividad >= 0 && $id_comision == 0 ) {
-		$qry .= "AND p.aid = $id_actividad ";
+	if ( $id_actividad == -2 ) {
+		$qry .= "AND aa.aid IS NULL ";
+	} else {
+		if ( $id_actividad == -1 ) {
+		} else {
+			if ( $id_actividad == -3 ) {
+				$qry .= "AND p.aid = 0 ";
+			} else { 
+				if ( $id_actividad >= 0 && $id_comision == 0 ) {
+					$qry .= "AND p.aid = $id_actividad ";
+				}
+			}
+		}
 	}
 	$qry .= "GROUP BY 1; ";
         $this->db->query($qry);
