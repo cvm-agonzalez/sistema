@@ -118,6 +118,7 @@ class Actividades_model extends CI_Model {
                 $actividad->federado = $asoc->federado;
                 $actividad->descuento = $asoc->descuento;
                 $actividad->monto_porcentaje = $asoc->monto_porcentaje;
+                $actividad->seguro = $asoc->seguro;
                 return $actividad;
 	}
     }
