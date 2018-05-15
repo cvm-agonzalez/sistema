@@ -2624,6 +2624,17 @@ $this->actividades_model->becar($id,$beca);
 
     }
 
+    public function versocio() {
+        $sid=$this->uri->segment(3);
+        $this->load->model('socios_model');
+	$socio=$this->socios_model->get_socio($debtarj->sid);
+	if ( $socio ) {
+		return $socio;
+	} else {	
+		return null;
+	}
+    }
+
     public function estadisticas()
     {
         $this->load->model('estadisticas_model');
@@ -2638,7 +2649,7 @@ $this->actividades_model->becar($id,$beca);
 			$this->load->view('admin',$data);
 			break;
         	case 'cobranza':
-			if ( $this->uri->segment(4) || $this->uri->segment(4) == 0 ) {
+			if ( $this->uri->segment(4) ) {
 				$id_actividad = $this->uri->segment(4);
                 		$this->load->model('actividades_model');
                 		$data['actividades'] = $this->actividades_model->get_actividades();

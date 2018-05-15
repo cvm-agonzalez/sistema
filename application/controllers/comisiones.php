@@ -18,37 +18,376 @@ class Comisiones extends CI_Controller {
 
 	public function index()
 	{
-		$data = $this->get_data();
-		$data['reporte'] = false;
-		$data['actividad_id'] = false;
 		$actividades = $this->general_model->get_actividades_comision();
 		if($actividades){
-			if(count($actividades) == 1 ){
-				foreach ($actividades as $actividad) {
-					$data['reporte'] = $this->general_model->get_reporte($actividad->Id);					
-					$data['actividades'] = false;
-				}
-			}else{
-				$data['actividades'] = $actividades;
-				if($this->input->post('actividad_id')){
-					$data['actividad_id'] = $this->input->post('actividad_id');
-					$data['reporte'] = $this->general_model->get_reporte($this->input->post('actividad_id'));					
-				}
-			}
+			$data['actividades'] = $actividades;
 		}else{
 			$data['actividades'] = false;
-			$data['reporte'] = false;
 		}
-		$this->load->view('comisiones/head', $data, FALSE);
+	        $data['baseurl'] = base_url();
+		$data['section'] = 'principal';
+
+		$this->load->model('comisiones_model');
+
+		$comision = $this->comisiones_model->get_comision();
+		$data['nombre_comision'] = $comision->descripcion;
+                $dia=date('d');
+                if ( $dia < 20 ) {
+                        $mes=date('m');
+                        if ( $mes > 1 ) {
+                                $periodo=date('Ym')-1;
+                        } else {
+                                $periodo=(date('Y')-1).'12';
+                        } 
+                } else {
+                        $periodo=date('Ym');
+                }
+                $anio_corte=2017;
+
+                $comision = $this->comisiones_model->get_comision();
+                $data['nombre_comision'] = $comision->descripcion;
+                $data['resumen'] = $this->comisiones_model->resumen($comision->id, $periodo, $anio_corte);
+
+
+		//$this->load->view('comisiones/head', $data, FALSE);
 		$this->load->view('comisiones/index', $data, FALSE);
-		$this->load->view('comisiones/foot', $data, FALSE);
+		//$this->load->view('comisiones/foot', $data, FALSE);
+
 	}
 
-
-	public function get_data()
+	public function lista_socios_act()
 	{
-		return false;
+                $accion=$this->uri->segment(3);
+                $id_actividad = $this->uri->segment(4);
+
+                $this->load->model('comisiones_model');
+		$this->load->model('actividades_model');
+                $data['baseurl'] = base_url();
+                $data['username'] = $this->session->userdata('username');
+                $comision = $this->comisiones_model->get_comision();
+                $id_comision = $comision->id;
+                $data['actividades'] = $this->general_model->get_actividades_comision();
+                if ( $id_actividad == 0 ) {
+                        $data['id_actividad'] = 0;
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv(-1, $id_comision);
+                } else {
+                        $data['id_actividad'] = $id_actividad;
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv( $id_actividad, 0);
+                }
+
+		switch ( $accion ) {
+			case 'excel':
+				foreach ( $data['socioact_tabla'] as $socio ) {
+					$socact = array(
+                                		'Actividad' => $socio->aid."-".$socio->descr_act,
+                                		'sid' => $socio->Id,
+                                		'Apellido y Nombre' => $socio->apellido.", ".$socio->nombre,
+                                		'DNI' => $socio->dni,
+                                		'domicilio' => $socio->domicilio,
+                                		'email' => $socio->mail,
+                                		'estado' => $socio->suspendido,
+                                		'saldo' => $socio->mora,
+                                		'ult_pago' => $socio->ult_pago,
+                                		);
+					$result[]=$socact;
+
+				}
+                                $archivo="Socios_Actividad_".date('Ymd');
+                                $fila1=null;
+                                $titulo="Socios_Actividad#".date('Ymd');
+                                $headers=array();
+                                $headers[]="Actividad";
+                                $headers[]="SID";
+                                $headers[]="Apellido Nombre";
+                                $headers[]="DNI";
+                                $headers[]="Domicilio";
+                                $headers[]="Email";
+                                $headers[]="Estado";
+                                $headers[]="Saldo";
+                                $headers[]="Ult Pago";
+                                $datos=$result;
+                                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+				break;
+
+			case 'view':
+                		$data['nombre_comision'] = $comision->descripcion;
+                		$data['mora'] = 0;
+                		$data['section'] = 'lista_socios_act';
+                		$this->load->view('comisiones/index', $data, FALSE);
+				break;
+		}
 	}
+
+	public function lista_morosos()
+	{
+                $accion=$this->uri->segment(3);
+                $id_actividad = $this->uri->segment(4);
+
+                $this->load->model('comisiones_model');
+		$this->load->model('actividades_model');
+                $data['baseurl'] = base_url();
+                $data['username'] = $this->session->userdata('username');
+                $comision = $this->comisiones_model->get_comision();
+                $id_comision = $comision->id;
+                $data['actividades'] = $this->general_model->get_actividades_comision();
+                if ( $id_actividad == 0 ) {
+                        $data['id_actividad'] = 0;
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv(-1, $id_comision, 1);
+                } else {
+                        $data['id_actividad'] = $id_actividad;
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv( $id_actividad, 0, 1);
+                }
+
+		switch ( $accion ) {
+			case 'excel':
+				foreach ( $data['socioact_tabla'] as $socio ) {
+					$socact = array(
+                                		'Actividad' => $socio->aid."-".$socio->descr_act,
+                                		'sid' => $socio->Id,
+                                		'Apellido y Nombre' => $socio->apellido.", ".$socio->nombre,
+                                		'DNI' => $socio->dni,
+                                		'domicilio' => $socio->domicilio,
+                                		'email' => $socio->mail,
+                                		'estado' => $socio->suspendido,
+                                		'saldo' => $socio->mora,
+                                		'ult_pago' => $socio->ult_pago,
+                                		);
+					$result[]=$socact;
+
+				}
+                                $archivo="Socios_Mora_Actividad_".date('Ymd');
+                                $fila1=null;
+                                $titulo="Socios_Mora_Actividad#".date('Ymd');
+                                $headers=array();
+                                $headers[]="Actividad";
+                                $headers[]="SID";
+                                $headers[]="Apellido Nombre";
+                                $headers[]="DNI";
+                                $headers[]="Domicilio";
+                                $headers[]="Email";
+                                $headers[]="Estado";
+                                $headers[]="Saldo";
+                                $headers[]="Ult Pago";
+                                $datos=$result;
+                                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+				break;
+
+			case 'view':
+                		$data['nombre_comision'] = $comision->descripcion;
+                		$data['mora'] = 1;
+                		$data['section'] = 'lista_socios_act';
+                		$this->load->view('comisiones/index', $data, FALSE);
+				break;
+		}
+	}
+
+	public function facturacion()
+	{
+                $accion=$this->uri->segment(3);
+                $id_actividad = $this->uri->segment(4);
+
+		$this->load->model('estadisticas_model');
+		$this->load->model('comisiones_model');
+		$this->load->model('actividades_model');
+	        $data['baseurl'] = base_url();
+		$data['username'] = $this->session->userdata('username');
+		$comision = $this->comisiones_model->get_comision();
+		$id_comision = $comision->id;
+		$data['actividades'] = $this->general_model->get_actividades_comision();
+        	if ( $id_actividad == 0 ) {
+			$data['id_actividad'] = 0;
+			$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla(-1, $id_comision);
+			$xact="Todas";
+		} else {
+			$data['id_actividad'] = $id_actividad;
+			$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla( $id_actividad, 0);
+			$xact=$this->actividades_model->get_actividad($id_actividad)->nombre;
+		}
+
+                switch ( $accion ) {
+                        case 'excel':
+                                foreach ( $data['cobranza_tabla'] as $mes ) {
+                                        $socact = array(
+                                                'Periodo' => $mes->periodo,
+                                                'Actividad' => $xact,
+                                                'Socios' => $mes->socios,
+                                                'Cuotas' => $mes->cuotas,
+                                                'Facturado' => $mes->facturado,
+                                                'Cobrado Mes' => $mes->pagado_mes,
+                                                'Efectividad' => $mes->porc_cobranza,
+                                                'Cobrado Atrasado' => $mes->pagado_mora,
+                                                '% Mora' => $mes->porc_mora,
+                                                'Pago Parcial' => $mes->pago_parcial,
+                                                'Impago' => $mes->impago,
+                                                '% Impago' => $mes->porc_impago
+                                                );
+                                        $result[]=$socact;
+
+                                }
+                                $archivo="Socios_Actividad_".date('Ymd');
+                                $fila1=null;
+                                $titulo="Socios_Actividad#".date('Ymd');
+                                $headers=array();
+                                $headers[]="Periodo";
+                                $headers[]="Actividad";
+                                $headers[]="Socios";
+                                $headers[]="Cuotas";
+                                $headers[]="Facturado";
+                                $headers[]="Cobrado Mes";
+                                $headers[]="% Efectividad";
+                                $headers[]="Cobrado Atrasado";
+                                $headers[]="% Mora";
+                                $headers[]="Pago Parcial";
+                                $headers[]="Impago";
+                                $headers[]="% Impago";
+                                $datos=$result;
+                                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+                                break;
+
+                        case 'view':
+				$data['nombre_comision'] = $comision->descripcion;
+				$data['section'] = 'facturacion';
+				$this->load->view('comisiones/index', $data, FALSE);
+                                break;
+                }
+
+
+	}
+
+	public function resumen() 
+	{
+		$id_socio=$this->uri->segment(3);
+		$accion=$this->uri->segment(4);
+
+		$this->load->model('socios_model');
+		$this->load->model('pagos_model');
+		$data['username'] = $this->session->userdata('username');
+		$data['baseurl'] = base_url();
+		$data['socio'] = $this->socios_model->get_socio($id_socio);
+		$data['facturacion'] = $this->pagos_model->get_facturacion($id_socio);
+		$data['cuota'] = $this->pagos_model->get_monto_socio($id_socio);
+                if ( $accion ) {
+                        if ( $accion == "excel" ) {
+                                $archivo="Resument_Cuenta_Asoc_".$id_socio."_".date('Ymd');
+                                $fila1="ID#".$id_socio."-".trim($data['socio']->apellido).", ".trim($data['socio']->nombre);
+                                $titulo="ID#".$id_socio;
+                                $headers=array();
+                                $headers[]="ID_Mov";
+                                $headers[]="SID";
+                                $headers[]="Fecha";
+                                $headers[]="Observacion";
+                                $headers[]="Debe";
+                                $headers[]="Haber";
+                                $headers[]="Saldo";
+                                $datos=$data['facturacion'];
+                                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+                                break;
+                        }
+                }
+
+                $data['section'] = 'socios-resumen';
+                $this->load->view('comisiones/index',$data);
+	}
+
+	public function liquidacion_mes()
+	{
+		$this->load->model('comisiones_model');
+	        $data['baseurl'] = base_url();
+		$data['section'] = 'liquidacion_mes';
+		$comision = $this->comisiones_model->get_comision();
+		$data['nombre_comision'] = $comision->descripcion;
+		$this->load->view('comisiones/index', $data, FALSE);
+	}
+
+	public function liquidaciones_ant()
+	{
+		$this->load->model('comisiones_model');
+	        $data['baseurl'] = base_url();
+		$data['section'] = 'liquidaciones_ant';
+		$comision = $this->comisiones_model->get_comision();
+		$data['nombre_comision'] = $comision->descripcion;
+		$this->load->view('comisiones/index', $data, FALSE);
+	}
+
+
+    	public function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
+                $this->load->library('PHPExcel');
+                $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
+                                             ->setLastModifiedBy("Club Villa Mitre")
+                                             ->setTitle($titulo)
+                                             ->setSubject($titulo);
+
+		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
+		$letras=$letras."AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK,AL,AM,AN,AO,AP,AQ,AR,AS,AT,AU,AV,AW,AX,AY,AZ";
+		$letras=$letras."BA,BB,BC,BD,BE,BF,BG,BH,BI,BJ,BK,BL,BM,BN,BO,BP,BQ,BR,BS,BT,BU,BV,BW,BX,BY,BZ";
+
+		$letra=explode(",",$letras);
+		$cant_col=count($headers);
+		$letra_ini=$letra[0];
+		$letra_fin=$letra[$cant_col];
+
+		$str_style=$letra_ini."1:".$letra_fin."1";
+
+                $this->phpexcel->getActiveSheet()->getStyle("$str_style")->getFill()->applyFromArray(
+                    array(
+                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+                        'startcolor' => array('rgb' => 'E9E9E9'),
+                    )
+                );
+
+
+		if ( $fila1 ) {
+                	$this->phpexcel->setActiveSheetIndex(0)
+                        	->setCellValue('A1', $fila1);
+			$cont = 3;
+			$inicio="A2";
+		} else {
+                	$cont = 2;
+			$inicio="A1";
+		}
+
+                // agregamos información a las celdas
+                $this->phpexcel->setActiveSheetIndex(0);
+
+		$this->phpexcel->getActiveSheet()->fromArray(
+        		$headers,   	// The data to set
+        		NULL,        	// Array values with this value will not be set
+        		"$inicio"       // Top left coordinate of the worksheet range where
+                     			//    we want to set these values (default is A1)
+    		);
+
+
+                foreach ($datos as $dato) {
+                	$this->phpexcel->setActiveSheetIndex(0);
+
+			$this->phpexcel->getActiveSheet()->fromArray(
+        			(array)$dato,   	// The data to set
+        			NULL,        	// Array values with this value will not be set
+        			'A'.$cont       // Top left coordinate of the worksheet range where
+                     				//    we want to set these values (default is A1)
+    			);
+                        $cont ++;
+                }
+                // Renombramos la hoja de trabajo
+                $this->phpexcel->getActiveSheet()->setTitle("$titulo");
+
+                foreach(range('A',"$letra_fin") as $columnID) {
+                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
+                        ->setAutoSize(true);
+                }
+                // configuramos el documento para que la hoja
+                // de trabajo número 0 sera la primera en mostrarse
+                // al abrir el documento
+                $this->phpexcel->setActiveSheetIndex(0);
+
+                // redireccionamos la salida al navegador del cliente (Excel2007)
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="'.$archivo.'.xlsx"');
+                header('Cache-Control: max-age=0');
+
+                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
+                $objWriter->save('php://output');
+        }
 
 	public function excel($id=''){
         

@@ -13,7 +13,8 @@
                        			<span class=" ui-select">
                        			<select name="actividad" id="actividad" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
 					<option value="-1" <? if($id_actividad == -1){ echo 'selected'; } ?>> Total Cobranza</option>
-					<option value="0" <? if($id_actividad == 0){ echo 'selected'; } ?>> Cuota Social</option>
+					<option value="-2" <? if($id_actividad == -2){ echo 'selected'; } ?>> Socio Hincha</option>
+					<option value="-3" <? if($id_actividad == -3){ echo 'selected'; } ?>> Cuota Social</option>
                        			<? foreach ( $actividades as $actividad ) { ?>
 				                        <option value="<?=$actividad->Id?>" <? if($actividad->Id == $id_actividad){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
                         			<?}?>

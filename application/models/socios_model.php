@@ -225,12 +225,8 @@ class Socios_model extends CI_Model {
     }
     public function get_cumpleanios(){ // esta funcion devuelve los socios que cumplen 18 años entre el 21 del mes pasado y el 20 de este mes
         
-/*
         $mes = date('m'); //mes actual
         $mes_ant = date('m')-1; //mes anterior
-*/
-	$mes = 11;
-	$mes_ant = 10;
         if(count($mes_ant) == 1){ 
             $mes_ant = '0'.$mes_ant;
         }
@@ -262,7 +258,7 @@ class Socios_model extends CI_Model {
         if($facturado){
             $this->db->where('facturado', 0);
         }
-        $query = $this->db->get_where('socios',array('tutor'=>'0','estado'=>'1','suspendido'=>0));
+        $query = $this->db->get_where('socios',array('tutor'=>'0','categoria !='=>'5','estado'=>'1','suspendido'=>0));
         return $query->result();
     }
     public function check_u_n($sn){
