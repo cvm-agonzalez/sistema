@@ -249,8 +249,8 @@ class Cron extends CI_Controller {
                 	}
                 	$this->pagos_model->insert_pago_nuevo($pago);
 
-			// Si la actividad tiene seguro facturo el seguro
-			if ( $actividad->seguro > 0 ) {
+			// Si la actividad tiene seguro y el socio no es federado de la actividad facturo el seguro
+			if ( $actividad->seguro > 0 && $actividad->federado == 0 ) {
                 		$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
 				$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
 
@@ -319,8 +319,8 @@ class Cron extends CI_Controller {
 
                     			$this->pagos_model->insert_pago_nuevo($pago);
 
-                        		// Si la actividad tiene seguro facturo el seguro
-                        		if ( $actividad->seguro > 0 ) {
+                        		// Si la actividad tiene seguro y el socio no es federado de la actividad facturo el seguro
+                        		if ( $actividad->seguro > 0 && $actividad->federado == 0 ) {
                                 		$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
                                 		$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
 		

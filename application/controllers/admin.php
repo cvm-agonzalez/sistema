@@ -1929,10 +1929,12 @@ class Admin extends CI_Controller {
             case 'alta':
                 $data['sid'] = $this->uri->segment(4);
                 $data['aid'] = $this->uri->segment(5);
+                $facturar = $this->uri->segment(6);
+                $federado = $this->uri->segment(7);
+                $data['federado'] = $federado;
                 $this->load->model("actividades_model");
                 $this->load->model("socios_model");
                 $act = $this->actividades_model->act_alta($data);
-                $facturar = $this->uri->segment(6);
                 if(date('d') < $this->date_facturacion && $facturar == 'true'){ //si la fecha es anterior a la definida
 
                     $actividad = $this->actividades_model->get_actividad($data['aid']);
@@ -1956,8 +1958,8 @@ class Admin extends CI_Controller {
 
                     $this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->Id);
 
-		    // Si la actividad tiene seguro lo registro
-		    if ( $actividad->seguro > 0 ) {
+		    // Si la actividad tiene seguro y no es federado de la actividad lo registro
+		    if ( $actividad->seguro > 0 && $federado == 0 ) {
                     	$descripcion = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
                     	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->Id);
 		    }
@@ -2157,6 +2159,12 @@ class Admin extends CI_Controller {
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
                 $act = $this->actividades_model->act_porc($aid);
+                echo $act;
+                break;
+            case 'federado':
+                $aid = $this->uri->segment(4);
+                $this->load->model('actividades_model');
+                $act = $this->actividades_model->act_federado($aid);
                 echo $act;
                 break;
             case 'asociar':

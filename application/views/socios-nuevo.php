@@ -215,7 +215,7 @@
                     </div>
                 </div>  
                 <div class="clearfix"></div>
-                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="submit" id="save_btn" class="btn btn-success">Guardar</button>
             </form>
         </div>
     </div>

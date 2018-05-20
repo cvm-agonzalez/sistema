@@ -92,14 +92,18 @@ class Pagos_model extends CI_Model {
 
             $monto = $cats['3']->precio - ($cats['3']->precio * $socio->descuento / 100); //valor de la cuota de grupo familiar
             $total = $monto + ( $monto_excedente - ($monto_excedente * $socio->descuento / 100) ); //cuota mensual mas el excedente en caso de ser mas socios de lo permitido en el girpo fliar
+
             foreach ($socio_actividades['actividad'] as $actividad) {
 		// actividades del titular del grupo familiar
 		if ( $actividad->monto_porcentaje == 0 ) {
 			if ( $actividad->precio > 0 ) {
-                		$total = $total + ( $actividad->precio - $actividad->descuento );
+                		 $total = $total + ( $actividad->precio - $actividad->descuento );
 			}
 		} else {
                 	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
             foreach ($familiares as $familiar) {
@@ -111,6 +115,9 @@ class Pagos_model extends CI_Model {
 			}
 		    } else {
                     	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		    }
+		    if ( $actividad->federado == 0 ) {
+			    $total=$total+$actividad->seguro;
 		    }
                 }
             }
@@ -148,10 +155,13 @@ class Pagos_model extends CI_Model {
 		//actividades del socio
 		if ( $actividad->monto_porcentaje == 0 ) {
 			if ( $actividad->precio > 0 ) {
-                		$total = $total + ( $actividad->precio - $actividad->descuento ) ;
+                		$total = $total + ( $actividad->precio - $actividad->descuento );
 			}
 		} else {
-                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) ;
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) );
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
 
@@ -183,7 +193,9 @@ class Pagos_model extends CI_Model {
         }
     }
 
-    public function get_monto_socio2($sid){ // devuelve el importe que deberá pagar un socio o su tutor, en caso de pertenecer a un grupo familiar
+    public function get_monto_socio2($sid){ 
+	// devuelve el importe que deberá pagar un socio o su tutor, en caso de pertenecer a un grupo familiar
+	// Excluye las actividades de Escuelita de VERANO !!!!!
         $grupo_familiar = $tutor = false;
         $monto = 0;
         //obtenemos el precio de cada categoria
@@ -236,6 +248,9 @@ class Pagos_model extends CI_Model {
 		} else {
                 	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
 		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
+		}
             }
             foreach ($familiares as $familiar) {
                 foreach($familiar['actividades']['actividad'] as $actividad){
@@ -249,6 +264,9 @@ class Pagos_model extends CI_Model {
 		    } else {
                     	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
 		    }
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
+		}
                 }
             }
 
@@ -290,6 +308,9 @@ class Pagos_model extends CI_Model {
                 	$total = $total + ( $actividad->precio - $actividad->descuento ) ;
 		} else {
                 	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) ;
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
 
