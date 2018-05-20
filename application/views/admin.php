@@ -295,6 +295,19 @@
                     $('#table-morosos').show();
                 })
 
+		$("#save_btn").click(function() {
+                    var fecha = $("#fechan").val();
+			<?  $hoy=date('Y-m-d'); ?>
+		    if ( fecha == 0 || fecha == "0000-00-00" ) { 
+			alert ("Error en la fecha de nacimiento, no puede ser 0");
+			return false;
+		   }
+                    if ( fecha > '<?=$hoy?>' ) { 
+                        alert ("Error en la fecha de nacimiento, no puede ser mayor a hoy");
+                        return false;
+                   };
+		})
+
                 <?
                 if($section == 'socios-editar'){
                 ?>
@@ -390,6 +403,22 @@
                 $('#r3').val(suggestion.data);
             }
         });
+
+        $("$fechan").change(function(){
+                        var fechan = "$fechan".val();
+                        var hoy = new Date();
+                        hoy = hoy.getDate();    
+
+                        if(fechan = 0){
+                                alert("No puede ser fecha nacimiento 0");
+                                return false;
+                        }
+                        if(fechan > hoy){
+                                alert("No puede ser fecha nacimiento mayor a hoy");
+                                return false;
+                        }
+        }
+
                         
         $("a#r-buscar").click(function(){
             var id = $(this).data('id');
@@ -961,12 +990,15 @@ $("#carga_debtarj_form").submit(function(){
         var id_debito = $("#id_debito").val();    
         var id_marca = $("#id_marca").val();    
         var nro_tarjeta = $("#nro_tarjeta").val();
-	if ( nro_tarjeta.length < 16 ) {
+	var largo = nro_tarjeta.length;
+	if ( largo < 16 ) {
 		var sigue = confirm("Seguro que el numero es tan corto?");
 		if (!sigue){return false;}
 	}
-        var fecha_adhesion = fecha_mostrar_db($("#fecha_adhesion").val());
+        var fecha_adhesion = $("#fecha_adhesion").val();
         var sid = $("#sid").val();
+
+	var ok = confirm("sid"+sid+" id_marca"+id_marca+" nro_tarjeta"+nro_tarjeta+" fecha_adhesion"+fecha_adhesion);
 
         $.post("<?=$baseurl?>admin/debtarj/grabar/0",{sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
         .done(function(data){
@@ -1217,7 +1249,7 @@ $("#debtarj_botones_form button").on("click", function(){
         <? /**
 
         **/ ?>
-        $(document).on("click",".actividad_beca",function(){
+        $(document).on("click","#actividad_beca",function(){
             var beca = $(this).data('beca');
             var id = $(this).data('id');
             angular.element("#modal_open").triggerHandler('click');

@@ -118,7 +118,6 @@ class Actividades_model extends CI_Model {
                 $actividad->federado = $asoc->federado;
                 $actividad->descuento = $asoc->descuento;
                 $actividad->monto_porcentaje = $asoc->monto_porcentaje;
-                $actividad->seguro = $asoc->seguro;
                 return $actividad;
 	}
     }
@@ -232,6 +231,18 @@ class Actividades_model extends CI_Model {
         return $fecha2[0].'/'.$fecha[1].'/'.$fecha[0];
     }
 
+    public function act_federado($aid){        
+        $this->db->where('Id',$aid);
+        $query = $this->db->get('actividades_asociadas');
+        $actual = $query->row();
+        $this->db->where('Id',$aid);
+	if ( $actual->federado == 0 ) {
+        	$query = $this->db->update("actividades_asociadas",array('federado'=>'1'));
+	} else {
+        	$query = $this->db->update("actividades_asociadas",array('federado'=>'0'));
+	}
+        return true;
+    } 
     public function act_peso($aid){        
         $this->db->where('Id',$aid);
         $query = $this->db->update("actividades_asociadas",array('monto_porcentaje'=>'0'));

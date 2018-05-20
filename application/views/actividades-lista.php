@@ -46,6 +46,7 @@
 								</a>
 								<a href="#" id="pone_peso" onclick="pone_peso('<?=$actividad->asoc_id?>')" data-beca="<?=$actividad->descuento?>">$</a>
 								<a href="#" id="pone_porc" onclick="pone_porc('<?=$actividad->asoc_id?>')" data-beca="<?=$actividad->descuento?>">%</a>
+								<a href="#" id="federado" onclick="federado('<?=$actividad->asoc_id?>')" data-id="<?=$actividad->asoc_id?>"><?if($actividad->federado == 0){ echo 'No Federado'; } else { echo 'Federado'; } ?></a>
 								<br>
 								<a href="#" id="quitar_actividad" onclick="quitar_act('<?=$actividad->asoc_id?>','<?=$actividad->Id?>')" data-id="<?=$actividad->asoc_id?>">									
 									Dar de Baja <i class="fa fa-times"></i>
@@ -152,13 +153,19 @@
 	        	var facturar = 'false';
 	        	var fecha = new Date();
 	        	fecha = fecha.getDate();	        	
+	        	var sifed = confirm("Es federado de la actividad p no cobrar el SEGURO?");
+			if ( sifed ) {
+				var federado = 1;
+			} else {
+				var federado = 0;
+			}
         		if(fecha < 35){
 	        		var agree= confirm("Desea que esta actividad sea facturada?");
 	        		if(agree){
 	        			facturar = 'true';
 	        		}
         		}
-	        	$.get("<?=$baseurl?>admin/actividades/alta/<?=$sid?>/"+id+"/"+facturar,function(data){
+	        	$.get("<?=$baseurl?>admin/actividades/alta/<?=$sid?>/"+id+"/"+facturar+"/"+federado,function(data){
 	        		var actividad = $.parseJSON(data);
 	        		var newLi = '<li class="sortable-item" id="asoc_'+actividad.asoc_id+'"><div class="pull-right cruz" id="cruz_'+actividad.asoc_id+'" style="margin-top:-20px;">Fecha de Alta: '+actividad.alta+'<br> <a href="#" style="color:green" class="actividad_beca" id="actividad_beca_'+actividad.asoc_id+'" data-id="'+actividad.asoc_id+'" data-beca="0">Configurar Beca</a><br><a href="#" onclick="quitar_act('+actividad.asoc_id+','+actividad.Id+')" id="quitar_actividad" data-id="'+actividad.asoc_id+'">Dar de Baja <i class="fa fa-times"></i></a></div>#<span>'+actividad.Id+' '+actividad.nombre+'</span></li>';
 	        	$( newLi ).prependTo( $("#actividades_si") ); 
@@ -175,6 +182,11 @@
         function pone_porc(aid){ 
                 var agree= confirm("Pone Porcentaje");
 	        $.get("<?=$baseurl?>admin/actividades/pone_porc/"+aid,function(data){
+		});
+	}
+        function federado(aid){ 
+                var agree= confirm("Cambia Federado"+aid);
+	        $.get("<?=$baseurl?>admin/actividades/federado/"+aid,function(data){
 		});
 	}
         function quitar_act(id,aid){ 

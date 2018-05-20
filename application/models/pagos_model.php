@@ -97,10 +97,13 @@ class Pagos_model extends CI_Model {
 		// actividades del titular del grupo familiar
 		if ( $actividad->monto_porcentaje == 0 ) {
 			if ( $actividad->precio > 0 ) {
-                		 $total = $total + ( $actividad->precio - $actividad->descuento ) + $actividad->seguro;
+                		 $total = $total + ( $actividad->precio - $actividad->descuento );
 			}
 		} else {
-                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) ) + $actividad->seguro;
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
             foreach ($familiares as $familiar) {
@@ -108,10 +111,13 @@ class Pagos_model extends CI_Model {
 		//actividades del los socios del grupo famlilar
 		    if ( $actividad->monto_porcentaje == 0 ) {
 			if ( $actividad->precio > 0 ) {
-                    		$total = $total + ( $actividad->precio - $actividad->descuento ) + $actividad->seguro;
+                    		$total = $total + ( $actividad->precio - $actividad->descuento );
 			}
 		    } else {
-                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) ) + $actividad->seguro;
+                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		    }
+		    if ( $actividad->federado == 0 ) {
+			    $total=$total+$actividad->seguro;
 		    }
                 }
             }
@@ -149,10 +155,13 @@ class Pagos_model extends CI_Model {
 		//actividades del socio
 		if ( $actividad->monto_porcentaje == 0 ) {
 			if ( $actividad->precio > 0 ) {
-                		$total = $total + ( $actividad->precio - $actividad->descuento ) + $actividad->seguro;
+                		$total = $total + ( $actividad->precio - $actividad->descuento );
 			}
 		} else {
-                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) + $actividad->seguro ;
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) );
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
 
@@ -235,9 +244,12 @@ class Pagos_model extends CI_Model {
 		}
 		// actividades del titular del grupo familiar
 		if ( $actividad->monto_porcentaje == 0 ) {
-                	$total = $total + ( $actividad->precio - $actividad->descuento ) + $actividad->seguro;
+                	$total = $total + ( $actividad->precio - $actividad->descuento );
 		} else {
-                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) ) + $actividad->seguro;
+                	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
             foreach ($familiares as $familiar) {
@@ -248,10 +260,13 @@ class Pagos_model extends CI_Model {
 
 			//actividades del los socios del grupo famlilar
 		    if ( $actividad->monto_porcentaje == 0 ) {
-                    	$total = $total + ( $actividad->precio - $actividad->descuento ) + $actividad->seguro;
+                    	$total = $total + ( $actividad->precio - $actividad->descuento );
 		    } else {
-                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) ) + $actividad->seguro;
+                    	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100) );
 		    }
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
+		}
                 }
             }
 
@@ -293,6 +308,9 @@ class Pagos_model extends CI_Model {
                 	$total = $total + ( $actividad->precio - $actividad->descuento ) ;
 		} else {
                 	$total = $total + ( $actividad->precio - ($actividad->precio * $actividad->descuento /100 ) ) ;
+		}
+		if ( $actividad->federado == 0 ) {
+			$total=$total+$actividad->seguro;
 		}
             }
 

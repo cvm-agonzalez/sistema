@@ -115,7 +115,7 @@
                                     <td>Cuota Mensual <?=$actividad->nombre?></td>
                                     <td>$<?=$actividad->precio?><td>
                                     <? } ?>
-				    <? if ( $actividad->seguro > 0 ) { ?>
+				    <? if ( $actividad->seguro > 0 && $actividad->federado == 0 ) { ?>
                                     	<td>Seguro  <?=$actividad->nombre?></td>
                                     	<td>$<?=$actividad->seguro?><td>
 				    <? } ?>
@@ -134,7 +134,7 @@
                                                 <td>Cuota Mensual <?=$actividad->nombre?> [<?=$familiar['datos']->nombre.' '.$familiar['datos']->apellido?> ]</td>
                                                 <td>$<?=$actividad->precio?><td>
                                             <? } ?>     
-	                                    <? if ( $actividad->seguro > 0 ) { ?>
+	                                    <? if ( $actividad->seguro > 0 && $actividad->federado == 0 ) { ?>
                                         	<td>Seguro  <?=$actividad->nombre?></td>
                                         	<td>$<?=$actividad->seguro?><td>
                                             <? } ?>
