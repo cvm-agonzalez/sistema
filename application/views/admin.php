@@ -295,6 +295,26 @@
                     $('#table-morosos').show();
                 })
 
+		$("#btn_profesor").click(function() {
+                    var sid = $("#sid-select").val();
+            		$.get("<?=$baseurl?>admin/socios/get/"+sid,function(data){
+                	if(data != 'false' ){
+                    		var socio = $.parseJSON(data); 
+				var ok = confirm("El socio "+sid+" se llama "+socio.apellido+", "+socio.nombre+ " Confirma?");
+				if (ok) { 
+					return true; 	
+				} else {
+					return false; 
+				}
+			} else {
+				alert("El socio "+sid+" No existe");
+				return false;
+			}
+			
+			})
+
+		})
+
 		$("#save_btn").click(function() {
                     var fecha = $("#fechan").val();
 			<?  $hoy=date('Y-m-d'); ?>
@@ -404,22 +424,6 @@
             }
         });
 
-        $("$fechan").change(function(){
-                        var fechan = "$fechan".val();
-                        var hoy = new Date();
-                        hoy = hoy.getDate();    
-
-                        if(fechan = 0){
-                                alert("No puede ser fecha nacimiento 0");
-                                return false;
-                        }
-                        if(fechan > hoy){
-                                alert("No puede ser fecha nacimiento mayor a hoy");
-                                return false;
-                        }
-        }
-
-                        
         $("a#r-buscar").click(function(){
             var id = $(this).data('id');
             $("#"+id+"-loading").removeClass('hidden');
