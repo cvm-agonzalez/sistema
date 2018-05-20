@@ -561,6 +561,13 @@ class Admin extends CI_Controller {
             /**
 
             **/
+            case 'get':
+                $id_socio = $this->uri->segment(4);
+                $this->load->model('socios_model');
+                $socio = $this->socios_model->get_socio_full($id_socio);
+		echo json_encode($socio);
+                break;
+
             case 'reinscribir':
                 $id_socio = $this->uri->segment(4);
                 $this->load->model('socios_model');
