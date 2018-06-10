@@ -1048,10 +1048,11 @@ AHG Comentado 20170105 porque no se usa..... creo
                     ->setCellValue('A1', 'Facturado El')
                     ->setCellValue('B1', 'Pagado El')                    
                     ->setCellValue('C1', 'Monto')
-                    ->setCellValue('D1', 'Socio')                    
-                    ->setCellValue('E1', 'Fecha de Nacimiento')
-                    ->setCellValue('F1', 'Observaciones')
-                    ->setCellValue('G1', 'Deuda');
+                    ->setCellValue('D1', 'Activ/Seguro')
+                    ->setCellValue('E1', 'Socio')                    
+                    ->setCellValue('F1', 'Fecha de Nacimiento')
+                    ->setCellValue('G1', 'Observaciones')
+                    ->setCellValue('H1', 'Deuda');
         
         $cont = 2;        
 
@@ -1081,14 +1082,21 @@ AHG Comentado 20170105 porque no se usa..... creo
                 $deuda = 'Cuota al Día';
             }
 
+            if($cliente->tipo == 6){                      
+		$concepto = "Seguro";
+	    } else {
+		$concepto = "Actividad";
+	    }
+
             $this->phpexcel->setActiveSheetIndex(0)
                         ->setCellValue('A'.$cont, date('d/m/Y',strtotime($cliente->generadoel)))
                         ->setCellValue('B'.$cont, date('d/m/Y',strtotime($cliente->pagadoel)))
                         ->setCellValue('C'.$cont, $cliente->pagado)
-                        ->setCellValue('D'.$cont, '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido)              
-                        ->setCellValue('E'.$cont, $cliente->socio->nacimiento)
-                        ->setCellValue('F'.$cont, $cliente->socio->observaciones)
-                        ->setCellValue('G'.$cont, $deuda);                     
+                        ->setCellValue('D'.$cont, $concepto)              
+                        ->setCellValue('E'.$cont, '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido)              
+                        ->setCellValue('F'.$cont, $cliente->socio->nacimiento)
+                        ->setCellValue('G'.$cont, $cliente->socio->observaciones)
+                        ->setCellValue('H'.$cont, $deuda);                     
                         $cont ++;
         } 
         // Renombramos la hoja de trabajo
