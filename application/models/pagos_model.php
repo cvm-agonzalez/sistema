@@ -614,8 +614,14 @@ class Pagos_model extends CI_Model {
                 $aid = 0;
                 $tipo = 1;
             }else{
-                $aid = $actividad;
-                $tipo = 4;
+		// Si en la leyenda pongo que es un Seguro lo tipifico como 6 pero con el aid de la actividad
+		if ( substr($des,0,6) == "Seguro" ) {
+                	$aid = $actividad;
+                	$tipo = 6;
+		} else {
+                	$aid = $actividad;
+                	$tipo = 4;
+		}
             }
             $pago = array(
                 'sid' => $sid,

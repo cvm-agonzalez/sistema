@@ -262,7 +262,7 @@ class Cron extends CI_Controller {
                  			'generadoel' => $xhoy,
                     			'descripcion' => $des,
                     			'monto' => $actividad->seguro,
-                    			'tipo' => 4,
+                    			'tipo' => 6,
                     		);
                 		$this->pagos_model->insert_pago_nuevo($pago);
 			}
@@ -332,7 +332,7 @@ class Cron extends CI_Controller {
                                         		'generadoel' => $xhoy,
                                         		'descripcion' => $des,
                                         		'monto' => $actividad->seguro,
-                                        		'tipo' => 4,
+                                        		'tipo' => 6,
                                 		);
                                 		$this->pagos_model->insert_pago_nuevo($pago);
                         		}
