@@ -285,6 +285,7 @@ class Admin extends CI_Controller {
 				$apynom=$campos[2];
 				$mensaje=$campos[4];
 
+
 				if ( trim($mensaje) == "DEBITO EXITOSO" ) {
 					$by=array("id_marca"=>$id_marca, "nro_tarjeta"=>$nro_tarjeta);
 					$debtarj=$this->debtarj_model->get_debtarj_by($by);
@@ -561,6 +562,13 @@ class Admin extends CI_Controller {
             /**
 
             **/
+            case 'get':
+                $id_socio = $this->uri->segment(4);
+                $this->load->model('socios_model');
+                $socio = $this->socios_model->get_socio_full($id_socio);
+		echo json_encode($socio);
+                break;
+
             case 'reinscribir':
                 $id_socio = $this->uri->segment(4);
                 $this->load->model('socios_model');
