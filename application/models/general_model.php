@@ -262,7 +262,7 @@ COMISIONES
         if($socios){
             foreach ($socios as $socio) {
                 $socio->info = $this->socios_model->get_socio($socio->sid);
-                $socio->deuda = $this->pagos_model->get_deuda($socio->sid);
+                $socio->deuda = $this->pagos_model->get_deuda_monto($socio->sid);
                 
                 $this->db->order_by('date','desc');
                 $this->db->where('haber >',0);

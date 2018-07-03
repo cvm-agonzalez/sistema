@@ -708,6 +708,16 @@ class Pagos_model extends CI_Model {
         return $deuda;
     }
 
+    public function get_deuda_sinhoy($sid){
+        $this->db->where('sid',$sid);
+        $this->db->where('DATE(date) < CURDATE()');
+        $this->db->order_by('Id','desc');
+        $query = $this->db->get('facturacion');
+        if($query->num_rows() == 0){ return 0;}
+        $deuda = $query->row()->total;
+        return $deuda;
+    }
+
     public function financiar_deuda($socio,$monto,$cuotas,$detalle){
         $inicio = date('Y-m-d');
         $fin = $inicio;

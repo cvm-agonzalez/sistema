@@ -276,7 +276,7 @@ class Socios_model extends CI_Model {
         $res['resumen'] = $resumen;
         $socio = $this->get_socio($sid);
         $res['mail'] = $socio->mail;
-        $res['deuda'] = $this->pagos_model->get_deuda($sid);
+        $res['deuda'] = $this->pagos_model->get_deuda_sinhoy($sid);
         $res['sid'] = $sid;
         return $res;
     }
