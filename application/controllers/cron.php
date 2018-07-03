@@ -107,20 +107,20 @@ class Cron extends CI_Controller {
 	    // Actualizo el registro de facturacion_cron con los socios suspendidos
 	    $this->pagos_model->update_facturacion_cron($xperiodo,1,$soc_susp,0);
             $this->db->truncate('facturacion_mails'); //limpiamos la db de mails
-            fwrite($log, date('H:i:s').' - Truncate mails');                        
+            fwrite($log, date('H:i:s').' - Truncate mails\n');                        
             //$this->email_a_suspendidos();
             //fwrite($log, date('H:i:s').' - Emails suspendidos');                        
             $this->db->update('socios',array('facturado'=>0)); //establecemos todos los socios como no facturados
-            fwrite($log, date('H:i:s').' - Indicador facturado en 0');                        
+            fwrite($log, date('H:i:s').' - Indicador facturado en 0 \n');                        
     		$cumpleanios = $this->socios_model->get_cumpleanios(); //buscamos los que cumplen 18 años
 		$cump=0;
     		foreach ($cumpleanios as $menor) {
     			$this->socios_model->actualizar_menor($menor->Id); //los quitamos del grupo familiar y cambiamos la categoria a mayor
-                $txt = date('H:i:s').": Actualización de categoría socio #".$menor->Id." \n";
+                $txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->Id.'-'.$menor->apellido.', '.$menor->nombre." \n";
                 fwrite($log, $txt);   
 			$cump++;
     		}
-            fwrite($log, date('H:i:s').' - Cambio de categoria mayor');                        
+            fwrite($log, date('H:i:s').' - Cambio de categoria mayor \n');                        
 	    // Actualizo el registro de facturacion_cron con los socios que cambiaron de categoria por mayoria de edad
 	    $this->pagos_model->update_facturacion_cron($xperiodo,2,$cump,0);
 
@@ -416,88 +416,203 @@ class Cron extends CI_Controller {
 		$mail = $this->socios_model->get_resumen_mail($socio->Id);
 
             	$cuota3 = $mail['resumen'];            
-            	$cuerpo = '<p><img src="http://clubvillamitre.com/images/vm-head.png" alt="" /></p>';
-            	$cuerpo .= '<h3><strong>Titular:</strong> '.$cuota3['titular'].'</h3>';
 
-            	if($deuda != 0){
-                	if($deuda < 0 ){
-                    		$cuerpo .= "Su deuda actual es de $ ".abs($deuda);
-                	}else{
-                    		$cuerpo .= "Usted posee un saldo a favor de $ ".abs($deuda);                
-                	}                
+		// Armo encabezado con escudo y datos de cabecera
+		$cuerpo  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
+        	$cuerpo .= "<thead>";
+		$cuerpo .= "<tr style='background-color: #105401 ;'>";
+		$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
+                $cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
+                $cuerpo .= "<th style='font-size:15; background-color: #105401; color:#FFF' align='right'>www.villamitre.com.ar</th>";
+                $cuerpo .= "</tr>";
+        	$cuerpo .= "</thead>";
+		$cuerpo .= "</table>";
+
+		// Datos del Titular
+            	$cuerpo .= '<h3 style="font-family:verdana"><strong>Titular:</strong> '.$mail['sid'].'-'.$cuota3['titular'].'</h3>';
+
+		// Analizo deuda previa a la facturación para poner mensaje acorde
+                if($deuda < 0 ){
+                    	$cuerpo .= "<h4 style='font-family:verdana' ><strong>Al d&iacute;a de la fecha Ud. adeuda $ ".abs($deuda)."</strong></h4>";
+                    	$cuerpo .= "<h4 style='font-family:verdana' ><strong>PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR SU SITUACION</strong></h4>";
+                } else {
+			if($deuda == 0) {
+                    		$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted esta al d&iacute;a con sus cuotas</strong></h4>";
+			} else {
+                    		$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted posee un saldo a favor de $ ".abs($deuda)."</strong></h4>";                
+			}
             	}
-            	$cuerpo .= "<h4>Cuota Mensual</h4>";
-            	$cuerpo .= '<h5><strong>Categor&iacute;a:</strong> '.$cuota3['categoria'].'</h5>';
-            
+
+		// Si es con grupo familiar
             	if($cuota3['categoria'] == 'Grupo Familiar'){
-           
-                	$cuerpo .= '<h5><strong>Integrantes</strong></h5><ul>';
+                	$cuerpo .= "<h5 style='font-family:verdana;'><strong>Integrantes</strong></h5><ul>";
                 	foreach ($cuota3['familiares'] as $familiar) {          
-                    		$cuerpo .= '<li>'.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'</li>';                    
+                    		$cuerpo .= "<li style='font-family:verdana;'>".$familiar['datos']->nombre." ".$familiar['datos']->apellido."</li>";                    
                 	}                    
                 	$cuerpo .= '</ul>';            
             	}
             
-            	$cuerpo .= '<table class="table table-hover" width="100%;" border="0" style="font-family: "Arial";">
+
+		// Armo tabla de conceptos facturados en el mes
+
+		// Titulos
+            	$cuerpo .= '<table class="table table-hover" width="100%" style="font-family: "Verdana";">
                 		<thead>
                     		  <tr style="background-color: #666 !important; color:#FFF;">                        
-                        	    <th style="padding:5px;" align="left">Descripci&oacute;n</th>
-                        	    <th style="padding:5px;" align="left">Monto</th>                        
+                        	    <th style="padding:5px;" align="left">Facturaci&oacute;n del Mes</th>
+                        	    <th style="padding:5px;" align="right">Monto</th>                        
                     		  </tr>
                 		</thead>
-                	    <tbody>
-                    	    <tr style="background: #CCC;">
+                	    <tbody> ';
+
+		// Cuota de Socio
+		$cuerpo .= '<tr style="background: #CCC;">
                         	<td style="padding: 5px;">Cuota Mensual '.$cuota3['categoria'].'</td>
-                        	<td style="padding: 5px;">$ '.$cuota3['cuota'].'</td>
+                        	<td style="padding: 5px;" align="right">$ '.$cuota3['cuota'].'</td>
                     	    </tr>';
+		// Si tiene descuento en la cuota social
+		if($cuota3['descuento'] != 0.00){                        
+                        $cuerpo .= '<tr style="background: #CCC;">                    
+                                	<td style="padding: 5px;">Descuento sobre cuota social</td>
+                                	<td style="padding: 5px;" align="right">'.$cuota3['descuento'].'%</td>
+                            	</tr>';                        
+		}
 	
+		// Actividades
 		foreach ($cuota3['actividades']['actividad'] as $actividad) {
                     $cuerpo .= '<tr style="background: #CCC;">
                         	  <td style="padding: 5px;">Cuota Mensual '.$actividad->nombre.'</td>
-                        	  <td style="padding: 5px;">$ '.$actividad->precio.'</td>
+                        	  <td style="padding: 5px;" align="right">$ '.$actividad->precio.'</td>
                     		</tr>';                        
+
+		    // Si tiene descuento lo pongo detallado
+		    if ( $actividad->descuento > 0 ) {
+			if ( $actividad->monto_porcentaje == 0 ) {
+				$msj_act=$actividad->descuento."$ ";
+				$msj_act_valor=$actividad->precio-$actividad->descuento;
+			} else {
+				$msj_act=$actividad->descuento."% ";
+				$msj_act_valor=$actividad->precio * $actividad->descuento / 100;
+			}
+                    	$cuerpo .= '<tr style="background: #CCC;">
+                        	  	<td style="padding: 5px;">Descuento sobre Actividad '.$actividad->nombre.$msj_act.'</td>
+                        	  	<td style="padding: 5px;" align="right">-$ '.$msj_act_valor.'</td>
+                    			</tr>';                        
+		    }
+		    // Si tiene seguro lo pongo detallado
+		    if ( $actividad->seguro > 0 ) {
+                    	$cuerpo .= '<tr style="background: #CCC;">
+                        	  	<td style="padding: 5px;">Seguro Actividad '.$actividad->nombre.'</td>
+                        	  	<td style="padding: 5px;" align="right">$ '.$actividad->seguro.'</td>
+                    			</tr>';                        
+		    }
                 } 
+
+		// Familiares
 		if($cuota3['familiares'] != 0){
 			foreach ($cuota3['familiares'] as $familiar) {
 				foreach($familiar['actividades']['actividad'] as $actividad){                           
                             		$cuerpo .= '<tr style="background: #CCC;">                    
                                 			<td style="padding: 5px;">Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.' ]</td>
-                                			<td style="padding: 5px;">$ '.$actividad->precio.'</td>
+                                			<td style="padding: 5px;" align="right">$ '.$actividad->precio.'</td>
                             			    </tr>';
+                    			// Si tiene descuento lo pongo detallado
+                    			if ( $actividad->descuento > 0 ) {
+                        			if ( $actividad->monto_porcentaje == 0 ) {
+                                			$msj_act=$actividad->descuento."$ ";
+                                			$msj_act_valor=$actividad->precio-$actividad->descuento;
+                        			} else {
+                                			$msj_act=$actividad->descuento."% ";
+                                			$msj_act_valor=$actividad->precio * $actividad->descuento / 100;
+                        			}
+                        			$cuerpo .= '<tr style="background: #CCC;">
+                                        			<td style="padding: 5px;">Descuento sobre Actividad '.$actividad->nombre.$msj_act.'</td>
+                                        			<td style="padding: 5px;" align="right">-$ '.$msj_act_valor.'</td>
+                                        		</tr>';                        
+                    			}
+                    			// Si tiene seguro lo pongo detallado
+                    			if ( $actividad->seguro > 0 ) {
+                        			$cuerpo .= '<tr style="background: #CCC;">
+                                        			<td style="padding: 5px;">Seguro Actividad '.$actividad->nombre.'</td>
+                                        			<td style="padding: 5px;" align="right">$ '.$actividad->seguro.'</td>
+                                        			</tr>';                        
+                    			}
+
                             	}                                   
                         }
 		}
+
+		// Cuota Excedente
 		if($cuota3['excedente'] >= 1){
 			$cuerpo .='<tr style="background: #CCC;">                    
                                 	<td style="padding: 5px;">Socio Extra (x'.$cuota3['excedente'].')</td>
-                                	<td style="padding: 5px;">$ '.$cuota3['monto_excedente'].'</td>
+                                	<td style="padding: 5px;" align="right">$ '.$cuota3['monto_excedente'].'</td>
                                    </tr>';                        
 		}
+
+		// Financiacion
 		if($cuota3['financiacion']){
 			foreach ($cuota3['financiacion'] as $plan) {                 
 				$cuerpo .= '<tr style="background: #CCC;">                    
-                                		<td style="padding: 5px;">Financiación de Deuda ('.$plan->detalle.')</td>
-                                		<td style="padding: 5px;">$ '.round($plan->monto/$plan->cuotas,2).'</td>
+                                		<td style="padding: 5px;">Financiaci&oacute;n de Deuda - Cuota '.$plan->actual.'/'.$plan->cuotas.' ('.$plan->detalle.')</td>
+                                		<td style="padding: 5px;" align="right">$ '.round($plan->monto/$plan->cuotas,2).'</td>
                             		</tr>';
                         }
 		}
-		if($cuota3['descuento'] != 0.00){                        
-                        $cuerpo .= '<tr style="background: #CCC;">                    
-                                	<td style="padding: 5px;">Descuento sobre cuota social</td>
-                                	<td style="padding: 5px;">'.$cuota3['descuento'].'%</td>
-                            	</tr>';                        
-		}
-                $cuerpo .= '
-                	</tbody>
+
+                $cuerpo .= '</tbody>
                 	<tfoot>
                     	<tr>                        
-                        	<th>Total</th>
-                        	<th>$ '.$cuota3['total'].'</th>                        
-                    	</tr>
-                	</tfoot>
-            		</table>';
+                        	<th style="font-family:verdana;" align="left">TOTAL FACTURADO DEL MES</th>
+                        	<th style="font-family:verdana;" align="right">$ '.$cuota3['total'].'</th>                        
+                    	</tr> ';
+
+		$resta_pagar = $cuota3['total'];
+		if ( $deuda < 0 ) {
+			$abs_deuda = abs($deuda);
+			$abonar = abs($deuda)+$cuota3['total'];
+			$cuerpo .= '<tr>                        
+                        		<th style="font-family:verdana;" align="left">DEUDA ANTERIOR</th>
+                        		<th style="font-family:verdana;" align="right">$ '.$abs_deuda.'</th>                        
+                    		    </tr> 
+                    		    <tr>                        
+                        		<th style="font-family:verdana;" align="left">TOTAL A ABONAR</th>
+                        		<th style="font-family:verdana;" align="right">$ '.$abonar.'</th>                        
+                    		    </tr> ';
+		} else { 
+			if ( $deuda > 0 ) {
+	                        $cuerpo .= '<tr>                        
+                                        	<th style="font-family:verdana;" align="left">SALDO A FAVOR ANTERIOR</th>
+                                        	<th style="font-family:verdana;" align="right">$ '.abs($deuda).'</th>                        
+                                	    </tr> ';
+				$resta_pagar=$cuota3['total']-$deuda;
+				if ( $resta_pagar > 0 ) {
+					$cuerpo .= '<tr>                        
+                                        		<th style="font-family:verdana;" align="left">TOTAL A ABONAR</th>
+                                        		<th style="font-family:verdana;" align="right">$ '.$resta_pagar.'</th>                        
+                                		</tr> ';
+				} else { 
+					if ( $resta_pagar < 0 ) {
+						$cuerpo .= '<tr>                        
+               	                         		<th style="font-family:verdana;" align="left">QUEDA A FAVOR</th>
+               	                         		<th style="font-family:verdana;" align="right">$ '.abs($resta_pagar).'</th>                        
+               	                 			</tr>';
+					} else {
+						if ( $resta_pagar == 0 ) {
+							$cuerpo .= '<tr>                        
+               	                         			<th style="font-family:verdana;" align="left">USTED ESTA AL DIA CON SUS PAGOS</th>
+               	                         			<th style="font-family:verdana;" align="right">$ 0</th>                        
+               	                 				</tr>';
+						}
+					}
+				}
+
+			}
+		}
+                $cuerpo .= '</tfoot> </table>';
             
             	// genero cupon para cuenta digital
+		/* COMENTO ESTA GENERACION PORQUE ME VOY A QUEDAR CON UN SOLO CUPON PARA CADA ASOCIADO
             	$this->load->model('pagos_model');
             	$cupon = $this->pagos_model->get_cupon($mail['sid']);
             	if($cupon->monto == $cuota3['total']){
@@ -523,12 +638,13 @@ class Cron extends CI_Controller {
             	if($cupon){
                 	$cuerpo .= '<br><br><img src="'.$cupon.'">';
             	}
+		*/
 
 		$cuerpo .= '';
 
             	if($mail['deuda'] < 0){
                 	$total = ($mail['deuda']*-1);
-                	$cuerpo .= '<h3>Su deuda total con el Club es de: $ '.$total.'</h3>';
+                	$cuerpo .= '<h3 style="font-family:verdana">Tiene 10 d&iacute;as para regularizar su situaci&oacute;n, contactese con Secretaria</h3>';
 
                     	// Aca grabo el archivo para mandar a cobrar a COL
 			$col_periodo=$xperiodo;
@@ -556,14 +672,26 @@ class Cron extends CI_Controller {
                     	);
                     	$this->pagos_model->insert_facturacion_col($facturacion_col);
 
-            	}else{
-			if ( $mail['deuda'] > 0 ) {
-                		$total = ($mail['deuda']);
-                		$cuerpo .= '<h3>Usted posee un saldo a favor de: $ '.$total.'</h3>';                
-			} else {
-                		$cuerpo .= '<h3>Usted esta al día con sus pagos </h3>';                
+            	} else {
+			if ($resta_pagar > 0 ) {
+                		$cuerpo .= '<h3 style="font-family:verdana">Recuerde que tiene hasta el d&iacute;a 10 para cancelar su saldo</h3>';
 			}
-            	}
+		}
+
+                $cuerpo .= '';
+                $cuerpo .= "<h3 style='font-family:verdana'>Le informamos que los socios que paguen sus cuotas con tarjeta de credito VISA, COOPEPLUS o BBPS </h3>";
+		$cuerpo .= "<h3 style='font-family:verdana'>tendran beneficios extras como sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine, etc. </h3>";
+		$cuerpo .= "<h3 style='font-family:verdana'> LLAMA A SECRETARIA Y HACE EL CAMBIO </h3>";
+                $cuerpo .= "<h3 style='font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de los beneficios de nuestra RED </h3>";
+		$cuerpo .= "<h3 style='font-family:verdana'> <a href='https://villamitre.com.ar/beneficios-2/'>En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS</a></h3>";
+		$cuerpo .= "<br> <br> <br>";
+
+		$cuerpo .= "<h3 style='font-family:verdana'> ADMINISTRACION</h3>";
+		$cuerpo .= "<h3 style='font-family:verdana'> CLUB VILLA MITRE - BAHIA BLANCA</h3>";
+		$cuerpo .= "<h3 style='font-family:verdana'> Garibaldi 149 - (291)-4817878 </h3>";
+		$cuerpo .= "<br> <br>";
+
+		$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
 
             	$email = array(
                     'email' => $mail['mail'],
@@ -725,17 +853,18 @@ class Cron extends CI_Controller {
 			$cant=$cant+1;
 			$totdeb=$totdeb+$importe;
 
+                        $socio = $this->socios_model->get_socio($id_socio);
 			if ( $ult_periodo == $xperiodo ) {
 				if ( $fecha_debito == $ult_fecha ) {
 	
-            				$txt = date('H:i:s')." Registre debito tarjeta para el asociado $id_socio por un monto de $importe \n";
+            				$txt = date('H:i:s')." Registre debito tarjeta para el asociado $id_socio - $socio->apellido, $socio->nombre por un monto de $importe \n";
             				fwrite($log, $txt);            
 				} else {
-            				$txt = date('H:i:s')." Registre debito pero el asociado $id_socio tiene la fecha de ultimo debito no coincide con el movimiento \n";
+            				$txt = date('H:i:s')." Registre debito pero el asociado $id_socio - $socio->apellido, $socio->nombre tiene la fecha de ultimo debito no coincide con el movimiento \n";
             				fwrite($log, $txt);            
 				}
 			} else {
-            			$txt = date('H:i:s')." El asociado $socio->Id tiene debito en tarjeta pero no coincide el ultimo periodo generado \n";
+            			$txt = date('H:i:s')." El asociado $id_socio - $socio->apellido, $socio->nombre tiene debito en tarjeta pero no coincide el ultimo periodo generado \n";
             			fwrite($log, $txt);            
 			
 			}
@@ -1055,6 +1184,7 @@ class Cron extends CI_Controller {
 	}
 
 	function get_pagos($fecha) {           
+  
         	$this->config->load('cuentadigital');    
         	$url = 'http://www.cuentadigital.com/exportacion.php?control='.$this->config->item('cd_control');;
         	$url .= '&fecha='.$fecha;	    
