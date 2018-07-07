@@ -62,6 +62,15 @@
                               data-ng-class="{active: row == '-cta_inic'}"></span>
                     </div></th>
                     <th><div class="th">
+                        Seguro
+                        <span class="glyphicon glyphicon-chevron-up"
+                              data-ng-click=" order('seguro') "
+                              data-ng-class="{active: row == 'seguro'}"></span>
+                        <span class="glyphicon glyphicon-chevron-down"
+                              data-ng-click=" order('-seguro') "
+                              data-ng-class="{active: row == '-seguro'}"></span>
+                    </div></th>
+                    <th><div class="th">
                         Solo Socios
                         <span class="glyphicon glyphicon-chevron-up"
                               data-ng-click=" order('solo_socios') "
@@ -90,6 +99,7 @@
                     <td>{{store.name}}</td>
                     <td>{{store.price}}</td>
                     <td>{{store.cta_inic}}</td>
+                    <td>{{store.seguro}}</td>
                     <td>{{store.solo_socios}}</td>
                     <td>{{store.estado}}</td>
                     <td>
