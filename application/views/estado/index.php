@@ -46,7 +46,7 @@
       <button type="submit" id="s_btn" data-loading-text="Buscando..." class="btn btn-success btn-block"><i class="fa fa-search"></i> Buscar</button>        
     </div>
   </div>
-</form>
+  </form>
 
 <div id="socio_info" style="display: none;"></div>
 </div>
