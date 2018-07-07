@@ -423,7 +423,6 @@ class Cron extends CI_Controller {
 		$cuerpo .= "<tr style='background-color: #105401 ;'>";
 		$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
                 $cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
-                $cuerpo .= "<th style='font-size:15; background-color: #105401; color:#FFF' align='right'>www.villamitre.com.ar</th>";
                 $cuerpo .= "</tr>";
         	$cuerpo .= "</thead>";
 		$cuerpo .= "</table>";
@@ -644,7 +643,7 @@ class Cron extends CI_Controller {
 
             	if($mail['deuda'] < 0){
                 	$total = ($mail['deuda']*-1);
-                	$cuerpo .= '<h3 style="font-family:verdana">Tiene 10 d&iacute;as para regularizar su situaci&oacute;n, contactese con Secretaria</h3>';
+                	$cuerpo .= '<p style="font-family:verdana; font-style:italic;">Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n, contactese con Secretaria</p>';
 
                     	// Aca grabo el archivo para mandar a cobrar a COL
 			$col_periodo=$xperiodo;
@@ -674,21 +673,19 @@ class Cron extends CI_Controller {
 
             	} else {
 			if ($resta_pagar > 0 ) {
-                		$cuerpo .= '<h3 style="font-family:verdana">Recuerde que tiene hasta el d&iacute;a 10 para cancelar su saldo</h3>';
+                		$cuerpo .= '<p style="font-family:verdana; font-style:italic;">Recuerde que tiene hasta el d&iacute;a 10 para cancelar su saldo</p>';
 			}
 		}
 
-                $cuerpo .= '';
-                $cuerpo .= "<h3 style='font-family:verdana'>Le informamos que los socios que paguen sus cuotas con tarjeta de credito VISA, COOPEPLUS o BBPS </h3>";
-		$cuerpo .= "<h3 style='font-family:verdana'>tendran beneficios extras como sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine, etc. </h3>";
-		$cuerpo .= "<h3 style='font-family:verdana'> LLAMA A SECRETARIA Y HACE EL CAMBIO </h3>";
-                $cuerpo .= "<h3 style='font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de los beneficios de nuestra RED </h3>";
-		$cuerpo .= "<h3 style='font-family:verdana'> <a href='https://villamitre.com.ar/beneficios-2/'>En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS</a></h3>";
-		$cuerpo .= "<br> <br> <br>";
+                $cuerpo .= "<p style='font-family:verdana'>Le informamos que los socios que paguen sus cuotas con <b>tarjeta de credito VISA, COOPEPLUS o BBPS</b> tendran beneficios extras como sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine, etc; entre otros. <b>LLAME A SECRETARIA Y HAGA EL CAMBIO</b> </p>";
 
-		$cuerpo .= "<h3 style='font-family:verdana'> ADMINISTRACION</h3>";
-		$cuerpo .= "<h3 style='font-family:verdana'> CLUB VILLA MITRE - BAHIA BLANCA</h3>";
-		$cuerpo .= "<h3 style='font-family:verdana'> Garibaldi 149 - (291)-4817878 </h3>";
+                $cuerpo .= "<p style='font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de los <b>beneficios de nuestra RED</b> </p>";
+		$cuerpo .= "<p style='font-family:verdana'> <a href='https://villamitre.com.ar/beneficios-2/'>En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS<img src='http://clubvillamitre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'></a></p>";
+		$cuerpo .= "<br> <br>";
+
+		$cuerpo .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
+		$cuerpo .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
+		$cuerpo .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
 		$cuerpo .= "<br> <br>";
 
 		$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
