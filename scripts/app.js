@@ -1067,7 +1067,6 @@ function () {
                 $http({method:'GET', url:'listdebitos'})
                     .success(function(data){                        
                         succescb(data);
-                        $("#cargando_debitos").html('<a href=debtarj/0" class="btn btn-success"><i class="fa fa-plus"></i> Nuevo Debito</a>');
                     })
                     .error(function(data){
                         $log.warn(data);    
