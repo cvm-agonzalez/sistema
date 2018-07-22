@@ -699,6 +699,19 @@ class Pagos_model extends CI_Model {
 
     }
 
+    public function get_deuda_aviso(){
+      $this->db->select('p.tutor_id sid, s.dni, s.apellido, s.nombre, s.mail, SUM(p.monto-p.pagado) deuda');
+      $this->db->where('p.estado',1);
+      $this->db->join('socios as s','s.Id = p.tutor_id');
+      $this->db->group_by('p.tutor_id');
+      $this->db->having('SUM(p.monto-p.pagado) > 0');
+      $query = $this->db->get('pagos as p');
+      if($query->num_rows() == 0){ return false;}
+      $deudores = $query->result();
+      $query->free_result();
+      return $deudores;
+    }
+
     public function get_deuda($sid){
         $this->db->where('sid',$sid);
         $this->db->order_by('Id','desc');

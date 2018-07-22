@@ -6,6 +6,7 @@
 		body{
 			font-family: 'Arial';
 			font-size: 12px;            
+			background: #ffffff;            
 		}
         strong{
             font-size: 10px;
@@ -20,16 +21,18 @@
             float: left;
         }
         .frente{
-            background-image:url(<?=base_url()?>images/carnet-frente.png); 
+            background-image:url(<?=base_url()?>images/carnet-frente-new.png); 
+	    background-size: 100% 100%;
         }
         .dorso{
-            background-image:url(<?=base_url()?>images/carnet-dorso.png); 
+            background-image:url(<?=base_url()?>images/carnet-dorso-new.png); 
+	    background-size: 100% 100%;
         }
         .imagen{
             margin-top:50px;
             margin-left: 15px;
             width: 80px;
-            float: left;            
+            float: left;
         }
         .datos{
             float:right;
@@ -47,7 +50,8 @@
 		</style>
 	</head>
 
-	<!--<body onload="window.print(); window.close();">        -->
+	<!-- <body onload="window.print(); window.close();"> -->
+
     <div class="carnet frente"></div>
     <div class="carnet dorso">
         <div class="imagen">
@@ -59,7 +63,7 @@
             <?
             }else{
             ?>
-                <img src="<?=base_url()?>images/g1.jpg" width="80">
+                <img src="<?=base_url()?>images/noPic.jpg" width="80">
             <?
             }
             ?>
@@ -76,19 +80,17 @@
         ?>
 
         <div class="datos">
-            <div class="nap"><?=ucfirst($socio->apellido)?> <?=ucfirst($socio->nombre)?></div>
-            <div class="nap">DNI <?=$socio->dni?></div>
-            <div class="nap">Socio No. <?=$num?></div>
-            <div class="nap">Ingreso <?=$fecha?></div>
+            <div class="nap" style="font-weight:bold"><?=ucfirst($socio->apellido)?> <?=ucfirst($socio->nombre)?></div>
+            <div class="nap" style="font-weight:bold">DNI <?=$socio->dni?></div>
+            <div class="nap" style="font-weight:bold">Socio No. <?=$num?></div>
+            <div class="nap" style="font-weight:bold">Ingreso <?=$fecha?></div>
         </div>
-        <div class="clear"></div>
-        <div align="center" class="barcode">
+        <div align="right" class="barcode">
             <?
             if( file_exists("images/cupones/".$cupon->Id.".png") ){
             ?>
-            <!-- <strong>Valor de la cuota <span style="font-weight:bold;">$<?=$monto?></span></strong> -->
             <br>
-            <img src="<?=base_url()?>images/cupones/<?=$cupon->Id?>.png">  
+            <img src="<?=base_url()?>images/cupones/<?=$cupon->Id?>.png" >  
             <?
             }
             ?>

@@ -3,14 +3,6 @@
     <div class="panel panel-default">
         <div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Profesor</strong></div>
         <div class="panel-body">
-            <?
-            if(!$profesor){
-            ?>
-            El Profesor que esta intentando editar no existe en nuestra base de datos.<br><br>
-            <a href="<?=$baseurl?>admin/actividades/profesores" class="btn btn-primary">Volver a Profesores</a>
-            <?
-            }else{
-            ?>
             <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/profesores/guardar/<?=$profesor->Id?>" method="post">
 
                 <div class="form-group">
@@ -34,7 +26,7 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2">SID</label>
                     <div class="col-sm-10">
-                        <input type="number" class="form-control" name="sid" value="<?=$profesor->sid?>" required>
+                        <input type="number" class="form-control" id="sid-select" name="sid" value="<?=$profesor->sid?>" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -97,11 +89,8 @@
                         <input type="text" class="form-control" name="pass" value="<?=$profesor->pass?>">
                     </div>
                 </div>                              
-                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                <button type="submit" id="btn_profesor" class="btn btn-success">Guardar Cambios</button>
             </form>
-            <?
-            }
-            ?>
         </div>
     </div>
 </section>                    

@@ -56,7 +56,7 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2">SID</label>
                     <div class="col-sm-10">
-                        <input type="number" class="form-control" name="sid" required>
+                        <input type="number" class="form-control" id="sid-select" name="sid" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -115,7 +115,7 @@
                         <input type="text" class="form-control" name="pass">
                     </div>
                 </div>                                
-                <button type="submit" class="btn btn-success">Agregar</button>
+                <button type="submit" id="btn_profesor" class="btn btn-success">Agregar</button>
             </form>
         </div>
     </div>

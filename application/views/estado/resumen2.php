@@ -34,7 +34,7 @@
   <form class="form-horizontal" role="search" id="search_form">
    <div class="form-group">
     <div class="col-sm-10">          
-      <input type="number" id="socio_input" class="form-control" <? if ( isset($socio) ) { echo "value="=$socio; } ?> placeholder="Buscar por DNI o código de barra" autofocus required>
+      <input type="number" id="socio_input" class="form-control" <? if ( isset($socio) ) { echo '"value='.$socio.'"'; } ?> placeholder="Buscar por DNI o código de barra" autofocus required>
     </div>
   </div>
 </form>

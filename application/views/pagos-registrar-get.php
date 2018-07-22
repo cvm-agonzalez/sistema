@@ -15,6 +15,18 @@
 	                </div>
 	            </div>
 
+                    <div class="form-group" id="aju-ing">
+                                        <label for="ajuste-ingreso" class="col-sm-4">Ajuste / Ingreso</label>
+                        <div class="col-sm-8">
+                            <span class="ui-select">
+                                <select id="ajuste-ingreso" style="margin:0px; border:1px solid #cbd5dd; padding:6px 15px 6px 10px;">  
+                                    <option value="1">Ajuste</option>
+                                    <option value="0">Ingreso Efectivo</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+
 	            <div class="form-group hidden" id="cuota-act">
 					<label for="actividad-cuota" class="col-sm-4">Cuota / Actividad</label>
 	                <div class="col-sm-8">
@@ -145,6 +157,11 @@ $("#reg-pago-form").submit(function(){
 	if(!agree){return false;}
 	$("#reg-cargando").removeClass('hidden');
 	var tipo = $("#tipo").val();	
+	if(tipo == 'haber'){
+		var ajuing = $("#ajuste-ingreso").val();
+	}else{
+		var ajuing = false;
+	}
 	if(tipo == 'debe'){
 		var actividad = $("#actividad-cuota").val();
 	}else{
@@ -152,7 +169,7 @@ $("#reg-pago-form").submit(function(){
 	}
 	var monto = $("#monto").val();
 	var des = $("#des").val();
-	$.post("<?=$baseurl?>admin/pagos/registrar/do",{sid: <?=$socio->Id?>, tipo: tipo, monto: monto, des: des, actividad:actividad})
+	$.post("<?=$baseurl?>admin/pagos/registrar/do",{sid: <?=$socio->Id?>, tipo: tipo, monto: monto, des: des, actividad:actividad, ajuing:ajuing})
 	.done(function(data){
 		var data = $.parseJSON(data);
 		var newTr = '<tr><td>'+data.iid+'</td><td>'+data.fecha+'</td><td><div class="socios_desc" id="socio_desc_'+data.iid+'">'+data.descripcion+'</div><div class="ver_mas" align="right"><a class="btn btn-primary" href="#" id="ver_mas" data-toggle="0" data-id="'+data.iid+'">Ver Más</a></div></td><td class="debe">$ '+data.debe+'</td><td class="haber">$ '+data.haber+'</td><td>$ '+data.total+'</td></tr>'
@@ -169,8 +186,10 @@ $("#reg-pago-form").submit(function(){
 $(document).on('change','#tipo',function(){
 	if($(this).val() == 'debe'){
 		$("#cuota-act").removeClass('hidden');
+		$("#aju-ing").addClass('hidden');
 	}else{
 		$("#cuota-act").addClass('hidden');
+		$("#aju-ing").removeClass('hidden');
 	}
 })
 </script>

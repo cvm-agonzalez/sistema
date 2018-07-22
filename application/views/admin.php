@@ -9,7 +9,7 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css">
         <!-- needs images, font... therefore can not be part of ui.css -->
-        <link rel="stylesheet" href="<?=$baseurl?>bower_components/font-awesome/css/font-awesome.min.css">        
+        <link rel="stylesheet" href="<?=$baseurl?>bower_components/font-awesome/css/font-awesome.min.css">
 
         <!-- end needs images -->
 
@@ -17,9 +17,9 @@
             <link rel="stylesheet" href="<?=$baseurl?>styles/main.css">
             <link rel="stylesheet" href="<?=$baseurl?>styles/notifIt.css">
             <link rel="stylesheet" href="<?=$baseurl?>styles/jquery.fileupload.css">
-            
+
             <?
-            /*if($redirect){            
+            /*if($redirect){
             ?>
             <script type="text/javascript">document.location.href = '<?=$redirect?>'</script>
             <?
@@ -83,7 +83,7 @@
                                                 <i class="fa fa-lock"></i>
                                                 <span data-i18n="Lock"></span>
                                             </a>
-                                        </li> 
+                                        </li>
                                         -->
                                         <li>
                                             <a href="<?=$baseurl?>admin/logout">
@@ -94,48 +94,48 @@
                                     </ul>
                                 </li>
 
-                            </ul>        
+                            </ul>
                         </div>
 
                     </header>
                 </section>
 
                 <aside data-ng-include=" '<?=$baseurl?>views/nav.php?baseurl=<?=$baseurl?>&section=<?=$section?>' " id="nav-container"></aside>
-            </div>            
+            </div>
                 <section id="content" class="cvm_section">
 
                     <? include($section.".php"); ?>
 
                 </section>
-            
+
         </div>
 
-        
+
         <script src="<?=$baseurl?>scripts/vendor.js" type="text/javascript" ></script>
 
         <script src="<?=$baseurl?>scripts/ui.js" type="text/javascript" ></script>
 
         <script src="<?=$baseurl?>scripts/jquery-ui-1.10.4.min.js" type="text/javascript" ></script>
-        
+
 
         <script src="<?=$baseurl?>scripts/app.js" type="text/javascript" ></script>
 
         <script src="<?=$baseurl?>scripts/webcam.js" type="text/javascript" ></script>
         <script src="<?=$baseurl?>scripts/jquery.fileupload.js" type="text/javascript" ></script>
-        
+
         <script src="<?=$baseurl?>scripts/jquery.autocomplete.js" type="text/javascript" ></script>
         <script src="<?=$baseurl?>scripts/bootstrap.min.js" type="text/javascript" ></script>
         <script src="<?=$baseurl?>scripts/jquery.ui.datepicker-es.js" type="text/javascript" ></script>
         <script src="<?=$baseurl?>scripts/tinymce/tinymce.min.js" type="text/javascript" ></script>
-    
-        
+
+
         <script>
         /*jslint unparam: true */
         /*global window, $ */
         $(function () {
             'use strict';
             // Change this to the location of your server-side upload handler:
-            
+
             $('#fileupload').fileupload({
                 url: '<?=base_url()?>admin/socios/subir_imagen',
                 dataType: 'json',
@@ -158,7 +158,7 @@
                 .parent().addClass($.support.fileInput ? undefined : 'disabled');
         });
         </script>
-        
+
         <script type="text/javascript">
 
 
@@ -212,27 +212,27 @@
                 var agree = confirm("Seguro que desea eliminar este Socio?");
                 if(agree){return true}else{return false}
             }
-            $(document).ready(function() 
-            {   
+            $(document).ready(function()
+            {
                 $("div#socio_desc").each(function(){
                     var id = $(this).data('id');
-                    if($(this).height() >= 24){                        
-                        $(this).addClass('socios_desc');                        
-                    }else{                       
+                    if($(this).height() >= 24){
+                        $(this).addClass('socios_desc');
+                    }else{
                         $("a#ver_mas[data-id="+id+"]").addClass("hidden");
                     }
                 })
                 $("a#ver_mas").click(function(){
                     var id = $(this).data('id');
                     var toggle = $(this).data('toggle');
-                    if(toggle == '0'){     
+                    if(toggle == '0'){
                         $("div[data-id="+id+"]").removeClass('socios_desc');
                         $(this).data('toggle','1');
                         $(this).text('Ver Menos');
                     }else{
                         $("div[data-id="+id+"]").addClass('socios_desc');
                         $(this).data('toggle','0');
-                        $(this).text('Ver Más'); 
+                        $(this).text('Ver Más');
                     }
                 })
                 $("a#btn-eliminar-socio").click(function(){
@@ -252,43 +252,43 @@
                     if(agree){return true}else{return false}
                 })
 
-                
-                
-                $('a#cliente_info_toogle').click(function(){                    
+
+
+                $('a#cliente_info_toogle').click(function(){
                    // $(this).parent().parent().next().toggle();
                     if($(this).hasClass("fa-plus-square-o")){
-                        $(this).removeClass();                                
+                        $(this).removeClass();
                         $(this).addClass("fa-minus-square-o");
                     }else{
-                        $(this).removeClass();                                
+                        $(this).removeClass();
                         $(this).addClass("fa-plus-square-o");
                     }
-                }); 
+                });
 
                 $('#btn-meses').click(function(){
                     $('#morosos-opt').hide(function(){
-                    $('#morosos-meses').show();    
+                    $('#morosos-meses').show();
                 });
 
 
-                
+
             })
 
                 $('#btn-act').click(function(){
                     $('#morosos-opt').hide(function(){
 
-                    $('#morosos-act').show();    
+                    $('#morosos-act').show();
                     });
-                    
+
                 })
-                
+
                 $('button#morosos-cancel').click(function(){
                     $('#morosos-meses').hide();
                     $('#morosos-act').hide(function(){
 
-                    $('#morosos-opt').show();    
+                    $('#morosos-opt').show();
                     });
-                    
+
                 })
 
                 $("button#morosos-ver").click(function(){
@@ -299,18 +299,18 @@
                     var sid = $("#sid-select").val();
             		$.get("<?=$baseurl?>admin/socios/get/"+sid,function(data){
                 	if(data != 'false' ){
-                    		var socio = $.parseJSON(data); 
+                    		var socio = $.parseJSON(data);
 				var ok = confirm("El socio "+sid+" se llama "+socio.apellido+", "+socio.nombre+ " Confirma?");
-				if (ok) { 
-					return true; 	
+				if (ok) {
+					return true;
 				} else {
-					return false; 
+					return false;
 				}
 			} else {
 				alert("El socio "+sid+" No existe");
 				return false;
 			}
-			
+
 			})
 
 		})
@@ -318,11 +318,11 @@
 		$("#save_btn").click(function() {
                     var fecha = $("#fechan").val();
 			<?  $hoy=date('Y-m-d'); ?>
-		    if ( fecha == 0 || fecha == "0000-00-00" ) { 
+		    if ( fecha == 0 || fecha == "0000-00-00" ) {
 			alert ("Error en la fecha de nacimiento, no puede ser 0");
 			return false;
 		   }
-                    if ( fecha > '<?=$hoy?>' ) { 
+                    if ( fecha > '<?=$hoy?>' ) {
                         alert ("Error en la fecha de nacimiento, no puede ser mayor a hoy");
                         return false;
                    };
@@ -334,9 +334,9 @@
                     var fecha = $("#fechan").val();
                     var res = fecha.split("-");
                     res[1]--;
-                    var d = new Date(res[2],res[1],res[0]);                    
-                    var n = d.getTime();                    
-                    if($.now()-d > 567648000000){                
+                    var d = new Date(res[2],res[1],res[0]);
+                    var n = d.getTime();
+                    if($.now()-d > 567648000000){
                         $("#menor").hide();
                     }else{
                         $("#menor").show();
@@ -349,9 +349,9 @@
                     var fecha = $("#fechan").val();
                     var res = fecha.split("-");
                     res[1]--;
-                    var d = new Date(res[0],res[1],res[2]);                    
-                    var n = d.getTime();                    
-                    if($.now()-d > 567648000000){                
+                    var d = new Date(res[0],res[1],res[2]);
+                    var n = d.getTime();
+                    if($.now()-d > 567648000000){
                         $("#menor").hide();
                         $("#s_cate").val("2");
                     }else{
@@ -365,8 +365,8 @@
                   $(this).tab('show')
                 })
                 $('#cats-conf-save').click(function(){
-                    var precios = [];                    
-                    $('input#cat-precio').each(function(){                        
+                    var precios = [];
+                    $('input#cat-precio').each(function(){
                         precios.push($(this).val());
                     })
                     var fam_excedente = $("input#cat-precio_unit").val();
@@ -377,25 +377,25 @@
                     $(this).html("<i class='fa fa-spinner fa-spin'></i> Guardando...");
                     $.post("<?=$baseurl?>admin/configuracion/categorias",{ precios: precios, fam: fam_excedente }).done(function(){
                         $('#cats-conf-save').removeAttr("disabled");
-                        $('#cats-conf-save').html("Guardar Cambios");  
+                        $('#cats-conf-save').html("Guardar Cambios");
                         $('#cats-conf-save').removeClass("btn-warning");
                         $('#cats-conf-save').addClass("btn-success");
                     })
 
-                })                                       
+                })
             })
         </script>
-        
+
         <? if($section == 'socios-nuevo' || ($section == 'socios-editar' && $socio) ){ ?>
         <script language="JavaScript">
         Webcam.setSWFLocation("<?=$baseurl?>scripts/webcam.swf");
         Webcam.attach( '#my_camera' );
-        
+
         function take_snapshot() {
             $("#save_btn").attr("disabled", "disabled");
             $("#save_btn").html("Guardando imagen...");
             var data_uri = Webcam.snap();
-            document.getElementById('my_result').innerHTML = '<img src="'+data_uri+'"/>';        
+            document.getElementById('my_result').innerHTML = '<img src="'+data_uri+'"/>';
             Webcam.upload( data_uri, '<?=$baseurl?>admin/socios/agregar_imagen', function(code, text) {
                 $("#save_btn").removeAttr("disabled");
                 $("#save_btn").html("Guardar");
@@ -403,23 +403,23 @@
                 // 'text' will be the raw response content
             } );
         }
-             
-                
-                                     
+
+
+
         a= $('#nombre').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-nombre' });
         a= $('#apellido').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-apellido'  });
         a= $('#localidad').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-localidad' });
         a= $('#nacionalidad').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-nacionalidad' });
         a= $('#r1').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-        onSelect: function (suggestion) {            
+        onSelect: function (suggestion) {
                 $('#r1').val(suggestion.data);
             } });
         a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-        onSelect: function (suggestion) {                
+        onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
             }  });
         a= $('#r3').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-apellido|nombre|dni',
-            onSelect: function (suggestion) {                
+            onSelect: function (suggestion) {
                 $('#r3').val(suggestion.data);
             }
         });
@@ -431,7 +431,7 @@
             $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                 $("#"+id+"-loading").addClass('hidden');
                 if(data){
-                    var socio = $.parseJSON(data);                                        
+                    var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
@@ -443,9 +443,9 @@
                    $("#tutor-nombre").focus();
                    $("#form-tutor").data("id",id);
                 }
-            })                            
-        })                            
-        function submit_tutor(){ 
+            })
+        })
+        function submit_tutor(){
 
             var tutor = $( "#form-tutor" ).serialize();
             $.get("<?=$baseurl?>admin/socios/nuevo-tutor?"+tutor, function(data){
@@ -454,35 +454,35 @@
                 }else{
                     angular.element("#modal_close").triggerHandler('click');
                     var socio = $.parseJSON(data);
-                    var id = $("#form-tutor").data('id');  
-                    var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'                                     
+                    var id = $("#form-tutor").data('id');
+                    var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio.nombre+' '+socio.apellido+' ('+socio.dni+') '+close_link);
                     $("#"+id+"-data").addClass("hidden");
                     $("#"+id+"-result").removeClass("hidden");
-                    $("#"+id+"-id").val(socio.Id);                                        
+                    $("#"+id+"-id").val(socio.Id);
                 }
             })
-        }  
-        function cleear(id){                                                     
+        }
+        function cleear(id){
             $("#"+id+"-data").removeClass('hidden');
             $("#"+id+"-id").val('0');
-            $("#"+id+"-result").addClass('hidden');                                 
-        }         
+            $("#"+id+"-result").addClass('hidden');
+        }
         </script>
         <? } ?>
         <? if($section == 'actividades-asociar'){ ?>
         <script type="text/javascript">
         $(document).ready(function(){
             a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-                onSelect: function (suggestion) {                    
+                onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
-                } 
+                }
             });
 
         })
         a= $('#activ').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-nombre' });
-        
-        
+
+
         $("#activ_asoc_form").submit(function(){
             var id = 'r2';
             $("#"+id+"-loading").removeClass('hidden');
@@ -490,12 +490,12 @@
             $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                 $("#"+id+"-loading").addClass('hidden');
                 if(data){
-                    var socio = $.parseJSON(data);                                        
+                    var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
-                    
+
                     $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
                     $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
                     $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].Id);
@@ -503,33 +503,33 @@
                     $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].Id);
                     $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
                     $("#accesos_directos").removeClass('hidden');
-                    
-                    
+
+
                     $("#"+id+"-id").val(socio[0].Id);
                     get_actividades(socio[0].Id);
                 }else{
-                   alert("El DNI ingresado no se encuentra en la Base de Datos.")                   
+                   alert("El DNI ingresado no se encuentra en la Base de Datos.")
                 }
-            })                            
-        })  
+            })
+        })
         function get_actividades(id){
             $("#"+id+"-loading").removeClass('hidden');
             $.get( "<?=$baseurl?>admin/actividades/get/"+id ).done(function(data){
                 $("#asociar-div").html(data);
                 $("#asociar-div").slideDown();
-                $("#"+id+"-loading").addClass('hidden');   
+                $("#"+id+"-loading").addClass('hidden');
             })
-            
+
         }
-        function cleear(id){                                                     
+        function cleear(id){
             $("#"+id+"-data").removeClass('hidden');
             $("#"+id+"-id").val('0');
             $("#"+id+"-result").addClass('hidden');
-            $("#asociar-div").slideUp();  
-            $("#accesos_directos").addClass('hidden');                             
+            $("#asociar-div").slideUp();
+            $("#accesos_directos").addClass('hidden');
         }
 
-        
+
 
         <? if($socio->Id && $socio->Id != 0){ ?> $("#asociar-div").slideDown(); get_actividades("<?=$socio->Id?>"); <? } ?>
         </script>
@@ -538,10 +538,10 @@
         <script type="text/javascript">
         $(document).ready(function(){
             a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-                onSelect: function (suggestion) {                    
+                onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
-                } 
-            });            
+                }
+            });
         })
         a= $('#activ').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-nombre' });
         $("#gen_cupon_form").submit(function(){
@@ -551,7 +551,7 @@
             $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                 $("#"+id+"-loading").addClass('hidden');
                 if(data){
-                    var socio = $.parseJSON(data);                                        
+                    var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
@@ -568,49 +568,49 @@
 
                     get_cupon(socio[0].Id);
                 }else{
-                    alert("El DNI ingresado no se encuentra en la Base de Datos.")                   
+                    alert("El DNI ingresado no se encuentra en la Base de Datos.")
                 }
-            })                            
+            })
         })
         function get_cupon(id){
              $("#cupon-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
             $.get( "<?=$baseurl?>admin/pagos/cupon/get/"+id ).done(function(data){
                 $("#cupon-div").html(data);
                 $("#cupon-div").slideDown();
-               
+
             })
-            
+
         }
-        
-        <? if($socio->Id && $socio->Id != 0){ ?> $("#cupon-div").slideDown(); get_cupon("<?=$socio->Id?>"); <? } ?>  
-        function cleear(id){                                                     
+
+        <? if($socio->Id && $socio->Id != 0){ ?> $("#cupon-div").slideDown(); get_cupon("<?=$socio->Id?>"); <? } ?>
+        function cleear(id){
             $("#"+id+"-data").removeClass('hidden');
             $("#"+id+"-id").val('0');
             $("#"+id+"-result").addClass('hidden');
-            $("#cupon-div").slideUp();   
-             $("#accesos_directos").addClass('hidden');                            
+            $("#cupon-div").slideUp();
+             $("#accesos_directos").addClass('hidden');
         }
         </script>
         <? } ?>
         <? if($section == 'pagos-registrar'){ ?>
-        
+
         <script language="JavaScript">
-                       
+
         $(document).ready(function(){
             a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-                onSelect: function (suggestion) {                    
+                onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
-                } 
-            });       
-        
-            $("#pagos_reg_form").submit(function(){                
+                }
+            });
+
+            $("#pagos_reg_form").submit(function(){
                 var id = 'r2';
                 $("#"+id+"-loading").removeClass('hidden');
                 var dni = $("#"+id).val();
                 $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                     $("#"+id+"-loading").addClass('hidden');
                     if(data){
-                        var socio = $.parseJSON(data);                                        
+                        var socio = $.parseJSON(data);
                         var close_link = '<a href="#" onclick="cliar(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                         $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
@@ -627,34 +627,34 @@
 
                         get_pago(socio[0].Id);
                     }else{
-                        alert("El DNI ingresado no se encuentra en la Base de Datos.")                   
+                        alert("El DNI ingresado no se encuentra en la Base de Datos.")
                     }
-                })                            
+                })
             })
             function get_pago(id){
                  $("#pago-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
-                 $.get( "<?=$baseurl?>admin/pagos/registrar/get/"+id ).done(function(data){                    
+                 $.get( "<?=$baseurl?>admin/pagos/registrar/get/"+id ).done(function(data){
                     $("#pago-div").html(data);
                     $("#pago-div").slideDown();
-                   
+
                 })
-                
+
             }
 
 
 
-            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>  
-               
-            
+            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>
+
+
         })
 
-        function cliar(id){                 
+        function cliar(id){
                 $("#"+id+"-data").removeClass('hidden');
                 $("#"+id+"-id").val('0');
                 $("#"+id+"-result").addClass('hidden');
-                $("#pago-div").slideUp();   
-                 $("#accesos_directos").addClass('hidden');                          
-            } 
+                $("#pago-div").slideUp();
+                 $("#accesos_directos").addClass('hidden');
+            }
 
             $("#cuotas").keyup(function(){
                 if($("#cuotas").val() && $("#monto").val()){
@@ -664,7 +664,7 @@
                             return false;
                         }
                             var valor_cuota = $("#monto").val()/$("#cuotas").val();
-                            
+
                                 $("#valor-cuota").val(valor_cuota);
                     }else{
                         alert("Por Favor Ingrese solo Números en los campos Monto y Cantidad de Cuotas");
@@ -675,24 +675,24 @@
         <? } ?>
 
         <? if($section == 'pagos-deuda'){ ?>
-        
+
         <script language="JavaScript">
-                       
+
         $(document).ready(function(){
             a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-                onSelect: function (suggestion) {                    
+                onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
-                } 
-            });       
-        
-            $("#pagos_deuda_form").submit(function(){                
+                }
+            });
+
+            $("#pagos_deuda_form").submit(function(){
                 var id = 'r2';
                 $("#"+id+"-loading").removeClass('hidden');
                 var dni = $("#"+id).val();
                 $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                     $("#"+id+"-loading").addClass('hidden');
                     if(data){
-                        var socio = $.parseJSON(data);                                        
+                        var socio = $.parseJSON(data);
                         var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                         $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
@@ -709,61 +709,61 @@
 
                         get_pago(socio[0].Id);
                     }else{
-                        alert("El DNI ingresado no se encuentra en la Base de Datos.")                   
+                        alert("El DNI ingresado no se encuentra en la Base de Datos.")
                     }
-                })                            
+                })
             })
             function get_pago(id){
                  $("#deuda-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
-                 $.get( "<?=$baseurl?>admin/pagos/deuda/get/"+id ).done(function(data){                    
+                 $.get( "<?=$baseurl?>admin/pagos/deuda/get/"+id ).done(function(data){
                     $("#deuda-div").html(data);
                     $("#deuda-div").slideDown();
-                   
+
                 })
-                
+
             }
 
 
 
-            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>  
-               
-            
+            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>
+
+
         })
 
-        function cleear(id){                 
+        function cleear(id){
                 $("#"+id+"-data").removeClass('hidden');
                 $("#"+id+"-id").val('0');
                 $("#"+id+"-result").addClass('hidden');
-                $("#deuda-div").slideUp();   
-                 $("#accesos_directos").addClass('hidden');                          
-            } 
+                $("#deuda-div").slideUp();
+                 $("#accesos_directos").addClass('hidden');
+            }
 
-            
+
          </script>
         <? } ?>
 
         <? if($section == 'pagos-facturacion'){ ?>
         <script type="text/javascript" src="<?=$baseurl?>scripts/notifIt.js"></script>
-            <script type="text/javascript">            
+            <script type="text/javascript">
                 $("#generar").click(function(){
                     notif({
                         msg: "<b>Alerta :</b> Recuerde ingresar en la opción <a href='<?=$baseurl?>admin/pagos/facturacion'>Pagos -> Facturacion Mensual</a> para generar la facturación del mes actual.",
                         type: "warning",
                         width: "all",
-                        opacity: "0.8",                    
-                        color: "#FFF",                    
+                        opacity: "0.8",
+                        color: "#FFF",
                         autohide: false
                     });
-                })                    
+                })
             </script>
         <? } ?>
         <? if($section == 'socios-resumen'){ ?>
         <script type="text/javascript">
         $(document).ready(function(){
             a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-                onSelect: function (suggestion) {                    
+                onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
-                } 
+                }
             });
 
         })
@@ -776,12 +776,12 @@
             $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                 $("#"+id+"-loading").addClass('hidden');
                 if(data){
-                    var socio = $.parseJSON(data);                                        
+                    var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
-                    
+
                     $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
                     $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
                     $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].Id);
@@ -789,62 +789,62 @@
                     $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].Id);
                     $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
                     $("#accesos_directos").removeClass('hidden');
-                    
+
                     $("#"+id+"-id").val(socio[0].Id);
                     get_actividades(socio[0].Id);
                 }else{
-                   alert("El DNI ingresado no se encuentra en la Base de Datos.")                   
+                   alert("El DNI ingresado no se encuentra en la Base de Datos.")
                 }
-            })   
+            })
             e.preventDefault();
-            return false;                         
-        })  
+            return false;
+        })
 
         function get_actividades(id){
             $("#"+id+"-loading").removeClass('hidden');
             $.get( "<?=$baseurl?>admin/socios/resumen2/"+id ).done(function(data){
                 $("#asociar-div").html(data);
                 $("#asociar-div").slideDown();
-                $("#"+id+"-loading").addClass('hidden');   
+                $("#"+id+"-loading").addClass('hidden');
             })
-            
+
         }
-        function cleear(id){                                                     
+        function cleear(id){
             $("#"+id+"-data").removeClass('hidden');
             $("#"+id+"-id").val('0');
             $("#"+id+"-result").addClass('hidden');
-            $("#asociar-div").slideUp();  
-            $("#accesos_directos").addClass('hidden');                             
+            $("#asociar-div").slideUp();
+            $("#accesos_directos").addClass('hidden');
         }
-     
-        
+
+
 
         <? if($socio->Id && $socio->Id != 0){ ?> $("#asociar-div").slideDown(); get_actividades("<?=$socio->Id?>"); <? } ?>
         </script>
         <? } ?>
 <!--
-    
+
 -->
-    
+
         <? if($section == 'pagos-editar'){ ?>
-        
+
         <script language="JavaScript">
-                       
+
         $(document).ready(function(){
             a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-                onSelect: function (suggestion) {                    
+                onSelect: function (suggestion) {
                 $('#r2').val(suggestion.data);
-                } 
-            });       
-        
-            $("#pagos_deuda_form").submit(function(){                
+                }
+            });
+
+            $("#pagos_deuda_form").submit(function(){
                 var id = 'r2';
                 $("#"+id+"-loading").removeClass('hidden');
                 var dni = $("#"+id).val();
                 $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
                     $("#"+id+"-loading").addClass('hidden');
                     if(data){
-                        var socio = $.parseJSON(data);                                        
+                        var socio = $.parseJSON(data);
                         var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
                         $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
@@ -861,36 +861,36 @@
 
                         get_pago(socio[0].Id);
                     }else{
-                        alert("El DNI ingresado no se encuentra en la Base de Datos.")                   
+                        alert("El DNI ingresado no se encuentra en la Base de Datos.")
                     }
-                })                            
+                })
             })
             function get_pago(id){
                  $("#deuda-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
-                 $.get( "<?=$baseurl?>admin/pagos/get_pagos/"+id ).done(function(data){                    
+                 $.get( "<?=$baseurl?>admin/pagos/get_pagos/"+id ).done(function(data){
                     $("#deuda-div").html(data);
                     $("#deuda-div").slideDown();
-                   
+
                 })
-                
+
             }
 
 
 
-            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>  
-               
-            
+            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>
+
+
         })
 
-        function cleear(id){                 
+        function cleear(id){
                 $("#"+id+"-data").removeClass('hidden');
                 $("#"+id+"-id").val('0');
                 $("#"+id+"-result").addClass('hidden');
-                $("#deuda-div").slideUp();   
-                 $("#accesos_directos").addClass('hidden');                          
-            } 
+                $("#deuda-div").slideUp();
+                 $("#accesos_directos").addClass('hidden');
+            }
 
-            
+
          </script>
         <? } ?>
 
@@ -991,8 +991,8 @@ $("#carga_debtarj_form").submit(function(){
         if(!agree){return false;}
         $("#reg-cargando").removeClass('hidden');
 
-        var id_debito = $("#id_debito").val();    
-        var id_marca = $("#id_marca").val();    
+        var id_debito = $("#id_debito").val();
+        var id_marca = $("#id_marca").val();
         var nro_tarjeta = $("#nro_tarjeta").val();
 	var largo = nro_tarjeta.length;
 	if ( largo < 16 ) {
@@ -1020,7 +1020,7 @@ $("#gen_debtarj_form select").on("change", function(){
     } else {
         $("#btn_total").hide();
     }
-    
+
 })
 $("#gen_debtarj_form button").on("click", function(){
         var boton = $(this).data("text");
@@ -1046,16 +1046,19 @@ $("#gen_debtarj_form button").on("click", function(){
 
 $("#debtarj_botones_form button").on("click", function(){
         var boton = $(this).data("text");
-	switch ( boton ) {
-	case "excel":
-        	var agree = confirm("Seguro que desea bajar la grilla a EXCEL ?");
-        	if(!agree){return false;};
-
+	
+	switch ( boton ) {	
+		case "excel":
+			var url = $(this).data("action");
+			break;
+		case "nuevo":
+			var url = $(this).data("action");
+			break;
 	}
-        var url = $(this).data("action");
-        $("#debtarj_excel_form").attr("action",url);
 
-        $("#debtarj_excel_form").submit();
+        $("#debtarj_botones_form").attr("action",url);
+
+        $("#debtarj_botones_form").submit();
 
         return true;
 })
@@ -1086,7 +1089,7 @@ $("#debtarj_botones_form button").on("click", function(){
         })
 
         $(document).on("click","#valor_cuota",function(){
-            $("#detalle_de_cuota").append('<i class="fa fa-spin fa-spinner"></i> Cargando...');                
+            $("#detalle_de_cuota").append('<i class="fa fa-spin fa-spinner"></i> Cargando...');
             angular.element("#detalle_de_cuota").append('click');
             angular.element("#modal_open").triggerHandler('click');
         })
@@ -1097,16 +1100,16 @@ $("#debtarj_botones_form button").on("click", function(){
             window.open('<?=base_url()?>imprimir/morosos/'+meses+'/'+act,'','width=800,height=600');
         })
 
-        $(document).on("click","#imprimir_listado_actividades",function(){            
+        $(document).on("click","#imprimir_listado_actividades",function(){
             var act = $(this).data('act');
             window.open('<?=base_url()?>imprimir/listado/actividades/'+act,'','width=800,height=600');
         })
 
-        $(document).on("click","#imprimir_carnet",function(){            
+        $(document).on("click","#imprimir_carnet",function(){
             var id = $(this).data('id');
             window.open('<?=base_url()?>imprimir/carnet/'+id,'','menubar=yes,toolbar=yes,width=800,height=600');
         })
-        
+
         $("#grupo-select").change(function(){
             var grupo = $(this).val();
             $("#grupo-categorias").slideUp();
@@ -1115,7 +1118,7 @@ $("#debtarj_botones_form button").on("click", function(){
 
 		if ( grupo == "soccomision" || grupo == "titcomision" ) {
             		$("#grupo-comisiones").slideDown();
-		} 
+		}
 
             $("#grupo-"+grupo).slideDown();
         })
@@ -1126,17 +1129,17 @@ $("#debtarj_botones_form button").on("click", function(){
             $("#envios-continuar").prop('disabled',true);
             $("#envios-continuar").html('Procesando <i class="fa fa-spin fa-spinner"></i>')
             var activ = $("#activ-select").val();
-	    if ( activ == " " ) { 
-		alert ("Debe Elegir una condicion de estado"); 
+	    if ( activ == " " ) {
+		alert ("Debe Elegir una condicion de estado");
             	$("#envios-continuar").prop('disabled',false);
             	$("#envios-continuar").html('Procesando <i class="fa fa-arrow-right"></i>')
-		return false; 
+		return false;
 		}
             var grupo = $("#grupo-select").val();
             var data;
             var titulo = $("#envio-titulo").val();
 	    if ( grupo == "soccomision" || grupo == "titcomision" ) {
-			data = $("#comisiones-select").val(); 
+			data = $("#comisiones-select").val();
 		} else {
             		data = $("#"+grupo+"-select").val();
 		}
@@ -1147,11 +1150,11 @@ $("#debtarj_botones_form button").on("click", function(){
                     $("#step2").html('<div class="alert alert-danger">No se encontraron socios para el grupo seleccionado.</div>');
                     $("#envios-continuar").prop('disabled',false);
                     $("#envios-continuar").html('Continuar <i class="fa fa-arrow-right"></i>')
-                }else{                    
+                }else{
                     $("#step2").html(data);
                     $("#envios-step1").slideUp();
                 }
-            })            
+            })
         })
         $(document).on("submit","#envios-step2",function(e){
             var text = tinyMCE.activeEditor.getContent();
@@ -1169,10 +1172,10 @@ $("#debtarj_botones_form button").on("click", function(){
         <?
         if($this->uri->segment(3) == 'editar'){
         ?>
-        $("#envios-step1").submit(function(){            
+        $("#envios-step1").submit(function(){
             $("#envios-continuar").prop('disabled',true);
             $("#envios-continuar").html('Procesando <i class="fa fa-spin fa-spinner"></i>')
-            var grupo = $("#grupo-select").val();           
+            var grupo = $("#grupo-select").val();
             var data;
             var titulo = $("#envio-titulo").val();
             data = $("#"+grupo+"-select").val();
@@ -1182,11 +1185,11 @@ $("#debtarj_botones_form button").on("click", function(){
                     $("#step2").html('<div class="alert alert-danger">No se encontraron socios para el grupo seleccionado.</div>');
                     $("#envios-continuar").prop('disabled',false);
                     $("#envios-continuar").html('Continuar <i class="fa fa-arrow-right"></i>')
-                }else{                    
+                }else{
                     $("#step2").html(data);
                     $("#envios-step1").slideUp();
                 }
-            })            
+            })
         })
         $(document).on("submit","#envios-step2",function(e){
             var text = tinyMCE.activeEditor.getContent();
@@ -1214,12 +1217,12 @@ $("#debtarj_botones_form button").on("click", function(){
                 $.post('<?=base_url()?>admin/envios/send/<?=$envio->Id?>')
                 .done(function(data){
                     if(data == 'end'){
-                        $("#estado").html('Envio Finalizado.');                        
+                        $("#estado").html('Envio Finalizado.');
                     }else{
                         data = $.parseJSON(data);
                         $("#enviados").html(data.enviados);
                         $("#estado").html(data.estado);
-                        enviar();            
+                        enviar();
                     }
                })
             }
@@ -1253,7 +1256,7 @@ $("#debtarj_botones_form button").on("click", function(){
         <? /**
 
         **/ ?>
-        $(document).on("click","#actividad_beca",function(){
+        $(document).on("click",".actividad_beca",function(){
             var beca = $(this).data('beca');
             var id = $(this).data('id');
             angular.element("#modal_open").triggerHandler('click');
@@ -1274,7 +1277,7 @@ $("#debtarj_botones_form button").on("click", function(){
         })
 
         function calcular_cuota(){
-            var monto = $("#s_cate").find(':selected').attr('data-precio');            
+            var monto = $("#s_cate").find(':selected').attr('data-precio');
             var descuento = $("#descuento").val();
             var a_pagar = monto - ( monto*descuento/100 );
             $("#a_pagar").text(a_pagar);
