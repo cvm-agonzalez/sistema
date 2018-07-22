@@ -918,6 +918,70 @@ class Cron extends CI_Controller {
 	return $cant;
     }
 
+    function aviso_deuda(){ // esta funcion genera emails de aviso a todos los deudores
+        $this->load->model('general_model');
+	$this->load->model("pagos_model");
+
+	// busco los socios con deuda
+	$deudores=$this->pagos_model->get_deuda_aviso();
+	if ( $deudores ) {
+
+		// vacio la tabla de envios detallados de facturacion
+		$this->db->truncate('facturacion_mails'); 
+
+		// ciclo cada deudor y armo/grabo los emails en envios
+		foreach ( $deudores as $deudor ) {
+			$txt_mail="";
+
+                	// Armo encabezado con escudo y datos de cabecera
+                	$txt_mail  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
+                	$txt_mail .= "<thead>";
+                	$txt_mail .= "<tr style='background-color: #105401 ;'>";
+                	$txt_mail .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
+                	$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
+                	$txt_mail .= "</tr>";
+                	$txt_mail .= "</thead>";
+                	$txt_mail .= "</table>";
+	
+                	// Datos del Titular
+                	$txt_mail .= '<h3 style="font-family:verdana"><strong>Titular:</strong> '.$deudor->sid.'-'.$deudor->nombre.', '.$deudor->apellido.'</h3>';
+
+
+			$txt_mail .= "<h1>AVISO DE DEUDA</h1>";
+			$txt_mail .= "<h2>Generado el ".date('d-m-Y')."</h2>";
+			$txt_mail .= "<br>";
+			$txt_mail .= "<h1>Al dia de hoy ud. tiene una deuda de $ ".$deudor->deuda."</h1>";
+			$txt_mail .= "<br>";
+			$txt_mail .= "<p>Al no estar al dia con sus pagos ud. no puede aprovechar nuestra RED de Beneficios </p>";
+			$txt_mail .= "<p>Al club lo hacemos entre todos, si sos de La Ciudad mantenete al dia </p>";
+			$txt_mail .= "<p>Es la unica forma de que sigamos haciendo cada dia un club mas grande </p>";
+			$txt_mail .= "<br>";
+			$txt_mail .= "<p>Ponganse en contacto con la secretaria para regularizar su situacion</p>";
+			$txt_mail .= "<br>";
+
+                	$txt_mail .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
+                	$txt_mail .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
+                	$txt_mail .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
+                	$txt_mail .= "<br> <br>";
+
+                	$txt_mail .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
+
+
+			// grabo el detalle del email
+	                $email = array(
+                    		'email' => $deudor->mail,
+                    		'body' => $txt_mail
+                	);
+                	$regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
+                	if(preg_match($regex, $deudor->mail)){
+                        	$this->db->insert('facturacion_mails',$email);
+                	}
+
+		}
+
+	}
+    }
+
 	function controles(){
 
         $this->load->database('default');
