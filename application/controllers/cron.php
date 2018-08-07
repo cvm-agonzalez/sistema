@@ -438,7 +438,9 @@ class Cron extends CI_Controller {
 			if($deuda == 0) {
                     		$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted esta al d&iacute;a con sus cuotas</strong></h4>";
 			} else {
-                    		$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted posee un saldo a favor de $ ".abs($deuda)."</strong></h4>";                
+				if ( $mail['debtarj'] == null ) {
+                    			$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted posee un saldo a favor de $ ".abs($deuda)."</strong></h4>";                
+				}
 			}
             	}
 
@@ -580,10 +582,17 @@ class Cron extends CI_Controller {
                     		    </tr> ';
 		} else { 
 			if ( $deuda > 0 ) {
-	                        $cuerpo .= '<tr>                        
-                                        	<th style="font-family:verdana;" align="left">SALDO A FAVOR ANTERIOR</th>
-                                        	<th style="font-family:verdana;" align="right">$ '.abs($deuda).'</th>                        
-                                	    </tr> ';
+				if ( $mail['debtarj'] == null ) {
+	                        	$cuerpo .= '<tr>                        
+                                        		<th style="font-family:verdana;" align="left">SALDO A FAVOR ANTERIOR</th>
+                                        		<th style="font-family:verdana;" align="right">$ '.abs($deuda).'</th>                        
+                                	    	</tr> ';
+				} else {
+	                        	$cuerpo .= '<tr>                        
+                                        		<th style="font-family:verdana;" align="left">UD. ESTA ADHERIDO AL DEBITO AUTOMATICO</th>
+                                	    	</tr> ';
+		
+				}
 				$resta_pagar=$cuota3['total']-$deuda;
 				if ( $resta_pagar > 0 ) {
 					$cuerpo .= '<tr>                        
@@ -952,11 +961,13 @@ class Cron extends CI_Controller {
 			$txt_mail .= "<br>";
 			$txt_mail .= "<h1>Al dia de hoy ud. tiene una deuda de $ ".$deudor->deuda."</h1>";
 			$txt_mail .= "<br>";
-			$txt_mail .= "<p>Al no estar al dia con sus pagos ud. no puede aprovechar nuestra RED de Beneficios </p>";
-			$txt_mail .= "<p>Al club lo hacemos entre todos, si sos de La Ciudad mantenete al dia </p>";
-			$txt_mail .= "<p>Es la unica forma de que sigamos haciendo cada dia un club mas grande </p>";
+			$txt_mail .= '<p style="font-family:verdana; font-style:italic;">Ponganse en contacto con la secretaria del Club para regularizar su situaci&oacuten. Existen diferentes formas para financiar su deuda </p>';
 			$txt_mail .= "<br>";
-			$txt_mail .= "<p>Ponganse en contacto con la secretaria para regularizar su situacion</p>";
+			$txt_mail .= '<p style="font-family:verdana; ">Recuerde que al no estar al d&iacutea con sus pagos ud. no puede aprovechar nuestra RED de Beneficios </p>';
+			$txt_mail .= "<br>";
+			$txt_mail .= '<p style="font-family:verdana; ">Al club lo hacemos entre todos y es de suma importancia su aporte </p>';
+			$txt_mail .= "<br>";
+			$txt_mail .= '<p style="font-family:verdana; ">Mas informaci&oacuten en <a href="https://www.villamitre.com.ar/"> www.villamitre.com.ar</a></p>';
 			$txt_mail .= "<br>";
 
                 	$txt_mail .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
@@ -1153,6 +1164,7 @@ class Cron extends CI_Controller {
        
 	function pagos(){
 		$this->load->model("pagos_model");
+		$this->load->model("socios_model");
 
 		// Si me vino una fecha en el URL fuerzo la generacion de esa fecha en particular sin controlar cron
         	if ($this->uri->segment(3)) {
@@ -1183,12 +1195,16 @@ class Cron extends CI_Controller {
 			$ctrl_gen="TODO";
 		}
 		
+		$reactivados=array();
+		$cant_react=0;
+		$cant_cd = 0;
+		$total_cd = 0;
+		$cant_col = 0;
+		$total_col = 0;
+
 		if ( $ctrl_gen == "TODO" || $ctrl_gen == "CD" ) {
 			// Busco los pagos del sitio de Cuenta Digital
 			$pagos = $this->get_pagos($ayer);
-
-			$cant_cd = 0;
-			$total_cd = 0;
 
 			// Si bajo algo del sitio
 			if($pagos) {
@@ -1196,6 +1212,15 @@ class Cron extends CI_Controller {
 				foreach ($pagos as $pago) {
 					$data = $this->pagos_model->insert_pago($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
+
+					// Me fijo si esta suspendido y con el pago se queda con saldo a favor para reactivar
+					$saldo=$this->pagos_model->get_saldo($pago['sid']);
+					$socio=$this->socios_model->get_socio($pago['sid']);
+					if ( $socio->suspendido == 1 && $saldo < 0 ) {
+						$this->socios_model->suspender($pago['sid'],'no');
+						$reactivados[]=$socio->Id."-".$socio->apellido.", ".$socio->nombre."\n";
+						$cant_react++;
+					}
 
 					// Acumulo para email
 					$cant_cd++;
@@ -1216,8 +1241,6 @@ class Cron extends CI_Controller {
 			// Busco los pagos registrados en COL
 			$pagos_COL = $this->get_pagos_COL($ayer,$suc_filtro);
 
-			$cant_col = 0;
-			$total_col = 0;
 
 			// Si bajo algo del sitio
 			if($pagos_COL) {
@@ -1226,6 +1249,15 @@ class Cron extends CI_Controller {
 					// Si vino en la URL que genera solo un local descarto el resto
 					$data = $this->pagos_model->insert_pago_col($pago);
 					$this->pagos_model->registrar_pago2($pago['sid'],$pago['monto']);
+
+					// Me fijo si esta suspendido y con el pago se queda con saldo a favor para reactivar
+					$saldo=$this->pagos_model->get_saldo($pago['sid']);
+					$socio=$this->socios_model->get_socio($pago['sid']);
+					if ( $socio->suspendido == 1 && $saldo < 0 ) {
+						$this->socios_model->suspender($pago['sid'],'no');
+						$reactivados[]=$socio->Id."-".$socio->apellido.", ".$socio->nombre."\n";
+						$cant_react++;
+					}
 
 					// Acumulo para email
 					$cant_col++;
@@ -1239,7 +1271,11 @@ class Cron extends CI_Controller {
 		}
 
         // Me mando email de aviso que el proceso termino OK
-	$info_total="Procese fecha de cobro = $ayer \n Procese $cant_cd pagos de CuentaDigital por un total de $ $total_cd \n Procese $cant_col pagos de LaCoope por un total de $ $total_col.";
+	$info_total="Procese fecha de cobro = $ayer \n Procese $cant_cd pagos de CuentaDigital por un total de $ $total_cd \n Procese $cant_col pagos de LaCoope por un total de $ $total_col.\n Reactive $cant_react socios. \n";
+	foreach ( $reactivados as $r ) {
+		$info_total.=$r."\n";
+	}
+	$xahora=date('Y-m-d G:i:s');
         mail('cvm.agonzalez@gmail.com', "El proceso de Imputación de Pagos finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".$xahora."\n".$info_total);
 
 	}

@@ -272,12 +272,20 @@ class Socios_model extends CI_Model {
 
     public function get_resumen_mail($sid){
         $this->load->model('pagos_model');
+        $this->load->model('debtarj_model');
         $resumen = $this->pagos_model->get_monto_socio($sid);
         $res['resumen'] = $resumen;
         $socio = $this->get_socio($sid);
         $res['mail'] = $socio->mail;
         $res['deuda'] = $this->pagos_model->get_deuda_sinhoy($sid);
         $res['sid'] = $sid;
+	$debtarj = $this->debtarj_model->get_debtarj_by_sid($sid);
+	if ( $debtarj ) {
+        	$res['debtarj'] = $debtarj;
+	} else {
+        	$res['debtarj'] = null;
+	}
+	
         return $res;
     }
 
