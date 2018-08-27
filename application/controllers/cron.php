@@ -961,6 +961,8 @@ class Cron extends CI_Controller {
 			$txt_mail .= "<br>";
 			$txt_mail .= "<h1>Al dia de hoy ud. tiene una deuda de $ ".$deudor->deuda."</h1>";
 			$txt_mail .= "<br>";
+			$txt_mail .= '<p style="font-family:verdana; ">Si ud. realizo alg&uacuten pago en el d&iacutea de ayer puede que no este reflejado en este resumen </p>';
+			$txt_mail .= "<br>";
 			$txt_mail .= '<p style="font-family:verdana; font-style:italic;">Ponganse en contacto con la secretaria del Club para regularizar su situaci&oacuten. Existen diferentes formas para financiar su deuda </p>';
 			$txt_mail .= "<br>";
 			$txt_mail .= '<p style="font-family:verdana; ">Recuerde que al no estar al d&iacutea con sus pagos ud. no puede aprovechar nuestra RED de Beneficios </p>';
