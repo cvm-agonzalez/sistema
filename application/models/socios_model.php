@@ -258,7 +258,7 @@ class Socios_model extends CI_Model {
         if($facturado){
             $this->db->where('facturado', 0);
         }
-        $query = $this->db->get_where('socios',array('tutor'=>'0','categoria !='=>'5','estado'=>'1','suspendido'=>0));
+        $query = $this->db->get_where('socios',array('tutor'=>'0','estado'=>'1','suspendido'=>0));
         return $query->result();
     }
     public function check_u_n($sn){
