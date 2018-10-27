@@ -700,12 +700,13 @@ class Pagos_model extends CI_Model {
     }
 
     public function get_deuda_aviso(){
-      $this->db->select('p.tutor_id sid, s.dni, s.apellido, s.nombre, s.mail, SUM(p.monto-p.pagado) deuda');
+      $this->db->select('p.tutor_id sid, p.sid tutoreado, s.dni, s.apellido, s.nombre, s.mail, SUM(p.monto-p.pagado) deuda');
       $this->db->where('p.estado',1);
       $this->db->where('s.suspendido',0);
+      $this->db->where('DATE_ADD(s.alta, INTERVAL 35 DAY)< CURDATE()');
       $this->db->join('socios as s','s.Id = p.tutor_id');
       $this->db->group_by('p.tutor_id');
-      $this->db->having('SUM(p.monto-p.pagado) > 0');
+      $this->db->having('SUM(p.monto-p.pagado) > 260');
       $query = $this->db->get('pagos as p');
       if($query->num_rows() == 0){ return false;}
       $deudores = $query->result();
