@@ -650,8 +650,10 @@ class Cron extends CI_Controller {
 
 		$cuerpo .= '';
 
-            	if($mail['deuda'] < 0){
-                	$total = ($mail['deuda']*-1);
+		$acobrar= $mail['deuda'] - $cuota3['total'];
+
+            	if($acobrar < 0){
+                	$total = abs($acobrar);
                 	$cuerpo .= '<p style="font-family:verdana; font-style:italic;">Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n, contactese con Secretaria</p>';
 
                     	// Aca grabo el archivo para mandar a cobrar a COL
@@ -659,7 +661,7 @@ class Cron extends CI_Controller {
 			$col_socio=$socio->Id;
 			$col_dni=$socio->dni;
 			$col_apynom=$socio->apellido." ".$socio->nombre;
-			$col_importe=$mail['deuda']*(-1);
+			$col_importe=$total;
 			$col_fecha_lim=$xlim1;
 			$col_recargo="0";
 			$col_fecha_lim2=$xlim2;
@@ -887,49 +889,64 @@ class Cron extends CI_Controller {
         $socios = $this->socios_model->get_socios_pagan();
 	$cant = 0 ;
         foreach ($socios as $socio) {
-            $this->db->where('tutor_id', $socio->Id);
-            $this->db->where('tipo', 1);
-            $this->db->where('estado', 1);
-            $query = $this->db->get('pagos');
-            if( $query->num_rows() >= 5 ){ 
-		$meses_atraso=$query->num_rows();
-            	$this->db->where('tutor_id', $socio->Id);
+            // Excluyo del analisis a los vitalicios
+	    if ( $socio->categoria != 5 ) {
+		$this->db->where('tutor_id', $socio->Id);
             	$this->db->where('tipo', 1);
-            	$this->db->where('pagadoel is not NULL');
-            	$this->db->select('tutor_id, MAX(pagadoel) maxfch, DATEDIFF(MAX(pagadoel),CURDATE()) dias_ultpago');
-    		$this->db->group_by('tutor_id');
+            	$this->db->where('estado', 1);
             	$query = $this->db->get('pagos');
-		$isusp=0;
-		if ( $query->num_rows() > 0 ) {
-                	$ult_pago = $query->row();
-			$ds_ult = $ult_pago->dias_ultpago;
-                	$query->free_result();                
-			if ( $ds_ult < -150 ) {
+            	if( $query->num_rows() >= 5 ){ 
+			$meses_atraso=$query->num_rows();
+            		$this->db->where('tutor_id', $socio->Id);
+            		$this->db->where('tipo', 1);
+            		$this->db->where('pagadoel is not NULL');
+            		$this->db->select('tutor_id, MAX(pagadoel) maxfch, DATEDIFF(MAX(pagadoel),CURDATE()) dias_ultpago');
+    			$this->db->group_by('tutor_id');
+            		$query = $this->db->get('pagos');
+			$isusp=0;
+			if ( $query->num_rows() > 0 ) {
+                		$ult_pago = $query->row();
+				$ds_ult = $ult_pago->dias_ultpago;
+                		$query->free_result();                
+				if ( $ds_ult < -150 ) {
+					$isusp=1;
+				}
+			} else {	
 				$isusp=1;
 			}
-		} else {	
-			$isusp=1;
-		}
-		if ( $isusp == 1 ) {
-                	$this->db->where('Id',$socio->Id);
-                	$this->db->update('socios', array('suspendido'=>1));
-
-
-                	$txt = date('H:i:s').": Socio Suspendido #".$socio->Id." ".TRIM($socio->apellido).", ".TRIM($socio->nombre)." DNI= ".$socio->dni." atraso de ".$meses_atraso." ultimo pago ".$ds_ult. " \n";
-                	fwrite($log, $txt);   
-
-        		$this->pagos_model->registrar_pago('debe',$socio->Id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0);
-
-			$cant++;
-		}
-            }
+			if ( $isusp == 1 ) {
+                		$this->db->where('Id',$socio->Id);
+                		$this->db->update('socios', array('suspendido'=>1));
+	
+	
+                		$txt = date('H:i:s').": Socio Suspendido #".$socio->Id." ".TRIM($socio->apellido).", ".TRIM($socio->nombre)." DNI= ".$socio->dni." atraso de ".$meses_atraso." ultimo pago ".$ds_ult. " \n";
+                		fwrite($log, $txt);   
+	
+        			$this->pagos_model->registrar_pago('debe',$socio->Id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0);
+	
+				$cant++;
+			}
+            	}
+	     }
         }        
 	return $cant;
     }
 
     function aviso_deuda(){ // esta funcion genera emails de aviso a todos los deudores
+        //log
+	$fecha=date('Ymd');
+        $file = './application/logs/avisodeuda-'.$fecha.'.log';
+        if( !file_exists($file) ){
+            echo "creo log";
+            $log = fopen($file,'w');
+        }else{
+            echo "existe log";
+            $log = fopen($file,'a');
+        }
+
         $this->load->model('general_model');
 	$this->load->model("pagos_model");
+	$this->load->model("debtarj_model");
 
 	// busco los socios con deuda
 	$deudores=$this->pagos_model->get_deuda_aviso();
@@ -937,56 +954,78 @@ class Cron extends CI_Controller {
 
 		// vacio la tabla de envios detallados de facturacion
 		$this->db->truncate('facturacion_mails'); 
+                $txt = "Truncate de mails \n";
+                fwrite($log, $txt);
 
 		// ciclo cada deudor y armo/grabo los emails en envios
 		foreach ( $deudores as $deudor ) {
-			$txt_mail="";
+			// si tiene debito automatico activo no lo mando
+			$debito=$this->debtarj_model->get_debtarj_by_sid($deudor->sid);
+			if ( !$debito ) {
+				$txt_mail="";
 
-                	// Armo encabezado con escudo y datos de cabecera
-                	$txt_mail  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
-                	$txt_mail .= "<thead>";
-                	$txt_mail .= "<tr style='background-color: #105401 ;'>";
-                	$txt_mail .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
-                	$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
-                	$txt_mail .= "</tr>";
-                	$txt_mail .= "</thead>";
-                	$txt_mail .= "</table>";
+                		// Armo encabezado con escudo y datos de cabecera
+                		$txt_mail  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
+                		$txt_mail .= "<thead>";
+                		$txt_mail .= "<tr style='background-color: #105401 ;'>";
+                		$txt_mail .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
+                		$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
+                		$txt_mail .= "</tr>";
+                		$txt_mail .= "</thead>";
+                		$txt_mail .= "</table>";
+		
+                		// Datos del Titular
+                		$txt_mail .= '<h3 style="font-family:verdana"><strong>Titular:</strong> '.$deudor->sid.'-'.$deudor->nombre.', '.$deudor->apellido.'</h3>';
 	
-                	// Datos del Titular
-                	$txt_mail .= '<h3 style="font-family:verdana"><strong>Titular:</strong> '.$deudor->sid.'-'.$deudor->nombre.', '.$deudor->apellido.'</h3>';
-
-
-			$txt_mail .= "<h1>AVISO DE DEUDA</h1>";
-			$txt_mail .= "<h2>Generado el ".date('d-m-Y')."</h2>";
-			$txt_mail .= "<br>";
-			$txt_mail .= "<h1>Al dia de hoy ud. tiene una deuda de $ ".$deudor->deuda."</h1>";
-			$txt_mail .= "<br>";
-			$txt_mail .= '<p style="font-family:verdana; font-style:italic;">Ponganse en contacto con la secretaria del Club para regularizar su situaci&oacuten. Existen diferentes formas para financiar su deuda </p>';
-			$txt_mail .= "<br>";
-			$txt_mail .= '<p style="font-family:verdana; ">Recuerde que al no estar al d&iacutea con sus pagos ud. no puede aprovechar nuestra RED de Beneficios </p>';
-			$txt_mail .= "<br>";
-			$txt_mail .= '<p style="font-family:verdana; ">Al club lo hacemos entre todos y es de suma importancia su aporte </p>';
-			$txt_mail .= "<br>";
-			$txt_mail .= '<p style="font-family:verdana; ">Mas informaci&oacuten en <a href="https://www.villamitre.com.ar/"> www.villamitre.com.ar</a></p>';
-			$txt_mail .= "<br>";
-
-                	$txt_mail .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
-                	$txt_mail .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
-                	$txt_mail .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
-                	$txt_mail .= "<br> <br>";
-
-                	$txt_mail .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
-
-
-			// grabo el detalle del email
-	                $email = array(
-                    		'email' => $deudor->mail,
-                    		'body' => $txt_mail
-                	);
-                	$regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
-                	if(preg_match($regex, $deudor->mail)){
-                        	$this->db->insert('facturacion_mails',$email);
-                	}
+	
+				$txt_mail .= "<h1>AVISO DE DEUDA</h1>";
+				$txt_mail .= "<h2>Generado el ".date('d-m-Y')."</h2>";
+				$txt_mail .= "<br>";
+				$txt_mail .= "<h1>Al dia de hoy ud. tiene una deuda de $ ".$deudor->deuda."</h1>";
+				$txt_mail .= "<br>";
+				$txt_mail .= '<p style="font-family:verdana; ">Si ud. realizo alg&uacuten pago en el d&iacutea de ayer puede que no este reflejado en este resumen </p>';
+				$txt_mail .= "<br>";
+				$txt_mail .= '<p style="font-family:verdana; font-style:italic;">Ponganse en contacto con la secretaria del Club para regularizar su situaci&oacuten. Existen diferentes formas para financiar su deuda </p>';
+				$txt_mail .= "<br>";
+				$txt_mail .= '<p style="font-family:verdana; ">Recuerde que al no estar al d&iacutea con sus pagos ud. no puede aprovechar nuestra RED de Beneficios </p>';
+				$txt_mail .= "<br>";
+				$txt_mail .= '<p style="font-family:verdana; ">Al club lo hacemos entre todos y es de suma importancia su aporte </p>';
+				$txt_mail .= "<br>";
+				$txt_mail .= '<p style="font-family:verdana; ">Mas informaci&oacuten en <a href="https://www.villamitre.com.ar/"> www.villamitre.com.ar</a></p>';
+				$txt_mail .= "<br>";
+	
+                		$txt_mail .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
+	                	$txt_mail .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
+                		$txt_mail .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
+                		$txt_mail .= "<br> <br>";
+	
+                		$txt_mail .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
+	
+	
+				// grabo el detalle del email
+	                	$email = array(
+                    			'email' => $deudor->mail,
+                    			'body' => $txt_mail
+                		);
+                		$regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
+                		if(preg_match($regex, $deudor->mail)){
+                        		$this->db->insert('facturacion_mails',$email);
+					// Logueo datos registrados de aviso de deuda
+					if ( $deudor->sid != $deudor->tutoreado ) {
+                				$txt = "El socio $deudor->sid es TUTOR y tiene Deuda de $deudor->deuda y se lo mandamos al email $deudor->mail \n";
+					} else {
+                				$txt = "El socio $deudor->sid tiene Deuda de $deudor->deuda y se lo mandamos al email $deudor->mail \n";
+					}
+                			fwrite($log, $txt);
+          	      		} else {
+					// Logueo datos descartados por no tener email registrado
+                			$txt = "El socio $deudor->sid tiene Deuda de $deudor->deuda y no se lo podemos mandar al email $deudor->mail \n";
+                			fwrite($log, $txt);
+				}
+			} else {
+                		$txt = "El socio $deudor->sid tiene Deuda de $deudor->deuda y no lo mandamos porque tiene Debito Automatico \n";
+                		fwrite($log, $txt);
+			}
 
 		}
 

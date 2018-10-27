@@ -286,7 +286,7 @@ class Admin extends CI_Controller {
 				$mensaje=$campos[4];
 
 
-				if ( trim($mensaje) == "DEBITO EXITOSO" ) {
+				if ( trim($mensaje) == "DEBITO EXITOSO" ||  trim(substr($mensaje,0,15)) == "DEBITO ACEPTADO" ) {
 					$by=array("id_marca"=>$id_marca, "nro_tarjeta"=>$nro_tarjeta);
 					$debtarj=$this->debtarj_model->get_debtarj_by($by);
 
