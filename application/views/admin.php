@@ -972,96 +972,6 @@ $("#comi-activ-form").submit(function(){
         return true;
 })
 
-$("#load-debtarj-form").submit(function(){
-        var marca = $("#marca").val();
-        var fecha = $("#fecha").val();
-        var url = "<?=$baseurl?>admin/debtarj/subearchivo" + "/" + marca + "/" + fecha
-
-        $("#load-debtarj-form").attr("action",url);
-
-        $("#load-debtarj-form").submit();
-
-        return true;
-
-})
-
-
-$("#carga_debtarj_form").submit(function(){
-        var agree = confirm("Seguro que desea registrar este debito?");
-        if(!agree){return false;}
-        $("#reg-cargando").removeClass('hidden');
-
-        var id_debito = $("#id_debito").val();
-        var id_marca = $("#id_marca").val();
-        var nro_tarjeta = $("#nro_tarjeta").val();
-	var largo = nro_tarjeta.length;
-	if ( largo < 16 ) {
-		var sigue = confirm("Seguro que el numero es tan corto?");
-		if (!sigue){return false;}
-	}
-        var fecha_adhesion = $("#fecha_adhesion").val();
-        var sid = $("#sid").val();
-
-	var ok = confirm("sid"+sid+" id_marca"+id_marca+" nro_tarjeta"+nro_tarjeta+" fecha_adhesion"+fecha_adhesion);
-
-        $.post("<?=$baseurl?>admin/debtarj/grabar/0",{sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
-        .done(function(data){
-		alert("Debito correctamente actualizado");
-                $("#reg-cargando").addClass('hidden');
-        })
-
-        return false;
-})
-
-$("#gen_debtarj_form select").on("change", function(){
-    var id_marca = $(this).val();
-    if ( id_marca > 1 ) {
-        $("#btn_total").show();
-    } else {
-        $("#btn_total").hide();
-    }
-
-})
-$("#gen_debtarj_form button").on("click", function(){
-        var boton = $(this).data("text");
-
-	var id_marca = $("#id_marca").val();
-	var periodo = $("#periodo").val();
-	var flag = $("#flag").val();
-
-        var agree = confirm("Seguro que desea "+boton+" el archivo ?");
-        if(!agree){return false;}
-
-	if ( flag == 1 ) {
-        	var url = $(this).data("action") + "/" + id_marca + "/" + periodo + "/1";
-	} else {
-        	var url = $(this).data("action") + "/" + id_marca + "/" + periodo;
-	}
-        $("#gen_debtarj_form").attr("action",url);
-
-        $("#gen_debtarj_form").submit();
-
-        return true;
-})
-
-$("#debtarj_botones_form button").on("click", function(){
-        var boton = $(this).data("text");
-	
-	switch ( boton ) {	
-		case "excel":
-			var url = $(this).data("action");
-			break;
-		case "nuevo":
-			var url = $(this).data("action");
-			break;
-	}
-
-        $("#debtarj_botones_form").attr("action",url);
-
-        $("#debtarj_botones_form").submit();
-
-        return true;
-})
 
 
 </script>
@@ -1291,9 +1201,143 @@ $("#debtarj_botones_form button").on("click", function(){
 
         $("#s_cate").change(function(){calcular_cuota()});
         $("#descuento").keyup(function(){calcular_cuota()});
+
+//Agregado AHG 
+            $("#contra_reg_form").submit(function(){
+                var marca = $("#marca").val();
+                var periodo = $("#periodo").val();
+            $.post("<?=base_url()?>admin/contracargos",{marca:marca,periodo:periodo})
+            })
+
+$("#load-debtarj-form").submit(function(){
+        var marca = $("#marca").val();
+        var fecha = $("#fecha").val();
+        var url = "<?=$baseurl?>admin/debtarj/subearchivo" + "/" + marca + "/" + fecha
+
+        $("#load-debtarj-form").attr("action",url);
+
+        $("#load-debtarj-form").submit();
+
+        return true;
+
+})
+
+
+$("#carga_debtarj_form").submit(function(){
+
+        var boton = $("#boton-deb").data("text");
+        switch ( boton ) {      
+                case "btnmodif":
+                        var url = "admin/debtarj/grabar/";
+			var msg = "Seguro que desea modificar este debito?";
+                        break;
+                case "btnagregar":
+                        var url = "admin/debtarj/grabar/0";
+			var msg = "Seguro que desea registrar este debito?";
+                        break;
+        }
+
+        var agree = confirm(msg);
+        if(!agree){return false;}
+        $("#reg-cargando").removeClass('hidden');
+
+        var id_debito = $("#id_debito").val();
+        var id_marca = $("#id_marca").val();
+        var nro_tarjeta = $("#nro_tarjeta").val();
+	var largo = nro_tarjeta.length;
+	if ( largo < 16 ) {
+		var sigue = confirm("Seguro que el numero es tan corto?");
+		if (!sigue){return false;}
+	}
+        var fecha_adhesion = $("#fecha_adhesion").val();
+        var sid = $("#sid").val();
+        var id_debito = $("#id_debito").val();
+
+        $.post("<?=$baseurl?>"+url,{id_debito: id_debito, sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
+        .done(function(data){
+		alert("Debito correctamente actualizado");
+                $("#reg-cargando").addClass('hidden');
+        })
+
+        return false;
+})
+
+$("#gen_debtarj_form select").on("change", function(){
+    var id_marca = $(this).val();
+    if ( id_marca > 1 ) {
+        $("#btn_total").show();
+    } else {
+        $("#btn_total").hide();
+    }
+
+})
+$("#gen_debtarj_form button").on("click", function(){
+        var boton = $(this).data("text");
+
+	var id_marca = $("#id_marca").val();
+	var periodo = $("#periodo").val();
+	var flag = $("#flag").val();
+
+        var agree = confirm("Seguro que desea "+boton+" el archivo ?");
+        if(!agree){return false;}
+
+	if ( flag == 1 ) {
+        	var url = $(this).data("action") + "/" + id_marca + "/" + periodo + "/1";
+	} else {
+        	var url = $(this).data("action") + "/" + id_marca + "/" + periodo;
+	}
+        $("#gen_debtarj_form").attr("action",url);
+
+        $("#gen_debtarj_form").submit();
+
+        return true;
+})
+
+$("#debtarj_botones_form button").on("click", function(){
+        var boton = $(this).data("text");
+	
+	switch ( boton ) {	
+		case "excel":
+			var url = $(this).data("action");
+			break;
+		case "nuevo":
+			var url = $(this).data("action");
+			break;
+	}
+
+        $("#debtarj_botones_form").attr("action",url);
+
+        $("#debtarj_botones_form").submit();
+
+        return true;
+})
+
+            <? if($section == 'contracargos-get' ) { ?>
+
+            function get_contracargo(id){
+                 $("#contracargo-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
+                 $.get( "<?=$baseurl?>admin/pagos/registrar/get/"+id ).done(function(data){
+                    $("#contracargo-div").html(data);
+                    $("#contracargo-div").slideDown();
+
+                })
+
+            }
+
+
+
+            <? if($tabla ){ ?> $("#contracargo-div").slideDown(); get_contracargo("<?=$tarjeta->Id?>"); <? } ?>
+
+	    <? } ?>
+
+
+
         </script>
         <? if($this->uri->segment(3) == 'guardada' && $this->uri->segment(2) == 'configuracion'){ ?>
         <script type="text/javascript">setTimeout(hide_cambio,4000)</script>
         <? } ?>
+
+
+	
     </body>
 </html>
