@@ -562,6 +562,16 @@ class Admin extends CI_Controller {
             /**
 
             **/
+            case 'categorias':
+                $data['username'] = $this->session->userdata('username');
+                $data['baseurl'] = base_url();
+                $data['action'] = 'nuevo';
+                $data['section'] = 'categorias';
+                $this->load->model("general_model");
+                $data['categorias'] = $this->general_model->get_cats();
+                $this->load->view('admin',$data);
+		break;
+
             case 'get':
                 $id_socio = $this->uri->segment(4);
                 $this->load->model('socios_model');
@@ -1571,26 +1581,65 @@ class Admin extends CI_Controller {
                		$this->load->view('admin',$data);
 			break;
 		case 'grabar':
+                	$datos['id'] = $this->input->post('id_debito');
                 	$datos['sid'] = $this->input->post('sid');
                 	$datos['id_marca'] = $this->input->post('id_marca');
                 	$datos['nro_tarjeta'] = $this->input->post('nro_tarjeta');
-                	$datos['fecha_adhesion'] = $this->input->post('fecha_adhesion');
+                	$fecha_view = $this->input->post('fecha_adhesion');
+                	$datos['fecha_adhesion'] = substr($fecha_view,6,4)."-".substr($fecha_view,3,2)."-".substr($fecha_view,0,2);
                 	$datos['estado'] = 1;
 
                 	$this->load->model('debtarj_model');
                 	if($datos['sid']){
-                    		if ($this->uri->segment(4) == 0 )  {
-                    			// Alta
-                            		$datos['id'] = 0;
-                            		$aid = $this->debtarj_model->grabar($datos);
+                    		if ( $datos['id'] == 0 )  {
+                    				// Alta
+                            			$aid = $this->debtarj_model->grabar($datos);
                     		} else {
                     			// Modificacion
-                            		$id = $this->uri->segment(4);
+                            		$id = $datos['id'];
                             		$this->debtarj_model->actualizar($id, $datos);
                     		}
 			}
 			break;
 
+                case 'contracargo':
+			if ( $this->input->post('marca') ) {
+                		$id_marca = $this->input->post('marca');
+                		$periodo = $this->input->post('periodo');
+	                	$this->load->model('debtarj_model');
+                 		$this->load->model('tarjeta_model');
+                 		$data['tarjeta'] = $this->tarjeta_model->get($id_marca);
+				$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
+				if ( $gen ) {
+                			$tabla = $this->input->post('tabla');
+					if ( !$tabla ) {
+						$tabla=array();
+					}
+					$data['fecha_debito'] = $gen->fecha_debito;
+					$data['cant_generada'] = $gen->cant_generada;
+					$data['total_generado'] = $gen->total_generado;
+					$data['tabla'] = $tabla;
+                 			$data['baseurl'] = base_url();
+                			$data['section'] = 'contracargos-get';
+                 			$this->load->view('admin',$data);
+				} else {
+		                        $data['baseurl'] = base_url();
+                                	$data['mensaje1'] = "No se encuentra ese periodo para esa tarjeta";
+                        		$data['msj_boton'] = "Volver a contracargo manual";
+                        		$data['url_boton'] = base_url()."admin/debtarj/contracargo";
+                        		$data['section'] = 'ppal-mensaje';
+                        		$this->load->view("admin",$data);
+				}
+ 			} else {
+	                	$this->load->model('debtarj_model');
+                 		$this->load->model('tarjeta_model');
+                 		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
+                 		$data['username'] = $this->session->userdata('username');
+                 		$data['baseurl'] = base_url();
+                 		$data['section'] = "contracargos";
+                 		$this->load->view('admin',$data);
+			}
+			break;
                 case 'stopdebit':
                         $this->load->model('debtarj_model');
                         $this->debtarj_model->stopdebit($this->uri->segment(4));

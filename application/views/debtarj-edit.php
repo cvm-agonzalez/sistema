@@ -66,6 +66,7 @@
 				           	<label for="" class="col-sm-3">Nro de Tarjeta</label>
 				            <div class="col-sm-3">
 				               	<input class="form-control" name="nro_tarjeta" id="nro_tarjeta" value="<?if ($debtarj) { echo $debtarj->nro_tarjeta; } else { echo ""; } ?>" required>
+		                                <input type="hidden" id="id_debito" value="<?if ($debtarj) { echo $debtarj->id; } else { echo '0'; }?>">
 				            </div>
 				        </div>	
 				    </div>
@@ -85,7 +86,7 @@
 					<div align="left" style="width:100%">
 				    	<div class="form-group">
 				            <div class="col-sm-6">
-				               	<button class="btn-success" > <?if ($debtarj) { echo "Modificar"; } else { echo "Agregar"; } ?> <i id="reg-cargando" class="fa fa-spin fa-spinner hidden"></i></button>
+				               	<button class="btn-success" id="boton-deb" <?if ($debtarj) { echo " data-text='btnmodif' > Modificar"; } else { echo " data-text='btnagregar' > Agregar"; } ?> <i id="reg-cargando" class="fa fa-spin fa-spinner hidden"></i></button>
 				            </div>
 				        </div>
 				    </div>

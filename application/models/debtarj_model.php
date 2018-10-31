@@ -14,6 +14,7 @@ class Debtarj_model extends CI_Model {
     
     public function grabar($datos)
     {
+	var_dump($datos);
         $this->db->insert('socios_debito_tarj', $datos);
         return $this->db->insert_id();   
     }
@@ -187,12 +188,9 @@ class Debtarj_model extends CI_Model {
 	$row=$query->row();
 	if ( $row ) {
 		$fecha_deb=$row->fecha_debito;
-
-        	$this->db->where('fecha_debito', $fecha_deb);
-        	$this->db->where('fecha_acreditacion',null);
-        	$query = $this->db->get('socios_debitos');
-		$debitos=$query->result();
-
+/* Armo SQL p buscar con JOIN */
+        	$qry="SELECT sd.id FROM socios_debitos sd JOIN socios_debito_tarj sdt ON ( sd.id_debito = sdt.id AND sdt.id_marca = $id_marca ) WHERE sd.fecha_debito = '$fecha_deb' AND sd.fecha_acreditacion IS NULL; ";
+        	$debitos = $this->db->query($qry)->result();
 		if ( $debitos ) {
 			foreach ( $debitos as $debito ) {
         			$this->db->where('id', $debito->id);
