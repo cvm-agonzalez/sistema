@@ -100,7 +100,8 @@
                     </header>
                 </section>
 
-                <aside data-ng-include=" '<?=$baseurl?>views/nav.php?baseurl=<?=$baseurl?>&section=<?=$section?>' " id="nav-container"></aside>
+
+                <aside data-ng-include=" '<?=$baseurl?>views/nav.php?baseurl=<?=$baseurl?>&section=<?=$section?>&rango=<?=$rango?>' " id="nav-container"></aside>
             </div>
                 <section id="content" class="cvm_section">
 
@@ -1204,10 +1205,25 @@ $("#comi-activ-form").submit(function(){
 
 //Agregado AHG 
             $("#contra_reg_form").submit(function(){
+alert("contra_reg");
                 var marca = $("#marca").val();
                 var periodo = $("#periodo").val();
-            $.post("<?=base_url()?>admin/contracargos",{marca:marca,periodo:periodo})
+                var url="<?=base_url()?>admin/debtarj/contracargo/getcab/"+marca+"/"+periodo;
+alert("antes get url="+url);
+
+            $.get("<?=$baseurl?>admin/debtarj/contracargo/getcab"+marca+"/"+periodo,function(data){
+                if(data){
+alert("encontro data");
+                    	var cabecera = $.parseJSON(data);
+            		var url="<?=base_url()?>admin/debtarj/contracargo/view/"+marca+"/"+periodo;
+        		$("#contra_reg_form").attr("action",url);
+                }else{
+			alert("No existe ese Periodo / Tarjeta ");
+                }
             })
+
+
+	})
 
 $("#load-debtarj-form").submit(function(){
         var marca = $("#marca").val();
@@ -1312,23 +1328,19 @@ $("#debtarj_botones_form button").on("click", function(){
         return true;
 })
 
-            <? if($section == 'contracargos-get' ) { ?>
 
-            function get_contracargo(id){
-                 $("#contracargo-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
-                 $.get( "<?=$baseurl?>admin/pagos/registrar/get/"+id ).done(function(data){
-                    $("#contracargo-div").html(data);
-                    $("#contracargo-div").slideDown();
-
-                })
-
-            }
-
-
-
-            <? if($tabla ){ ?> $("#contracargo-div").slideDown(); get_contracargo("<?=$tarjeta->Id?>"); <? } ?>
-
-	    <? } ?>
+$("#contra-pago-form").submit(function(){
+        var agree = confirm("Seguro que desea registrar este contracargo?");
+        if(!agree){return false;}
+        $("#reg-cargando").removeClass('hidden');
+        var periodo = $("#periodo").val();
+        var id_marca = $("#id_marca").val();
+        var fecha_debito = $("#fechadeb").val();
+        var nrotarjeta = $("#nrotarjeta").val();
+        var importe = $("#importe").val();
+        $.post("<?=$baseurl?>admin/debtarj/contracargo/do/"+id_marca+"/"+periodo,{fecha_debito: fecha_debito, nrotarjeta: nrotarjeta, importe: importe})
+        return false;
+})
 
 
 

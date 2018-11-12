@@ -451,6 +451,7 @@ class Admin extends CI_Controller {
 
     public function morosos(){
         $data['username'] = $this->session->userdata('username');
+        $data['rango'] = $this->session->userdata('rango');
         $data['baseurl'] = base_url();
         $data['section'] = 'morosos';
         $this->load->view('admin',$data);
@@ -482,7 +483,7 @@ class Admin extends CI_Controller {
                     'username'         =>         $check_user->user
                     );
                     $this->session->set_userdata($data);
-                    //$this->login_model->update_lCon();
+                    $this->login_model->update_lCon();
                     redirect(base_url().'admin');
                 }
             }
@@ -514,6 +515,7 @@ class Admin extends CI_Controller {
         $this->load->model('admins_model');
         $this->login_model->update_lCon();
         $data['username'] = $this->session->userdata('username');
+        $data['rango'] = $this->session->userdata('rango');
         $data['baseurl'] = base_url();
         switch ($action) {
             case 'agregar':
@@ -563,13 +565,25 @@ class Admin extends CI_Controller {
 
             **/
             case 'categorias':
-                $data['username'] = $this->session->userdata('username');
-                $data['baseurl'] = base_url();
-                $data['action'] = 'nuevo';
-                $data['section'] = 'categorias';
-                $this->load->model("general_model");
-                $data['categorias'] = $this->general_model->get_cats();
-                $this->load->view('admin',$data);
+		if ( $this->uri->segment(4) ) {
+			switch ( $this->uri->segment(4) ) {
+				case 'listcateg':
+                			$this->load->model('general_model');
+					$result=$this->general_model->get_cats();
+                			$datos = json_encode($result);
+                			echo $datos;
+					break;
+			}
+		} else {
+                	$data['username'] = $this->session->userdata('username');
+                        $data['rango'] = $this->session->userdata('rango');
+                	$data['baseurl'] = base_url();
+                	$data['action'] = 'nuevo';
+                	$data['section'] = 'categorias';
+                	$this->load->model("general_model");
+                	$data['categorias'] = $this->general_model->get_cats();
+                	$this->load->view('admin',$data);
+		}
 		break;
 
             case 'get':
@@ -892,6 +906,7 @@ class Admin extends CI_Controller {
                 break;
             case 'agregar':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['action'] = 'nuevo';
                 $data['section'] = 'socios-nuevo';
@@ -906,6 +921,7 @@ class Admin extends CI_Controller {
 
             case 'nuevo':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $datos = array();
                 foreach($_POST as $key => $val)
@@ -932,6 +948,7 @@ class Admin extends CI_Controller {
                 if($prev_user = $this->socios_model->checkDNI($datos['dni'])){
                     //el dni esta repetido, incluimos la vista de listado con el usuario coincidente
                     $data['username'] = $this->session->userdata('username');
+                    $data['rango'] = $this->session->userdata('rango');
                     $data['prev_user'] = $prev_user;
                     $data['baseurl'] = base_url();
                     $data['section'] = 'socio-dni-repetido';
@@ -1004,6 +1021,7 @@ class Admin extends CI_Controller {
 
             case 'nuevo-tutor':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 //if(!$this->session->userdata('username')){ redirect(base_url()."admin"); }
                 $tutor['nombre'] = $this->input->get("tutor-nombre");
@@ -1042,6 +1060,7 @@ class Admin extends CI_Controller {
 
             case 'registrado':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['uid'] = $this->uri->segment(4);
                 $data['section'] = 'socios-registrado';
@@ -1050,6 +1069,7 @@ class Admin extends CI_Controller {
 
             case 'editar':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'socios-editar';
                 $this->load->model("general_model");
@@ -1106,6 +1126,7 @@ class Admin extends CI_Controller {
                 	if($prev_user = $this->socios_model->checkDNI($datos['dni'],$id)){
                     		//el dni esta repetido, incluimos la vista de listado con el usuario coincidente
                     		$data['username'] = $this->session->userdata('username');
+                		$data['rango'] = $this->session->userdata('rango');
                     		$data['prev_user'] = $prev_user;
                     		$data['baseurl'] = base_url();
                     		$data['section'] = 'socio-dni-repetido';
@@ -1137,6 +1158,7 @@ class Admin extends CI_Controller {
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
                 $data['facturacion'] = $this->pagos_model->get_facturacion($this->uri->segment(4));
@@ -1166,6 +1188,7 @@ class Admin extends CI_Controller {
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
                 $data['facturacion'] = $this->pagos_model->get_facturacion($this->uri->segment(4));
@@ -1178,6 +1201,7 @@ class Admin extends CI_Controller {
                 break;
              case 'resumen-deuda':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['deuda'] = 'only';
                 $data['section'] = 'socios-resumen';
@@ -1186,6 +1210,7 @@ class Admin extends CI_Controller {
 
              case 'resumen-sindeuda':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['deuda'] = 'no';
                 $data['section'] = 'socios-resumen';
@@ -1194,6 +1219,7 @@ class Admin extends CI_Controller {
 
             case 'categorias':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'socios-categorias';
                 $this->load->view('admin',$data);
@@ -1201,6 +1227,7 @@ class Admin extends CI_Controller {
 
             default:
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'socios';
                 //$this->load->model("socios_model");
@@ -1234,6 +1261,7 @@ class Admin extends CI_Controller {
 		case 'eliminar':
                         $this->load->model('rifas_model');
                		$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
                         $this->rifas_model->borrar_rifas($this->uri->segment(4));
                         $data['section'] = 'rifas-mensaje';
@@ -1243,6 +1271,7 @@ class Admin extends CI_Controller {
 		case 'editar':
                         $this->load->model('rifas_model');
                		$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
 			$rifa = $this->rifas_model->get_rifas_by_id($this->uri->segment(4));
                		$data['rifa'] = $rifa;
@@ -1252,6 +1281,7 @@ class Admin extends CI_Controller {
 		case 'editada':
                         $this->load->model('rifas_model');
                		$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                         $this->rifas_model->actualizar_rifas($this->uri->segment(4));
                         $data['section'] = 'rifas-editada';
                         $this->load->view('admin',$data);
@@ -1265,6 +1295,7 @@ class Admin extends CI_Controller {
 		case 'agregar':
                         $this->load->model('rifas_model');
                		$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
                         $data['section'] = 'rifas-nueva';
                         $this->load->view('admin',$data);
@@ -1294,6 +1325,7 @@ class Admin extends CI_Controller {
 		default:
                		$this->load->model('rifas_model');
                		$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                		$data['baseurl'] = base_url();
 			$rifas = $this->rifas_model->get_rifas();
                		$data['rifas'] = $rifas;
@@ -1463,6 +1495,7 @@ class Admin extends CI_Controller {
 			$this->debtarj_model->insert_periodo_marca($datos);
 
                  	$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                  	$data['baseurl'] = base_url();
                	 	$data['result'] = $result;
 
@@ -1508,6 +1541,7 @@ class Admin extends CI_Controller {
                  $this->load->model('debtarj_model');
                  $this->load->model('tarjeta_model');
                  $data['username'] = $this->session->userdata('username');
+                 $data['rango'] = $this->session->userdata('rango');
                  $data['baseurl'] = base_url();
                	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
                	 $data['debitos_gen'] = $this->debtarj_model->get_debitos_gen();
@@ -1535,6 +1569,7 @@ class Admin extends CI_Controller {
                  $this->load->model('tarjeta_model');
                	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
                  $data['username'] = $this->session->userdata('username');
+                 $data['rango'] = $this->session->userdata('rango');
                  $data['baseurl'] = base_url();
                  $data['section'] = "load-debtarj";
                  $this->load->view('admin',$data);
@@ -1542,6 +1577,7 @@ class Admin extends CI_Controller {
             case 'list-debtarj':
                  $this->load->model('debtarj_model');
                  $data['username'] = $this->session->userdata('username');
+                 $data['rango'] = $this->session->userdata('rango');
                  $data['baseurl'] = base_url();
                  if ( $this->uri->segment(4) ) {
                  	if ( $this->uri->segment(4) == "excel" ) {
@@ -1572,6 +1608,7 @@ class Admin extends CI_Controller {
                		$this->load->model('debtarj_model');
                		$data['baseurl'] = base_url();
                		$data['username'] = $this->session->userdata('username');
+                        $data['rango'] = $this->session->userdata('rango');
 			        $debtarj = $this->debtarj_model->get_debtarj($this->uri->segment(4));
 			        $data['debtarj'] = $debtarj;
                		$socio = $this->socios_model->get_socio($debtarj->sid);
@@ -1603,41 +1640,88 @@ class Admin extends CI_Controller {
 			break;
 
                 case 'contracargo':
-			if ( $this->input->post('marca') ) {
-                		$id_marca = $this->input->post('marca');
-                		$periodo = $this->input->post('periodo');
-	                	$this->load->model('debtarj_model');
-                 		$this->load->model('tarjeta_model');
-                 		$data['tarjeta'] = $this->tarjeta_model->get($id_marca);
-				$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
-				if ( $gen ) {
-                			$tabla = $this->input->post('tabla');
-					if ( !$tabla ) {
-						$tabla=array();
-					}
-					$data['fecha_debito'] = $gen->fecha_debito;
-					$data['cant_generada'] = $gen->cant_generada;
-					$data['total_generado'] = $gen->total_generado;
-					$data['tabla'] = $tabla;
-                 			$data['baseurl'] = base_url();
-                			$data['section'] = 'contracargos-get';
-                 			$this->load->view('admin',$data);
-				} else {
-		                        $data['baseurl'] = base_url();
-                                	$data['mensaje1'] = "No se encuentra ese periodo para esa tarjeta";
-                        		$data['msj_boton'] = "Volver a contracargo manual";
-                        		$data['url_boton'] = base_url()."admin/debtarj/contracargo";
-                        		$data['section'] = 'ppal-mensaje';
-                        		$this->load->view("admin",$data);
-				}
- 			} else {
-	                	$this->load->model('debtarj_model');
-                 		$this->load->model('tarjeta_model');
-                 		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
-                 		$data['username'] = $this->session->userdata('username');
-                 		$data['baseurl'] = base_url();
-                 		$data['section'] = "contracargos";
-                 		$this->load->view('admin',$data);
+                        if ( !$this->uri->segment(4) ) {
+				$this->load->model('debtarj_model');
+				$this->load->model('tarjeta_model');
+				$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
+				$data['username'] = $this->session->userdata('username');
+                  		$data['rango'] = $this->session->userdata('rango');
+				$data['baseurl'] = base_url();
+				$data['section'] = "contracargos";
+				$this->load->view('admin',$data);
+			} else  {
+				$accion=$this->uri->segment(4);
+                                switch ( $accion ) {
+                                        case 'getcab':
+                				$id_marca = $this->uri->segment(5);
+                				$periodo = $this->uri->segment(6);
+	                                        $this->load->model('debtarj_model');
+                                        	$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
+						if ($gen) { 
+							$salida=json_encode($gen); 
+						} else { 
+							$salida=null; 
+						}
+						echo $salida;
+						break;
+                                        case 'do':
+                				$id_marca = $this->uri->segment(5);
+                				$periodo = $this->uri->segment(6);
+                                                $fecha_debito = $this->input->post('fecha_debito');
+                                                $nrotarjeta = $this->input->post('nrotarjeta');
+                                                $importe = $this->input->post('importe');
+                                                $this->load->model('debtarj_model');
+                                                $retact = $this->debtarj_model->mete_contracargo($periodo, $id_marca, $nrotarjeta, $importe);
+                                                if ( $retact ) {
+                                                        redirect(base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo);
+                                                } else {
+                                                        $data['baseurl'] = base_url();
+                                                        $data['mensaje1'] = "No se encuentra esa tarjeta importe para hacer contracargo";
+                                                        $data['msj_boton'] = "Volver a contracargo manual";
+                                                        //$data['url_boton'] = base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo;
+                                                        $data['section'] = 'ppal-mensaje';
+                                                        $this->load->view("admin",$data);
+                                                }
+                                                break;
+                                        case 'view':
+                				$id_marca = $this->uri->segment(5);
+                				$periodo = $this->uri->segment(6);
+	                                        $this->load->model('debtarj_model');
+                                        	$this->load->model('tarjeta_model');
+                                        	$data['tarjeta'] = $this->tarjeta_model->get($id_marca);
+                                        	$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
+                                        	if ( $gen ) {
+                                                	// Si es la primera vez que entro actualizo masivamente socios_debitos y actualizo cabecera socios_debitos_gen
+                                                	if ( $gen->cant_acreditada == 0 ) {
+                                                        	$this->debtarj_model->inicializa_contra($periodo, $id_marca);
+                                                	}
+                                                	// Si encuentro contracargos ya realizados los traigo sino arranco con un array vacio
+                                                	$contras = $this->debtarj_model->get_contracargos($periodo, $id_marca);
+                                                	if ( $contras ) {
+                                                        	$tabla=$contras;
+                                                	} else {
+                                                        	$tabla=array();
+                                                	}
+                                                	$data['id_marca'] = $id_marca;
+                                                	$data['periodo'] = $periodo;
+                                                	$data['fecha_debito'] = $gen->fecha_debito;
+                                                	$data['cant_generada'] = $gen->cant_generada;
+                                                	$data['total_generado'] = $gen->total_generado;
+                                                	$data['tabla'] = $tabla;
+                                                	$data['baseurl'] = base_url();
+                                                	$data['section'] = 'contracargos-get';
+                                                	$this->load->view('admin',$data);
+						} else {
+                                                        $data['baseurl'] = base_url();
+                                                        $data['mensaje1'] = "No existe ese periodo para esa marca";
+                                                        $data['msj_boton'] = "Volver a contracargo manual";
+                                                        $data['url_boton'] = base_url()."admin/debtarj/contracargo/";
+                                                        $data['section'] = 'ppal-mensaje';
+                                                        $this->load->view("admin",$data);
+						}
+						break;
+                                }
+
 			}
 			break;
                 case 'stopdebit':
@@ -1682,6 +1766,7 @@ class Admin extends CI_Controller {
 			$fecha=date('d-m-Y');
                		$data['fecha'] = $fecha;
                		$data['username'] = $this->session->userdata('username');
+                  	$data['rango'] = $this->session->userdata('rango');
                		$data['socio'] = $this->socios_model->get_socio($this->uri->segment(3));
                		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
                		$data['baseurl'] = base_url();
@@ -2234,6 +2319,7 @@ class Admin extends CI_Controller {
                 break;
             case 'agregar':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'actividades-agregar';
                 $this->load->model("actividades_model");
@@ -2265,6 +2351,7 @@ class Admin extends CI_Controller {
                 break;
             case 'editar':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $this->load->model('actividades_model');
                 $data['actividad'] = $this->actividades_model->get_actividad($this->uri->segment(4));
@@ -2333,6 +2420,7 @@ class Admin extends CI_Controller {
                     redirect(base_url()."admin/actividades/comisiones");
                 }else{
                     $data['username'] = $this->session->userdata('username');
+                    $data['rango'] = $this->session->userdata('rango');
                     $data['baseurl'] = base_url();
                     $data['section'] = 'actividades-comisiones';
                     $this->load->model('actividades_model');
@@ -2382,6 +2470,7 @@ class Admin extends CI_Controller {
                     redirect(base_url()."admin/actividades/profesores");
                 }else{
                     $data['username'] = $this->session->userdata('username');
+                    $data['rango'] = $this->session->userdata('rango');
                     $data['baseurl'] = base_url();
                     $data['section'] = 'actividades-profesores';
                     $this->load->model('actividades_model');
@@ -2431,6 +2520,7 @@ class Admin extends CI_Controller {
                     redirect(base_url()."admin/actividades/lugares");
                 }else{
                     $data['username'] = $this->session->userdata('username');
+                    $data['rango'] = $this->session->userdata('rango');
                     $data['baseurl'] = base_url();
                     $data['section'] = 'actividades-lugares';
                     $this->load->model('actividades_model');
@@ -2450,6 +2540,7 @@ $this->actividades_model->becar($id,$beca);
 
             default:
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'actividades';
                 $this->load->model('actividades_model');
@@ -2475,6 +2566,7 @@ $this->actividades_model->becar($id,$beca);
                         $this->load->model('pagos_model');
                         $this->load->model('actividades_model');
                         $data['username'] = $this->session->userdata('username');
+                        $data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
                         $data['socio'] = $this->socios_model->get_socio($sid);
                         $data['facturacion'] = $this->pagos_model->get_facturacion($sid);
@@ -2489,6 +2581,7 @@ $this->actividades_model->becar($id,$beca);
 
                     default:
                         $data['username'] = $this->session->userdata('username');
+                        $data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
                         $data['section'] = 'pagos-registrar';
                         $data['sid'] = $this->uri->segment(4);
@@ -2504,6 +2597,7 @@ $this->actividades_model->becar($id,$beca);
                 break;
             case 'facturacion':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'pagos-facturacion';
                 $this->load->view('admin',$data);
@@ -2549,6 +2643,7 @@ $this->actividades_model->becar($id,$beca);
                         break;
                     default:
                         $data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
                         $data['section'] = 'pagos-cupon';
                         $data['sid'] = $this->uri->segment(4);
@@ -2626,6 +2721,7 @@ $this->actividades_model->becar($id,$beca);
 
 
                         $data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                         $data['baseurl'] = base_url();
                         $this->load->model('socios_model');
                         $data['sid'] = $id_socio;
@@ -2637,6 +2733,7 @@ $this->actividades_model->becar($id,$beca);
                 break;
             case 'deuda-socio':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'pagos-deuda';
                 $data['socio'] = 'socio';
@@ -2645,6 +2742,7 @@ $this->actividades_model->becar($id,$beca);
 
             case 'editar':
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'pagos-editar';
                 $data['socio'] = 'socio';
@@ -2670,6 +2768,7 @@ $this->actividades_model->becar($id,$beca);
 
             default:
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'listado_imprimir';
 /*
@@ -2707,6 +2806,7 @@ $this->actividades_model->becar($id,$beca);
 	switch ( $opcion ) {
         	case 'facturacion':
 			$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
 			$data['baseurl'] = base_url();
 			$data['facturacion_mensual'] = $this->estadisticas_model->facturacion_mensual();
 			$data['facturacion_anual'] = $this->estadisticas_model->facturacion_anual();
@@ -2719,6 +2819,7 @@ $this->actividades_model->becar($id,$beca);
                 		$this->load->model('actividades_model');
                 		$data['actividades'] = $this->actividades_model->get_actividades();
 				$data['username'] = $this->session->userdata('username');
+                		$data['rango'] = $this->session->userdata('rango');
 				$data['baseurl'] = base_url();
 				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_actividad);
 				$data['section'] = 'estadisticas-cobranza';
@@ -2729,6 +2830,7 @@ $this->actividades_model->becar($id,$beca);
                 		$this->load->model('actividades_model');
                 		$data['actividades'] = $this->actividades_model->get_actividades();
 				$data['username'] = $this->session->userdata('username');
+                		$data['rango'] = $this->session->userdata('rango');
 				$data['baseurl'] = base_url();
 				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla();
 				$data['id_actividad'] = -1;
@@ -2760,6 +2862,7 @@ $this->actividades_model->becar($id,$beca);
 
             default:
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'configuracion';
                 $this->load->model("general_model");
@@ -2783,11 +2886,13 @@ $this->actividades_model->becar($id,$beca);
             $this->email->send();
 
             $data['username'] = $this->session->userdata('username');
+            $data['rango'] = $this->session->userdata('rango');
             $data['baseurl'] = base_url();
             $data['section'] = 'soporte-enviado';
             $this->load->view('admin',$data);
         }else{
             $data['username'] = $this->session->userdata('username');
+            $data['rango'] = $this->session->userdata('rango');
             $data['baseurl'] = base_url();
             $data['section'] = 'soporte';
             $this->load->view('admin',$data);
@@ -2847,6 +2952,7 @@ $this->actividades_model->becar($id,$beca);
                 $this->load->model('general_model');
                 $data['envio'] = $this->general_model->get_envio($id);
                 $data['username'] = $this->session->userdata('username');
+            $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'envios-enviar';
                 $this->load->view('admin',$data);
@@ -2883,6 +2989,7 @@ $this->actividades_model->becar($id,$beca);
                 $data['actividades'] = $this->actividades_model->get_actividades();
                 $data['comisiones'] = $this->actividades_model->get_comisiones();
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'envios-nuevo';
                 $this->load->view('admin',$data);
@@ -2953,6 +3060,7 @@ $this->actividades_model->becar($id,$beca);
                 $data['actividades'] = $this->actividades_model->get_actividades();
                 $data['profesores'] = $this->actividades_model->get_profesores();
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'envios-editar';
                 $this->load->view('admin',$data);
@@ -3015,6 +3123,7 @@ $this->actividades_model->becar($id,$beca);
                 $this->load->model('general_model');
                 $data['envios'] = $this->general_model->get_envios();
                 $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
                 $data['section'] = 'envios';
                 $this->load->view('admin',$data);

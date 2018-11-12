@@ -1,7 +1,11 @@
 <?
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * 
+ * Por convencion asignamos los siguientes niveles de acceso con el rango
+ * 0 = root
+ * 1 = admin
+ * 2 = usuario de lectura 
+ * 3 = acceso publico de comisiones
  */
 class Login_model extends CI_Model {
     
