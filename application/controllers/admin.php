@@ -567,6 +567,80 @@ class Admin extends CI_Controller {
             case 'categorias':
 		if ( $this->uri->segment(4) ) {
 			switch ( $this->uri->segment(4) ) {
+				case 'editar':
+					$idcateg = $this->uri->segment(5);
+                			$this->load->model('general_model');
+					$categ=$this->general_model->get_cat($idcateg);
+                			$data['username'] = $this->session->userdata('username');
+                        		$data['rango'] = $this->session->userdata('rango');
+                			$data['baseurl'] = base_url();
+                			$data['categoria'] = $categ;
+                			$data['action'] = 'agregar';
+                			$data['section'] = 'categorias-editar';
+                			$this->load->view('admin',$data);
+					break;
+				case 'editar-do':
+					$idcateg = $this->uri->segment(5);
+                			$this->load->model('general_model');
+       			                $datos['Id'] = $idcateg;
+       			                $datos['nomb'] = $this->input->post('nombre');
+       			                $datos['precio'] = $this->input->post('precio');
+       			                $datos['precio_unit'] = $this->input->post('precio_unit');
+       			                $datos['estado'] = $this->input->post('estado');
+                        		$this->general_model->update_cat($idcateg,$datos);
+
+					// Grabo log de cambios
+                			$login = $this->session->userdata('username');
+                        		$nivel_acceso = $this->session->userdata('rango');
+					$tabla = "categorias";
+					$operacion = 2;
+					$llave = $idcateg;
+					$observ = substr(json_encode($datos),0,255);
+    					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                                	redirect(base_url().'admin/socios/categorias');
+					break;
+				case 'eliminar':
+					$idcateg = $this->uri->segment(5);
+                			$this->load->model('general_model');
+					$categ=$this->general_model->delete_cat($idcateg);
+
+					// Grabo log de cambios
+                			$login = $this->session->userdata('username');
+                        		$nivel_acceso = $this->session->userdata('rango');
+					$tabla = "categorias";
+					$operacion = 3;
+					$llave = $idcateg;
+					$observ = substr(json_encode($datos),0,255);
+    					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                                	redirect(base_url().'admin/socios/categorias');
+					break;
+				case 'agregar':
+                			$data['username'] = $this->session->userdata('username');
+                        		$data['rango'] = $this->session->userdata('rango');
+                			$data['baseurl'] = base_url();
+                			$data['action'] = 'agregar';
+                			$data['section'] = 'categorias-agregar';
+                			$this->load->view('admin',$data);
+					break;
+				case 'agregar-do':
+                			$this->load->model('general_model');
+       			                $datos['Id'] = 0;
+       			                $datos['nomb'] = $this->input->post('nombre');
+       			                $datos['precio'] = $this->input->post('precio');
+       			                $datos['precio_unit'] = $this->input->post('precio_unit');
+       			                $datos['estado'] = 1;
+                        		$this->general_model->insert_cat($datos);
+
+					// Grabo log de cambios
+                			$login = $this->session->userdata('username');
+                        		$nivel_acceso = $this->session->userdata('rango');
+					$tabla = "categorias";
+					$operacion = 1;
+					$llave = $idcateg;
+					$observ = substr(var_dump($datos), 255);
+    					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                                	redirect(base_url().'admin/socios/categorias');
+					break;
 				case 'listcateg':
                 			$this->load->model('general_model');
 					$result=$this->general_model->get_cats();
@@ -1217,13 +1291,6 @@ class Admin extends CI_Controller {
                 $this->load->view('admin',$data);
                 break;
 
-            case 'categorias':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
-                $data['section'] = 'socios-categorias';
-                $this->load->view('admin',$data);
-                break;
 
             default:
                 $data['username'] = $this->session->userdata('username');
@@ -1235,6 +1302,18 @@ class Admin extends CI_Controller {
                 $this->load->view('admin',$data);
                 break;
         }
+    }
+
+    public function log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ) {
+		$this->load->model("general_model");
+			$datos['log_ts'] = date('Y-m-d H:i:s');
+			$datos['login'] = $login;
+			$datos['nivel_acceso'] = $nivel_acceso;
+			$datos['tabla'] = $tabla;
+			$datos['operacion'] = $operacion;
+			$datos['clave'] = $llave;
+			$datos['observacion'] = $observ;
+        	$this->general_model->write_log($datos);
     }
 
     public function rifas() {

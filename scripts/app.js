@@ -1060,6 +1060,46 @@ function () {
         }           
     ])
 
+    .service('tableCateg', function ($http) { 
+        return {
+            getCateg: function(succescb){
+                $http({method:'GET', url:'categorias/listcateg'})
+                    .success(function(data){                        
+                        succescb(data);
+                       $("#cargando_cats").html('<a href="categorias/agregar" class="btn btn-success"><i class="fa fa-plus"></i> Nueva Categoria</a>');
+
+                    })
+                    .error(function(data){
+                        $log.warn(data);    
+                    });  
+            }
+        }
+    })
+    .controller("tableCategoria", ["tableCateg","$scope", "$filter",
+        function (tableCateg, $scope, $filter) {
+            var init;
+            var categs = tableCateg.getCateg(function(categs){
+                return $scope.stores = categs, $scope.searchKeywords = "", $scope.filteredStores = [], $scope.row = "", $scope.select = function (page) {
+                var end, start;
+                return start = (page - 1) * $scope.numPerPage, end = start + $scope.numPerPage, $scope.currentPageStores = $scope.filteredStores.slice(start, end)
+                }, $scope.onFilterChange = function () {
+                    return $scope.select(1), $scope.currentPage = 1, $scope.row = ""
+                }, $scope.onNumPerPageChange = function () {
+                    return $scope.select(1), $scope.currentPage = 1
+                }, $scope.onOrderChange = function () {
+                    return $scope.select(1), $scope.currentPage = 1
+                }, $scope.search = function () {
+                    return $scope.filteredStores = $filter("filter")($scope.stores, $scope.searchKeywords), $scope.onFilterChange()
+                }, $scope.order = function (rowName) {
+                    return $scope.row !== rowName ? ($scope.row = rowName, $scope.filteredStores = $filter("orderBy")($scope.stores, rowName), $scope.onOrderChange()) : void 0
+                }, $scope.numPerPageOpt = [3, 5, 10, 20], $scope.numPerPage = $scope.numPerPageOpt[2], $scope.currentPage = 1, $scope.currentPageStores = [], (init = function () {
+                    return $scope.search(), $scope.select($scope.currentPage)
+                })()
+                           
+            });
+            
+        }
+    ])
 
     .service('tableDebito', function ($http) { 
         return {
