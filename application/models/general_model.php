@@ -9,8 +9,14 @@ class General_model extends CI_Model {
         parent::__construct();
         $this->load->database('default');
     }
-    
+
+    public function write_log($log)
+    {
+        $this->db->insert('log_cambios',$log);
+    }
+
     public function get_cats(){
+        $this->db->where('estado > 0');
         $query = $this->db->get("categorias");
         return $query->result();
     }
@@ -20,6 +26,22 @@ class General_model extends CI_Model {
         $query = $this->db->get("categorias");
         return $query->row();
     }
+    public function update_cat($idcateg,$categ='')
+    {
+        $this->db->where('Id',$idcateg);
+        $this->db->update('categorias',$categ);
+    }
+    public function insert_cat($categ='')
+    {
+        $this->db->insert('categorias',$categ);
+        return $this->db->insert_id();
+    }
+    public function delete_cat($idcateg)
+    {
+    	$this->db->where('Id',$idcateg);
+	$this->db->update('categorias',array('estado'=>0));
+    }
+
     /*public function get_ciudades(){
     	$this->db->order_by("ciudad_nombre", "asc"); 
         $query = $this->db->get("ciudades");
