@@ -178,7 +178,7 @@ $("#reg-pago-form").submit(function(){
 		$("#des").val("");
 		$("#reg-cargando").addClass('hidden');
 	})
-	console.log(tipo+monto+des);
+	//console.log(tipo+monto+des);
 
 	return false;
 })

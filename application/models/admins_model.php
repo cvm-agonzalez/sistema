@@ -41,6 +41,38 @@ class Admins_model extends CI_Model {
 		return $admin;
 	}
 
+	public function chk_pwd($id,$old_pwd)
+	{
+		$this->db->where('Id',$id);
+		$query = $this->db->get('admin');
+		if( $query->num_rows() == 0 ){ return false; }
+		$user = $query->row();
+		var_dump($user);
+		if ( $user ) {
+			var_dump($user->pass);
+			var_dump($old_pwd);
+			var_dump("hola");
+
+			if ( $user->pass == $old_pwd ) {
+				var_dump("true");
+				return true;
+			} else {
+				var_dump("false");
+				return false;
+			}
+		} else {
+			var_dump("false");
+			return false;
+		}
+	}
+
+	public function update_pwd($id,$new_pwd)
+	{
+		$now=date('Y-m-d H:i:s');
+		$this->db->where('Id', $id);
+		$this->db->update('admin', array("pass"=>$new_pwd, "last_chgpwd"=>$now));
+	}
+
 	public function update_admin($id='',$admin)
 	{
 		$this->db->where('Id', $id);

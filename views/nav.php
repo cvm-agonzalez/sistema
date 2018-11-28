@@ -110,7 +110,6 @@ function is_active($uri,$actual){
         <ul <? is_active($_GET['section'],'estadisticas') ?>>
             <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/facturacion"><i class="fa fa-caret-right"></i><span data-i18n="Facturación"></span></a></li>
             <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/cobranza"><i class="fa fa-caret-right"></i><span data-i18n="Cobranza"></span></a></li>            
-            <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/ingresos"><i class="fa fa-caret-right"></i><span data-i18n="Participacion Ingresos"></span></a></li>            
         </ul>
     </li>
 
@@ -118,12 +117,11 @@ function is_active($uri,$actual){
     <li>
         <a href="<?=$_GET['baseurl']?>admin/pagos"><i class="fa fa-tasks"><span class="icon-bg bg-warning"></span></i> <span data-i18n="Listados"></span></a>
     </li> 
-    <li>
-        <a href="<?=$_GET['baseurl']?>admin/envios"><i class="fa fa-envelope"><span class="icon-bg bg-success"></span></i> <span data-i18n="Envíos Masivos"></span></a>
-    </li> 
-    <li>
-        <a href="<?=$_GET['baseurl']?>admin/soporte"><i class="fa fa-question-circle"><span class="icon-bg bg-danger"></span></i> <span data-i18n="Soporte"></span></a>
-    </li>       
+   <? if ( $_GET['rango'] < 2 ) { ?>
+    	<li>
+        	<a href="<?=$_GET['baseurl']?>admin/envios"><i class="fa fa-envelope"><span class="icon-bg bg-success"></span></i> <span data-i18n="Envíos Masivos"></span></a>
+    	</li> 
+   <? } ?>
 </ul>
 </div>
 <script type="text/javascript">

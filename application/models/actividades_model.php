@@ -371,7 +371,7 @@ class Actividades_model extends CI_Model {
         $this->db->update('comisiones',array("estado"=>'0'));
     }
 
-    public function actualizar_comision($id, $datos){
+    public function actualizar_comision($datos, $id){
         $this->db->where('Id', $id);
         $this->db->update('comisiones', $datos); 
     }

@@ -44,6 +44,11 @@
                                 <li><a id="acceso_actividad" href="<?=$baseurl?>admin/actividades/asociar/<?=$socio->Id?>">Asociar Actividad</a> </li>
                                 <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->Id?>">Enviar Resumen</a></li>
                                 <li><a id="acceso_debtarj" href="<?=$baseurl?>admin/debtarj/<?=$socio->Id?>">Adherir Debito Tarjeta</a></li>
+                                <li><a id="imprimir_carnet" data-id="<?=$socio->Id?>" href="#">Imprimir Carnet</a></li>
+                                <li><a id="acceso_financiar" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->Id?>">Financiar Deuda</a></li>
+                                <li><a id="acceso_suspender" href="<?=$baseurl?>admin/socios/suspender/<?=$socio->Id?>">Suspender Socio</a></li>
+                                <li><a id="acceso_reinscribir" href="<?=$baseurl?>admin/socios/reinscribir/<?=$socio->Id?>">Reinscribir Socio</a></li>
+
                             </ul>
                         </div>
                     </div>                   

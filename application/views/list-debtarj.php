@@ -18,11 +18,13 @@
                     </span>
                 </div>
 		<form id="debtarj_botones_form" method="post">
-                <div class="col-sm-2 col-xs-3 " id="cargando_debitos" align="left">
-                        <button class="btn-success fa fa-plus" data-text="nuevo" data-action="<?=$baseurl?>admin/debtarj/" >Nuevo Debito <i class="fa fa-spin fa-spinner hidden"></i></button>
-                </div>
+                        <? if ( $rango < 2 ) { ?>
+                		<div class="col-sm-2 col-xs-3 " id="debtarj_nuevo" align="left">
+                        		<button class="btn-success fa fa-plus" data-text="nuevo" data-action="<?=base_url()?>admin/debtarj/0" >Nuevo Debito <i class="fa fa-spin fa-spinner hidden"></i></button>
+                		</div>
+			<? } ?>
                 <div class="col-sm-2 col-xs-3" id="debtarj_excel" align="right">
-                    <a href="<?=base_url()?>admin/debtarj/list-debtarj/excel" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
+                        <button class="btn-success fa fa-cloud-download" data-text="excel" data-action="<?=base_url()?>admin/debtarj/list-debtarj/excel" >Excel <i class="fa fa-spin fa-spinner hidden"></i></button>
                 </div>
 		</form>
             </div>
@@ -126,9 +128,11 @@
                     <td>{{store.price}}</td>
                     <td>{{store.estado}}</td>
                     <td>
-                        <a href="<?=base_url()?>admin/debtarj/{{store.sid}}">Editar</a> | 
-                        <a href="<?=base_url()?>admin/debtarj/eliminar/{{store.id}}" >Eliminar</a> |
-                        <a href="<?=base_url()?>admin/debtarj/stopdebit/{{store.id}}" >Stop DB</a> |
+                        <? if ( $rango < 2 ) { ?>
+                        	<a href="<?=base_url()?>admin/debtarj/{{store.sid}}">Editar</a> | 
+                        	<a href="<?=base_url()?>admin/debtarj/eliminar/{{store.id}}" >Eliminar</a> |
+                        	<a href="<?=base_url()?>admin/debtarj/stopdebit/{{store.id}}" >Stop DB</a> |
+                        <? } ?>
                         <a href="<?=base_url()?>admin/socios/resumen/{{store.sid}}" >Ver Resumen</a>
 
                     </td>
