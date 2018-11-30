@@ -103,9 +103,11 @@
                     <td>{{store.solo_socios}}</td>
                     <td>{{store.estado}}</td>
                     <td>
-                        <a href="#" id="imprimir_listado_actividades" data-act="{{store.id}}">Imprimir Listado</a> | 
-                        <a href="<?=base_url()?>admin/actividades/editar/{{store.id}}">Editar</a> | 
-                        <a href="<?=base_url()?>admin/actividades/eliminar/{{store.id}}" onclick="return check_eliminar_act()">Eliminar</a>
+                        <a href="#" id="imprimir_listado_actividades" data-act="{{store.id}}">Imprimir Listado</a>  
+			<? if ( $rango < 2 ) { ?>
+                        	<a href="<?=base_url()?>admin/actividades/editar/{{store.id}}">| Editar</a>  
+                        	<a href="<?=base_url()?>admin/actividades/eliminar/{{store.id}}" onclick="return check_eliminar_act()">| Eliminar</a>
+			<? } ?>
                     </td>
                 </tr>
                 <?

@@ -26,6 +26,7 @@
                         </div>
                         <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->Id?>">
                     </div> 
+		<? if ( $rango < 2 ) { ?>
                     <div class="form-group col-lg-6 <? if(!$socio->Id){ echo 'hidden'; } ?>" style="padding-top:20px;" id="accesos_directos">
                         <a id="acceso_editar" class="btn btn-success" href="<?=$baseurl?>admin/socios/editar/<?=$socio->Id?>"><i class="fa fa-user"></i> Editar este socio</a>                        
                         <a id="acceso_cupon" class="btn btn-info" href="<?=$baseurl?>admin/pagos/cupon/<?=$socio->Id?>"><i class="fa fa-dollar"></i> Generar Cupón</a>
@@ -39,14 +40,29 @@
                                 <li><a id="acceso_deuda" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->Id?>">Financiar Deuda</a></li>
                                 <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->Id?>">Enviar Resumen</a></li>
                                 <li><a id="acceso_debtarj" href="<?=$baseurl?>admin/debtarj/<?=$socio->Id?>">Adherir Debito Tarjeta</a></li>
+                                <li><a id="imprimir_carnet" data-id="<?=$socio->Id?>" href="#">Imprimir Carnet</a></li>
+                                <li><a id="acceso_financiar" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->Id?>">Financiar Deuda</a></li>
+                                <li><a id="acceso_suspender" href="<?=$baseurl?>admin/socios/suspender/<?=$socio->Id?>">Suspender Socio</a></li>
+                                <li><a id="acceso_reinscribir" href="<?=$baseurl?>admin/socios/reinscribir/<?=$socio->Id?>">Reinscribir Socio</a></li>
+
                             </ul>
                         </div>
-		<div>
-                <a href="<?=base_url()?>admin/socios/resumen/<?=$this->uri->segment(4)?>/excel" class="btn btn-primary">Bajar a Excel</a>
-		</div>
-                        <!--<a id="acceso_cupon" class="btn btn-warning" href="<?=$baseurl?>admin/actividades/asociar/<?=$socio->Id?>"><i class="fa fa-dollar"></i> Asociar Actividad</a>-->
-                        <br><br>
+		        <div>
+                		<a href="<?=base_url()?>admin/socios/resumen/<?=$this->uri->segment(4)?>/excel" class="btn btn-primary">Bajar a Excel</a>
+			</div>
+                        	<!--<a id="acceso_cupon" class="btn btn-warning" href="<?=$baseurl?>admin/actividades/asociar/<?=$socio->Id?>"><i class="fa fa-dollar"></i> Asociar Actividad</a>-->
+                        	<br><br>
                     </div>                   
+		<? } else { ?>
+                    <div class="form-group col-lg-6 <? if(!$socio->Id){ echo 'hidden'; } ?>" style="padding-top:20px;" id="accesos_directos">
+                        <a id="acceso_editar" class="btn btn-success" href="<?=$baseurl?>admin/socios/editar/<?=$socio->Id?>"><i class="fa fa-user"></i> Ver este socio</a>                        
+                    </div>                   
+                    <div>
+                        <a href="<?=base_url()?>admin/socios/resumen/<?=$this->uri->segment(4)?>/excel" class="btn btn-primary">Bajar a Excel</a>
+                    </div>
+
+
+		<? } ?>
                 </div>            
                 <div class="col-lg-12" id="asociar-div" style="display:none;">
                 

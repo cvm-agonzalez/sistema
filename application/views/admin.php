@@ -54,8 +54,14 @@
                             <span class="icon-bar"></span>
                         </div>
 
+
                         <div class="top-nav">
-                    <ul class="nav-right pull-right list-unstyled">
+			<div>
+                    	  <ul class="nav-right pull-right">
+				login: <?=$username?>
+			  </ul>
+			</div>
+                    	  <ul class="nav-right pull-right list-unstyled">
 
                                 <li class="dropdown text-normal nav-profile">
                                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
@@ -65,26 +71,20 @@
                                         </span>
                                     </a>
                                     <ul class="dropdown-menu with-arrow pull-right">
+					<? if ( $rango == 0 ) { ?>
+                                        	<li>
+                                            		<a href="<?=$baseurl?>admin/admins">
+                                                	<i class="fa fa-user"></i>
+                                                	<span data-i18n="Administradores"></span>
+                                            		</a>
+                                        	</li>
+					<? } ?>
                                         <li>
-                                            <a href="<?=$baseurl?>admin/admins">
-                                                <i class="fa fa-user"></i>
-                                                <span data-i18n="Administradores"></span>
+                                            <a href="<?=$baseurl?>admin/admins/chgpwd">
+                                                <i class="fa fa-key"></i>
+                                                <span data-i18n="Cambiar Contraseña"></span>
                                             </a>
                                         </li>
-                                        <li>
-                                            <a href="<?=$baseurl?>admin/configuracion">
-                                                <i class="fa fa-gear"></i>
-                                                <span data-i18n="Configuracion"></span>
-                                            </a>
-                                        </li>
-                                        <!--
-                                        <li>
-                                            <a href="#/pages/lock-screen">
-                                                <i class="fa fa-lock"></i>
-                                                <span data-i18n="Lock"></span>
-                                            </a>
-                                        </li>
-                                        -->
                                         <li>
                                             <a href="<?=$baseurl?>admin/logout">
                                                 <i class="fa fa-sign-out"></i>
@@ -364,25 +364,6 @@
                 $('#conf-tab a').click(function (e) {
                   e.preventDefault()
                   $(this).tab('show')
-                })
-                $('#cats-conf-save').click(function(){
-                    var precios = [];
-                    $('input#cat-precio').each(function(){
-                        precios.push($(this).val());
-                    })
-                    var fam_excedente = $("input#cat-precio_unit").val();
-                    console.log(precios,fam_excedente);
-                    $(this).attr("disabled", "disabled");
-                    $(this).removeClass("btn-success");
-                    $(this).addClass("btn-warning");
-                    $(this).html("<i class='fa fa-spinner fa-spin'></i> Guardando...");
-                    $.post("<?=$baseurl?>admin/configuracion/categorias",{ precios: precios, fam: fam_excedente }).done(function(){
-                        $('#cats-conf-save').removeAttr("disabled");
-                        $('#cats-conf-save').html("Guardar Cambios");
-                        $('#cats-conf-save').removeClass("btn-warning");
-                        $('#cats-conf-save').addClass("btn-success");
-                    })
-
                 })
             })
         </script>
