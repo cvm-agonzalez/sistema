@@ -1,5 +1,4 @@
 # sistema
-Sistema en linea en www.clubvillamitre.com
+Sistema para manejo de socios de entidades
 
-Voy a poner todo el codigo que esta en linea en www.clubvillamitre.com para poder manejarlo con versiones
-Cuando tenga alguien que me de una mano usaremos este repositorio para manejar versiones
+Hay que definir un sitio para hostear este sistema
