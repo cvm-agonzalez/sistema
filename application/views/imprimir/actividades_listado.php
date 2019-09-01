@@ -10,7 +10,7 @@
 </div>
 <div class="pull-right hidden-print">
     <button class="btn btn-info" onclick="print()"><i class="fa fa-print"></i> Imprimir</button>
-    <a href="<?=base_url()?>imprimir/actividades_excel/<?=$actividad->Id?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
+    <a href="<?=base_url()?>imprimir/actividades_excel/<?=$actividad->id?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
 </div>
 <table class="table table-striped table-bordered" cellspacing="0" width="100%" id="actividades_table">
     <thead>
@@ -32,7 +32,7 @@
     	?>
         <tr>
             <td><?=@$socio->socio?></td>
-            <td># <?=@$socio->Id?></td>
+            <td># <?=@$socio->id?></td>
             <td><?=@$socio->dni?></td>
             <td><?=@$socio->nacimiento?></td>
             <td><?=$socio->observaciones?></td>
@@ -67,7 +67,7 @@
             </td>
             <td>$ <?=number_format($socio->monto_adeudado*-1,2)?></td>
             <td><? if($socio->suspendido == 1){ echo '<label class="label label-danger"><i class="fa fa-warning"></i> SUSPENDIDO</label>'; }else{ echo '<label class="label label-success"><i class="fa fa-check"></i> ACTIVO</label>'; } ?></td>
-            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->Id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
+            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
         </tr> 
         <?
     	}

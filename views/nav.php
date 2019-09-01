@@ -55,11 +55,8 @@ function is_active($uri,$actual){
             			<li><a href="<?=$_GET['baseurl']?>admin/actividades"><i class="fa fa-caret-right"></i><span data-i18n="Listado"></span></a></li>
             			<li><a href="<?=$_GET['baseurl']?>admin/actividades/agregar"><i class="fa fa-caret-right"></i><span data-i18n="Nuevo"></span></a></li>                
             			<li><a href="<?=$_GET['baseurl']?>admin/actividades/comisiones"><i class="fa fa-caret-right"></i><span data-i18n="Comisiones"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/actividades/profesores"><i class="fa fa-caret-right"></i><span data-i18n="Profesores"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/actividades/lugares"><i class="fa fa-caret-right"></i><span data-i18n="Lugares"></span></a></li>
             			<li><a href="<?=$_GET['baseurl']?>admin/actividades/asociar"><i class="fa fa-caret-right"></i><span data-i18n="Asociar"></span></a></li>
             			<li><a href="<?=$_GET['baseurl']?>admin/actividades/load-asoc-activ"><i class="fa fa-caret-right"></i><span data-i18n="Relacion Masiva"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>comisiones/lista_socios_act"><i class="fa fa-caret-right"></i><span data-i18n="Socios Activos por Actividad"></span></a></li>
         			</ul>
     			</li>
 	<?		break;
@@ -115,7 +112,13 @@ function is_active($uri,$actual){
 
 <!--Opciones de Menu Reportes-->
     <li>
-        <a href="<?=$_GET['baseurl']?>admin/pagos"><i class="fa fa-tasks"><span class="icon-bg bg-warning"></span></i> <span data-i18n="Listados"></span></a>
+        <a href="<?=$_GET['baseurl']?>admin/reportes"><i class="fa fa-tasks"><span class="icon-bg bg-warning"></span></i> <span data-i18n="Listados"></span></a>
+        <ul class="sub-nav" <? is_active($_GET['section'],'reportes') ?>>
+            <li><a href="<?=$_GET['baseurl']?>admin/reportes/socios"><i class="fa fa-caret-right"></i><span data-i18n="Listados de Socios"></span></a></li>
+            <li><a href="<?=$_GET['baseurl']?>admin/reportes/cobros"><i class="fa fa-caret-right"></i><span data-i18n="Listados de Cobros"></span></a></li>
+            <li><a href="<?=$_GET['baseurl']?>admin/reportes/exportar"><i class="fa fa-caret-right"></i><span data-i18n="Exportación Datos"></span></a></li>
+        </ul>
+
     </li> 
    <? if ( $_GET['rango'] < 2 ) { ?>
     	<li>

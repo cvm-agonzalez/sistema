@@ -57,12 +57,15 @@ class Autocomplete extends CI_Controller {
 
     public function buscar_socio()
     {               // esta funcion busca socios, recibe 2 parametros de la URL
+        $id_entidad=$this->session->userdata('id_entidad')){          
         $this->load->model('socios_model'); 
         $param = $this->uri->segment(3);  // 1. el parametro que buscar
         $value = $this->uri->segment(4); // 2. el parametro a buscar
         if($value && $param){
             $by = array("$param" => $value);
-            $socio = $this->socios_model->get_socio_by($by);
+            $socio = $this->socios_model->get_socio_by($id_entidad, $by);
+		var_dump($id_entidad);
+		var_dump($by);
             if($socio){
                 $json = json_encode($socio);
                 echo $json;

@@ -38,7 +38,7 @@
 	                            	foreach ($activ_asoc as $actividad) {	                            	
 						if ( $actividad->estado == 1 ) {
 	                            	?>
-	                            			<option value="<?=$actividad->Id?>"><?=$actividad->nombre?></option>
+	                            			<option value="<?=$actividad->id?>"><?=$actividad->nombre?></option>
 	                            	<?
 	                            		}
 					}
@@ -105,11 +105,11 @@
 				foreach ($facturacion as $ingreso) {				
 				?>
 				<tr>
-					<td><?=$ingreso->Id?></td>
+					<td><?=$ingreso->id?></td>
 					<td><?=mostrar_fecha($ingreso->date)?></td>
 					<td>
-						<div class="" id="socio_desc" data-id="<?=$ingreso->Id?>"><?=$ingreso->descripcion?></div>
-						<div class="ver_mas" align="right"><a class="btn btn-primary hidden" href="#" id="ver_mas" data-toggle="0" data-id="<?=$ingreso->Id?>">Ver Más</a></div>
+						<div class="" id="socio_desc" data-id="<?=$ingreso->id?>"><?=$ingreso->descripcion?></div>
+						<div class="ver_mas" align="right"><a class="btn btn-primary hidden" href="#" id="ver_mas" data-toggle="0" data-id="<?=$ingreso->id?>">Ver Más</a></div>
 					</td>
 					<td class="debe">$ <?=$ingreso->debe?></td>
 					<td class="haber">$ <?=$ingreso->haber?></td>
@@ -169,7 +169,7 @@ $("#reg-pago-form").submit(function(){
 	}
 	var monto = $("#monto").val();
 	var des = $("#des").val();
-	$.post("<?=$baseurl?>admin/pagos/registrar/do",{sid: <?=$socio->Id?>, tipo: tipo, monto: monto, des: des, actividad:actividad, ajuing:ajuing})
+	$.post("<?=$baseurl?>admin/pagos/registrar/do",{sid: <?=$socio->id?>, tipo: tipo, monto: monto, des: des, actividad:actividad, ajuing:ajuing})
 	.done(function(data){
 		var data = $.parseJSON(data);
 		var newTr = '<tr><td>'+data.iid+'</td><td>'+data.fecha+'</td><td><div class="socios_desc" id="socio_desc_'+data.iid+'">'+data.descripcion+'</div><div class="ver_mas" align="right"><a class="btn btn-primary" href="#" id="ver_mas" data-toggle="0" data-id="'+data.iid+'">Ver Más</a></div></td><td class="debe">$ '+data.debe+'</td><td class="haber">$ '+data.haber+'</td><td>$ '+data.total+'</td></tr>'

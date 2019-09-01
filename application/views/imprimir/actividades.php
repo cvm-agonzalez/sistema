@@ -9,7 +9,7 @@
 	        		<?
 	        		foreach ($actividades as $actividad) {        		
 	        		?>
-	        		<option value="<?=$actividad->Id?>"><?=$actividad->nombre?></option>
+	        		<option value="<?=$actividad->id?>"><?=$actividad->nombre?></option>
 	        		<?
 	        		}
 	        		?>

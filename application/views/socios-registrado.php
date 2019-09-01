@@ -6,7 +6,7 @@
                 <div class="col-lg-12">
                     <h4>Los cambios se guardaron correctamente.</h4>
                     <?                
-                    if(@$_GET['e'] == 'socio_n'){
+                    if(@$_GET['e'] == 'nro_socio'){
                     ?>
                     <div class="alert alert-warning">
                         El número de socio ingresado es mayor que 28852 o ya se encuentra en uso por otro socio.

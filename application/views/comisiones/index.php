@@ -13,7 +13,7 @@ function is_active($seccion1,$seccion2)
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Club Villa Mitre | Comisiones</title>
+    <title><?=$ent_nombre?> | Comisiones</title>
 
     <!-- Bootstrap -->
     <link href="<?=base_url()?>styles/bootstrap.min.css" rel="stylesheet">
@@ -41,7 +41,7 @@ function is_active($seccion1,$seccion2)
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="<?=base_url()?>comisiones">Club Villa Mitre</a>
+          <a class="navbar-brand" href="<?=base_url()?>comisiones"><?=$ent_nombre?></a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav pull-right">
@@ -68,7 +68,7 @@ function is_active($seccion1,$seccion2)
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Club Villa Mitre</title>
+        <title><?=$ent_nombre?></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -108,7 +108,7 @@ function is_active($seccion1,$seccion2)
                         <!-- Logo -->
                         <div class="logo">
                             <a href="<?=$baseurl?>admin">
-                                <span>Villa Mitre</span>
+                                <span><?=$ent_nombre?></span>
                             </a>
                         </div>
 
@@ -124,7 +124,7 @@ function is_active($seccion1,$seccion2)
 
                                 <li class="dropdown text-normal nav-profile">
                                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-                                        <img src="<?=$baseurl?>images/g1.jpg" alt="" class="img-circle img30_30">
+					<img src="<?=$baseurl?>entidades/<?=$ent_directorio?>/images/g1.jpg" alt="" class="img-circle img30_30">
                                         <span class="hidden-xs">
                                             <span data-i18n=""></span>
                                         </span>

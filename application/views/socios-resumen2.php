@@ -16,7 +16,7 @@
 			?>
 			<div class="alert alert-danger" style="font-size:16px;">
 				<div class="pull-left" style="margin-top:6px;"><i class="fa fa-exclamation-triangle"></i> USUARIO SUSPENDIDO</div>
-				<div class="pull-right"><a href="<?=base_url()?>admin/socios/desuspender/<?=$socio->Id?>" class="btn btn-success">Desuspender</a></div>
+				<div class="pull-right"><a href="<?=base_url()?>admin/socios/desuspender/<?=$socio->id?>" class="btn btn-success">Desuspender</a></div>
 				<div class="clearfix"></div>
 			</div>
 			<?
@@ -44,11 +44,11 @@
 					foreach ($facturacion as $ingreso) {				
 					?>
 					<tr>
-						<td><?=$ingreso->Id?></td>
+						<td><?=$ingreso->id?></td>
 						<td><?=mostrar_fecha($ingreso->date)?></td>
 						<td>
-							<div class="" id="socio_desc" data-id="<?=$ingreso->Id?>"><?=$ingreso->descripcion?></div>
-							<div class="ver_mas" align="right"><a class="btn btn-primary" href="#" id="ver_mas" data-toggle="0" data-id="<?=$ingreso->Id?>">Ver Más</a></div>
+							<div class="" id="socio_desc" data-id="<?=$ingreso->id?>"><?=$ingreso->descripcion?></div>
+							<div class="ver_mas" align="right"><a class="btn btn-primary" href="#" id="ver_mas" data-toggle="0" data-id="<?=$ingreso->id?>">Ver Más</a></div>
 						</td>
 						<td class="debe">$ <?=$ingreso->debe?></td>
 						<td class="haber">$ <?=$ingreso->haber?></td>

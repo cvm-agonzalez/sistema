@@ -12,7 +12,7 @@ function is_active($seccion1,$seccion2)
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Club Villa Mitre | Comisiones</title>
+    <title><?=$ent_nombre?> | Comisiones</title>
 
     <!-- Bootstrap -->
     <link href="<?=base_url()?>styles/bootstrap.min.css" rel="stylesheet">
@@ -40,7 +40,7 @@ function is_active($seccion1,$seccion2)
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="<?=base_url()?>comisiones">Club Villa Mitre</a>
+          <a class="navbar-brand" href="<?=base_url()?>comisiones"><?=$ent_nombre?></a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav pull-right">

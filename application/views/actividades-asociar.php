@@ -9,7 +9,7 @@
                     </div>
                     <div class="form-group col-lg-5" style="padding-top:20px;">
                        <form id="activ_asoc_form">
-                            <div id="r2-data" <? if($socio->Id != 0){ echo 'class="hidden"'; }?>>
+                            <div id="r2-data" <? if($socio->id != 0){ echo 'class="hidden"'; }?>>
                                 <div class="col-sm-7">
                                     <input type="text" name="r2" id="r2" class="form-control" placeholder="Ingrese Nombre, Apellido o DNI del socio">
                                 </div>
@@ -17,25 +17,25 @@
                                     <button type="submit" id="r-buscar" data-id="r2" class="btn btn-primary">Buscar</button> <i id="r2-loading" class="fa fa-spinner fa-spin hidden"></i>
                                 </div>
                             </div>
-                            <div id="r2-result" <? if($socio->Id == 0){ echo 'class="hidden size-h3"'; }else{ echo 'class="size-h3"'; }?>>
+                            <div id="r2-result" <? if($socio->id == 0){ echo 'class="hidden size-h3"'; }else{ echo 'class="size-h3"'; }?>>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             <? echo $socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
                             </div>
-                            <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->Id?>">
+                            <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->id?>">
                         </form>
                     </div> 
-                    <div class="form-group col-lg-6 <? if(!$socio->Id){ echo 'hidden'; } ?>" style="padding-top:20px;" id="accesos_directos">
-                        <a id="acceso_editar" class="btn btn-success" href="<?=$baseurl?>admin/socios/editar/<?=$socio->Id?>"><i class="fa fa-user"></i> Editar este socio</a>                        
-                        <a id="acceso_cupon" class="btn btn-info" href="<?=$baseurl?>admin/pagos/cupon/<?=$socio->Id?>"><i class="fa fa-dollar"></i> Generar Cupón</a>
+                    <div class="form-group col-lg-6 <? if(!$socio->id){ echo 'hidden'; } ?>" style="padding-top:20px;" id="accesos_directos">
+                        <a id="acceso_editar" class="btn btn-success" href="<?=$baseurl?>admin/socios/editar/<?=$socio->id?>"><i class="fa fa-user"></i> Editar este socio</a>                        
+                        <a id="acceso_cupon" class="btn btn-info" href="<?=$baseurl?>admin/pagos/cupon/<?=$socio->id?>"><i class="fa fa-dollar"></i> Generar Cupón</a>
                         <div class="btn-group">
                             <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-plus"></i> Más Acciones...
                             <span class="caret"></span>
                             </button><ul class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop1">
-                                <li><a id="acceso_ver_resumen" href="<?=$baseurl?>admin/socios/resumen/<?=$socio->Id?>">Ver Resumen</a></li>
-                                <li><a id="acceso_pago" href="<?=$baseurl?>admin/pagos/registrar/<?=$socio->Id?>">Registrar Pago</a></li>
-                                <li><a id="acceso_deuda" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->Id?>">Financiar Deuda</a></li>
-                                <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->Id?>">Enviar Resumen</a></li>
+                                <li><a id="acceso_ver_resumen" href="<?=$baseurl?>admin/socios/resumen/<?=$socio->id?>">Ver Resumen</a></li>
+                                <li><a id="acceso_pago" href="<?=$baseurl?>admin/pagos/registrar/<?=$socio->id?>">Registrar Pago</a></li>
+                                <li><a id="acceso_deuda" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->id?>">Financiar Deuda</a></li>
+                                <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->id?>">Enviar Resumen</a></li>
                             </ul>
                         </div>
                     </div>                   

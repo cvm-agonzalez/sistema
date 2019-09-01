@@ -24,7 +24,7 @@
 						<?
 						foreach ($actividades as $actividad) {                        
 							?>
-							<option value="<?=$actividad->Id?>" <? if($actividad->Id == $actividad_sel){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
+							<option value="<?=$actividad->id?>" <? if($actividad->id == $actividad_sel){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
 							<?
 						}   
 						?>

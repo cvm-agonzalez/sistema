@@ -14,11 +14,11 @@
                                     foreach ($lugares as $lugar) {                                       
                                     ?>
                                     <tr>
-                                        <td><?=$lugar->Id?></td>
+                                        <td><?=$lugar->id?></td>
                                         <td><span class="color-success"><?=$lugar->nombre?></td>
                                         <td>
-                                            <a href="<?=$baseurl?>admin/actividades/lugares/editar/<?=$lugar->Id?>"><i class="fa fa-gear"></i> Editar</a>  | 
-                                            <a id="btn-eliminar-lugar" href="<?=$baseurl?>admin/actividades/lugares/eliminar/<?=$lugar->Id?>"><i class="fa fa-times"></i> Eliminar</a>
+                                            <a href="<?=$baseurl?>admin/actividades/lugares/editar/<?=$lugar->id?>"><i class="fa fa-gear"></i> Editar</a>  | 
+                                            <a id="btn-eliminar-lugar" href="<?=$baseurl?>admin/actividades/lugares/eliminar/<?=$lugar->id?>"><i class="fa fa-times"></i> Eliminar</a>
                                         </td>
                                     </tr>                                    
                                     <?

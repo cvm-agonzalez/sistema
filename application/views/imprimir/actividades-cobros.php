@@ -22,7 +22,7 @@
 					<?
 					foreach ($actividades as $actividad) {
 					?>
-					<option value="<?=$actividad->Id?>" <? if($actividad->Id == $actividad_s){echo 'selected';} ?>><?=$actividad->nombre?></option>
+					<option value="<?=$actividad->id?>" <? if($actividad->id == $actividad_s){echo 'selected';} ?>><?=$actividad->nombre?></option>
 					<?
 					}
 					?>
@@ -118,7 +118,7 @@
 	                }
 	                ?>
 	        	</td>
-	        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->socio->Id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
+	        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->socio->id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
 	        </tr>
 	        <?
 	    	}

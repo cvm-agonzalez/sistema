@@ -20,12 +20,23 @@
             height: 194px;
             float: left;
         }
+	<?
+
+        $ent_directorio = $this->session->userdata('ent_directorio');
+	switch ($socio->categoria) {
+                default:
+                        $frente=base_url()."entidades/".$ent_directorio."/carnet-frente.png";
+                        $dorso=base_url()."entidades/".$ent_directorio."/carnet-dorso.png";
+			break;
+	}
+
+	?>
         .frente{
-            background-image:url(<?=base_url()?>images/carnet-frente-new.png); 
+            background-image:url(<?=$frente?>); 
 	    background-size: 100% 100%;
         }
         .dorso{
-            background-image:url(<?=base_url()?>images/carnet-dorso-new.png); 
+            background-image:url(<?=$dorso?>); 
 	    background-size: 100% 100%;
         }
         .imagen{
@@ -56,23 +67,23 @@
     <div class="carnet dorso">
         <div class="imagen">
             <?
-            if(file_exists('images/socios/'.$socio->Id.'.jpg')){
-                
+            if(file_exists( BASEPATH."../entidades/".$ent_directorio."/socios/".$socio->id.".jpg" )){
+		$imagen = BASEPATH."../entidades/".$ent_directorio."/socios/".$socio->id.".jpg";
             ?>
-                <img src="<?=base_url()?>images/image_carnet.php?img=socios/<?=$socio->Id?>.jpg" width="80">
+                <img src="<?=base_url()?>entidades/image_carnet.php?img=<?=$imagen?>" width="80">
             <?
             }else{
             ?>
-                <img src="<?=base_url()?>images/noPic.jpg" width="80">
+                <img src="<?=base_url()?>entidades/<?=$ent_directorio?>/noPic.jpg" width="80">
             <?
             }
             ?>
         </div>
         <? 
-        if($socio->socio_n){
-            $num = $socio->socio_n;
+        if($socio->nro_socios){
+            $num = $socio->nro_socios;
         }else{
-            $num = $socio->Id;
+            $num = $socio->id;
         }        
         $fecha = explode(' ', $socio->alta);
         $fecha = explode('-', $fecha[0]);
@@ -87,10 +98,10 @@
         </div>
         <div align="right" class="barcode">
             <?
-            if( file_exists("images/cupones/".$cupon->Id.".png") ){
+            if( file_exists("images/cupones/".$cupon->id.".png") ){
             ?>
             <br>
-            <img src="<?=base_url()?>images/cupones/<?=$cupon->Id?>.png" >  
+            <img src="<?=base_url()?>images/cupones/<?=$cupon->id?>.png" >  
             <?
             }
             ?>
@@ -101,14 +112,14 @@
 		<div style="float:left; width:48%">
             <div style="float:left; width:100px; border:2px solid #000; height:100px;">
             <?
-            if(file_exists('images/socios/'.$socio->Id.'.jpg')){
+            if(file_exists('images/socios/'.$socio->id.'.jpg')){
                 
             ?>
-                <img src="<?=base_url()?>images/image_carnet.php?img=socios/<?=$socio->Id?>.jpg" width="100">
+                <img src="<?=base_url()?>images/image_carnet.php?img=socios/<?=$socio->id?>.jpg" width="100">
             <?
             }else{
             ?>
-                <img src="<?=base_url()?>images/g1.jpg" width="100">
+		<img src="<?=$baseurl?>entidades/<?=$ent_directorio?>/g1.jpg" alt="" width="100">
             <?
             }
             ?>                
@@ -119,10 +130,10 @@
                 &nbsp;<strong>D.N.I.:</strong> <?=$socio->dni?><br>
 
                 <? 
-                if($socio->socio_n){
-                    $num = $socio->socio_n;
+                if($socio->nro_socio){
+                    $num = $socio->nro_socio;
                 }else{
-                    $num = $socio->Id;
+                    $num = $socio->id;
                 }
                 ?>
 
@@ -145,9 +156,9 @@
             </div>
             <div style="float:left; width:65%; padding-top:0px;">
                 <?
-                if( file_exists("images/cupones/".$cupon->Id.".png") ){
+                if( file_exists("images/cupones/".$cupon->id.".png") ){
                 ?>
-                    <img src="<?=base_url()?>images/cupones/<?=$cupon->Id?>.png">                   
+                    <img src="<?=base_url()?>images/cupones/<?=$cupon->id?>.png">                   
                 <div align="center" style="padding-top:10px; padding-left: 35px">
                     Valor de la Cuota: $ <?=$monto?>
                 </div>

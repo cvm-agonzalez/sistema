@@ -86,7 +86,7 @@
                             	<? } ?>
                             </td>
                             <td>
-                            	<a href="#" id="cancelar_plan" data-id="<?=$plan->Id?>">
+                            	<a href="#" id="cancelar_plan" data-id="<?=$plan->id?>">
                             		<i class="fa fa-times" style="color:#F00;"></i>
                             	</a>
                             </td>

@@ -9,7 +9,7 @@
 	        		<?
 	        		foreach ($actividades as $aa) {        		
 	        		?>
-	        		<option value="<?=$aa->Id?>" <? if($actividad->Id == $aa->Id ){ echo 'selected'; } ?>><?=$aa->nombre?></option>
+	        		<option value="<?=$aa->id?>" <? if($actividad->id == $aa->id ){ echo 'selected'; } ?>><?=$aa->nombre?></option>
 	        		<?
 	        		}
 	        		?>
@@ -38,7 +38,7 @@
     </div>
     <div class="pull-right hidden-print">
         <button class="btn btn-info" onclick="print()"><i class="fa fa-print"></i> Imprimir</button>
-        <a href="<?=base_url()?>imprimir/anterior_excel/<?=$actividad->Id?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
+        <a href="<?=base_url()?>imprimir/anterior_excel/<?=$actividad->id?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
     </div>
     <table class="table table-striped table-bordered" cellspacing="0" width="100%" id="actividades_table">
         <thead>
@@ -60,7 +60,7 @@
         	?>
             <tr>
                 <td><?=@$socio->socio?></td>
-                <td># <?=@$socio->Id?></td>
+                <td># <?=@$socio->id?></td>
                 <td><?=@$socio->telefono?></td>
                 <td><?=@$socio->dni?></td>
                 <td><?=@$socio->nacimiento?></td>
@@ -78,7 +78,7 @@
                     }
                     ?>
                 </td>
-                <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->Id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
+                <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
             </tr> 
             <?
         	}

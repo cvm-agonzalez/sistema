@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Club Villa Mitre</title>
+        <title><?=$ent_nombre?></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -43,7 +43,8 @@
                         <!-- Logo -->
                         <div class="logo">
                             <a href="<?=$baseurl?>admin">
-                                <span>Villa Mitre</span>
+                                <span><?=$ent_nombre?></span>
+			<?var_dump($data)?>
                             </a>
                         </div>
 
@@ -65,7 +66,7 @@
 
                                 <li class="dropdown text-normal nav-profile">
                                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-                                        <img src="<?=$baseurl?>images/g1.jpg" alt="" class="img-circle img30_30">
+                                        <img src="<?=$baseurl?>entidades/<?=$ent_directorio?>/g1.jpg" alt="" class="img-circle img30_30">
                                         <span class="hidden-xs">
                                             <span data-i18n=""></span>
                                         </span>
@@ -103,7 +104,7 @@
 
                 <aside data-ng-include=" '<?=$baseurl?>views/nav.php?baseurl=<?=$baseurl?>&section=<?=$section?>&rango=<?=$rango?>' " id="nav-container"></aside>
             </div>
-                <section id="content" class="cvm_section">
+                <section id="content" class="gs_section">
 
                     <? include($section.".php"); ?>
 
@@ -136,6 +137,7 @@
         $(function () {
             'use strict';
             // Change this to the location of your server-side upload handler:
+	   // cambio?
 
             $('#fileupload').fileupload({
                 url: '<?=base_url()?>admin/socios/subir_imagen',
@@ -143,7 +145,7 @@
                 done: function (e, data) {
                     $.each(data.result.files, function (index, file) {
                         //$('<p/>').text(file.name).appendTo('#files');
-                        $("#my_result").html('<img src="<?=$baseurl?>images/temp/'+file.name+'" width="100%">');
+                        $("#my_result").html('<img src="<?=base_url()?>images/temp/'+file.name+'" width="100%">');
                         $('#progress .progress-bar').hide();
                     });
                 },
@@ -392,19 +394,6 @@
         a= $('#apellido').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-apellido'  });
         a= $('#localidad').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-localidad' });
         a= $('#nacionalidad').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-nacionalidad' });
-        a= $('#r1').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-        onSelect: function (suggestion) {
-                $('#r1').val(suggestion.data);
-            } });
-        a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
-        onSelect: function (suggestion) {
-                $('#r2').val(suggestion.data);
-            }  });
-        a= $('#r3').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-apellido|nombre|dni',
-            onSelect: function (suggestion) {
-                $('#r3').val(suggestion.data);
-            }
-        });
 
         $("a#r-buscar").click(function(){
             var id = $(this).data('id');
@@ -418,7 +407,7 @@
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
-                    $("#"+id+"-id").val(socio[0].Id);
+                    $("#"+id+"-id").val(socio[0].id);
                 }else{
                    angular.element("#modal_open").triggerHandler('click');
                    $("#tutor-dni").val($("#"+id).val());
@@ -441,7 +430,7 @@
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio.nombre+' '+socio.apellido+' ('+socio.dni+') '+close_link);
                     $("#"+id+"-data").addClass("hidden");
                     $("#"+id+"-result").removeClass("hidden");
-                    $("#"+id+"-id").val(socio.Id);
+                    $("#"+id+"-id").val(socio.id);
                 }
             })
         }
@@ -478,17 +467,17 @@
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
 
-                    $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
-                    $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
-                    $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].Id);
-                    $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].Id);
-                    $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].Id);
-                    $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
+                    $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                    $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].id);
+                    $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].id);
+                    $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].id);
+                    $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].id);
+                    $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
                     $("#accesos_directos").removeClass('hidden');
 
 
-                    $("#"+id+"-id").val(socio[0].Id);
-                    get_actividades(socio[0].Id);
+                    $("#"+id+"-id").val(socio[0].id);
+                    get_actividades(socio[0].id);
                 }else{
                    alert("El DNI ingresado no se encuentra en la Base de Datos.")
                 }
@@ -513,7 +502,7 @@
 
 
 
-        <? if($socio->Id && $socio->Id != 0){ ?> $("#asociar-div").slideDown(); get_actividades("<?=$socio->Id?>"); <? } ?>
+        <? if($socio->id && $socio->id != 0){ ?> $("#asociar-div").slideDown(); get_actividades("<?=$socio->id?>"); <? } ?>
         </script>
         <? } ?>
         <? if($section == 'pagos-cupon'){ ?>
@@ -538,17 +527,17 @@
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
-                    $("#"+id+"-id").val(socio[0].Id);
+                    $("#"+id+"-id").val(socio[0].id);
 
-                    $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
-                    $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].Id);
-                    $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].Id);
-                    $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].Id);
-                    $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].Id);
-                    $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
+                    $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                    $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].id);
+                    $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].id);
+                    $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].id);
+                    $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].id);
+                    $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
                     $("#accesos_directos").removeClass('hidden');
 
-                    get_cupon(socio[0].Id);
+                    get_cupon(socio[0].id);
                 }else{
                     alert("El DNI ingresado no se encuentra en la Base de Datos.")
                 }
@@ -564,7 +553,7 @@
 
         }
 
-        <? if($socio->Id && $socio->Id != 0){ ?> $("#cupon-div").slideDown(); get_cupon("<?=$socio->Id?>"); <? } ?>
+        <? if($socio->id && $socio->id != 0){ ?> $("#cupon-div").slideDown(); get_cupon("<?=$socio->id?>"); <? } ?>
         function cleear(id){
             $("#"+id+"-data").removeClass('hidden');
             $("#"+id+"-id").val('0');
@@ -597,17 +586,17 @@
                         $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
                         $("#"+id+"-result").removeClass('hidden');
-                        $("#"+id+"-id").val(socio[0].Id);
+                        $("#"+id+"-id").val(socio[0].id);
 
-                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
-                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].Id);
-                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].Id);
-                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
-                        $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].Id);
-                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
+                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].id);
+                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].id);
+                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].id);
+                        $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].id);
+                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
                         $("#accesos_directos").removeClass('hidden');
 
-                        get_pago(socio[0].Id);
+                        get_pago(socio[0].id);
                     }else{
                         alert("El DNI ingresado no se encuentra en la Base de Datos.")
                     }
@@ -625,7 +614,7 @@
 
 
 
-            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>
+            <? if($socio->id && $socio->id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->id?>"); <? } ?>
 
 
         })
@@ -679,17 +668,17 @@
                         $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
                         $("#"+id+"-result").removeClass('hidden');
-                        $("#"+id+"-id").val(socio[0].Id);
+                        $("#"+id+"-id").val(socio[0].id);
 
-                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
-                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].Id);
-                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].Id);
-                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
-                        $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].Id);
-                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
+                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].id);
+                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].id);
+                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].id);
+                        $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].id);
+                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
                         $("#accesos_directos").removeClass('hidden');
 
-                        get_pago(socio[0].Id);
+                        get_pago(socio[0].id);
                     }else{
                         alert("El DNI ingresado no se encuentra en la Base de Datos.")
                     }
@@ -707,7 +696,7 @@
 
 
 
-            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>
+            <? if($socio->id && $socio->id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->id?>"); <? } ?>
 
 
         })
@@ -764,16 +753,16 @@
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
 
-                    $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
-                    $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
-                    $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].Id);
-                    $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].Id);
-                    $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].Id);
-                    $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
+                    $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                    $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].id);
+                    $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].id);
+                    $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].id);
+                    $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].id);
+                    $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
                     $("#accesos_directos").removeClass('hidden');
 
-                    $("#"+id+"-id").val(socio[0].Id);
-                    get_actividades(socio[0].Id);
+                    $("#"+id+"-id").val(socio[0].id);
+                    get_actividades(socio[0].id);
                 }else{
                    alert("El DNI ingresado no se encuentra en la Base de Datos.")
                 }
@@ -801,7 +790,7 @@
 
 
 
-        <? if($socio->Id && $socio->Id != 0){ ?> $("#asociar-div").slideDown(); get_actividades("<?=$socio->Id?>"); <? } ?>
+        <? if($socio->id && $socio->id != 0){ ?> $("#asociar-div").slideDown(); get_actividades("<?=$socio->id?>"); <? } ?>
         </script>
         <? } ?>
 <!--
@@ -831,17 +820,17 @@
                         $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
                         $("#"+id+"-result").removeClass('hidden');
-                        $("#"+id+"-id").val(socio[0].Id);
+                        $("#"+id+"-id").val(socio[0].id);
 
-                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].Id);
-                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].Id);
-                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].Id);
-                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].Id);
-                        $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].Id);
-                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].Id);
+                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].id);
+                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].id);
+                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].id);
+                        $("#acceso_pago").attr('href','<?=$baseurl?>admin/pagos/registrar/'+socio[0].id);
+                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
                         $("#accesos_directos").removeClass('hidden');
 
-                        get_pago(socio[0].Id);
+                        get_pago(socio[0].id);
                     }else{
                         alert("El DNI ingresado no se encuentra en la Base de Datos.")
                     }
@@ -859,7 +848,7 @@
 
 
 
-            <? if($socio->Id && $socio->Id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->Id?>"); <? } ?>
+            <? if($socio->id && $socio->id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->id?>"); <? } ?>
 
 
         })
@@ -1106,7 +1095,7 @@ $("#comi-activ-form").submit(function(){
 
             function enviar(){
                 if(pausa){ $("#estado").html('Envio Pausado'); return false; }
-                $.post('<?=base_url()?>admin/envios/send/<?=$envio->Id?>')
+                $.post('<?=base_url()?>admin/envios/send/<?=$envio->id?>')
                 .done(function(data){
                     if(data == 'end'){
                         $("#estado").html('Envio Finalizado.');

@@ -1,6 +1,6 @@
 
 <div align="center">
-	<img src="<?=$baseurl?>images/cupones/<?=$cupon->Id?>.png"><br><br>
+	<img src="<?=$baseurl?>images/cupones/<?=$cupon->id?>.png"><br><br>
 	<!-- <span style="font-family:Arial; font-size:12px;">Valor de la Cuota: $ <?=$cupon->monto?></span> -->
 </div>
 

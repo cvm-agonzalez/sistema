@@ -11,7 +11,7 @@
             <?
             }else{
             ?>
-            <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/lugares/guardar/<?=$lugar->Id?>" method="post">
+            <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/lugares/guardar/<?=$lugar->id?>" method="post">
 
                 <div class="form-group">
                     <label for="" class="col-sm-2">Nombre</label>

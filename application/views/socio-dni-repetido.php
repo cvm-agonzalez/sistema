@@ -7,7 +7,7 @@
                     <h4>Atención el DNI del socio que intento agregar ya se encuentra en nuestra base de datos.</h4>                    
                     <p>Nombre y Apellido: <?=$prev_user[0]->nombre.' '.$prev_user[0]->apellido?><br>
                     Fecha de Alta: <?=$prev_user[0]->alta?>
-                    <? $uid = $prev_user[0]->Id; ?>
+                    <? $uid = $prev_user[0]->id; ?>
 
                     </p>
                     <a class="btn btn-primary" href="<?=$baseurl?>admin/socios"><i class="fa fa-arrow-left"></i> Volver al Listado</a> 

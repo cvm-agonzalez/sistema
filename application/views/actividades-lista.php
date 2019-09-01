@@ -32,7 +32,7 @@
                 $actividades_asociadas = array();
                 foreach ($actividades_asoc as $actividad){                                
                 	if($actividad->estado == '1'){
-                		$actividades_asociadas[] = $actividad->Id; 		
+                		$actividades_asociadas[] = $actividad->id; 		
                 	}                
                 ?>                	
 					<li class="sortable-item <? if($actividad->estado == '0'){ echo 'baja'; } ?>" id="asoc_<?=$actividad->asoc_id?>">
@@ -48,7 +48,7 @@
 								<a href="#" id="pone_porc" onclick="pone_porc('<?=$actividad->asoc_id?>')" data-beca="<?=$actividad->descuento?>">%</a>
 								<a href="#" id="federado" onclick="federado('<?=$actividad->asoc_id?>')" data-id="<?=$actividad->asoc_id?>"><?if($actividad->federado == 0){ echo 'No Federado'; } else { echo 'Federado'; } ?></a>
 								<br>
-								<a href="#" id="quitar_actividad" onclick="quitar_act('<?=$actividad->asoc_id?>','<?=$actividad->Id?>')" data-id="<?=$actividad->asoc_id?>">									
+								<a href="#" id="quitar_actividad" onclick="quitar_act('<?=$actividad->asoc_id?>','<?=$actividad->id?>')" data-id="<?=$actividad->asoc_id?>">									
 									Dar de Baja <i class="fa fa-times"></i>
 								</a>
 							<?
@@ -62,7 +62,7 @@
 							}
 							?>
 						</div>						
-						#<span><?=$actividad->Id?> <?=$actividad->nombre?>
+						#<span><?=$actividad->id?> <?=$actividad->nombre?>
 						<?
 						if($actividad->descuento > 0){
 						?>
@@ -84,16 +84,16 @@
             	Buscar Actividad: <input class="form-control" type="text" id="activ"><br>            	
                 <ul class="sortable-list" id="actividades_no">
                 <? foreach ($actividades as $actividad){ 
-                	if(!in_array($actividad->Id, $actividades_asociadas)){
+                	if(!in_array($actividad->id, $actividades_asociadas)){
                 	?>
-					<li class="sortable-item" id="no_asoc_<?=$actividad->Id?>">
+					<li class="sortable-item" id="no_asoc_<?=$actividad->id?>">
 						<div class="pull-left " style="margin-top:-5px; margin-left:5px;">
-							<a class="btn btn-success" href="#" id="asociar_actividad" data-id="<?=$actividad->Id?>">
+							<a class="btn btn-success" href="#" id="asociar_actividad" data-id="<?=$actividad->id?>">
 								<i class="fa fa-arrow-left"></i>
 							</a>
        					                 <input type="hidden" name="solosoc" id="solosoc" class="form-control" data-id="<?=$actividad->solo_socios?>">
 						</div>
-						#<span><?=$actividad->Id?> <?=$actividad->nombre?>
+						#<span><?=$actividad->id?> <?=$actividad->nombre?>
 
 						</span>
 					</li>
@@ -167,7 +167,7 @@
         		}
 	        	$.get("<?=$baseurl?>admin/actividades/alta/<?=$sid?>/"+id+"/"+facturar+"/"+federado,function(data){
 	        		var actividad = $.parseJSON(data);
-	        		var newLi = '<li class="sortable-item" id="asoc_'+actividad.asoc_id+'"><div class="pull-right cruz" id="cruz_'+actividad.asoc_id+'" style="margin-top:-20px;">Fecha de Alta: '+actividad.alta+'<br> <a href="#" style="color:green" class="actividad_beca" id="actividad_beca_'+actividad.asoc_id+'" data-id="'+actividad.asoc_id+'" data-beca="0">Configurar Beca</a><br><a href="#" onclick="quitar_act('+actividad.asoc_id+','+actividad.Id+')" id="quitar_actividad" data-id="'+actividad.asoc_id+'">Dar de Baja <i class="fa fa-times"></i></a></div>#<span>'+actividad.Id+' '+actividad.nombre+'</span></li>';
+	        		var newLi = '<li class="sortable-item" id="asoc_'+actividad.asoc_id+'"><div class="pull-right cruz" id="cruz_'+actividad.asoc_id+'" style="margin-top:-20px;">Fecha de Alta: '+actividad.alta+'<br> <a href="#" style="color:green" class="actividad_beca" id="actividad_beca_'+actividad.asoc_id+'" data-id="'+actividad.asoc_id+'" data-beca="0">Configurar Beca</a><br><a href="#" onclick="quitar_act('+actividad.asoc_id+','+actividad.id+')" id="quitar_actividad" data-id="'+actividad.asoc_id+'">Dar de Baja <i class="fa fa-times"></i></a></div>#<span>'+actividad.id+' '+actividad.nombre+'</span></li>';
 	        	$( newLi ).prependTo( $("#actividades_si") ); 
 	        	});
         	}else{

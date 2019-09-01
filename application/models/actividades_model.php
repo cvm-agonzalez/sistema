@@ -10,22 +10,25 @@ class Actividades_model extends CI_Model {
         $this->load->database('default');
     }
     
+/* Funciones para trabajar con la tabla profesores */
     public function reg_profesor($datos){
         $this->db->insert('profesores', $datos);
         return $this->db->insert_id();   
     }
     public function update_profesor($datos,$id){
-        $this->db->where("Id",$id);
+        $this->db->where("id",$id);
         $this->db->update('profesores', $datos);
         return true;   
     }    
-    public function get_profesores(){
+    public function get_profesores($id_entidad){
     	$this->db->order_by("apellido", "asc"); 
-        $query = $this->db->get_where("profesores",array('estado' => '1'));
+    	$this->db->where("estado", "1"); 
+    	$this->db->where("id_entidad", $id_entidad); 
+        $query = $this->db->get("profesores");
         return $query->result();
     }    
     public function get_profesor($id){
-        $this->db->where("Id", $id); 
+        $this->db->where("id", $id); 
         $query = $this->db->get("profesores");
         if($query->num_rows() == '0'){
             return false;
@@ -34,73 +37,56 @@ class Actividades_model extends CI_Model {
         }
     }
     public function del_profesor($id){
-        $this->db->where("Id", $id); 
+        $this->db->where("id", $id); 
         $query = $this->db->update("profesores",array("estado"=>'0'));
         return true;
     } 
+/* Fin funciones para trabajar con la tabla profesores */
 
-    public function reg_lugar($datos){
-        $this->db->insert('lugares', $datos);
-        return $this->db->insert_id();   
-    }
-    public function update_lugar($datos,$id){
-        $this->db->where("Id",$id);
-        $this->db->update('lugares', $datos);
-        return true;   
-    }    
-    public function get_lugares(){
-        $this->db->order_by("nombre", "asc"); 
-        $query = $this->db->get_where("lugares",array("estado"=>'1'));
-        return $query->result();
-    }    
-    public function get_lugar($id){
-        $this->db->where("Id", $id); 
-        $query = $this->db->get("lugares");
-        if($query->num_rows() == '0'){
-            return false;
-        }else{        
-            return $query->row();
-        }
-    }
-    public function del_lugar($id){
-        $this->db->where("Id", $id); 
-        $query = $this->db->update("lugares",array("estado"=>'0'));
-        return true;
-    } 
-
+/* Funciones para trabajar con la tabla actividades */
     public function reg_actividad($datos){
+        $id_entidad = $datos['id_entidad'];
+        $qry = "SELECT MAX(aid) max_id FROM actividades WHERE id_entidad = $id_entidad; ";
+        $resultado = $this->db->query($qry)->row();
+        if ( $resultado->max_id ) {
+                $datos['aid'] = $resultado->max_id+1;
+        } else {
+                $datos['aid'] = 1;
+        }
+
+
         $this->db->insert('actividades', $datos);
         return $this->db->insert_id();   
     }
     public function update_actividad($datos,$id){
-        $this->db->where("Id",$id);
+        $this->db->where("id",$id);
         $this->db->update('actividades', $datos);
         return true;   
     }    
-    public function get_actividades_list(){
+    public function get_actividades($id_entidad){
         $this->db->order_by("nombre", "asc"); 
-        $query = $this->db->get("actividades");
-        return $query->result();
-    }    
-    public function get_actividades(){
-        $this->db->order_by("nombre", "asc"); 
-        $this->db->where("estado >",'0');
+        $this->db->where("id_entidad",$id_entidad);
+        $this->db->where("estado",'1');
         $query = $this->db->get("actividades");
         return $query->result();
     }    
     public function get_actividad($id){
-        $this->db->where("Id", $id); 
+        $this->db->where("id", $id); 
         $query = $this->db->get("actividades");
         return $query->row();
     }
     public function del_actividad($id){
-        $this->db->where("Id", $id); 
+        $this->db->where("id", $id); 
         $query = $this->db->update("actividades", array("estado"=>'0'));
         return true;
     }
+/* Fin de funciones para trabajar con la tabla actividades */
+
+/* Funciones para trabajar con la tabla actividades_asociadas */
     public function get_act_asoc_puntual($sid, $aid){
         $this->db->where("sid", $sid);
         $this->db->where("aid", $aid);
+        $this->db->where("estado", 1);
         $query = $this->db->get("actividades_asociadas");
         if ($query->num_rows() == 0){
 		return false;
@@ -108,7 +94,7 @@ class Actividades_model extends CI_Model {
 		$asoc = $query->row();
                 $actividad = $this->get_actividad($asoc->aid);
                 $actividad->estado = $asoc->estado;
-                $actividad->asoc_id = $asoc->Id;
+                $actividad->asoc_id = $asoc->id;
                 if($actividad->estado == '1'){
                     $actividad->alta = $this->show_date($asoc->date);
                 }else{
@@ -133,7 +119,7 @@ class Actividades_model extends CI_Model {
             foreach ($query->result() as $asoc) {
                 $actividad = $this->get_actividad($asoc->aid);
                 $actividad->estado = $asoc->estado;
-                $actividad->asoc_id = $asoc->Id;
+                $actividad->asoc_id = $asoc->id;
                 if($actividad->estado == '1'){
                     $actividad->alta = $this->show_date($asoc->date);
                 }else{
@@ -155,18 +141,18 @@ class Actividades_model extends CI_Model {
         if ($query->num_rows() == 0){
             $act_asoc = new stdClass();
             return $act_asoc;
-	} else {
+	    } else {
             $act_asoc = array();
             foreach ($query->result() as $asoc) {
-		$sid=$asoc->Id;
-        	$this->db->order_by("estado", "desc");
-        	$this->db->where("sid", $sid);
-        	$query = $this->db->get("actividades_asociadas");
-        	if ($query->num_rows() > 0){
+		        $sid=$asoc->id;
+        	    $this->db->order_by("estado", "desc");
+        	    $this->db->where("sid", $sid);
+        	    $query = $this->db->get("actividades_asociadas");
+        	    if ($query->num_rows() > 0) {
             		foreach ($query->result() as $asoc) {
                 		$actividad = $this->get_actividad($asoc->aid);
                 		$actividad->estado = $asoc->estado;
-                		$actividad->asoc_id = $asoc->Id;
+                		$actividad->asoc_id = $asoc->id;
                 		if($actividad->estado == '1') {
                     			$actividad->alta = $this->show_date($asoc->date);
                 		} else {
@@ -178,8 +164,8 @@ class Actividades_model extends CI_Model {
                 		$actividad->monto_porcentaje = $asoc->monto_porcentaje;
                 		$act_asoc[] = $actividad;
             		}
-		}
-	    }
+		        }
+	        }
             return $act_asoc;
         }
     }
@@ -198,15 +184,16 @@ class Actividades_model extends CI_Model {
         $this->db->where("estado", '1');
         $query = $this->db->update("actividades_asociadas",array('estado'=>'0','date_alta'=>$fecha));
     }
+
     public function act_baja($sid,$aid){
         
-        $this->db->where("Id", $aid);
+        $this->db->where("id", $aid);
         $query = $this->db->get('actividades_asociadas');
         $fecha = $query->row();
         $fecha = $fecha->date;
 
         $this->db->where("sid", $sid);
-        $this->db->where("Id", $aid);
+        $this->db->where("id", $aid);
         $query = $this->db->update("actividades_asociadas",array('estado'=>'0','date_alta'=>$fecha));
         $alta = $this->show_date($fecha);
         $fecha = array();
@@ -216,6 +203,7 @@ class Actividades_model extends CI_Model {
         $fecha = json_encode($fecha);
         return $fecha;
     }
+
     public function act_alta($data){        
         $query = $this->db->insert("actividades_asociadas",$data);
         $iid = $this->db->insert_id(); 
@@ -225,6 +213,7 @@ class Actividades_model extends CI_Model {
         $actividad = json_encode($actividad);
         return $actividad;
     } 
+
     public function show_date($fecha){
         $fecha = explode('-', $fecha);
         $fecha2 = explode(' ', $fecha[2]);
@@ -232,29 +221,31 @@ class Actividades_model extends CI_Model {
     }
 
     public function act_federado($aid){        
-        $this->db->where('Id',$aid);
+        $this->db->where('id',$aid);
         $query = $this->db->get('actividades_asociadas');
         $actual = $query->row();
-        $this->db->where('Id',$aid);
-	if ( $actual->federado == 0 ) {
-        	$query = $this->db->update("actividades_asociadas",array('federado'=>'1'));
-	} else {
-        	$query = $this->db->update("actividades_asociadas",array('federado'=>'0'));
-	}
+        $this->db->where('id',$aid);
+	    if ( $actual->federado == 0 ) {
+        	    $query = $this->db->update("actividades_asociadas",array('federado'=>'1'));
+	    } else {
+        	    $query = $this->db->update("actividades_asociadas",array('federado'=>'0'));
+	    }
         return true;
     } 
+
     public function act_peso($aid){        
-        $this->db->where('Id',$aid);
+        $this->db->where('id',$aid);
         $query = $this->db->update("actividades_asociadas",array('monto_porcentaje'=>'0'));
         return true;
     } 
+
     public function act_porc($aid){        
-        $this->db->where('Id',$aid);
+        $this->db->where('id',$aid);
         $query = $this->db->update("actividades_asociadas",array('monto_porcentaje'=>'1'));
         return true;
     } 
 
-    public function get_socactiv($id_actividad=-1,$id_comision=0,$mora=0){
+    public function get_socactiv($id_entidad, $id_actividad=-1,$id_comision=0,$mora=0){
         $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_socios_activos;";
         $this->db->query($qry);
 
@@ -262,43 +253,43 @@ class Actividades_model extends CI_Model {
                 $qry1 ="DROP TEMPORARY TABLE IF EXISTS tmp_actividades; ";
                 $this->db->query($qry1);
                 $qry1 ="CREATE TEMPORARY TABLE tmp_actividades ( INDEX ( aid ) )
-                        SELECT a.Id as aid FROM actividades a WHERE a.comision = $id_comision; ";
+                        SELECT a.id as aid FROM actividades a WHERE a.id_entidad = $id_entidad AND a.comision = $id_comision; ";
                 $this->db->query($qry1);
         }
 
         $qry = "CREATE TEMPORARY TABLE tmp_socios_activos
-		SELECT aa.aid, a.nombre descr_act, s.*
+		        SELECT aa.aid, a.nombre descr_act, s.*
                 FROM actividades_asociadas aa 
-			JOIN socios s ON aa.sid = s.Id 
-			JOIN actividades a ON aa.aid = a.Id ";
+			        JOIN socios s ON aa.sid = s.id 
+			        JOIN actividades a ON aa.aid = a.id ";
         if ( $id_comision > 0 ) {
                 $qry .= "       JOIN tmp_actividades USING ( aid ) ";
         }
-        $qry .= "WHERE aa.estado = 1 ";
+        $qry .= "WHERE aa.id_entidad = $id_entidad AND aa.estado = 1 ";
         if ( $id_actividad >= 0 && $id_comision == 0 ) {
                 $qry .= "AND aa.aid = $id_actividad ";
         }
-	$qry .= "ORDER BY aa.aid, s.Id; ";
+        $qry .= "ORDER BY aa.aid, s.id; ";
         $this->db->query($qry);
 
         $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_pagos;";
         $this->db->query($qry);
 
         $qry = "CREATE TEMPORARY TABLE tmp_pagos
-		SELECT ta.Id sid, SUM(monto-pagado) saldo, MAX(pagadoel) ult_pago
+		        SELECT ta.id sid, SUM(monto-pagado) saldo, MAX(pagadoel) ult_pago
                 FROM tmp_socios_activos ta
-			JOIN pagos p ON ( ta.Id = p.tutor_id )
-		GROUP BY 1; ";
+			        JOIN pagos p ON ( p.id_entidad = $id_entidad AND ta.id = p.tutor_id )
+		        GROUP BY 1; ";
         $this->db->query($qry);
 
         $qry = "SELECT ta.*, IFNULL(tp.saldo,0) mora, IFNULL(tp.ult_pago,'') ult_pago
-		FROM tmp_socios_activos ta		
-			LEFT JOIN tmp_pagos tp ON ta.Id = tp.sid ";
-	if ( $mora == 0 ) {
-		$qry .= "; ";
-	} else {
-		$qry .= "WHERE tp.saldo > 0; ";
-	}
+		        FROM tmp_socios_activos ta		
+			        LEFT JOIN tmp_pagos tp ON ta.id = tp.sid ";
+	    if ( $mora == 0 ) {
+		    $qry .= "; ";
+	    } else {
+		    $qry .= "WHERE tp.saldo > 0; ";
+	    }
 	
         $socactiv = $this->db->query($qry);
         return $socactiv->result();
@@ -325,12 +316,12 @@ class Actividades_model extends CI_Model {
         $socios = $query->result();
 	$datos=array();
         foreach ($socios as $socio) {
-            $datos_socio = $this->socios_model->get_socio($socio->sid);
-	    $datos[] = array ( 'sid' => $datos_socio->Id,
-                               'apynom' => $datos_socio->nombre.' '.$datos_socio->apellido,
-                               'estado_asoc' => $datos_socio->suspendido,
-                               'dni'=>$datos_socio->dni,
-                               'actividad' => 1 );
+        $datos_socio = $this->socios_model->get_socio($socio->sid);
+	$datos[] = array ( 'sid' => $datos_socio->id,
+                   'apynom' => $datos_socio->nombre.' '.$datos_socio->apellido,
+                   'estado_asoc' => $datos_socio->suspendido,
+                   'dni'=>$datos_socio->dni,
+                   'actividad' => 1 );
         }
         return $datos;
 
@@ -338,20 +329,21 @@ class Actividades_model extends CI_Model {
 
     public function becar($id='',$beca)
     {    
-        $this->db->where('Id',$id);
-	if ( $beca > 100 ) {
+        $this->db->where('id',$id);
+	    if ( $beca > 100 ) {
         	$this->db->update('actividades_asociadas',array("descuento"=>$beca, "monto_porcentaje"=>0 ));
-	} else {
+	    } else {
         	$this->db->update('actividades_asociadas',array("descuento"=>$beca, "monto_porcentaje"=>1 ));
-	}
+	    }
     }
 
-    public function get_act_asoc_all()
+    public function get_act_asoc_all($id_entidad)
     {
         $this->db->select('aa.*, socios.nombre as socio_nombre, socios.apellido as socio_apellido, actividades.nombre as actividad_nombre');
         $this->db->where('aa.estado', 1);
-        $this->db->join('socios', 'socios.Id = aa.sid', 'left');
-        $this->db->join('actividades', 'actividades.Id = aa.aid', 'left');
+        $this->db->where('aa.id_entidad', $id_entidad);
+        $this->db->join('socios', 'socios.id = aa.sid', 'left');
+        $this->db->join('actividades', 'actividades.id = aa.aid', 'left');
         $query = $this->db->get('actividades_asociadas as aa');
         if( $query->num_rows() == 0 ){ return false; }
         $asoc = $query->result();
@@ -359,20 +351,31 @@ class Actividades_model extends CI_Model {
         return $asoc;
     }
 
+/* Fin funciones para trabajar con la tabla actividades_asociadas */
 
+/* Funciones para trabajar con la tabla comisiones */
     public function grabar_comision($datos)
     {
+        $id_entidad = $datos['id_entidad'];
+        $qry = "SELECT MAX(cid) max_id FROM comisiones WHERE id_entidad = $id_entidad; ";
+        $resultado = $this->db->query($qry)->row();
+        if ( $resultado->max_id ) {
+                $datos['cid'] = $resultado->max_id+1;
+        } else {
+                $datos['cid'] = 1;
+        }
+
         $this->db->insert('comisiones', $datos);
         return $this->db->insert_id();   
     }
 
     public function borrar_comision($id){
-        $this->db->where('Id', $id); 
+        $this->db->where('id', $id); 
         $this->db->update('comisiones',array("estado"=>'0'));
     }
 
     public function actualizar_comision($datos, $id){
-        $this->db->where('Id', $id);
+        $this->db->where('id', $id);
         $this->db->update('comisiones', $datos); 
     }
 
@@ -384,33 +387,39 @@ class Actividades_model extends CI_Model {
             $comision->descripcion='';
             return $comision;
         } else {
-            $query = $this->db->get_where('comisiones',array('Id' => $id),1);
+            $query = $this->db->get_where('comisiones',array('id' => $id),1);
             if($query->num_rows() == 0) {return false;}
             return $query->row();
         }
     }
 
-    public function get_comisiones()
+    public function get_comisiones($id_entidad)
     {
-        $this->db->where('estado >','0');
+        $this->db->where('id_entidad',$id_entidad);
+        $this->db->where('estado','1');
         $query = $this->db->get('comisiones');
         return $query->result();
     }
+/* Fin funciones para trabajar con la tabla comisiones */
 
     /* Funciones de la tabla tmp_asoc_activ */
-    public function trunc_asoc_act(){ 
-	$this->db->truncate('tmp_asoc_activ');
+    public function trunc_asoc_act($id_entidad){
+        $this->db->where('id_entidad',$id_entidad);
+        $this->db->delete('tmp_asoc_activ');
     }
 
-    public function insert_asoc_act($datos){ 
+    public function insert_asoc_act($datos){
         $this->db->insert('tmp_asoc_activ', $datos);
     }
 
-    public function get_asocact_exist($existe){ 
+    public function get_asocact_exist($id_entidad, $existe){
+        $this->db->where("id_entidad =",$id_entidad);
         $this->db->where("existe_relacion =",$existe);
         $query = $this->db->get("tmp_asoc_activ");
         return $query->result();
     }
+
+
 
 }
 ?>

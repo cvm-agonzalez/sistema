@@ -38,7 +38,7 @@
 					?>
 				</td>
 				<td>
-					<a href="<?=base_url()?>admin/pagos/eliminar/<?=$pago->Id?>" class="btn btn-danger" id="eliminar_pago"><i class="fa fa-trash-o"></i></a>
+					<a href="<?=base_url()?>admin/pagos/eliminar/<?=$pago->id?>" class="btn btn-danger" id="eliminar_pago"><i class="fa fa-trash-o"></i></a>
 				</td>
 			</tr>
 

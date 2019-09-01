@@ -14,7 +14,7 @@
         <?
         foreach ($actividades as $actividad) {              
         ?>
-        <option value="<?=$actividad->Id?>" <? if($a_actual == $actividad->Id){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
+        <option value="<?=$actividad->id?>" <? if($a_actual == $actividad->id){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
         <?
         }
         ?>
@@ -51,13 +51,13 @@ if($socios){
     	?>
         <tr>
             <td><?=$socio->nombre?> <?=$socio->apellido?></td>
-            <td><?=$socio->Id?></td>
+            <td><?=$socio->id?></td>
             <td><?=$socio->telefono?></td>
             <td><?=$socio->dni?></td>
             <td><?=$socio->nacimiento?></td>
             <td><?=$socio->alta?></td>
             <td><?=$socio->descuento?><? if ( $socio->monto_porcentaje == 0 ) { echo '$'; } else { echo '%'; } ?></td>
-            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->Id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
+            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
         </tr>
         <? }  ?>
     </tbody>

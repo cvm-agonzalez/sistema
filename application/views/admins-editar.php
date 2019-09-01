@@ -2,7 +2,7 @@
 	<div class="panel panel-default">
 		<div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Administrador</strong></div>
 		<div class="panel-body">
-			<form autocomplete="off" class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/admins/guardar/<?=$admin->Id?>" method="post">
+			<form autocomplete="off" class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/admins/guardar/<?=$admin->id?>" method="post">
 
 				<div class="form-group">
 					<label for="user" class="col-sm-2">Nombre de usuario</label>

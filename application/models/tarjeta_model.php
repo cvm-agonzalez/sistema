@@ -19,12 +19,12 @@ class Tarjeta_model extends CI_Model {
     }
 
     public function borrar($id){
-        $this->db->where('Id', $id); 
+        $this->db->where('id', $id); 
         $this->db->update('tarj_marca',array("estado"=>'0'));
     }
 
     public function actualizar($id, $datos){
-        $this->db->where('Id', $id);
+        $this->db->where('id', $id);
         $this->db->update('tarj_marca', $datos); 
     }
 
@@ -33,26 +33,28 @@ class Tarjeta_model extends CI_Model {
         if (!$id || $id == '0'){
             $tarjeta = new stdClass();
             $tarjeta->id=0;
+            $tarjeta->id_entidad=0;
             $tarjeta->descripcion=0;
             $tarjeta->id_cuenta_banco=0;
             $tarjeta->fecha_firma_convenio=0;
             $tarjeta->estado=0;
             return $tarjeta;
         } else {
-            $query = $this->db->get_where('tarj_marca',array('Id' => $id),1);
+            $query = $this->db->get_where('tarj_marca',array('id' => $id),1);
             if($query->num_rows() == 0) {return false;}
             return $query->row();
         }
     }
 
-    public function get_tarjetas()
+    public function get_tarjetas($id_entidad)
     {
-        $query = $this->db->get_where('tarj_marca',array('estado'=>1));
+        $query = $this->db->get_where('tarj_marca',array('id_entidad'=>$id_entidad,'estado'=>1));
         return $query->result();
     }
 
-    public function get_debtarj_by($by)
+    public function get_debtarj_by($id_entidad, $by)
     {
+        $by['id_entidad'] = $id_entidad;
         $by['estado'] = 1;
         $query = $this->db->get_where('tarj_marca',$by,1);
         if($query->num_rows() == 0){

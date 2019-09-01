@@ -35,7 +35,7 @@ function is_active($seccion1,$seccion2)
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <!--<a class="navbar-brand" href="#">Club Villa Mitre - Listados</a>-->
+          <!--<a class="navbar-brand" href="#"><?=$ent_nombre?> - Listados</a>-->
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -51,25 +51,6 @@ function is_active($seccion1,$seccion2)
                 <li class=""><a href="<?=base_url()?>imprimir/listado/sin_actividades">Sin Actividades</a></li>              
               </ul>
             </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="font-size:18px !important;">Cobros <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li class=""><a href="<?=base_url()?>imprimir/cobros/ingresos">Ingresos</a></li>              
-                <li class=""><a href="<?=base_url()?>imprimir/cobros/actividades">Actividades</a></li>
-                <li class=""><a href="<?=base_url()?>imprimir/cobros/anterior">Deuda Anterior</a></li>
-                <li class=""><a href="<?=base_url()?>imprimir/cobros/cuentadigital">CuentaDigital</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="<?=base_url()?>imprimir/exportar" style="font-size:18px !important;">Exportar</a>
-            </li>
-            <!--
-            <li class="<?=is_active('actividades',$listado)?>"><a href="<?=base_url()?>imprimir/listado/actividades">Actividades</a></li>
-            <li class="<?=is_active('profesores',$listado)?>"><a href="<?=base_url()?>imprimir/listado/profesores">Profesores</a></li>
-            <li class="<?=is_active('usuarios_suspendidos',$listado)?>"><a href="<?=base_url()?>imprimir/listado/usuarios_suspendidos">Usuarios Suspendidos</a></li>
-            <li class="<?=is_active('morosos',$listado)?>"><a href="<?=base_url()?>imprimir/listado/morosos">Morosos</a></li>
-            <li class="<?=is_active('socios',$listado)?>"><a href="<?=base_url()?>imprimir/listado/socios">Socios</a></li>
-            -->
           </ul>
         </div><!--/.nav-collapse -->
       </div>

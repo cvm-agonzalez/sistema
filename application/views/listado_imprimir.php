@@ -1,4 +1,4 @@
-<iframe src="<?=base_url()?>imprimir" id="iframe1" scrolling="no" width="100%" height="600" frameborder="0"></iframe>
+<iframe src="<?=base_url()?>imprimir/listado" id="iframe1" scrolling="no" width="100%" height="600" frameborder="0"></iframe>
 <script language="JavaScript">
 <!--
 function autoResize(id){

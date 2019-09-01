@@ -23,7 +23,7 @@
          <span class="icon-bar"></span>
          <span class="icon-bar"></span>
        </button>
-       <a class="navbar-brand" href="#">Club Villa Mitre</a>
+       <a class="navbar-brand" href="#"><?=$ent_nombre?></a>
      </div>
 
    </div>

@@ -9,7 +9,7 @@ class Estadisticas_model extends CI_Model {
         parent::__construct();
     }
     
-    public function facturacion_mensual(){        
+    public function facturacion_mensual($id_entidad){        
         $fecha = date('Y-m-j');
         $ret = "[";
             for ($i=0; $i <= 12; $i++) {
@@ -19,6 +19,7 @@ class Estadisticas_model extends CI_Model {
 
                 $facturacion = 0;
                 $this->db->select_sum('monto');
+                $this->db->where('id_entidad' , $id_entidad);
                 $this->db->where($n_mes, 'MONTH(generadoel)' , FALSE);
                 $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
                 $query = $this->db->get('pagos');
@@ -29,6 +30,7 @@ class Estadisticas_model extends CI_Model {
 
                 $pagos = 0;
                 $this->db->select_sum('pagado');
+                $this->db->where('id_entidad' , $id_entidad);
                 $this->db->where($n_mes, 'MONTH(generadoel)' , FALSE);
                 $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
                 $query = $this->db->get('pagos');
@@ -43,7 +45,7 @@ class Estadisticas_model extends CI_Model {
         return $ret;
     }
 
-    public function facturacion_anual(){        
+    public function facturacion_anual($id_entidad){        
         $fecha = date('Y-m-j');
         $ret = "[";
             for ($i=0; $i <= 10; $i++) {
@@ -53,7 +55,7 @@ class Estadisticas_model extends CI_Model {
 
                 $facturacion = 0;
                 $this->db->select_sum('monto');
-                //$this->db->where($n_mes, 'MONTH(date)' , FALSE);
+                $this->db->where('id_entidad' , $id_entidad);
                 $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
                 $query = $this->db->get('pagos');
                 if($query->num_rows() != 0){
@@ -63,7 +65,7 @@ class Estadisticas_model extends CI_Model {
 
                 $pagos = 0;
                 $this->db->select_sum('pagado');
-                //$this->db->where($n_mes, 'MONTH(date)' , FALSE);
+                $this->db->where('id_entidad' , $id_entidad);
                 $this->db->where($n_anio, 'YEAR(generadoel)' , FALSE);
                 $query = $this->db->get('pagos');
                 if($query->num_rows() != 0){
@@ -78,7 +80,7 @@ class Estadisticas_model extends CI_Model {
     }
 
 
-    public function cobranza_tabla($id_actividad='-1', $id_comision='0'){        
+    public function cobranza_tabla($id_entidad, $id_actividad='-1', $id_comision='0'){        
 	$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_cobranza;";
         $this->db->query($qry);
 
@@ -86,7 +88,7 @@ class Estadisticas_model extends CI_Model {
 		$qry1 ="DROP TEMPORARY TABLE IF EXISTS tmp_actividades; ";
         	$this->db->query($qry1);
 		$qry1 ="CREATE TEMPORARY TABLE tmp_actividades ( INDEX ( aid ) )
-			SELECT a.Id as aid FROM actividades a WHERE a.comision = $id_comision; ";
+			SELECT a.id as aid FROM actividades a WHERE a.id_entidad = $id_entidad AND a.comision = $id_comision; ";
         	$this->db->query($qry1);
 	}
 
@@ -104,7 +106,7 @@ class Estadisticas_model extends CI_Model {
 	if ( $id_actividad == -2 ) {
 		$qry .= "	LEFT JOIN actividades_asociadas aa ON ( p.tutor_id = aa.sid AND aa.estado = 1 ) ";
 	}
-	$qry .= "WHERE DATE_FORMAT(p.generadoel,'%Y%m') >= DATE_FORMAT( DATE_SUB(CURDATE(), INTERVAL 1 YEAR), '%Y%m' ) ";
+	$qry .= "WHERE p.id_entidad = $id_entidad AND DATE_FORMAT(p.generadoel,'%Y%m') >= DATE_FORMAT( DATE_SUB(CURDATE(), INTERVAL 1 YEAR), '%Y%m' ) ";
 	if ( $id_actividad == -2 ) {
 		$qry .= "AND aa.aid IS NULL ";
 	} else {
@@ -134,9 +136,9 @@ class Estadisticas_model extends CI_Model {
         return $resultado;
     }
 
-    public function actividades_mensual(){        
+    public function actividades_mensual($id_entidad){        
         $this->load->model('actividades_model');
-        $actividades = $this->actividades_model->get_actividades();
+        $actividades = $this->actividades_model->get_actividades($id_entidad);
         $labels = $keys = $data = "[";        
         $letras = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','aa','ab','ac','ad','ae','af','ag','ah','ai','aj','ak','al','am','an');
         $cont = 0;
@@ -167,27 +169,19 @@ class Estadisticas_model extends CI_Model {
                 $data .= $letras[$cont].': ';
 
                 $this->db->where('estado',1);
-                $this->db->where('aid',$actividad->Id);
+                $this->db->where('id_entidad',$id_entidad);
+                $this->db->where('aid',$actividad->id);
                 $this->db->where('date <',$fechaa);
                 $query = $this->db->get('actividades_asociadas');
                 $activas = $query->num_rows();
                 
-                /*var_dump($this->db->last_query());
-                echo '<br><br>';
-                echo $activas;
-                echo '<br><br>';*/
-
                 $this->db->where('estado',0);
-                $this->db->where('aid',$actividad->Id);
+                $this->db->where('aid',$actividad->id);
+                $this->db->where('id_entidad',$id_entidad);
                 $this->db->where('date_alta <',$fechaa);
                 $this->db->where('date >',$fechaa);
                 $query = $this->db->get('actividades_asociadas');
                 $bajas = $query->num_rows();
-
-                /*var_dump($this->db->last_query());
-                echo '<br><br>';
-                echo $bajas;
-                echo '<br><br>';*/ 
 
                 $activ = $bajas+$activas;
 
@@ -207,9 +201,9 @@ class Estadisticas_model extends CI_Model {
         return $ret;
     }
 
-    public function actividades_anual(){        
+    public function actividades_anual($id_entidad){        
         $this->load->model('actividades_model');
-        $actividades = $this->actividades_model->get_actividades();
+        $actividades = $this->actividades_model->get_actividades($id_entidad);
         $labels = $keys = $data = "[";        
         $letras = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','aa','ab','ac','ad','ae','af','ag','ah','ai','aj','ak','al','am','an');
         $cont = 0;
@@ -241,27 +235,20 @@ class Estadisticas_model extends CI_Model {
                 $data .= $letras[$cont].': ';
 
                 $this->db->where('estado',1);
-                $this->db->where('aid',$actividad->Id);
+                $this->db->where('aid',$actividad->id);
+                $this->db->where('id_entidad',$id_entidad);
                 $this->db->where('date <',$fechaa);
                 $query = $this->db->get('actividades_asociadas');
                 $activas = $query->num_rows();
                 
-                /*var_dump($this->db->last_query());
-                echo '<br><br>';
-                echo $activas;
-                echo '<br><br>';*/
-
                 $this->db->where('estado',0);
-                $this->db->where('aid',$actividad->Id);
+                $this->db->where('aid',$actividad->id);
+                $this->db->where('id_entidad',$id_entidad);
+                $this->db->where('date <',$fechaa);
                 $this->db->where('date_alta <',$fechaa);
                 $this->db->where('date >',$fechaa);
                 $query = $this->db->get('actividades_asociadas');
                 $bajas = $query->num_rows();
-
-                /*var_dump($this->db->last_query());
-                echo '<br><br>';
-                echo $bajas;
-                echo '<br><br>';*/ 
 
                 $activ = $bajas+$activas;
 

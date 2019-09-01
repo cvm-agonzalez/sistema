@@ -14,13 +14,13 @@
 			<tbody>
 				<? foreach($listaAdmin as $aa){ ?>
 				<tr>
-					<td><?=$aa->Id?></td>
+					<td><?=$aa->id?></td>
 					<td><span class="color-success"><?=$aa->user?></td>
 					<td><?=$aa->mail?></td>
 					<td><span class="label label-info"><?=$aa->lCon?></span></td>
 					<td>
-						<a href="<?=base_url()?>admin/admins/editar/<?=$aa->Id?>"><i class="fa fa-gear"></i> Editar</a>  | 
-						<a onclick="return confirm('Seguro que desea eliminar este Administrador?');" href="<?=base_url()?>admin/admins/eliminar/<?=$aa->Id?>"><i class="fa fa-times"></i> Eliminar</a>
+						<a href="<?=base_url()?>admin/admins/editar/<?=$aa->id?>"><i class="fa fa-gear"></i> Editar</a>  | 
+						<a onclick="return confirm('Seguro que desea eliminar este Administrador?');" href="<?=base_url()?>admin/admins/eliminar/<?=$aa->id?>"><i class="fa fa-times"></i> Eliminar</a>
 					</td>
 				</tr>                                    
 				<? } ?>

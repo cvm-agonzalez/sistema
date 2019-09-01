@@ -15,27 +15,28 @@ class Estado extends CI_Controller {
 	}
 
 	public function ver() {
+	        $id_entidad = $this->session->userdata('id_entidad');
 		$this->load->model('socios_model');
 		$this->load->model('pagos_model');
 		$dni = $this->uri->segment(3);
-		$socio = $this->socios_model->get_socio_by_dni($dni);
+		$socio = $this->socios_model->get_socio_by_dni($id_entidad, $dni);
 		$data = array();
 	        $data['socio'] = $socio;
 
 		$this->load->view('estado/index2', $data, FALSE);
 
 		if($socio){
-			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($socio->Id);
-			$socio->cuota = $this->pagos_model->get_monto_socio($socio->Id)['total'];			
-			$socio->facturacion = $this->pagos_model->get_facturacion($socio->Id);
-			if($socio->socio_n == ''){
-				$socio_n = $socio->Id;
+			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad, $socio->id);
+			$socio->cuota = $this->pagos_model->get_monto_socio($id_entidad, $socio->id)['total'];			
+			$socio->facturacion = $this->pagos_model->get_facturacion($id_entidad, $socio->id);
+			if($socio->nro_socio == ''){
+				$nro_socio = $socio->id;
 			}else{
-				$socio_n = $socio->socio_n;
+				$nro_socio = $socio->nro_socio;
 			}
 			?>
 
-			<h2>#<?=$socio_n?> - <?=$socio->apellido?>, <?=$socio->nombre?></h2>			
+			<h2>#<?=$nro_socio?> - <?=$socio->apellido?>, <?=$socio->nombre?></h2>			
 			<?
 			if($socio->deuda){                      
 	            $hoy = new DateTime();
@@ -78,27 +79,28 @@ class Estado extends CI_Controller {
 
 	public function get_socio()
 	{
+	        $id_entidad = $this->session->userdata('id_entidad');
 		header('Access-Control-Allow-Origin: *'); 
 		$this->load->model('socios_model');
 		$this->load->model('pagos_model');
 		$input = $this->input->post('socio_input');
 		if(strlen($input) > 9){			
-			$socio = $this->socios_model->get_socio_by_barcode($input);
+			$socio = $this->socios_model->get_socio_by_barcode($id_entidad,$input);
 		}else{
-			$socio = $this->socios_model->get_socio_by_dni($input);
+			$socio = $this->socios_model->get_socio_by_dni($id_entidad,$input);
 		}
 		if($socio){
-			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($socio->Id);
-			$socio->cuota = $this->pagos_model->get_monto_socio($socio->Id)['total'];			
-			$socio->facturacion = $this->pagos_model->get_facturacion($socio->Id);
-			if($socio->socio_n == ''){
-				$socio_n = $socio->Id;
+			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad,$socio->id);
+			$socio->cuota = $this->pagos_model->get_monto_socio($id_entidad,$socio->id)['total'];			
+			$socio->facturacion = $this->pagos_model->get_facturacion($id_entidad,$socio->id);
+			if($socio->nro_socio == ''){
+				$nro_socio = $socio->id;
 			}else{
-				$socio_n = $socio->socio_n;
+				$nro_socio = $socio->nro_socio;
 			}
 			?>
 
-			<h2>#<?=$socio_n?> - <?=$socio->apellido?>, <?=$socio->nombre?></h2>			
+			<h2>#<?=$nro_socio?> - <?=$socio->apellido?>, <?=$socio->nombre?></h2>			
 			<?
 			if($socio->deuda){                      
 	            $hoy = new DateTime();

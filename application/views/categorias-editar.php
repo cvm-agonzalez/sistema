@@ -2,12 +2,12 @@
     <div class="panel panel-default">
         <div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Categoria Socio</strong></div>
         <div class="panel-body">
-                    <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/socios/categorias/editar-do/<?=$categoria->Id?>" method="post">
+                    <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/socios/categorias/editar-do/<?=$categoria->id?>" method="post">
 
                 <div class="form-group">
                     <label for="" class="col-sm-2">Nombre</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="nombre" value="<?=$categoria->nomb?>">
+                        <input type="text" class="form-control" name="nombre" value="<?=$categoria->nombre?>">
                     </div>
                 </div>
                 <div class="form-group">

@@ -6,11 +6,11 @@
 }
 </style>
 <div class="pull-left">
-    <h3><?=$categoria->nomb?>: <?=count($socios)?></h3>
+    <h3><?=$categoria->nombre?>: <?=count($socios)?></h3>
 </div>
 <div class="pull-right hidden-print">
     <button class="btn btn-info" onclick="print()"><i class="fa fa-print"></i> Imprimir</button>
-    <a href="<?=base_url()?>imprimir/categorias_excel/<?=$categoria->Id?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
+    <a href="<?=base_url()?>imprimir/categorias_excel/<?=$categoria->id?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
 </div>
 <table class="table table-striped table-bordered" cellspacing="0" width="100%" id="categorias_table">
     <thead>
@@ -31,7 +31,7 @@
     	?>
         <tr>
             <td><?=@$socio->apellido?> <?=@$socio->nombre?> </td>
-            <td># <?=@$socio->Id?></td>
+            <td># <?=@$socio->id?></td>
             <td><?=@$socio->telefono?></td>
             <td><?=@$socio->dni?></td>
             <td><?=$socio->alta?></td>    

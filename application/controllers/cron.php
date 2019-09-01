@@ -4,11 +4,11 @@
 class Cron extends CI_Controller {
 
 	public function __construct()
-    {
-        parent::__construct();
-        if($_GET['order'] != 'asdqwe'){exit('No Permitido');}
-        $this->load->helper('url');
-    }
+    	{
+        	parent::__construct();
+		if($_GET['order'] != 'asdqwe'){exit('No Permitido');}
+        	$this->load->helper('url');
+    	}
 
 	function index()
 	{
@@ -25,14 +25,14 @@ class Cron extends CI_Controller {
         $query->free_result();
         foreach ($cupones as $cupon) {
             var_dump($cupon);
-            $content = file_get_contents("https://zxing.org/w/decode?u=http%3A%2F%2Fclubvillamitre.com%2Fimages%2Fcupones%2F".$cupon->Id.".png");
+            $content = file_get_contents("https://zxing.org/w/decode?u=http%3A%2F%2Fclubvillamitre.com%2Fimages%2Fcupones%2F".$cupon->id.".png");
             list($a,$estado1) = explode('<title>',$content);
             $estado = explode('</title>',$estado1);
             if($estado[0] == "Decode Succeeded"){
                 list($a,$pre1) = explode('<pre>',$estado[1]);
                 $pre = explode('</pre>',$pre1);                
                 $cup = array('barcode' => $pre[0]);
-                $this->db->where('Id', $cupon->Id);
+                $this->db->where('id', $cupon->id);
                 $this->db->update('cupones', $cup);
             }
         }
@@ -45,7 +45,7 @@ class Cron extends CI_Controller {
 	foreach ( $cupones as $cupon ) {
 		$cant++;
 		if ( $cant < 30 ) {
-                	$cupon = 'images/cupones/'.$cupon->Id.'.png';
+                	$cupon = 'images/cupones/'.$cupon->id.'.png';
 			unlink($cupon);
 		}
         }
@@ -115,8 +115,8 @@ class Cron extends CI_Controller {
     		$cumpleanios = $this->socios_model->get_cumpleanios(); //buscamos los que cumplen 18 años
 		$cump=0;
     		foreach ($cumpleanios as $menor) {
-    			$this->socios_model->actualizar_menor($menor->Id); //los quitamos del grupo familiar y cambiamos la categoria a mayor
-                $txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->Id.'-'.$menor->apellido.', '.$menor->nombre." \n";
+    			$this->socios_model->actualizar_menor($menor->id); //los quitamos del grupo familiar y cambiamos la categoria a mayor
+                $txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->id.'-'.$menor->apellido.', '.$menor->nombre." \n";
                 fwrite($log, $txt);   
 			$cump++;
     		}
@@ -145,7 +145,7 @@ class Cron extends CI_Controller {
 	// Ciclo los asociados a facturar
 	foreach ($socios as $socio) {		
 		// Busco el valor de la cuota social a pagar
-		$cuota = $this->pagos_model->get_monto_socio($socio->Id);
+		$cuota = $this->pagos_model->get_monto_socio($socio->id);
 		// Si tiene categoria de NO SOCIO no genero cuota
 		$descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
 		if ( $cuota['categoria'] != 'No Socio' ) {
@@ -165,8 +165,8 @@ class Cron extends CI_Controller {
 
 			// Inserto el pago de la cuota (tipo=1)
             		$pago = array(
-                		'sid' => $socio->Id, 
-                		'tutor_id' => $socio->Id,
+                		'sid' => $socio->id, 
+                		'tutor_id' => $socio->id,
                 		'aid' => 0, 
                 		'generadoel' => $xhoy,
                 		'descripcion' => $descripcion,
@@ -192,9 +192,9 @@ class Cron extends CI_Controller {
                 		$descr_inicial = 'Cuota Inicial '.$actividad->nombre.' - $ '.$actividad->cuota_inicial.'<br>';
 	                        // Inserto el pago de la actividad (tipo=4)
                         	$pago = array(
-                                	'sid' => $socio->Id,
-                                	'tutor_id' => $socio->Id,
-                                	'aid' => $actividad->Id,
+                                	'sid' => $socio->id,
+                                	'tutor_id' => $socio->id,
+                                	'aid' => $actividad->id,
                                 	'generadoel' => $xhoy,
                                 	'descripcion' => $descr_inicial,
                                 	'monto' => $actividad->cuota_inicial,
@@ -234,9 +234,9 @@ class Cron extends CI_Controller {
 
 			// Inserto el pago de la actividad (tipo=4)
                 	$pago = array(
-                    		'sid' => $socio->Id,
-                    		'tutor_id' => $socio->Id,
-                    		'aid' => $actividad->Id,
+                    		'sid' => $socio->id,
+                    		'tutor_id' => $socio->id,
+                    		'aid' => $actividad->id,
                  		'generadoel' => $xhoy,
                     		'descripcion' => $des,
                     		'monto' => $valor,
@@ -256,9 +256,9 @@ class Cron extends CI_Controller {
 
 				// Inserto el pago del seguro
                 		$pago = array(
-                    			'sid' => $socio->Id,
-                    			'tutor_id' => $socio->Id,
-                    			'aid' => $actividad->Id,
+                    			'sid' => $socio->id,
+                    			'tutor_id' => $socio->id,
+                    			'aid' => $actividad->id,
                  			'generadoel' => $xhoy,
                     			'descripcion' => $des,
                     			'monto' => $actividad->seguro,
@@ -302,9 +302,9 @@ class Cron extends CI_Controller {
 
 					// Inserto el pago de la actividad del familia (tipo=4)
                     			$pago = array(
-                        			'sid' => $familiar['datos']->Id,
-                        			'tutor_id' => $socio->Id,
-                        			'aid' => $actividad->Id,
+                        			'sid' => $familiar['datos']->id,
+                        			'tutor_id' => $socio->id,
+                        			'aid' => $actividad->id,
                         			'generadoel' => $xhoy,
                         			'descripcion' => $des,
                         			'monto' => $valor,
@@ -326,9 +326,9 @@ class Cron extends CI_Controller {
 		
                                 		// Inserto el pago del seguro
                                 		$pago = array(
-                                        		'sid' => $socio->Id,
-                                        		'tutor_id' => $socio->Id,
-                                        		'aid' => $actividad->Id,
+                                        		'sid' => $socio->id,
+                                        		'tutor_id' => $socio->id,
+                                        		'aid' => $actividad->id,
                                         		'generadoel' => $xhoy,
                                         		'descripcion' => $des,
                                         		'monto' => $actividad->seguro,
@@ -347,8 +347,8 @@ class Cron extends CI_Controller {
 	         	$des = 'Socio Extra (x'.$cuota['excedente'].') - $ '.$cuota['monto_excedente'].'<br>';
 			// Inserto el pago de la cuota excedente
                 	$pago = array(
-                    		'sid' => $socio->Id,    
-                    		'tutor_id' => $socio->Id,                
+                    		'sid' => $socio->id,    
+                    		'tutor_id' => $socio->id,                
                     		'aid' => 0,
                     		'generadoel' => $xhoy,
                     		'descripcion' => $des,
@@ -360,20 +360,20 @@ class Cron extends CI_Controller {
 
 		//financiacion de deuda
 		$deuda_financiada = 0;
-		$planes = $this->pagos_model->get_financiado_mensual($socio->Id);
+		$planes = $this->pagos_model->get_financiado_mensual($socio->id);
 		// Si tiene planes de financiacion activos
             	if($planes){
 			// Ciclo cada plan
     			foreach ($planes as $plan) {                
-                		$this->pagos_model->update_cuota($plan->Id);
+                		$this->pagos_model->update_cuota($plan->id);
 
 				$ncuota=$plan->actual+1;
                     		$descripcion .= 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$ncuota.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
                     		$des = 'Financiación de Deuda ('.$plan->detalle.' - Cuota: '.$ncuota.'/'.$plan->cuotas.') - $ '.round($plan->monto/$plan->cuotas,2).'<br>';
 				// Inserto el pago del plan de financiacion (tipo=3)
                     		$pago = array(
-                        		'sid' => $socio->Id,  
-                        		'tutor_id' => $socio->Id,                  
+                        		'sid' => $socio->id,  
+                        		'tutor_id' => $socio->id,                  
                         		'aid' => 0,
                         		'generadoel' => $xhoy,
                         		'descripcion' => $des,
@@ -392,11 +392,11 @@ class Cron extends CI_Controller {
             	//end financiacion de deuda	
 
 		// Obtiene el saldo total de la ultima fila de facturacion!!!
-	        $total = $this->pagos_model->get_socio_total($socio->Id);
+	        $total = $this->pagos_model->get_socio_total($socio->id);
 		// Le agrega la cuota facturada este mes al total del saldo
 	        $total = $total - ($cuota['total']);
 		$data = array(
-			"sid" => $socio->Id,
+			"sid" => $socio->id,
 			"date" => $xhoy,
 			"descripcion" => $descripcion,
 			"debe" => $cuota['total'],
@@ -404,7 +404,7 @@ class Cron extends CI_Controller {
 			"total" => $total
 		);
 
-            	$deuda = $this->pagos_model->get_deuda($socio->Id);
+            	$deuda = $this->pagos_model->get_deuda($socio->id);
 
 		// Inserta el registro de facturacion del mes
 		$this->pagos_model->insert_facturacion($data);
@@ -413,7 +413,7 @@ class Cron extends CI_Controller {
 		$this->pagos_model->update_facturacion_cron($xperiodo,3, 1, $cuota['total']);
 
 		// armo mail
-		$mail = $this->socios_model->get_resumen_mail($socio->Id);
+		$mail = $this->socios_model->get_resumen_mail($socio->id);
 
             	$cuota3 = $mail['resumen'];            
 
@@ -624,7 +624,7 @@ class Cron extends CI_Controller {
             	$this->load->model('pagos_model');
             	$cupon = $this->pagos_model->get_cupon($mail['sid']);
             	if($cupon->monto == $cuota3['total']){
-                	$cupon = base_url().'images/cupones/'.$cupon->Id.'.png';
+                	$cupon = base_url().'images/cupones/'.$cupon->id.'.png';
             	}else{
                 	$cupon = $this->cuentadigital($mail['sid'],$cuota3['titular'],$cuota3['total']);
                 	if($cupon && $mail['sid'] != 0){
@@ -658,7 +658,7 @@ class Cron extends CI_Controller {
 
                     	// Aca grabo el archivo para mandar a cobrar a COL
 			$col_periodo=$xperiodo;
-			$col_socio=$socio->Id;
+			$col_socio=$socio->id;
 			$col_dni=$socio->dni;
 			$col_apynom=$socio->apellido." ".$socio->nombre;
 			$col_importe=$total;
@@ -714,14 +714,14 @@ class Cron extends CI_Controller {
 
 	 
 		// Registro pago2 verificar.....
-            	$this->pagos_model->registrar_pago2($socio->Id,0);
+            	$this->pagos_model->registrar_pago2($socio->id,0);
 	
 		// Actualizado el estado de socios como facturado (facturado=1)
-            	$this->db->where('Id', $socio->Id);
+            	$this->db->where('id', $socio->id);
             	$this->db->update('socios', array('facturado'=>1));
 
 		// Registro en el log que asociado facture
-            	$txt = date('H:i:s').": Socio #".$socio->Id." DNI=".$socio->dni."-".TRIM($socio->apellido).", ".TRIM($socio->nombre)." facturado \n";
+            	$txt = date('H:i:s').": Socio #".$socio->id." DNI=".$socio->dni."-".TRIM($socio->apellido).", ".TRIM($socio->nombre)." facturado \n";
             	fwrite($log, $txt);            
 
 	}
@@ -754,7 +754,7 @@ class Cron extends CI_Controller {
         $socios_suspendidos = $query->result();
         //var_dump($socios_suspendidos);die;
         foreach ($socios_suspendidos as $socio) {
-            $mail = $this->socios_model->get_resumen_mail($socio->Id);
+            $mail = $this->socios_model->get_resumen_mail($socio->id);
             $total = ($mail['deuda']*-1);
 
             if($total <= 0){ continue; }
@@ -763,7 +763,7 @@ class Cron extends CI_Controller {
             $cuerpo .= '<h3><strong>Titular:</strong> '.$socio->nombre.' '.$socio->apellido.'</h3>';
             $cuerpo .= '<div style="padding:20px;background-color: #fdefee; border-color: #fad7db; color: #b13d31;">USUARIO SUSPENDIDO POR FALTA DE PAGO</div>';
 
-            $this->db->where('sid', $socio->Id);
+            $this->db->where('sid', $socio->id);
             $this->db->order_by('date', 'asc');
             $query = $this->db->get('facturacion');
             if( $query->num_rows() == 0 ){ continue; }
@@ -782,9 +782,9 @@ class Cron extends CI_Controller {
 
             $cuerpo .= '<h3>Su deuda total con el Club es de: $ '.$total.'</h3>';
 
-            $cupon = $this->cuentadigital($socio->Id,$socio->nombre.' '.$socio->apellido,$total);
+            $cupon = $this->cuentadigital($socio->id,$socio->nombre.' '.$socio->apellido,$total);
             if($cupon && $mail['sid'] != 0){
-                $cupon_id = $this->pagos_model->generar_cupon($socio->Id,$total,$cupon);
+                $cupon_id = $this->pagos_model->generar_cupon($socio->id,$total,$cupon);
                 $data = base64_decode($cupon['image']);
                 $img = imagecreatefromstring($data);
                 if ($img !== false) {
@@ -891,13 +891,13 @@ class Cron extends CI_Controller {
         foreach ($socios as $socio) {
             // Excluyo del analisis a los vitalicios
 	    if ( $socio->categoria != 5 ) {
-		$this->db->where('tutor_id', $socio->Id);
+		$this->db->where('tutor_id', $socio->id);
             	$this->db->where('tipo', 1);
             	$this->db->where('estado', 1);
             	$query = $this->db->get('pagos');
             	if( $query->num_rows() >= 5 ){ 
 			$meses_atraso=$query->num_rows();
-            		$this->db->where('tutor_id', $socio->Id);
+            		$this->db->where('tutor_id', $socio->id);
             		$this->db->where('tipo', 1);
             		$this->db->where('pagadoel is not NULL');
             		$this->db->select('tutor_id, MAX(pagadoel) maxfch, DATEDIFF(MAX(pagadoel),CURDATE()) dias_ultpago');
@@ -915,14 +915,14 @@ class Cron extends CI_Controller {
 				$isusp=1;
 			}
 			if ( $isusp == 1 ) {
-                		$this->db->where('Id',$socio->Id);
+                		$this->db->where('id',$socio->id);
                 		$this->db->update('socios', array('suspendido'=>1));
 	
 	
-                		$txt = date('H:i:s').": Socio Suspendido #".$socio->Id." ".TRIM($socio->apellido).", ".TRIM($socio->nombre)." DNI= ".$socio->dni." atraso de ".$meses_atraso." ultimo pago ".$ds_ult. " \n";
+                		$txt = date('H:i:s').": Socio Suspendido #".$socio->id." ".TRIM($socio->apellido).", ".TRIM($socio->nombre)." DNI= ".$socio->dni." atraso de ".$meses_atraso." ultimo pago ".$ds_ult. " \n";
                 		fwrite($log, $txt);   
 	
-        			$this->pagos_model->registrar_pago('debe',$socio->Id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0);
+        			$this->pagos_model->registrar_pago('debe',$socio->id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0);
 	
 				$cant++;
 			}
@@ -1056,7 +1056,7 @@ class Cron extends CI_Controller {
 			GROUP BY 1;";
         	$this->db->query($qry);
 			
-		$qry = "SELECT s.Id sid, s.dni, s.nombre, s.apellido, f.saldo saldo_fact, f.debe, f.haber, p.saldo saldo_pago, p.generado, p.afavor, p.pagado, p.sin_imputar, sdt.id_marca
+		$qry = "SELECT s.id sid, s.dni, s.nombre, s.apellido, f.saldo saldo_fact, f.debe, f.haber, p.saldo saldo_pago, p.generado, p.afavor, p.pagado, p.sin_imputar, sdt.id_marca
 			FROM tmp_saldo_fact f
         			LEFT JOIN socios s ON ( f.sid = s.id )
         			LEFT JOIN tmp_saldo_pago p ON ( f.sid = p.sid )
@@ -1067,7 +1067,7 @@ class Cron extends CI_Controller {
 		if ( $resultado->num_rows() == 0 ) {
 			"Los saldos de facturacion y pagos COINCIDEN \n";
 		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Saldo Fact \t Debe \t Haber \t Saldo Pago \t Generado \t A Favor \t Pagado \t Sin Imputar \t IdMarca \n";
+			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Saldo Fact \t Debe \t Haber \t Saldo Pago \t Generado \t A Favor \t Pagado \t Sin Imputar \t idMarca \n";
 			foreach ( $resultado->result() as $fila ) {
 				$txt_ctrl=$txt_ctrl.$fila->sid."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->saldo_fact."\t".$fila->debe."\t".$fila->haber."\t".$fila->saldo_pago."\t".$fila->generado."\t".$fila->afavor."\t".$fila->pagado."\t".$fila->sin_imputar."\t".$fila->id_marca."\n";
         		}
@@ -1085,7 +1085,7 @@ class Cron extends CI_Controller {
 
 		$qry = "SELECT t.sid, s.dni, s.nombre, s.apellido, t.saldo saldo_fact, t.debe, t.haber, f.total ult_fila
 			FROM tmp_saldo_fact t
-        			JOIN socios s ON ( t.sid = s.Id )
+        			JOIN socios s ON ( t.sid = s.id )
         			JOIN tmp_ultid u USING (sid)
         			JOIN facturacion f ON ( f.id = u.max_id )
 			WHERE t.saldo <> -f.total; ";
@@ -1110,17 +1110,17 @@ class Cron extends CI_Controller {
 			WHERE p.tipo = 5 AND p.monto < 0; ";
         	$this->db->query($qry);
 
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
+		$qry = "SELECT s.id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
 			FROM pagos p
         			JOIN tmp_afavor a USING ( tutor_id )
-        			JOIN socios s ON ( p.tutor_id = s.Id )
+        			JOIN socios s ON ( p.tutor_id = s.id )
 			WHERE p.estado = 1 AND p.tipo <> 5; ";
         	$resultado = $this->db->query($qry);
 
 		if ( $resultado->num_rows() == 0 ) {
 			"No existen socios con saldo a favor y pagos pendientes \n";
 		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
+			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
 			foreach ( $resultado->result() as $fila ) {
 				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
         		}
@@ -1128,16 +1128,16 @@ class Cron extends CI_Controller {
 
 /* Control de que no haya socios con registros estado=1 y todo pagado */
 		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS PENDIENTES Y TODO PAGADO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
+		$qry = "SELECT s.id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
 			FROM pagos p
-				JOIN socios s ON ( p.tutor_id = s.Id )
+				JOIN socios s ON ( p.tutor_id = s.id )
 			WHERE p.estado = 1 AND p.pagado >= p.monto AND p.tipo <> 5 AND p.monto > 0; ";
         	$resultado = $this->db->query($qry);
 
 		if ( $resultado->num_rows() == 0 ) {
 			"No existen pagos pendientes de socios con todo pagado \n";
 		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
+			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
 			foreach ( $resultado->result() as $fila ) {
 				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
         		}
@@ -1145,16 +1145,16 @@ class Cron extends CI_Controller {
 
 /* Control de que no haya socios con registros estado=0 y sin todo pagado */
 		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS con ESTADO=0 Y SIN TODO PAGADO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
+		$qry = "SELECT s.id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
 			FROM pagos p
-				JOIN socios s ON ( p.tutor_id = s.Id )
+				JOIN socios s ON ( p.tutor_id = s.id )
 			WHERE p.estado = 0 AND p.pagado < p.monto AND p.tipo <> 5 AND p.monto > 0; ";
         	$resultado = $this->db->query($qry);
 
 		if ( $resultado->num_rows() == 0 ) {
 			"No existen pagos con estado=0 y sin todo pagado \n";
 		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
+			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
 			foreach ( $resultado->result() as $fila ) {
 				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
         		}
@@ -1163,16 +1163,16 @@ class Cron extends CI_Controller {
 
 /* Control de que no haya socios con pagado > monto */
 		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS MAYORES AL MONTO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
+		$qry = "SELECT s.id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
 			FROM pagos p
-				JOIN socios s ON ( p.tutor_id = s.Id )
+				JOIN socios s ON ( p.tutor_id = s.id )
 			WHERE p.estado = 0 AND pagado > monto;";
         	$resultado = $this->db->query($qry);
 
 		if ( $resultado->num_rows() == 0 ) {
 			"No existen pagos con mayor pagado que el monto \n";
 		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
+			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
 			foreach ( $resultado->result() as $fila ) {
 				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
         		}
@@ -1180,7 +1180,7 @@ class Cron extends CI_Controller {
 
 /* Control de que no haya registros estado=1 y monto=pagado=0 */
 		$txt_ctrl=$txt_ctrl."CONTROL DE PAGOS PENDIENTES PERO QUE TIENEN TODO PAGADO \n";
-		$qry = "SELECT s.Id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
+		$qry = "SELECT s.id tutor_id, s.dni, s.nombre, s.apellido, p.id id_pago, p.sid, p.monto, p.generadoel, p.pagado, p.pagadoel, p.estado
 			FROM pagos p
         			JOIN socios s ON ( p.tutor_id = s.id )
 			WHERE p.estado = 1 AND p.pagado = p.monto AND p.tipo <> 5; ";
@@ -1189,7 +1189,7 @@ class Cron extends CI_Controller {
 		if ( $resultado->num_rows() == 0 ) {
 			"No existen pagos pendientes con todo pagado \n";
 		} else {
-			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t Id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
+			$txt_ctrl=$txt_ctrl. "SID \t DNI \t Nombre \t Apellido \t id_Pago \t Tutor \t Socio \t Monto \t GeneradoEl \t Pagado \t PagadoEl \t Estado \n";
 			foreach ( $resultado->result() as $fila ) {
 				$txt_ctrl=$txt_ctrl.$fila->tutor_id."\t".$fila->dni."\t".$fila->nombre."\t".$fila->apellido."\t".$fila->id_pago."\t".$fila->sid."\t".$fila->monto."\t".$fila->generadoel."\t".$fila->pagado."\t".$fila->pagadoel."\t".$fila->estado."\n";
         		}
@@ -1257,7 +1257,7 @@ class Cron extends CI_Controller {
 					$socio=$this->socios_model->get_socio($pago['sid']);
 					if ( $socio->suspendido == 1 && $saldo < 0 ) {
 						$this->socios_model->suspender($pago['sid'],'no');
-						$reactivados[]=$socio->Id."-".$socio->apellido.", ".$socio->nombre."\n";
+						$reactivados[]=$socio->id."-".$socio->apellido.", ".$socio->nombre."\n";
 						$cant_react++;
 					}
 
@@ -1294,7 +1294,7 @@ class Cron extends CI_Controller {
 					$socio=$this->socios_model->get_socio($pago['sid']);
 					if ( $socio->suspendido == 1 && $saldo < 0 ) {
 						$this->socios_model->suspender($pago['sid'],'no');
-						$reactivados[]=$socio->Id."-".$socio->apellido.", ".$socio->nombre."\n";
+						$reactivados[]=$socio->id."-".$socio->apellido.", ".$socio->nombre."\n";
 						$cant_react++;
 					}
 
@@ -1456,7 +1456,7 @@ class Cron extends CI_Controller {
 			fwrite($f,$linea);
 			$cont++;
 			$total=$total+$importe;
-			fwrite($log,$socio->Id." ".$socio->apellido.", ".$socio->nombre." monto :".$importe."\n");
+			fwrite($log,$socio->id." ".$socio->apellido.", ".$socio->nombre." monto :".$importe."\n");
 		}
 	}
 	$linea="FECHA :".$fecha."\n";
@@ -1507,7 +1507,7 @@ class Cron extends CI_Controller {
 			fwrite($f,$linea);
 			$cont++;
 			$total=$total+$importe;
-			fwrite($log,$socio->Id." ".$socio->apellido.", ".$socio->nombre." monto :".$importe."\n");
+			fwrite($log,$socio->id." ".$socio->apellido.", ".$socio->nombre." monto :".$importe."\n");
 		}
 	}
 	$linea="FECHA :".$fecha."\n";
@@ -1572,14 +1572,14 @@ class Cron extends CI_Controller {
             $this->load->model('pagos_model');
             $socios = $this->socios_model->get_socios_pagan();
             foreach ($socios as $socio) {
-                $cuota = $this->pagos_model->get_monto_socio($socio->Id);
-                $total = $this->pagos_model->get_socio_total($socio->Id);
+                $cuota = $this->pagos_model->get_monto_socio($socio->id);
+                $total = $this->pagos_model->get_socio_total($socio->id);
                 if($total*-1 > $cuota['total']){
                     $debe = $cuota['total'] * $config->interes_mora /100;
                     
                     $total = $total - $debe;
                     $facturacion = array(
-                        'sid' => $socio->Id,
+                        'sid' => $socio->id,
                         'descripcion'=>'Intereses por Mora',
                         'debe'=>$debe,
                         'haber'=>0,
@@ -1588,8 +1588,8 @@ class Cron extends CI_Controller {
                     $this->pagos_model->insert_facturacion($facturacion);
 
                     $pago = array(
-                        'sid' => $socio->Id, 
-                        'tutor_id' => $socio->Id,
+                        'sid' => $socio->id, 
+                        'tutor_id' => $socio->id,
                         'aid' => 0, 
                         'generadoel' => date('Y-m-d'),
                         'descripcion' => "Intereses por Mora",
@@ -1627,7 +1627,7 @@ class Cron extends CI_Controller {
                 if($this->email->send()){
                     error_log( " ----> Enviado OK "." \n", 3, "cron_envios.log");
 
-                    $this->db->where('Id',$email->Id);
+                    $this->db->where('id',$email->id);
                     $this->db->update('facturacion_mails',array('estado'=>1));
 		    $enviados++;
                 } else {
@@ -1653,9 +1653,9 @@ class Cron extends CI_Controller {
         $query = $this->db->get('socios');
         $socios = $query->result();
         foreach ($socios as $socio) {            
-            $total = $this->pagos_model->get_socio_total($socio->Id);            
+            $total = $this->pagos_model->get_socio_total($socio->id);            
             $pago = array(
-                'sid' => $socio->Id, 
+                'sid' => $socio->id, 
                 'tutor_id' => $sid,
                 'aid' => 0, 
                 'generadoel' => date('Y-m-d'),
@@ -1706,10 +1706,10 @@ class Cron extends CI_Controller {
         $this->load->model("socios_model");
         $socios = $this->socios_model->listar(); //listamos todos los socios activos
         foreach ($socios as $socio) {    
-            $total = $this->pagos_model->get_socio_total($socio['datos']->Id);
-            $total2 = $this->pagos_model->get_socio_total2($socio['datos']->Id);
+            $total = $this->pagos_model->get_socio_total($socio['datos']->id);
+            $total2 = $this->pagos_model->get_socio_total2($socio['datos']->id);
             if($total + $total2 != 0 && $total <= 0){
-                echo $socio['datos']->Id.' | '.$total.' | '.$total2.'<br>';            
+                echo $socio['datos']->id.' | '.$total.' | '.$total2.'<br>';            
             }
         }
     }  

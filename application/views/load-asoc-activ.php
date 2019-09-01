@@ -6,7 +6,7 @@
                        <span class=" ui-select">
                        <select name="actividad" id="actividad" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
                        <? foreach ( $actividades as $actividad ) { ?>
-				<option value="<?=$actividad->Id?>" ><?=$actividad->nombre?></option>
+				<option value="<?=$actividad->id?>" ><?=$actividad->nombre?></option>
                         <?}?>
                        </select>
                        </span>
@@ -41,7 +41,7 @@
                        			<select id="dato1col" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
                                 		<option value="" > Clave Datos 1 columna </option>
                                 		<option value="dni" > Documento </option>
-                                		<option value="sid" > Id de Asociado </option>
+                                		<option value="sid" > id de Asociado </option>
                        			</select>
                        		</span>
                      	</div>

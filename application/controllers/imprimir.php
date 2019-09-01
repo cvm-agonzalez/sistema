@@ -17,283 +17,198 @@ class Imprimir extends CI_Controller {
     function index()
     {
         $data['listado'] = false;
-        $this->load->view('imprimir/index',$data);
-        $this->load->view('imprimir/foot');
+        $this->load->view('imprimir/foot',$data);
     }
+
+        private function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
+	        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        	$ent_nombre = $this->session->userdata('ent_ent_nombre');
+
+                $this->load->library('PHPExcel');
+                $this->phpexcel->getProperties()->setCreator($ent_nombre)
+                                             ->setLastModifiedBy($ent_nombre)
+                                             ->setTitle($titulo)
+                                             ->setSubject($titulo);
+
+		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
+		$letras=$letras."AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK,AL,AM,AN,AO,AP,AQ,AR,AS,AT,AU,AV,AW,AX,AY,AZ";
+		$letras=$letras."BA,BB,BC,BD,BE,BF,BG,BH,BI,BJ,BK,BL,BM,BN,BO,BP,BQ,BR,BS,BT,BU,BV,BW,BX,BY,BZ";
+
+		$letra=explode(",",$letras);
+		$cant_col=count($headers);
+		$letra_ini=$letra[0];
+		$letra_fin=$letra[$cant_col];
+
+		$str_style=$letra_ini."1:".$letra_fin."1";
+
+                $this->phpexcel->getActiveSheet()->getStyle("$str_style")->getFill()->applyFromArray(
+                    array(
+                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+                        'startcolor' => array('rgb' => 'E9E9E9'),
+                    )
+                );
+
+
+		if ( $fila1 ) {
+                	$this->phpexcel->setActiveSheetIndex(0)
+                        	->setCellValue('A1', $fila1);
+			$cont = 3;
+			$inicio="A2";
+		} else {
+                	$cont = 2;
+			$inicio="A1";
+		}
+
+                // agregamos información a las celdas
+                $this->phpexcel->setActiveSheetIndex(0);
+
+		$this->phpexcel->getActiveSheet()->fromArray(
+        		$headers,   	// The data to set
+        		NULL,        	// Array values with this value will not be set
+        		"$inicio"       // Top left coordinate of the worksheet range where
+                     			//    we want to set these values (default is A1)
+    		);
+
+
+                foreach ($datos as $dato) {
+                	$this->phpexcel->setActiveSheetIndex(0);
+
+			$this->phpexcel->getActiveSheet()->fromArray(
+        			(array)$dato,   	// The data to set
+        			NULL,        	// Array values with this value will not be set
+        			'A'.$cont       // Top left coordinate of the worksheet range where
+                     				//    we want to set these values (default is A1)
+    			);
+                        $cont ++;
+                }
+                // Renombramos la hoja de trabajo
+                $this->phpexcel->getActiveSheet()->setTitle("$titulo");
+
+                foreach(range('A',"$letra_fin") as $columnID) {
+                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
+                        ->setAutoSize(true);
+                }
+                // configuramos el documento para que la hoja
+                // de trabajo número 0 sera la primera en mostrarse
+                // al abrir el documento
+                $this->phpexcel->setActiveSheetIndex(0);
+
+                // redireccionamos la salida al navegador del cliente (Excel2007)
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="'.$archivo.'.xlsx"');
+                header('Cache-Control: max-age=0');
+
+                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
+                $objWriter->save('php://output');
+        }
 
     public function exportar($action='')
     {
+        $id_entidad = $this->session->userdata('id_entidad');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
         $data['listado'] = false;
         switch ($action) {
             case 'socios':
                 $this->load->model('socios_model');                
                 $this->load->model('general_model');                
                 $this->load->model('pagos_model');                
-                $clientes = $this->socios_model->get_socios();
+                $clientes = $this->socios_model->get_socios($id_entidad);
                     
-                $titulo = "CVM - Socios - ".date('d-m-Y');
-                
-                
-                
-                $this->load->library('PHPExcel');                
-                $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                             ->setLastModifiedBy("Club Villa Mitre")
-                                             ->setTitle("Listado")
-                                             ->setSubject("Listado de Socios");
-                
-                $this->phpexcel->getActiveSheet()->getStyle('A1:R1')->getFill()->applyFromArray(
-                    array(
-                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                        'startcolor' => array('rgb' => 'E9E9E9'),
-                    )
-                );
-                 
+                $titulo = $ent_abrev." - Socios - ".date('d-m-Y');
+		$fila1 = false;
 
-                // agregamos información a las celdas
-                $this->phpexcel->setActiveSheetIndex(0)
-                            ->setCellValue('A1', '#')
-                            ->setCellValue('B1', 'Apellido')
-                            ->setCellValue('C1', 'Nombre')
-                            ->setCellValue('D1', 'DNI')
-                            ->setCellValue('E1', 'Domicilio')
-                            ->setCellValue('F1', 'Localidad')
-                            ->setCellValue('G1', 'Nacionalidad')
-                            ->setCellValue('H1', 'Fecha de Nacimiento')
-                            ->setCellValue('I1', 'Teléfono')
-                            ->setCellValue('J1', 'Email')
-                            ->setCellValue('K1', 'Celular')
-                            ->setCellValue('L1', 'Tutor de grupo Familiar')
-                            ->setCellValue('M1', 'Categoría de Socio')
-                            ->setCellValue('N1', 'Descuento')
-                            ->setCellValue('O1', 'Fecha de Ingreso')                            
-                            ->setCellValue('P1', 'Estado')
-                            ->setCellValue('Q1', 'Observaciones')
-                            ->setCellValue('R1', 'Saldo en Cuenta Corriente');                 
-                
-                $cont = 2;
-                foreach ($clientes as $cliente) {
-                    //tutor
-                    if($cliente->tutor != 0){
-                        $tutor = $this->socios_model->get_socio($cliente->tutor);
-                        $tutor->Id = '#'.$tutor->Id;
-                    }else{
-                        $tutor = new STDClass();
-                        $tutor->Id = '';
-                        $tutor->nombre = '';
-                        $tutor->apellido = '';
-                    }
-                    //categoria
-                    $categoria = $this->general_model->get_cat($cliente->categoria);
-                    //estado
-                    if($cliente->suspendido == 0){
-                        $estado = 'Activo';
-                    }else{
-                        $estado = 'Suspendido';
-                    }
-                    //saldo
-                    $saldo = $this->pagos_model->get_socio_total($cliente->Id);
+		$archivo="Listado de Socios"."_".date('Ymd');
+		$headers=array();
+		$headers[]='#';
+		$headers[]='Apellido';
+		$headers[]='Nombre';
+		$headers[]='DNI';
+		$headers[]='Domicilio';
+		$headers[]='Localidad';
+		$headers[]='Nacionalidad';
+		$headers[]='Fecha de Nacimiento';
+		$headers[]='Teléfono';
+		$headers[]='Email';
+		$headers[]='Celular';
+		$headers[]='Tutor de grupo Familiar';
+		$headers[]='Categoría de Socio';
+		$headers[]='Descuento';
+		$headers[]='Fecha de Ingreso';
+		$headers[]='Estado';
+		$headers[]='Observaciones';
+		$headers[]='Saldo en Cuenta Corriente';
 
-                    $this->phpexcel->setActiveSheetIndex(0)
-                                ->setCellValue('A'.$cont, $cliente->Id)
-                                ->setCellValue('B'.$cont, $cliente->apellido)  
-                                ->setCellValue('C'.$cont, trim($cliente->nombre))  
-                                ->setCellValue('D'.$cont, $cliente->dni)  
-                                ->setCellValue('E'.$cont, $cliente->domicilio)  
-                                ->setCellValue('F'.$cont, $cliente->localidad)  
-                                ->setCellValue('G'.$cont, $cliente->nacionalidad)  
-                                ->setCellValue('H'.$cont, $cliente->nacimiento)
-                                ->setCellValue('I'.$cont, $cliente->telefono)
-                                ->setCellValue('J'.$cont, $cliente->mail)
-                                ->setCellValue('K'.$cont, $cliente->celular)
-                                ->setCellValue('L'.$cont, $tutor->Id.' - '.$tutor->apellido.' '.$tutor->nombre)
-                                ->setCellValue('M'.$cont, $categoria->nomb)
-                                ->setCellValue('N'.$cont, $cliente->descuento)
-                                ->setCellValue('O'.$cont, $cliente->alta)
-                                ->setCellValue('P'.$cont, $estado)
-                                ->setCellValue('Q'.$cont, trim($cliente->observaciones))
-                                ->setCellValue('R'.$cont, $saldo);                               
-                                $cont ++;
-                } 
-                // Renombramos la hoja de trabajo
-                $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-                 
-                foreach(range('A','R') as $columnID) {
-                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                        ->setAutoSize(true);
-                }
-                // configuramos el documento para que la hoja
-                // de trabajo número 0 sera la primera en mostrarse
-                // al abrir el documento
-                $this->phpexcel->setActiveSheetIndex(0);
-                 
-                 
-                // redireccionamos la salida al navegador del cliente (Excel2007)
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-                header('Cache-Control: max-age=0');
-                 
-                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-                $objWriter->save('php://output');
+		$datos=$clientes;
+		$this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
                 break;
 
             case 'actividades':
                 $this->load->model('actividades_model');
                 $this->load->model('socios_model');
-                $actividades = $this->actividades_model->get_act_asoc_all();
+                $actividades = $this->actividades_model->get_act_asoc_all($id_entidad);
+        	$ent_abrev = $this->session->userdata('ent_abreviatura');
+        	$ent_nombre = $this->session->userdata('ent_ent_nombre');
                     
-                $titulo = "CVM - Actividades - ".date('d-m-Y');
-                
-                
-                
-                $this->load->library('PHPExcel');                
-                $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                             ->setLastModifiedBy("Club Villa Mitre")
-                                             ->setTitle("Listado")
-                                             ->setSubject("Listado de Socios");
-                
-                $this->phpexcel->getActiveSheet()->getStyle('A1:F1')->getFill()->applyFromArray(
-                    array(
-                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                        'startcolor' => array('rgb' => 'E9E9E9'),
-                    )
-                );
-                 
+                $titulo = $ent_abrev." - Actividades - ".date('d-m-Y');
+		$fila1 = false;
 
-                // agregamos información a las celdas
-                $this->phpexcel->setActiveSheetIndex(0)
-                            ->setCellValue('A1', 'Socio #')
-                            ->setCellValue('B1', 'Apellido')
-                            ->setCellValue('C1', 'Nombre')
-                            ->setCellValue('D1', 'Actividad #')
-                            ->setCellValue('E1', 'Actividad')
-                            ->setCellValue('F1', 'Descuento');
+                $archivo="Listado de Actividades"."_".date('Ymd');
+                $headers=array();
+                $headers[]='Socio #';
+                $headers[]='Apellido';
+                $headers[]='Nombre';
+                $headers[]='Actividad #';
+                $headers[]='Descripcion Actividad';
+                $headers[]='Descuento';
 
-                $cont = 2;
-                foreach ($actividades as $actividad) {                    
+                $datos=$actividades;
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 
-                    $this->phpexcel->setActiveSheetIndex(0)
-                                ->setCellValue('A'.$cont, $actividad->sid)
-                                ->setCellValue('B'.$cont, $actividad->socio_apellido)  
-                                ->setCellValue('C'.$cont, trim($actividad->socio_nombre))  
-                                ->setCellValue('D'.$cont, $actividad->aid)  
-                                ->setCellValue('E'.$cont, $actividad->actividad_nombre)  
-                                ->setCellValue('F'.$cont, $actividad->descuento);                                                        
-                                $cont ++;
-                } 
-                // Renombramos la hoja de trabajo
-                $this->phpexcel->getActiveSheet()->setTitle('Actividades');
-                 
-                foreach(range('A','F') as $columnID) {
-                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                        ->setAutoSize(true);
-                }
-                // configuramos el documento para que la hoja
-                // de trabajo número 0 sera la primera en mostrarse
-                // al abrir el documento
-                $this->phpexcel->setActiveSheetIndex(0);
-                 
-                 
-                // redireccionamos la salida al navegador del cliente (Excel2007)
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-                header('Cache-Control: max-age=0');
-                 
-                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-                $objWriter->save('php://output');
                 break;
 
             case 'cuenta_corriente':
                 $this->load->model('pagos_model');                
-                $facturaciones = $this->pagos_model->get_facturacion_all();
+                $facturaciones = $this->pagos_model->get_facturacion_all($id_entidad);
                     
-                $titulo = "CVM - Cuentas Corrientes - ".date('d-m-Y');
-                
-                
-                
-                $this->load->library('PHPExcel');                
-                $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                             ->setLastModifiedBy("Club Villa Mitre")
-                                             ->setTitle("Listado")
-                                             ->setSubject("Listado de Socios");
-                
-                $this->phpexcel->getActiveSheet()->getStyle('A1:F1')->getFill()->applyFromArray(
-                    array(
-                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                        'startcolor' => array('rgb' => 'E9E9E9'),
-                    )
-                );
-                 
+        	$ent_abrev = $this->session->userdata('ent_abreviatura');
+        	$ent_nombre = $this->session->userdata('ent_ent_nombre');
 
-                // agregamos información a las celdas
-                $this->phpexcel->setActiveSheetIndex(0)
-                            ->setCellValue('A1', 'Socio #')
-                            // ->setCellValue('B1', 'Apellido')
-                            // ->setCellValue('C1', 'Nombre')
-                            ->setCellValue('B1', 'Facturación #')
-                            ->setCellValue('C1', 'Fecha')
-                            ->setCellValue('D1', 'Descripcion')
-                            ->setCellValue('E1', 'Tipo (D/H)')
-                            ->setCellValue('F1', 'Importe');
+                $titulo = $ent_abrev." - Cuentas Corrientes - ".date('d-m-Y');
+		$fila1 = false;
+                
+                $archivo="Listado de Cuenta Corriente"."_".date('Ymd');
+                $headers=array();
+                $headers[]='Socio #';
+                $headers[]='Facturacion #';
+                $headers[]='Fecha';
+                $headers[]='Descripcion';
+                $headers[]='Tipo (D/H)';
+                $headers[]='Importe';
 
-                $cont = 2;
-                foreach ($facturaciones as $facturacion) {                    
-                    if($facturacion->debe == 0){
-                        $tipo = "H";
-                        $importe = $facturacion->haber;
-                    }else if($facturacion->haber == 0){
-                        $tipo = "D";
-                        $importe = $facturacion->debe;
-                    }
+                $datos=$actividades;
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 
-                    $this->phpexcel->setActiveSheetIndex(0)
-                                ->setCellValue('A'.$cont, $facturacion->sid)
-                                // ->setCellValue('B'.$cont, $facturacion->apellido)  
-                                // ->setCellValue('C'.$cont, trim($facturacion->nombre))  
-                                ->setCellValue('B'.$cont, $facturacion->Id)  
-                                ->setCellValue('C'.$cont, $facturacion->date)  
-                                ->setCellValue('D'.$cont, str_replace('Detalle',' Detalle',strip_tags($facturacion->descripcion)))
-                                ->setCellValue('E'.$cont, $tipo)  
-                                ->setCellValue('F'.$cont, $importe);                                                        
-                                $cont ++;
-                } 
-                // Renombramos la hoja de trabajo
-                $this->phpexcel->getActiveSheet()->setTitle('Cuentas Corrientes');
-                 
-                foreach(range('A','F') as $columnID) {
-                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                        ->setAutoSize(true);
-                }
-                // configuramos el documento para que la hoja
-                // de trabajo número 0 sera la primera en mostrarse
-                // al abrir el documento
-                $this->phpexcel->setActiveSheetIndex(0);
-                 
-                 
-                // redireccionamos la salida al navegador del cliente (Excel2007)
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-                header('Cache-Control: max-age=0');
-                 
-                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-                $objWriter->save('php://output');
                 break;
             
             default:                
-                $this->load->view('imprimir/index',$data);
+                $this->load->view('imprimir/index_exportar',$data);
                 $this->load->view('imprimir/exportar',$data);
                 $this->load->view('imprimir/foot');
                 break;
         }
+        $this->load->view('imprimir/foot');
     }
 
     public function listado($listado,$id=false)
     {
+        $id_entidad = $this->session->userdata('id_entidad');
         $data['listado'] = $listado;
-        $this->load->view('imprimir/index',$data);
+        $this->load->view('imprimir/index_listado',$data);
         switch ($listado) {
             case 'actividades':
                 $this->load->model('actividades_model');
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $data['render_cat'] = false;
                 if($id){ $data['render_cat'] = $id; }                
                 $this->load->view('imprimir/actividades',$data);
@@ -301,25 +216,23 @@ class Imprimir extends CI_Controller {
 
             case 'profesores':
                 $this->load->model('actividades_model');
-                $data['profesores'] = $this->actividades_model->get_profesores();
+                $data['profesores'] = $this->actividades_model->get_profesores($id_entidad);
                 $this->load->view('imprimir/profesores',$data);
                 break;
 
             case 'usuarios_suspendidos':
                 $this->load->model('pagos_model');
-                $data['socios'] = $this->pagos_model->get_usuarios_suspendidos();
+                $data['socios'] = $this->pagos_model->get_usuarios_suspendidos($id_entidad);
                 $this->load->view('imprimir/usuarios_suspendidos',$data);
                 break;
 
             case 'socios':
-                //$this->load->model('actividades_model');
-                //$data['actividades'] = $this->actividades_model->get_actividades();
                 $this->load->view('imprimir/socios',$data);
                 break;
 
             case 'categorias':
                 $this->load->model('general_model');
-                $data['actividades'] = $this->general_model->get_cats();                
+                $data['actividades'] = $this->general_model->get_cats($id_entidad);                
                 $this->load->view('imprimir/categorias',$data);
                 break;
 
@@ -329,21 +242,21 @@ class Imprimir extends CI_Controller {
                 $comision = $this->input->post('comisiones');
                 $actividad = $this->input->post('morosos_activ'); 
                 if($comision || $actividad){                           
-                    	$data['morosos'] = $this->pagos_model->get_morosos($comision, $actividad);
+                    	$data['morosos'] = $this->pagos_model->get_morosos($id_entidad, $comision, $actividad);
                 }else{
                     $data['morosos'] = false;
                 }
                 $this->load->model('actividades_model');
                 $data['actividad_sel'] = $actividad;
                 $data['comision_sel'] = $comision;
-                $data['comisiones'] = $this->actividades_model->get_comisiones();
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $this->load->view('imprimir/morosos',$data);
                 break;
 
             case 'financiacion':
                 $this->load->model('pagos_model');
-                $data['socios'] = $this->pagos_model->get_socios_financiados();
+                $data['socios'] = $this->pagos_model->get_socios_financiados($id_entidad);
                 $this->load->view('imprimir/financiacion',$data);                
                 break;
 
@@ -354,16 +267,16 @@ class Imprimir extends CI_Controller {
                 $actividad = $this->uri->segment(4);
                 $data['socios'] = false;
                 if($actividad){
-                    $data['socios'] = $this->pagos_model->get_becas($actividad);
+                    $data['socios'] = $this->pagos_model->get_becas($id_entidad,$actividad);
                 }
                 $data['a_actual'] = $actividad;
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $this->load->view('imprimir/becas',$data);             
                 break;
             
             case 'sin_actividades':
                 $this->load->model('pagos_model');
-                $data['socios'] = $this->pagos_model->get_sin_actividades();
+                $data['socios'] = $this->pagos_model->get_sin_actividades($id_entidad);
                 $this->load->view('imprimir/sin_actividades',$data);
                 break;
 
@@ -376,14 +289,15 @@ class Imprimir extends CI_Controller {
 
     public function cobros($action='',$fecha1=false,$fecha2=false)
     {        
+        $id_entidad = $this->session->userdata('id_entidad');
         $data = array();
         $this->load->model('pagos_model');
-        $this->load->view('imprimir/index',$data);
+        $this->load->view('imprimir/index_cobros',$data);
         switch ($action) {
             case 'ingresos':
                 $data['ingresos'] = false;
                 if($fecha1 && $fecha2){
-                    $data['ingresos'] = $this->pagos_model->get_ingresos($fecha1,$fecha2);
+                    $data['ingresos'] = $this->pagos_model->get_ingresos($id_entidad,$fecha1,$fecha2);
                 }
                 $data['fecha1'] = $fecha1;
                 $data['fecha2'] = $fecha2;
@@ -405,17 +319,17 @@ class Imprimir extends CI_Controller {
                 }
                 if($fecha1 && $fecha2){
                     if($actividad != '-1'){
-                        $data['cobros'] = $this->pagos_model->get_cobros_actividad($fecha1,$fecha2,$actividad,$categoria);
+                        $data['cobros'] = $this->pagos_model->get_cobros_actividad($id_entidad, $fecha1,$fecha2,$actividad,$categoria);
                         $data['actividad_s'] = $actividad;                        
                     }else{
-                        $data['cobros'] = $this->pagos_model->get_cobros_cuota($fecha1,$fecha2,$categoria);
+                        $data['cobros'] = $this->pagos_model->get_cobros_cuota($id_entidad, $fecha1,$fecha2,$categoria);
                         $data['actividad_s'] = '-1';
                     }
                 }                
                 $data['fecha1'] = $fecha1;
                 $data['fecha2'] = $fecha2;
                 $this->load->model('actividades_model');
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $data['actividad_info'] = $this->actividades_model->get_actividad($actividad);
                 $this->load->view('imprimir/actividades-cobros', $data, FALSE);
                 break;
@@ -424,21 +338,21 @@ class Imprimir extends CI_Controller {
                 $this->load->model('actividades_model');
                 $id = $this->uri->segment(4);
                 $data['actividad'] = new STDClass();
-                $data['actividad']->Id = false;
+                $data['actividad']->id = false;
                 if($id){
-                    $data['socios'] = $this->pagos_model->get_pagos_actividad_anterior($id);
+                    $data['socios'] = $this->pagos_model->get_pagos_actividad_anterior($id_entidad, $id);
                     $data['actividad'] = $this->actividades_model->get_actividad($id);
                 }else{
                     $data['socios'] = false;                    
                 }
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $this->load->view('imprimir/anterior',$data);
                 break;
 
             case 'cuentadigital':
                 $data['ingresos'] = false;
                 if($fecha1 && $fecha2){
-                    $data['ingresos'] = $this->pagos_model->get_ingresos_cuentadigital($fecha1,$fecha2);
+                    $data['ingresos'] = $this->pagos_model->get_ingresos_cuentadigital($id_entidad, $fecha1,$fecha2);
                 }
                 $data['fecha1'] = $fecha1;
                 $data['fecha2'] = $fecha2;
@@ -454,13 +368,14 @@ class Imprimir extends CI_Controller {
     }
 
     function generar($listado,$id){
+        $id_entidad = $this->session->userdata('id_entidad');
         switch ($listado) {           
             case 'actividades':
                 $this->load->model('pagos_model');
                 $this->load->model('actividades_model');
                 $data['actividad'] = $this->actividades_model->get_actividad($id);
                 $data['profesor'] = $this->actividades_model->get_profesor($data['actividad']->profesor);
-                $data['socios'] = $this->pagos_model->get_pagos_actividad($id);
+                $data['socios'] = $this->pagos_model->get_pagos_actividad($id_entidad, $id);
                 $this->load->view('imprimir/actividades_listado',$data);
                 break;
 
@@ -468,7 +383,7 @@ class Imprimir extends CI_Controller {
                 $this->load->model('pagos_model');
                 $this->load->model('actividades_model');
                 $data['profesor'] = $this->actividades_model->get_profesor($id);
-                $data['socios'] = $this->pagos_model->get_pagos_profesor($id);
+                $data['socios'] = $this->pagos_model->get_pagos_profesor($id_entidad, $id);
                 $this->load->view('imprimir/profesores_listado',$data);
                 break;
 
@@ -477,11 +392,11 @@ class Imprimir extends CI_Controller {
                 if($id == 'activos'){
                     $data['id'] = $id;
                     $data['titulo'] = "Socios Activos";
-                    $data['socios'] = $socios = $this->pagos_model->get_socios_activos();
+                    $data['socios'] = $socios = $this->pagos_model->get_socios_activos($id_entidad);
                     foreach ($socios as $socio) {
-                        $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($socio->Id);
+                        $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad, $socio->id);
                         /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-			            $array_ahg = $this->pagos_model->get_monto_socio($socio->Id);
+			$array_ahg = $this->pagos_model->get_monto_socio($id_entidad, $socio->id);
                         $socio->cuota = $array_ahg['total'];
                         /* Fin Modificacion AHG */
                     }
@@ -489,11 +404,11 @@ class Imprimir extends CI_Controller {
                 }else if($id == 'suspendidos'){
                     $data['id'] = $id;
                     $data['titulo'] = "Socios Suspendidos";                    
-                    $data['socios'] = $socios = $this->pagos_model->get_usuarios_suspendidos();
+                    $data['socios'] = $socios = $this->pagos_model->get_usuarios_suspendidos($id_entidad);
                     foreach ($socios as $socio) {
-                        $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($socio->Id);
+                        $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad,$socio->id);
                         /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-			            $array_ahg = $this->pagos_model->get_monto_socio($socio->Id);
+			            $array_ahg = $this->pagos_model->get_monto_socio($id_entidad, $socio->id);
                         $socio->cuota = $array_ahg['total'];
                         /* Fin Modificacion AHG */
                     }
@@ -505,7 +420,7 @@ class Imprimir extends CI_Controller {
                 $this->load->model('pagos_model');
                 $this->load->model('general_model');
                 $data['categoria'] = $this->general_model->get_cat($id);               
-                $data['socios'] = $this->pagos_model->get_pagos_categorias($id);
+                $data['socios'] = $this->pagos_model->get_pagos_categorias($id_entidad, $id);
                 $this->load->view('imprimir/categorias_listado',$data);
                 break;
 
@@ -519,67 +434,43 @@ class Imprimir extends CI_Controller {
         }
     }
 
-/*
-AHG Comentado 20170105 porque no se usa..... creo
-    function morosos(){
-        $this->load->model('pagos_model');
-        $meses = $this->uri->segment(3);
-        $act = $this->uri->segment(4) ?: null;
-        if(!$meses){ $meses = 6; }
-        if($meses){
-        $data['morosos'] = $this->pagos_model->get_morosos($meses, $act);
-            if($act){
-                $this->load->model('actividades_model');
-                $actividad = $this->actividades_model->get_actividad($this->uri->segment(4))->nombre;                        
-            }else{
-                $actividad = "Todas";
-            }
-        $data['meses'] = $meses;
-        $data['actividad'] = $actividad;
-        $this->load->view('imprimir-morosos',$data);
-        }
-
-    }
-*/
 
     public function actividades($id=false){
-        /*$this->load->model('pagos_model');
-        $this->load->model('actividades_model');
-        $act = $this->uri->segment(3) ?: null;        
-        if(!$act){die;}
-        $actividad = $this->actividades_model->get_actividad($this->uri->segment(3))->nombre;
-        $data['actividad'] = $actividad;
-        $data['socios'] = $this->pagos_model->get_pagos_actividad($act);
-        $this->load->view('imprimir-actividades',$data);        */
         if(!$id){ return false; }
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
         $data['actividad'] = $this->actividades_model->get_actividad($id);
         $data['profesor'] = $this->actividades_model->get_profesor($data['actividad']->profesor);
-        $data['socios'] = $this->pagos_model->get_pagos_actividad($id);
+        $data['socios'] = $this->pagos_model->get_pagos_actividad($id_entidad, $id);
         $this->load->view('imprimir/actividades_listado',$data);    
     }
+
     public function carnet(){
         $this->load->model('socios_model');        
         $this->load->model('pagos_model');        
         $id = $this->uri->segment(3) ?: null;        
         if(!$id){die;}
+        $id_entidad = $this->session->userdata('id_entidad');
         $socio = $data['socio'] = $this->socios_model->get_socio($id);
-        $data['cupon'] = $this->pagos_model->get_cupon($id);
-        $monto = $this->pagos_model->get_monto_socio($id);
+        $data['cupon'] = $this->pagos_model->get_cupon($id, $id_entidad);
+        $monto = $this->pagos_model->get_monto_socio($id_entidad, $id);
         $data['monto'] = $monto = $monto['total'];
+/* Comentado para probar sin cuentadigital
         if($data['cupon']->monto == 0 || $data['cupon']->monto != $monto){
             //$this->load->model('socios_model');
             //$socio = $this->socios_model->get_socio($_POST['id']);
             $cupon = $this->cuentadigital($id,$socio->nombre.' '.$socio->apellido,$monto);
             if($cupon){                                    
                 $this->load->model('pagos_model');
-                $cupon_id = $this->pagos_model->generar_cupon($id,$monto,$cupon);
+                $cupon_id = $this->pagos_model->generar_cupon($id_entidad,$id,$monto,$cupon);
                 $data = base64_decode($cupon['image']);
                 $img = imagecreatefromstring($data);
                     if ($img !== false) {
                         @header('Content-Type: image/png');
-                        imagepng($img,'images/cupones/'.$cupon_id.'.png',0);
+                	$ent_nombre = $this->session->userdata('ent_nombre');
+			$ent_directorio = $this->session->userdata('ent_directorio');
+			imagepng($img,base_url().'entidades/'.$ent_directorio.'/images/cupones/'.$cupon_id.'.png',0);
                         imagedestroy($img);
                         redirect(base_url().'imprimir/carnet/'.$id);
 
@@ -588,8 +479,9 @@ AHG Comentado 20170105 porque no se usa..... creo
                         echo 'Ocurrió un error.';
                     }                
             }
-        $data['cupon'] = $this->pagos_model->get_cupon($id);
+        $data['cupon'] = $this->pagos_model->get_cupon($id, $id_entidad);
         }
+*/
         $fmto = $this->uri->segment(4);
 	if ( !$fmto ) {
         	$this->load->view('imprimir-carnet',$data);
@@ -640,123 +532,47 @@ AHG Comentado 20170105 porque no se usa..... creo
     }
 
     public function socios_excel($type=''){
-        $this->load->model('pagos_model'); 
-        if($type=='suspendidos'){    
-            $clientes = $this->pagos_model->get_usuarios_suspendidos();
-            $titulo = "CVM - Socios Suspendidos - ".date('d-m-Y');
-        }else{
-            $clientes = $this->pagos_model->get_socios_activos();
-            $titulo = "CVM - Socios Activos - ".date('d-m-Y');
-        }
-        foreach ($clientes as $cliente) {
-            $cliente->deuda = $this->pagos_model->get_ultimo_pago_socio($cliente->Id);
-            /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-            $array_ahg = $this->pagos_model->get_monto_socio($cliente->Id);
-            $cliente->cuota = $array_ahg['total'];
-            /* Fin Modificacion AHG */
-        }
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:F1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
-        // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Teléfono')
-                    ->setCellValue('C1', 'Domicilio')
-                    ->setCellValue('D1', 'DNI')
-                    ->setCellValue('E1', 'Fecha de Alta')                   
-                    ->setCellValue('F1', 'Monto Adeudado')                   
-                    ->setCellValue('G1', 'Meses Adeudados');
+		$id_entidad = $this->session->userdata('id_entidad');
+		$this->load->model('pagos_model'); 
+		$ent_abrev = $this->session->userdata('ent_abreviatura');
+		$ent_nombre = $this->session->userdata('ent_ent_nombre');
+		if($type=='suspendidos'){    
+			$clientes = $this->pagos_model->get_usuarios_suspendidos($id_entidad);
+			$titulo = $ent_abrev." - Socios Suspendidos - ".date('d-m-Y');
+		}else{
+			$clientes = $this->pagos_model->get_socios_activos($id_entidad);
+			$titulo = $ent_abrev." - Socios Activos - ".date('d-m-Y');
+		}
+                $fila1 = false;
+
+                $archivo="Listado de Socios"."_".date('Ymd');
+
+                $headers=array();
+                $headers[]='Nombre y Apellido';
+                $headers[]='Telefono';
+                $headers[]='Domicilio';
+                $headers[]='DNI';
+                $headers[]='Fecha de Alta';
+                $headers[]='Monto Adeudado';
+                $headers[]='Meses Adeudados';
+
+                $datos=$clientes;
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 
 
-
-
-        $cont = 2;
-        foreach ($clientes as $cliente) {        
-            if($cliente->deuda){                      
-                $hoy = new DateTime();
-                $d2 = new DateTime($cliente->deuda->generadoel);                
-                $interval = $d2->diff($hoy);
-                $meses = $interval->format('%m');
-                if($meses > 0){
-                    $meses_a = "Debe ".$meses;
-                    if($meses > 1){ 
-                        $meses_a .= ' Meses';
-                    }else{
-                        $meses_a .= ' Mes';
-                    }                    
-                }else{
-                    if( $hoy->format('%m') != $d2->format('%m') && $cliente->deuda->monto != '0.00' ){
-                    $meses_a = "Saldo del mes anterior";
-                    }else{                
-                    $meses_a = "Cuota al Día";                
-                    }
-                }
-            }else{            
-                $meses_a = "Aún no se registró ningun pago";
-            }                    
-            
-
-            if($cliente->deuda_monto < 0){
-                $monto_a = "$ ".$cliente->deuda_monto*-1;        
-            }else{    
-                $monto_a = "Cuota al Día";        
-            }
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, $cliente->telefono)
-                        ->setCellValue('C'.$cont, $cliente->domicilio)
-                        ->setCellValue('D'.$cont, $cliente->dni)
-                        ->setCellValue('E'.$cont, date('d/m/Y',strtotime($cliente->alta)))
-                        ->setCellValue('F'.$cont, $monto_a)
-                        ->setCellValue('G'.$cont, $meses_a);
-                        $cont ++;
-        } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
-    
-    // end: setExcel
     }
 
     public function actividades_excel($id=''){
+        $id_entidad = $this->session->userdata('id_entidad');
         
         $this->load->model('actividades_model');
         $this->load->model('pagos_model');
 
         $actividad = $this->actividades_model->get_actividad($id);        
-        $clientes = $this->pagos_model->get_pagos_actividad($id);        
-        $titulo = "CVM - ".$actividad->nombre." - ".date('d-m-Y');
+        $clientes = $this->pagos_model->get_pagos_actividad($id_entidad,$id);        
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $titulo = $ent_abrev." - ".$actividad->nombre." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -855,13 +671,15 @@ AHG Comentado 20170105 porque no se usa..... creo
 
 
     public function categorias_excel($id=''){
-        
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('general_model');
         $categoria = $this->general_model->get_cat($id);               
-        $clientes = $this->pagos_model->get_pagos_categorias($id);
+        $clientes = $this->pagos_model->get_pagos_categorias($id_entidad,$id);
         
-        $titulo = "CVM - ".$categoria->nomb." - ".date('d-m-Y');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $titulo = $ent_abrev." - ".$categoria->nombre." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -910,7 +728,7 @@ AHG Comentado 20170105 porque no se usa..... creo
 
             $this->phpexcel->setActiveSheetIndex(0)
                         ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, '# '.$cliente->Id)
+                        ->setCellValue('B'.$cont, '# '.$cliente->id)
                         ->setCellValue('C'.$cont, $cliente->telefono)
                         ->setCellValue('D'.$cont, $cliente->dni)
                         ->setCellValue('E'.$cont, date('d/m/Y',strtotime($cliente->alta)))
@@ -944,10 +762,13 @@ AHG Comentado 20170105 porque no se usa..... creo
     
     public function ingresos_excel($fecha1='',$fecha2=''){
                     
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
-        $clientes = $data['ingresos'] = $this->pagos_model->get_ingresos($fecha1,$fecha2);
+        $clientes = $data['ingresos'] = $this->pagos_model->get_ingresos($id_entidad,$fecha1,$fecha2);
         
-        $titulo = "CVM - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".date('d-m-Y');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $titulo = $ent_abrev." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -1013,20 +834,22 @@ AHG Comentado 20170105 porque no se usa..... creo
 
     public function cobros_actividad_excel($fecha1='',$fecha2='',$actividad='',$categoria=''){
                     
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
 
         if($actividad != '-1'){
-            $clientes = $data['ingresos'] = $this->pagos_model->get_cobros_actividad($fecha1,$fecha2,$actividad,$categoria);
+            $clientes = $data['ingresos'] = $this->pagos_model->get_cobros_actividad($id_entidad,$fecha1,$fecha2,$actividad,$categoria);
             $data['actividad_s'] = $actividad;                        
         }else{
-            $clientes = $data['ingresos'] = $this->pagos_model->get_cobros_cuota($fecha1,$fecha2,$categoria);
+            $clientes = $data['ingresos'] = $this->pagos_model->get_cobros_cuota($id_entidad,$fecha1,$fecha2,$categoria);
             $data['actividad_s'] = '-1';
         }
-        //$clientes = $data['ingresos'] = $this->pagos_model->get_cobros_actividad($fecha1,$fecha2,$actividad,$categoria);
         $actividad = $this->actividades_model->get_actividad($actividad);
         
-        $titulo = "CVM - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - ".date('d-m-Y');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $titulo = $ent_abrev." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -1126,12 +949,15 @@ AHG Comentado 20170105 porque no se usa..... creo
 
     public function morosos_excel($comision='',$actividad=''){
                     
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
                 
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
 	if($comision || $actividad){
-		$clientes = $this->pagos_model->get_morosos($comision, $actividad);
-            	$titulo = "CVM - Morosos - ".date('d-m-Y');
+		$clientes = $this->pagos_model->get_morosos($id_entidad,$comision, $actividad);
+            	$titulo = $ent_abrev." - Morosos - ".date('d-m-Y');
 	} else {
 		return false;
 	}
@@ -1214,16 +1040,18 @@ AHG Comentado 20170105 porque no se usa..... creo
 
     public function anterior_excel($id=''){
             
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
         if($id != ''){
-            $clientes = $this->pagos_model->get_pagos_actividad_anterior($id);
+            $clientes = $this->pagos_model->get_pagos_actividad_anterior($id_entidad,$id);
             $actividad = $this->actividades_model->get_actividad($id);       
-            $titulo = "CVM - Deuda Anterior - ".$actividad->nombre." - ".date('d-m-Y');
+            $titulo = $ent_abrev." - Deuda Anterior - ".$actividad->nombre." - ".date('d-m-Y');
         }else{
             die();
         }
-        
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -1260,7 +1088,7 @@ AHG Comentado 20170105 porque no se usa..... creo
         }
             $this->phpexcel->setActiveSheetIndex(0)
                         ->setCellValue('A'.$cont, $cliente->socio)
-                        ->setCellValue('B'.$cont, $cliente->Id)  
+                        ->setCellValue('B'.$cont, $cliente->id)  
                         ->setCellValue('C'.$cont, $cliente->telefono)  
                         ->setCellValue('D'.$cont, $cliente->dni)  
                         ->setCellValue('E'.$cont, $cliente->nacimiento)  
@@ -1294,13 +1122,14 @@ AHG Comentado 20170105 porque no se usa..... creo
     }
     public function financiacion_excel(){
             
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
         
-            $clientes = $this->pagos_model->get_socios_financiados();            
-            $titulo = "CVM - Financiación  - ".date('d-m-Y');
-      
-        
+        $clientes = $this->pagos_model->get_socios_financiados($id_entidad);            
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $titulo = $ent_abrev." - Financiación  - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -1366,17 +1195,20 @@ AHG Comentado 20170105 porque no se usa..... creo
     }
 
     public function becas_excel($actividad=false){       
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
         if($actividad){
-            $clientes = $this->pagos_model->get_becas($actividad);
+            $clientes = $this->pagos_model->get_becas($id_entidad,$actividad);
             if($actividad != '-1'){
                 $a = $this->actividades_model->get_actividad($actividad);
             }else{
                 $a = new STDClass();
                 $a->nombre = 'Cuota Social';
             }
-            $titulo = "CVM - Becados - ".$a->nombre." - ".date('d-m-Y');
+            $titulo = $ent_abrev." - Becados - ".$a->nombre." - ".date('d-m-Y');
         }else{
             die();
         }
@@ -1412,7 +1244,7 @@ AHG Comentado 20170105 porque no se usa..... creo
         foreach ($clientes as $cliente) {            
             $this->phpexcel->setActiveSheetIndex(0)
                         ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, $cliente->Id)  
+                        ->setCellValue('B'.$cont, $cliente->id)  
                         ->setCellValue('C'.$cont, $cliente->telefono)  
                         ->setCellValue('D'.$cont, $cliente->dni)  
                         ->setCellValue('E'.$cont, $cliente->nacimiento)  
@@ -1446,10 +1278,13 @@ AHG Comentado 20170105 porque no se usa..... creo
     }
 
     public function sin_actividad_excel(){       
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');                
-        $clientes = $this->pagos_model->get_sin_actividades();
+        $clientes = $this->pagos_model->get_sin_actividades($id_entidad);
             
-        $titulo = "CVM - Socios Sin Actividades Asociadas - ".date('d-m-Y');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $titulo = $ent_abrev." - Socios Sin Actividades Asociadas - ".date('d-m-Y');
         
         
         
@@ -1482,7 +1317,7 @@ AHG Comentado 20170105 porque no se usa..... creo
         foreach ($clientes as $cliente) {            
             $this->phpexcel->setActiveSheetIndex(0)
                         ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, $cliente->Id)  
+                        ->setCellValue('B'.$cont, $cliente->id)  
                         ->setCellValue('C'.$cont, $cliente->telefono)  
                         ->setCellValue('D'.$cont, $cliente->dni)  
                         ->setCellValue('E'.$cont, $cliente->nacimiento)  

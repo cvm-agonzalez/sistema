@@ -33,11 +33,11 @@
     	?>
         <tr>
             <td><?=@$socio->apellido?> <?=@$socio->nombre?> </td>
-            <td><?=@$socio->Id?></td>
+            <td><?=@$socio->id?></td>
             <td><?=@$socio->telefono?></td>
             <td><?=@$socio->dni?></td>
             <td><?=@$socio->alta?></td>            
-            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->Id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>           
+            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>           
         </tr> 
         <?
     	}

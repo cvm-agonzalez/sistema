@@ -18,7 +18,8 @@ class Comisiones extends CI_Controller {
 
 	public function index()
 	{
-		$actividades = $this->general_model->get_actividades_comision();
+		$id_entidad = $this->session->userdata('id_entidad');
+		$actividades = $this->general_model->get_actividades_comision($id_entidad);
 		if($actividades){
 			$data['actividades'] = $actividades;
 		}else{
@@ -46,17 +47,16 @@ class Comisiones extends CI_Controller {
 
                 $comision = $this->comisiones_model->get_comision();
                 $data['nombre_comision'] = $comision->descripcion;
-                $data['resumen'] = $this->comisiones_model->resumen($comision->id, $periodo, $anio_corte);
+                $data['resumen'] = $this->comisiones_model->resumen($id_entidad, $comision->id, $periodo, $anio_corte);
 
 
-		//$this->load->view('comisiones/head', $data, FALSE);
 		$this->load->view('comisiones/index', $data, FALSE);
-		//$this->load->view('comisiones/foot', $data, FALSE);
 
 	}
 
 	public function lista_socios_act()
 	{
+		$id_entidad = $this->session->userdata('id_entidad');
                 $accion=$this->uri->segment(3);
                 $id_actividad = $this->uri->segment(4);
 
@@ -66,13 +66,13 @@ class Comisiones extends CI_Controller {
                 $data['username'] = $this->session->userdata('username');
                 $comision = $this->comisiones_model->get_comision();
                 $id_comision = $comision->id;
-                $data['actividades'] = $this->general_model->get_actividades_comision();
+                $data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
                 if ( $id_actividad == 0 ) {
                         $data['id_actividad'] = 0;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv(-1, $id_comision);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, -1, $id_comision);
                 } else {
                         $data['id_actividad'] = $id_actividad;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv( $id_actividad, 0);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, $id_actividad, 0);
                 }
 
 		switch ( $accion ) {
@@ -80,7 +80,7 @@ class Comisiones extends CI_Controller {
 				foreach ( $data['socioact_tabla'] as $socio ) {
 					$socact = array(
                                 		'Actividad' => $socio->aid."-".$socio->descr_act,
-                                		'sid' => $socio->Id,
+                                		'sid' => $socio->id,
                                 		'Apellido y Nombre' => $socio->apellido.", ".$socio->nombre,
                                 		'DNI' => $socio->dni,
                                 		'domicilio' => $socio->domicilio,
@@ -120,6 +120,7 @@ class Comisiones extends CI_Controller {
 
 	public function lista_morosos()
 	{
+		$id_entidad = $this->session->userdata('id_entidad');
                 $accion=$this->uri->segment(3);
                 $id_actividad = $this->uri->segment(4);
 
@@ -129,13 +130,13 @@ class Comisiones extends CI_Controller {
                 $data['username'] = $this->session->userdata('username');
                 $comision = $this->comisiones_model->get_comision();
                 $id_comision = $comision->id;
-                $data['actividades'] = $this->general_model->get_actividades_comision();
+                $data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
                 if ( $id_actividad == 0 ) {
                         $data['id_actividad'] = 0;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv(-1, $id_comision, 1);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, -1, $id_comision, 1);
                 } else {
                         $data['id_actividad'] = $id_actividad;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv( $id_actividad, 0, 1);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, $id_actividad, 0, 1);
                 }
 
 		switch ( $accion ) {
@@ -143,7 +144,7 @@ class Comisiones extends CI_Controller {
 				foreach ( $data['socioact_tabla'] as $socio ) {
 					$socact = array(
                                 		'Actividad' => $socio->aid."-".$socio->descr_act,
-                                		'sid' => $socio->Id,
+                                		'sid' => $socio->id,
                                 		'Apellido y Nombre' => $socio->apellido.", ".$socio->nombre,
                                 		'DNI' => $socio->dni,
                                 		'domicilio' => $socio->domicilio,
@@ -183,6 +184,7 @@ class Comisiones extends CI_Controller {
 
 	public function facturacion()
 	{
+		$id_entidad = $this->session->userdata('id_entidad');
                 $accion=$this->uri->segment(3);
                 $id_actividad = $this->uri->segment(4);
 
@@ -193,14 +195,14 @@ class Comisiones extends CI_Controller {
 		$data['username'] = $this->session->userdata('username');
 		$comision = $this->comisiones_model->get_comision();
 		$id_comision = $comision->id;
-		$data['actividades'] = $this->general_model->get_actividades_comision();
+		$data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
         	if ( $id_actividad == 0 ) {
 			$data['id_actividad'] = 0;
-			$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla(-1, $id_comision);
+			$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad, -1, $id_comision);
 			$xact="Todas";
 		} else {
 			$data['id_actividad'] = $id_actividad;
-			$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla( $id_actividad, 0);
+			$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad, $id_actividad, 0);
 			$xact=$this->actividades_model->get_actividad($id_actividad)->nombre;
 		}
 
@@ -256,6 +258,7 @@ class Comisiones extends CI_Controller {
 
 	public function resumen() 
 	{
+		$id_entidad = $this->session->userdata('id_entidad');
 		$id_socio=$this->uri->segment(3);
 		$accion=$this->uri->segment(4);
 
@@ -264,8 +267,8 @@ class Comisiones extends CI_Controller {
 		$data['username'] = $this->session->userdata('username');
 		$data['baseurl'] = base_url();
 		$data['socio'] = $this->socios_model->get_socio($id_socio);
-		$data['facturacion'] = $this->pagos_model->get_facturacion($id_socio);
-		$data['cuota'] = $this->pagos_model->get_monto_socio($id_socio);
+		$data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad, $id_socio);
+		$data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad, $id_socio);
                 if ( $accion ) {
                         if ( $accion == "excel" ) {
                                 $archivo="Resument_Cuenta_Asoc_".$id_socio."_".date('Ymd');
@@ -291,8 +294,10 @@ class Comisiones extends CI_Controller {
 
 	public function liquidacion_mes()
 	{
+		$id_entidad = $this->session->userdata('id_entidad');
 		$this->load->model('comisiones_model');
 	        $data['baseurl'] = base_url();
+		$data['id_entidad'] = $id_entidad;
 		$data['section'] = 'liquidacion_mes';
 		$comision = $this->comisiones_model->get_comision();
 		$data['nombre_comision'] = $comision->descripcion;
@@ -301,8 +306,10 @@ class Comisiones extends CI_Controller {
 
 	public function liquidaciones_ant()
 	{
+		$id_entidad = $this->session->userdata('id_entidad');
 		$this->load->model('comisiones_model');
 	        $data['baseurl'] = base_url();
+		$data['id_entidad'] = $id_entidad;
 		$data['section'] = 'liquidaciones_ant';
 		$comision = $this->comisiones_model->get_comision();
 		$data['nombre_comision'] = $comision->descripcion;
@@ -432,7 +439,7 @@ class Comisiones extends CI_Controller {
 			}
             $this->phpexcel->setActiveSheetIndex(0)
                         ->setCellValue('A'.$cont, $cliente->info->apellido.' '.$cliente->info->nombre)
-                        ->setCellValue('B'.$cont, $cliente->info->Id)
+                        ->setCellValue('B'.$cont, $cliente->info->id)
                         ->setCellValue('C'.$cont, $cliente->info->dni)
                         ->setCellValue('D'.$cont, date('d/m/Y',strtotime($cliente->info->nacimiento)))
                         ->setCellValue('E'.$cont, $deuda)
@@ -490,12 +497,14 @@ class Comisiones extends CI_Controller {
 
 	public function username_check($pass,$email)
 	{		
-		if( !$user = $this->login_model->log_comision($email,$pass) ){
+		$id_entidad = $this->session->userdata('id_entidad');
+		if( !$user = $this->login_model->log_comision($id_entidad,$email,$pass) ){
 			$this->form_validation->set_message('username_check', 'El E-Mail y/o Contraseña ingresados son incorrectos');
 			return false;
 		}else{
 			$array = array(
-				'Id' => $user->Id,
+				'id' => $user->id,
+				'id_entidad' => $id_entidad,
 				'email' => $user->email,
 				'nombre'=>	$user->nombre,				
 				'apellido'=>	$user->apellido,				
@@ -526,6 +535,7 @@ class Comisiones extends CI_Controller {
     public function upd_pwd()
     {
         $this->load->model('Login_model');
+	$id_entidad = $this->session->userdata('id_entidad');
 
         $old_pwd=$_POST['old_pwd'];
         $new_pwd1=$_POST['new_pwd1'];
@@ -534,7 +544,7 @@ class Comisiones extends CI_Controller {
         $user = $this->session->userdata('username');
         $mail = $this->session->userdata('email');
 
-        if ( !$user = $this->Login_model->log_comision($mail,$old_pwd) ) {
+        if ( !$user = $this->Login_model->log_comision($id_entidad,$mail,$old_pwd) ) {
             redirect(base_url().'comisiones/cambio_pwd/2');
         }
 
@@ -547,7 +557,7 @@ class Comisiones extends CI_Controller {
         }
 
         if ( $user ) {
-            $this->Login_model->upd_pwd_comision($mail, $old_pwd, $new_pwd1);
+            $this->Login_model->upd_pwd_comision($id_entidad,$mail, $old_pwd, $new_pwd1);
             $this->logout();
             return true;
         }

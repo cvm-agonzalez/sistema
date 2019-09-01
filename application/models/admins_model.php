@@ -9,20 +9,15 @@ class Admins_model extends CI_Model {
         parent::__construct();
     }
     
-    // public function get_admins()
-    // {       
-    //     $query = $this->db->get('admin');                 
-    //     return $query->result();        
-    // }
-
 	public function insert_admin($admin='')
 	{
 		$this->db->insert('admin', $admin);
 		return $this->db->insert_id();
 	}
 
-	public function get_admins()
+	public function get_admins($id_entidad)
 	{
+		$this->db->where('id_entidad', $id_entidad);
 		$this->db->where('estado', 1);
 		$query = $this->db->get('admin');
 		if( $query->num_rows() == 0 ){ return false; }
@@ -33,7 +28,7 @@ class Admins_model extends CI_Model {
 
 	public function get_admin($id)
 	{
-		$this->db->where('Id', $id);
+		$this->db->where('id', $id);
 		$query = $this->db->get('admin');
 		if( $query->num_rows() == 0 ){ return false; }
 		$admin = $query->row();
@@ -43,7 +38,7 @@ class Admins_model extends CI_Model {
 
 	public function chk_pwd($id,$old_pwd)
 	{
-		$this->db->where('Id',$id);
+		$this->db->where('id',$id);
 		$query = $this->db->get('admin');
 		if( $query->num_rows() == 0 ){ return false; }
 		$user = $query->row();
@@ -69,13 +64,13 @@ class Admins_model extends CI_Model {
 	public function update_pwd($id,$new_pwd)
 	{
 		$now=date('Y-m-d H:i:s');
-		$this->db->where('Id', $id);
+		$this->db->where('id', $id);
 		$this->db->update('admin', array("pass"=>$new_pwd, "last_chgpwd"=>$now));
 	}
 
 	public function update_admin($id='',$admin)
 	{
-		$this->db->where('Id', $id);
+		$this->db->where('id', $id);
 		$this->db->update('admin', $admin);
 	}
 }

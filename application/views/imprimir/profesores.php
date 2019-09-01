@@ -9,7 +9,7 @@
 	        		<?
 	        		foreach ($profesores as $profesor) {        		
 	        		?>
-	        		<option value="<?=$profesor->Id?>"><?=$profesor->nombre?> <?=$profesor->apellido?></option>
+	        		<option value="<?=$profesor->id?>"><?=$profesor->nombre?> <?=$profesor->apellido?></option>
 	        		<?
 	        		}
 	        		?>

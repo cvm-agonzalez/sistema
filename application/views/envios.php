@@ -31,12 +31,12 @@
                            <?
                            if($envio->enviados < $envio->total){
                            ?>
-                           <a href="<?=base_url()?>admin/envios/enviar/<?=$envio->Id?>"><i class="fa fa-play"></i> Continuar Envio </a>  | 
+                           <a href="<?=base_url()?>admin/envios/enviar/<?=$envio->id?>"><i class="fa fa-play"></i> Continuar Envio </a>  | 
                            <?
                            }
                            ?>
-                           <a href="<?=base_url()?>admin/envios/editar/<?=$envio->Id?>"><i class="fa fa-pencil"></i> Editar </a>  | 
-                           <a id="del_confirm" data-msj="Seguro que desea eliminar este envio?" href="<?=base_url()?>admin/envios/eliminar/<?=$envio->Id?>"><i class="fa fa-trash-o"></i> Eliminar</a>
+                           <a href="<?=base_url()?>admin/envios/editar/<?=$envio->id?>"><i class="fa fa-pencil"></i> Editar </a>  | 
+                           <a id="del_confirm" data-msj="Seguro que desea eliminar este envio?" href="<?=base_url()?>admin/envios/eliminar/<?=$envio->id?>"><i class="fa fa-trash-o"></i> Eliminar</a>
                         </td>
                      </tr>
                      <?

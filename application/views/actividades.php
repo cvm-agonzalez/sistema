@@ -28,11 +28,11 @@
                     <th><div class="th">
                         Código
                         <span class="glyphicon glyphicon-chevron-up"
-                              data-ng-click=" order('name') "
-                              data-ng-class="{active: row == 'name'}"></span>
+                              data-ng-click=" order('aid') "
+                              data-ng-class="{active: row == 'aid'}"></span>
                         <span class="glyphicon glyphicon-chevron-down"
-                              data-ng-click=" order('-name') "
-                              data-ng-class="{active: row == '-name'}"></span>
+                              data-ng-click=" order('-aid') "
+                              data-ng-class="{active: row == '-aid'}"></span>
                     </div></th>
                     <th><div class="th">
                         Actividad
@@ -95,7 +95,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="store in currentPageStores">                    
-                    <td>{{store.id}}</td>
+                    <td>{{store.aid}}</td>
                     <td>{{store.name}}</td>
                     <td>{{store.price}}</td>
                     <td>{{store.cta_inic}}</td>
@@ -114,12 +114,12 @@
                 foreach ($actividades as $actividad) {              
                 ?>
                 <!--<tr>
-                    <td><?=$actividad->Id?></td>
+                    <td><?=$actividad->aid?></td>
                     <td><?=$actividad->nombre?></td>
                     
                     <td><?=$actividad->precio?></td>
-                    <td><a href="<?=base_url()?>admin/actividades/editar/<?=$actividad->Id?>">Editar</a> | 
-                      <a id="btn-eliminar-actividad" href="<?=base_url()?>admin/actividades/eliminar/<?=$actividad->Id?>">Eliminiar</a></td>
+                    <td><a href="<?=base_url()?>admin/actividades/editar/<?=$actividad->id?>">Editar</a> | 
+                      <a id="btn-eliminar-actividad" href="<?=base_url()?>admin/actividades/eliminar/<?=$actividad->id?>">Eliminiar</a></td>
                 </tr>-->
                 <?
                 }

@@ -38,7 +38,7 @@
                            <?
                            foreach ($categorias as $cat) {                           
                            ?>
-                           <option value="<?=$cat->Id?>"><?=$cat->nomb?></option>                           
+                           <option value="<?=$cat->id?>"><?=$cat->nombre?></option>                           
                            <?
                            }
                            ?>
@@ -50,7 +50,7 @@
                            <?
                            foreach ($actividades as $actividad) {                           
                            ?>
-                           <option value="<?=$actividad->Id?>"><?=$actividad->nombre?></option>                           
+                           <option value="<?=$actividad->id?>"><?=$actividad->nombre?></option>                           
                            <?
                            }
                            ?>

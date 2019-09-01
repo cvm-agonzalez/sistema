@@ -75,50 +75,20 @@
                     </div>
                 </div>               
                 <div class="clearfix"></div>
-                <div id="menor" style="display: none;">
-                    <div class="form-group col-lg-6">
-                        <label for="" class="col-sm-3">DNI Contacto #1</label>
-                        <div id="r1-data">
-                            <div class="col-sm-5">
-                                <input type="text" name="r1" id="r1" class="form-control">
-                            </div>
-                            <div class="col-sm-4">
-                                <a href="#" id="r-buscar" data-id="r1" class="btn btn-primary">Buscar</a> <i id="r1-loading" class="fa fa-spinner fa-spin hidden"></i>
-                            </div>
-                        </div>
-                        <div id="r1-result" class="hidden"></div>
-                        <input type="hidden" name="r1-id" id="r1-id" class="form-control">
-                    </div>
-                    <div class="form-group col-lg-6">
-                        <label for="" class="col-sm-3">DNI Contacto #2</label>
-                        <div id="r2-data">
-                            <div class="col-sm-5">
-                                <input type="text" name="r2" id="r2" class="form-control">
-                            </div>
-                            <div class="col-sm-4">
-                                <a href="#" id="r-buscar" data-id="r2" class="btn btn-primary">Buscar</a> <i id="r2-loading" class="fa fa-spinner fa-spin hidden"></i>
-                            </div>
-                        </div>
-                        <div id="r2-result" class="hidden"></div>
-                        <input type="hidden" name="r2-id" id="r2-id" class="form-control">
-                    </div>                    
                 </div>
-
                 
 
                 <div class="clearfix"></div>
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Tutor de Grupo Familiar</label>
-                        <div id="r3-data">
+                        <div id="tutor-data">
                             <div class="col-sm-5">
-                                <input type="text" name="r3" id="r3" class="form-control">
+                                <input type="text" name="tutor" id="tutor" class="form-control">
                             </div>
                             <div class="col-sm-4">
-                                <a href="#" id="r-buscar" data-id="r3" class="btn btn-primary">Buscar</a> <i id="r3-loading" class="fa fa-spinner fa-spin hidden"></i>
+                                <a href="#" id="r-buscar" data-id="tutor" class="btn btn-primary">Buscar</a> <i id="tutor-loading" class="fa fa-spinner fa-spin hidden"></i>
                             </div>
                         </div>
-                        <div id="r3-result" class="hidden"></div>
-                        <input type="hidden" name="r3-id" id="r3-id" class="form-control">
                 </div>
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Categoría de Socio</label>
@@ -128,7 +98,7 @@
                                 <?
                                 foreach ($categorias as $cat) {                                                           
                                 ?>
-                                    <option value="<?=$cat->Id?>" data-precio="<?=$cat->precio?>"><?=$cat->nomb?></option>
+                                    <option value="<?=$cat->id?>" data-precio="<?=$cat->precio?>"><?=$cat->nombre?></option>
                                 <?
                                 }
                                 ?>
@@ -185,12 +155,12 @@
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Socio #</label>
                     <div class="col-sm-9">
-                        <input type="number" name="socio_n" class="form-control" value="">                        
+                        <input type="number" name="nro_socio" class="form-control" value="">                        
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <p>
-                        <li>El número de socio personalizado deberá ser menor a 28.852.</li>
+                        <li>El número de socio personalizado servira para respectar numeracion anterior al sistema</li>
                         <li>Si no desea utilizar un número personalizado deje este campo en blanco</li>
                     </p>
                 </div>

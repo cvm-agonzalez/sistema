@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Actividad</strong></div>
         <div class="panel-body">
-                    <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/guardar/<?=$actividad->Id?>" method="post">
+                    <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/guardar/<?=$actividad->id?>" method="post">
 
                 <div class="form-group">
                     <label for="" class="col-sm-2">Nombre</label>
@@ -34,7 +34,7 @@
                         <?
                         foreach ($lugares as $lugar) {                                            
                         ?>
-                        <option value="<?=$lugar->Id?>" <? if($lugar->Id == $actividad->lugar){ echo 'selected';} ?>>
+                        <option value="<?=$lugar->id?>" <? if($lugar->id == $actividad->lugar){ echo 'selected';} ?>>
                             <?=$lugar->nombre?> [<?=$lugar->direccion?>]
                         </option>
                         <?

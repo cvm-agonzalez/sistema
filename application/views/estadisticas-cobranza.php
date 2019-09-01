@@ -16,7 +16,7 @@
 					<option value="-2" <? if($id_actividad == -2){ echo 'selected'; } ?>> Socio Hincha</option>
 					<option value="-3" <? if($id_actividad == -3){ echo 'selected'; } ?>> Cuota Social</option>
                        			<? foreach ( $actividades as $actividad ) { ?>
-				                        <option value="<?=$actividad->Id?>" <? if($actividad->Id == $id_actividad){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
+				                        <option value="<?=$actividad->id?>" <? if($actividad->id == $id_actividad){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
                         			<?}?>
                        			</select>
                        			</span>

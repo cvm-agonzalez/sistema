@@ -23,7 +23,7 @@
                         <?
                         foreach ($actividades as $actividad) {                        
                         ?>
-                        <option value="<?=$actividad->Id?>" <? if($actividad->Id == $actividad_sel){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
+                        <option value="<?=$actividad->id?>" <? if($actividad->id == $actividad_sel){ echo 'selected'; } ?>><?=$actividad->nombre?></option>
                         <?
                         }   
                         ?>
@@ -62,9 +62,9 @@
                     foreach ($morosos as $moroso) {                                        
                     ?>
                     <tr>
-                        <td><?=$moroso->nomb?></td>
+                        <td><?=$moroso->nombre?></td>
                         <td>$ <?=$moroso->deuda*-1?></td>                        
-                        <td><a href="<?=base_url()?>admin/socios/resumen/<?=$moroso->Id?>">Ver Resumen</a></td>
+                        <td><a href="<?=base_url()?>admin/socios/resumen/<?=$moroso->id?>">Ver Resumen</a></td>
                     </tr>
                     <?
                     }

@@ -15,8 +15,22 @@ class Admin extends CI_Controller {
         }
     }
 
+	private function carga_data() {
+		$data = array();
+		$data['ent_nombre'] = $this->session->userdata('ent_nombre');
+		$data['ent_directorio'] = $this->session->userdata('ent_directorio');
+		$data['ent_abreviatura'] = $this->session->userdata('abreviatura');
+		$data['id_entidad'] = $this->session->userdata('id_entidad');
+		$data['username'] = $this->session->userdata('username');
+		$data['rango'] = $this->session->userdata('rango');
+		$data['baseurl'] = base_url();
+		return $data;
+	}
+ 
     public function no_facturado($value='')
     {
+	$id_entidad = $this->session->userdata('id_entidad');
+        $this->db->where('socios.id_entidad', $id_entidad);
         $this->db->where('socios.suspendido', 0);
         $this->db->where('socios.estado', 1);
         $this->db->where('socios.tutor', 0);
@@ -25,120 +39,48 @@ class Admin extends CI_Controller {
         $socios = $query->result();
         $no_facturados = $facturados = array();
         foreach ($socios as $socio) {
-            $this->db->where('sid', $socio->Id);
+            $this->db->where('id_entidad', $id_entidad);
+            $this->db->where('sid', $socio->id);
             $this->db->like('date', '2016-03-01','after');
             $query = $this->db->get('facturacion');
 
             if( $query->num_rows() == 0 ){
-                $no_facturados[] = $socio->Id;
+                $no_facturados[] = $socio->id;
             }else{
-                $facturados[] = $socio->Id;
+                $facturados[] = $socio->id;
             }
         }
         echo '<strong>facturados</strong><br>';
         foreach ($facturados as $facturado) {
             echo $facturado.'<br>';
-            $this->db->where('Id', $facturado);
+            $this->db->where('id', $facturado);
             $this->db->update('socios', array('facturado'=>1));
         }
         echo '<strong>no_facturados</strong><br>';
         foreach ($no_facturados as $facturado) {
             echo $facturado.'<br>';
-            $this->db->where('Id', $facturado);
+            $this->db->where('id', $facturado);
             $this->db->update('socios', array('facturado'=>0));
         }
     }
 
-    public function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
-                $this->load->library('PHPExcel');
-                $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                             ->setLastModifiedBy("Club Villa Mitre")
-                                             ->setTitle($titulo)
-                                             ->setSubject($titulo);
+	private function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
+		include('gen_EXCEL.php');
+	}
 
-		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
-		$letras=$letras."AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK,AL,AM,AN,AO,AP,AQ,AR,AS,AT,AU,AV,AW,AX,AY,AZ";
-		$letras=$letras."BA,BB,BC,BD,BE,BF,BG,BH,BI,BJ,BK,BL,BM,BN,BO,BP,BQ,BR,BS,BT,BU,BV,BW,BX,BY,BZ";
-
-		$letra=explode(",",$letras);
-		$cant_col=count($headers);
-		$letra_ini=$letra[0];
-		$letra_fin=$letra[$cant_col];
-
-		$str_style=$letra_ini."1:".$letra_fin."1";
-
-                $this->phpexcel->getActiveSheet()->getStyle("$str_style")->getFill()->applyFromArray(
-                    array(
-                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                        'startcolor' => array('rgb' => 'E9E9E9'),
-                    )
-                );
-
-
-		if ( $fila1 ) {
-                	$this->phpexcel->setActiveSheetIndex(0)
-                        	->setCellValue('A1', $fila1);
-			$cont = 3;
-			$inicio="A2";
-		} else {
-                	$cont = 2;
-			$inicio="A1";
-		}
-
-                // agregamos información a las celdas
-                $this->phpexcel->setActiveSheetIndex(0);
-
-		$this->phpexcel->getActiveSheet()->fromArray(
-        		$headers,   	// The data to set
-        		NULL,        	// Array values with this value will not be set
-        		"$inicio"       // Top left coordinate of the worksheet range where
-                     			//    we want to set these values (default is A1)
-    		);
-
-
-                foreach ($datos as $dato) {
-                	$this->phpexcel->setActiveSheetIndex(0);
-
-			$this->phpexcel->getActiveSheet()->fromArray(
-        			(array)$dato,   	// The data to set
-        			NULL,        	// Array values with this value will not be set
-        			'A'.$cont       // Top left coordinate of the worksheet range where
-                     				//    we want to set these values (default is A1)
-    			);
-                        $cont ++;
-                }
-                // Renombramos la hoja de trabajo
-                $this->phpexcel->getActiveSheet()->setTitle("$titulo");
-
-                foreach(range('A',"$letra_fin") as $columnID) {
-                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                        ->setAutoSize(true);
-                }
-                // configuramos el documento para que la hoja
-                // de trabajo número 0 sera la primera en mostrarse
-                // al abrir el documento
-                $this->phpexcel->setActiveSheetIndex(0);
-
-                // redireccionamos la salida al navegador del cliente (Excel2007)
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="'.$archivo.'.xlsx"');
-                header('Cache-Control: max-age=0');
-
-                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-                $objWriter->save('php://output');
-    }
 
     public function arma_listdebitos() {
+		$id_entidad = $this->session->userdata('id_entidad');
         	$this->load->model("debtarj_model");
         	$this->load->model("socios_model");
         	$this->load->model("tarjeta_model");
-        	$debtarjs = $this->debtarj_model->get_debtarjs();
+        	$debtarjs = $this->debtarj_model->get_debtarjs($id_entidad);
         	foreach ($debtarjs as $debtarj){
 			$socio=$this->socios_model->get_socio($debtarj->sid);
 			$tarjeta=$this->tarjeta_model->get($debtarj->id_marca);
 			if ( $socio ) {
                       		$nombre = $socio->nombre.", ".$socio->apellido;
-				$debito = $this->debtarj_model->get_debitos_by_socio($debtarj->id);
+				$debito = $this->debtarj_model->get_debitos_by_socio($id_entidad, $debtarj->id);
 				if ( $debito ) {
 					$precio = $debito->importe;
 					$fecha = $debito->fecha_debito;
@@ -156,6 +98,7 @@ class Admin extends CI_Controller {
                 		$datos[] = array (
                       			'id' => $debtarj->id,
                       			'sid' => $debtarj->sid,
+                      			'id_entidad' => $debtarj->id_entidad,
                       			'dni' => $socio->dni,
                       			'name' => $nombre,
                       			'id_marca' => $debtarj->id_marca,
@@ -170,7 +113,7 @@ class Admin extends CI_Controller {
 		return $datos;
     }
 
-    public function sube_asociados($id_actividad, $dato1col) {
+    public function sube_asociados($id_entidad, $id_actividad, $dato1col) {
 	//datos del arhivo
 	$nombre_archivo = $_FILES['userfile']['name'];
 	$tipo_archivo = $_FILES['userfile']['type'];
@@ -199,12 +142,12 @@ class Admin extends CI_Controller {
 			if ( $dato1col == "sid" ) {
 				$socio=$this->socios_model->get_socio($col1);
 			} else {
-				$socio=$this->socios_model->get_socio_by_dni($col1);
+				$socio=$this->socios_model->get_socio_by_dni($id_entidad,$col1);
 			}
 
 
 			if ( $socio ) {
-				$sid=$socio->Id;
+				$sid=$socio->id;
 				$existe=0;
 				$act_asoc=$this->actividades_model->get_act_asoc_puntual($sid,$id_actividad);
 				if ( $act_asoc ) {
@@ -242,7 +185,7 @@ class Admin extends CI_Controller {
 	return $socios;
     }
 
-    public function sube_coopeplus($periodo,$id_marca,$fecha_debito) {
+    public function sube_coopeplus($id_entidad, $periodo,$id_marca,$fecha_debito) {
 	$result = false;
 	//datos del arhivo
 	$nombre_archivo = $_FILES['userfile']['name'];
@@ -287,13 +230,13 @@ class Admin extends CI_Controller {
 
 
 				if ( trim($mensaje) == "DEBITO EXITOSO" ||  trim(substr($mensaje,0,15)) == "DEBITO ACEPTADO" ) {
-					$by=array("id_marca"=>$id_marca, "nro_tarjeta"=>$nro_tarjeta);
+					$by=array("id_marca"=>$id_marca, "nro_tarjeta"=>$nro_tarjeta, "id_entidad"=>$id_entidad);
 					$debtarj=$this->debtarj_model->get_debtarj_by($by);
 
 					foreach ( $debtarj as $debtj) {
 						if ( $debtj ) {
 							$id_debito=$debtj->id;
-							$debito=$this->debtarj_model->get_debito_by_id($id_debito, $fecha_debito);
+							$debito=$this->debtarj_model->get_debito_by_id($id_entidad, $id_debito, $fecha_debito);
 							if ( $debito && $debito->importe == $importe ) {
 								$serial++;
 								$total=$total+$importe;
@@ -308,14 +251,14 @@ class Admin extends CI_Controller {
 		}
 	}
 	if ( $serial > 0 ) {
-		$this->debtarj_model->upd_noacred($id_marca, $periodo);
-		$this->debtarj_model->upd_gen($periodo, $id_marca, $serial, $total);
+		$this->debtarj_model->upd_noacred($id_entidad, $id_marca, $periodo);
+		$this->debtarj_model->upd_gen($id_entidad, $periodo, $id_marca, $serial, $total);
 		$result=true;
 	}
 	return $result;
     }
 
-    public function sube_visa($periodo,$fecha_debito) {
+    public function sube_visa($id_entidad, $periodo,$fecha_debito) {
 
 	$result = false;
 	$id_marca=1;
@@ -359,7 +302,7 @@ class Admin extends CI_Controller {
                 		$nro_tarjeta=substr($xnro_tarjeta,14,4);
 
 				//echo $fecha_debito."-".$fecha_acred."-".$nro_tarjeta."-".$serie."-".$serial."-".$serie."-".$importe."\n";
-				$debito=$this->debtarj_model->get_debito_rng($id_marca, $fecha_debito, $serie);
+				$debito=$this->debtarj_model->get_debito_rng($id_entidad, $id_marca, $fecha_debito, $serie);
 
 				// print_r($debito);
 				if ( $debito ) {
@@ -372,8 +315,8 @@ class Admin extends CI_Controller {
 		}
 	}
 	if ( $serial > 0 ) {
-		$this->debtarj_model->upd_noacred($id_marca, $periodo);
-		$this->debtarj_model->upd_gen($periodo, $id_marca, $serial, $total);
+		$this->debtarj_model->upd_noacred($id_entidad, $id_marca, $periodo);
+		$this->debtarj_model->upd_gen($id_entidad, $periodo, $id_marca, $serial, $total);
 		$result=true;
 	}
 	return $result;
@@ -381,13 +324,13 @@ class Admin extends CI_Controller {
 
 
     public function listado(){
+	$id_entidad = $this->session->userdata('id_entidad');
         $this->load->model("socios_model");
         $this->load->model("pagos_model");
-        $data['socios'] = $this->socios_model->listar();
+        $data['socios'] = $this->socios_model->listar($id_entidad);
 
 
         foreach ($data['socios'] as $socio){
-//		var_dump($socio['cuota']);
 	    $xestado = "XXXX";
 	    if ( $socio['datos']->suspendido == 1 ) {
 		$xestado = "SUSP";
@@ -395,7 +338,7 @@ class Admin extends CI_Controller {
 		$xestado = "ACTI";
  	    }
             $datos[] = array(
-            'id' => $socio['datos']->Id,
+            'id' => $socio['datos']->id,
             'name' => $socio['datos']->nombre.' '.$socio['datos']->apellido,
             'dni'=>$socio['datos']->dni,
             'price' => $socio['cuota']['total'],
@@ -410,8 +353,9 @@ class Admin extends CI_Controller {
     }
 
     public function listado_act(){
+	$id_entidad = $this->session->userdata('id_entidad');
         $this->load->model("actividades_model");
-        $data['actividades'] = $this->actividades_model->get_actividades_list();
+        $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
         foreach ($data['actividades'] as $actividad){
             switch ( $actividad->estado ) {
                 case 0: $estado="BAJA"; break;
@@ -426,7 +370,8 @@ class Admin extends CI_Controller {
             }
 
             $datos[] = array (
-            'id' => $actividad->Id,
+            'aid' => $actividad->aid,
+            'id' => $actividad->id,
             'name' => $actividad->nombre,
             'price' => $actividad->precio,
             'cta_inic' => $actividad->cuota_inicial,
@@ -441,16 +386,14 @@ class Admin extends CI_Controller {
 
     public function index() {
 	if(!$this->session->userdata('is_logued_in')){
+		$data = $this->carga_data();
 		$data['token'] = $this->token();
-           	$data['baseurl'] = base_url();
 		$this->load->view('login-form',$data);
 	}else{
 		if($this->session->userdata('prox_vto') == 1 ){
+			$data = $this->carga_data();
 			$data['mensaje1'] = "La contraseña actual se vence en 10 dias recuerde cambiarla";
-			$data['baseurl'] = base_url();
 			$data['section'] = 'ppal-mensaje';
-			$data['username'] = $this->session->userdata('username');
-			$data['rango'] = $this->session->userdata('rango');
 			$this->load->view('admin',$data);
 		} else {
                 	if($this->session->userdata('prox_vto') == -1 ){
@@ -463,68 +406,92 @@ class Admin extends CI_Controller {
     }
 
     public function morosos(){
-        $data['username'] = $this->session->userdata('username');
-        $data['rango'] = $this->session->userdata('rango');
-        $data['baseurl'] = base_url();
+	$data = $this->carga_data();
         $data['section'] = 'morosos';
         $this->load->view('admin',$data);
     }
 
 	public function login()
 	{
-
-        //if($this->input->post('token') && $this->input->post('token') == $this->session->userdata('token'))
-        //{
-            $this->form_validation->set_rules('username', 'nombre de usuario', 'required|trim|min_length[2]|max_length[150]|xss_clean');
-            $this->form_validation->set_rules('password', 'password', 'required|trim|min_length[5]|max_length[150]|xss_clean');
-             //lanzamos mensajes de error si es que los hay
-            if($this->form_validation->run() == FALSE)
-            {
-            	$this->session->set_flashdata('usuario_incorrecto','Falta ingresar algún dato.');
-                redirect(base_url().'admin');
-            }else{
-                $username = $this->input->post('username');
-                $password = sha1($this->input->post('password'));
-                $check_user = $this->login_model->login_user($username,$password);
-                if($check_user == TRUE)
-                {
-			// Valido ultimo cambio de contraseña
-			$hoy=new DateTime(date('Y-m-d'));
-			$ult_cambio=new DateTime($check_user->last_chgpwd);
-			$dias = $hoy->diff($ult_cambio);
-			if ( $dias->days > 90 ) {
-				$prox_vto = -1;
-			} else { 
-				if ( $dias->days > 80 ) {
-					$prox_vto = 1;
-				} else {
-					$prox_vto = 0;
-				}
-			}
-                   	$data = array( 'is_logued_in'     =>         TRUE,
-                    				'id_usuario'     =>         $check_user->Id,
-                  				'rango'        =>        $check_user->rango,
-                   				'mail'        =>        $check_user->mail,
-                    				'username'         =>         $check_user->user,
-						'prox_vto'	=> $prox_vto,
-                    				'last_chgpwd'         =>         $check_user->last_chgpwd);
-
-                    	$this->session->set_userdata($data);
-                    	$this->login_model->update_lCon();
-		
-                    	// Grabo log de cambios
-                    	$login = $this->session->userdata('username');
-                    	$nivel_acceso = $this->session->userdata('rango');
-                    	$tabla = "login";
-                    	$operacion = 0;
-                    	$llave = $this->session->userdata('id_usuario');
-                    	$observ = "Logueo exitoso";
-                    	$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-	
-                    	redirect(base_url().'admin');
+		if ( !$this->session->userdata('id_entidad') ) {
+			$this->form_validation->set_rules('entidad', 'entidad', 'required|trim|min_length[1]|max_length[50]|xss_clean');
 		}
-            }
-    }
+		$this->form_validation->set_rules('username', 'nombre de usuario', 'required|trim|min_length[2]|max_length[150]|xss_clean');
+		$this->form_validation->set_rules('password', 'password', 'required|trim|min_length[5]|max_length[150]|xss_clean');
+	
+		//lanzamos mensajes de error si es que los hay
+		if($this->form_validation->run() == FALSE)
+		{
+			$this->session->set_flashdata('usuario_incorrecto','Falta ingresar algún dato.');
+			redirect(base_url().'admin');
+		}else{
+			if ( !$this->session->userdata('id_entidad') ) {
+				$entidad = $this->input->post('entidad');
+			} else {	
+				$entidad = $this->session->userdata('id_entidad');
+			}
+			$username = $this->input->post('username');
+			$password = sha1($this->input->post('password'));
+			$check_user = $this->login_model->login_user($entidad, $username,$password);
+			if($check_user == TRUE)
+			{
+				// Valido ultimo cambio de contraseña
+                        	if ( $check_user->ult_cambio > 90 ) {
+                                	$prox_vto = -1;
+                        	} else {
+                                	if ( $check_user->ult_cambio > 80 ) {
+                                        	$prox_vto = 1;
+                                	} else {
+                                        	$prox_vto = 0;
+                                	}
+                        	}
+
+				$hoy=new DateTime(date('Y-m-d'));
+				$ult_cambio=new DateTime($check_user->last_chgpwd);
+				$dias = $hoy->diff($ult_cambio);
+				if ( $dias->days > 90 ) {
+					$prox_vto = -1;
+				} else { 
+					if ( $dias->days > 80 ) {
+						$prox_vto = 1;
+					} else {
+						$prox_vto = 0;
+					}
+				}
+				// Busco datos Entidad
+        			$this->load->model('general_model');
+				$entidad = $this->general_model->get_ent_dir($check_user->id_entidad);
+
+				// Seteo variables de sesion
+				$data = array( 'is_logued_in'     =>         TRUE,
+						'id_entidad'     =>         $check_user->id_entidad,
+						'id_usuario'     =>         $check_user->id,
+						'rango'        =>        $check_user->rango,
+						'mail'        =>        $check_user->mail,
+						'username'         =>         $check_user->user,
+						'ent_abreviatura' => $entidad->abreviatura,
+						'ent_nombre' => $entidad->descripcion,
+						'ent_directorio' => $entidad->dir_name,
+						'prox_vto'	=> $prox_vto,
+						'last_chgpwd'         =>         $check_user->last_chgpwd);
+				$this->session->set_userdata($data);
+				$this->login_model->update_lCon();
+	
+				// Grabo log de cambios
+				$id_entidad = $this->session->userdata('id_entidad');
+				$login = $this->session->userdata('username');
+				$nivel_acceso = $this->session->userdata('rango');
+				$tabla = "login";
+				$operacion = 0;
+				$llave = $this->session->userdata('id_usuario');
+				$observ = "Logueo exitoso";
+				$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+				$data = $this->carga_data();
+                		$this->load->view('admin',$data);
+			}
+		}
+    	}
 
 	public function token()
     {
@@ -541,21 +508,23 @@ class Admin extends CI_Controller {
       public function logout()
     {
         $this->session->sess_destroy();
-                    // Grabo log de cambios
-                    $login = $this->session->userdata('username');
-                    $nivel_acceso = $this->session->userdata('rango');
-                    $tabla = "login";
-                    $operacion = 0;
-                    $llave = $this->session->userdata('id_usuario');
-                    $observ = "Logout exitoso";
-                    $this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-        redirect(base_url().'admin');
+	// Grabo log de cambios
+	$id_entidad = $this->session->userdata('id_entidad');
+	$login = $this->session->userdata('username');
+	$nivel_acceso = $this->session->userdata('rango');
+	$tabla = "login";
+	$operacion = 0;
+	$llave = $this->session->userdata('id_usuario');
+	$observ = "Logout exitoso";
+	$this->log_cambios($id_entidad,$login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+	redirect(base_url().'admin');
     }
 
     public function admins($action='',$id='')
     {
         $this->load->model('admins_model');
         $this->login_model->update_lCon();
+        $data['id_entidad'] = $this->session->userdata('id_entidad');
         $data['username'] = $this->session->userdata('username');
         $data['rango'] = $this->session->userdata('rango');
         $data['baseurl'] = base_url();
@@ -566,33 +535,32 @@ class Admin extends CI_Controller {
                 $id = $this->admins_model->insert_admin($admin);
 
                 // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "admin";
                 $operacion = 1;
                 $llave = $id;
                 $observ = substr(json_encode($admin),0,255);
-                $this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                 redirect(base_url().'admin/admins','refresh');
                 break;
 
             case 'chgpwd':
+		$data = $this->carga_data();
         	$id = $this->session->userdata('id_usuario');
                 $data['admin'] = $this->admins_model->get_admin($id);
                 $data['action'] = "chgpwd";
                 $data['section'] = 'admins-editar';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view('admin',$data);
                 break;
 
             case 'editar':
+		$data = $this->carga_data();
                 $data['admin'] = $this->admins_model->get_admin($id);
                 $data['action'] = "edit";
                 $data['section'] = 'admins-editar';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view('admin',$data);
                 break;
 
@@ -602,30 +570,24 @@ class Admin extends CI_Controller {
 			$pwd_old = sha1($admin['pass_old']);
                 	$rtdo = $this->admins_model->chk_pwd($id,$pwd_old);
 			if ( !$rtdo ) {
+				$data = $this->carga_data();
 				$data['mensaje1'] = "La contraseña actual es incorrecta ";
-				$data['baseurl'] = base_url();
 				$data['section'] = 'ppal-mensaje';
-                		$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
 				$this->load->view('admin',$data);
 				break;
 			}
                 	if( $admin['pass1'] != ''){
 				if ( strlen($admin['pass1']) < 8 ) {
+					$data = $this->carga_data();
 					$data['mensaje1'] = "Las contraseñas deben tener al menos 8 caracteres";
-					$data['baseurl'] = base_url();
 					$data['section'] = 'ppal-mensaje';
-                			$data['username'] = $this->session->userdata('username');
-                			$data['rango'] = $this->session->userdata('rango');
 					$this->load->view('admin',$data);
 					break;
 				}
 				if ( $admin['pass1'] == $admin ['pass_old'] ) {
+					$data = $this->carga_data();
 					$data['mensaje1'] = "La nueva contraseña no puede ser igual a la actual";
-					$data['baseurl'] = base_url();
 					$data['section'] = 'ppal-mensaje';
-                			$data['username'] = $this->session->userdata('username');
-                			$data['rango'] = $this->session->userdata('rango');
 					$this->load->view('admin',$data);
 					break;
 				}
@@ -634,30 +596,24 @@ class Admin extends CI_Controller {
                 			unset($admin['pass_old']);
                 			$this->admins_model->update_pwd($id,$new_pwd);
 
+					$data = $this->carga_data();
 					$data['mensaje1'] = "La nueva contraseña fue correctamente actualizada. Cierre sesion y vuelva a ingresar.";
-					$data['baseurl'] = base_url();
 					$data['section'] = 'ppal-mensaje';
 					$data['msj_boton2'] = 'Cerrar Sesion y volver a loguearse';
 					$data['url_boton2'] = base_url().'admin/logout';
-                			$data['username'] = $this->session->userdata('username');
-                			$data['rango'] = $this->session->userdata('rango');
 					$this->load->view('admin',$data);
 					break;
 				} else {
+					$data = $this->carga_data();
 					$data['mensaje1'] = "Las contraseñas nuevas no coinciden";
-					$data['baseurl'] = base_url();
 					$data['section'] = 'ppal-mensaje';
-                			$data['username'] = $this->session->userdata('username');
-                			$data['rango'] = $this->session->userdata('rango');
 					$this->load->view('admin',$data);
 				}
 				break;
                 	} else {
+				$data = $this->carga_data();
 				$data['mensaje1'] = "La contraseña nuevas no puede estar vacia";
-				$data['baseurl'] = base_url();
 				$data['section'] = 'ppal-mensaje';
-                		$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
 				$this->load->view('admin',$data);
 				break;
 			}
@@ -672,13 +628,14 @@ class Admin extends CI_Controller {
                 $this->admins_model->update_admin($id,$admin);
 
                 // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "admin";
                 $operacion = 2;
                 $llave = $id;
                 $observ = substr(json_encode($admin),0,255);
-                $this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                 redirect(base_url().'admin/admins','refresh');
 
@@ -689,22 +646,23 @@ class Admin extends CI_Controller {
                 $this->admins_model->update_admin($id,$admin);
 
                 // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "admin";
                 $operacion = 3;
                 $llave = $id;
                 $observ = substr(json_encode($admin),0,255);
-                $this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                 redirect(base_url().'admin/admins','refresh');
                 break;
 
             default:
-                $data['listaAdmin'] = $this->admins_model->get_admins();
+		$data = $this->carga_data();
+		$id_entidad  = $this->session->userdata('id_entidad');
+                $data['listaAdmin'] = $this->admins_model->get_admins($id_entidad);
                 $data['section'] = 'admins';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view('admin',$data);
                 break;
         }
@@ -723,9 +681,7 @@ class Admin extends CI_Controller {
 					$idcateg = $this->uri->segment(5);
                 			$this->load->model('general_model');
 					$categ=$this->general_model->get_cat($idcateg);
-                			$data['username'] = $this->session->userdata('username');
-                        		$data['rango'] = $this->session->userdata('rango');
-                			$data['baseurl'] = base_url();
+					$data = $this->carga_data();
                 			$data['categoria'] = $categ;
                 			$data['action'] = 'agregar';
                 			$data['section'] = 'categorias-editar';
@@ -734,21 +690,22 @@ class Admin extends CI_Controller {
 				case 'editar-do':
 					$idcateg = $this->uri->segment(5);
                 			$this->load->model('general_model');
-       			                $datos['Id'] = $idcateg;
-       			                $datos['nomb'] = $this->input->post('nombre');
+       			                $datos['id'] = $idcateg;
+       			                $datos['nombre'] = $this->input->post('nombre');
        			                $datos['precio'] = $this->input->post('precio');
        			                $datos['precio_unit'] = $this->input->post('precio_unit');
        			                $datos['estado'] = $this->input->post('estado');
                         		$this->general_model->update_cat($idcateg,$datos);
 
 					// Grabo log de cambios
+                			$id_entidad = $this->session->userdata('id_entidad');
                 			$login = $this->session->userdata('username');
                         		$nivel_acceso = $this->session->userdata('rango');
 					$tabla = "categorias";
 					$operacion = 2;
 					$llave = $idcateg;
 					$observ = substr(json_encode($datos),0,255);
-    					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+    					$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                                 	redirect(base_url().'admin/socios/categorias');
 					break;
 				case 'eliminar':
@@ -757,57 +714,58 @@ class Admin extends CI_Controller {
 					$categ=$this->general_model->delete_cat($idcateg);
 
 					// Grabo log de cambios
+                			$id_entidad = $this->session->userdata('id_entidad');
                 			$login = $this->session->userdata('username');
                         		$nivel_acceso = $this->session->userdata('rango');
 					$tabla = "categorias";
 					$operacion = 3;
 					$llave = $idcateg;
 					$observ = "Borrado de la categoria $idcateg";
-    					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+    					$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                                 	redirect(base_url().'admin/socios/categorias');
 					break;
 				case 'agregar':
-                			$data['username'] = $this->session->userdata('username');
-                        		$data['rango'] = $this->session->userdata('rango');
-                			$data['baseurl'] = base_url();
+					$data = $this->carga_data();
                 			$data['action'] = 'agregar';
                 			$data['section'] = 'categorias-agregar';
                 			$this->load->view('admin',$data);
 					break;
 				case 'agregar-do':
                 			$this->load->model('general_model');
-       			                $datos['Id'] = 0;
-       			                $datos['nomb'] = $this->input->post('nombre');
+       			                $datos['id'] = 0;
+                			$datos['id_entidad'] = $this->session->userdata('id_entidad');
+       			                $datos['nombre'] = $this->input->post('nombre');
        			                $datos['precio'] = $this->input->post('precio');
        			                $datos['precio_unit'] = $this->input->post('precio_unit');
        			                $datos['estado'] = 1;
                         		$this->general_model->insert_cat($datos);
 
 					// Grabo log de cambios
+                			$id_entidad = $this->session->userdata('id_entidad');
                 			$login = $this->session->userdata('username');
                         		$nivel_acceso = $this->session->userdata('rango');
 					$tabla = "categorias";
 					$operacion = 1;
 					$llave = $idcateg;
 					$observ = substr(json_encode($datos), 0, 255);
-    					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+    					$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                                 	redirect(base_url().'admin/socios/categorias');
 					break;
 				case 'listcateg':
                 			$this->load->model('general_model');
-					$result=$this->general_model->get_cats();
+                			$id_entidad = $this->session->userdata('id_entidad');
+					$result=$this->general_model->get_cats($id_entidad);
                 			$datos = json_encode($result);
                 			echo $datos;
 					break;
 			}
 		} else {
-                	$data['username'] = $this->session->userdata('username');
-                        $data['rango'] = $this->session->userdata('rango');
-                	$data['baseurl'] = base_url();
+			$data = $this->carga_data();
+                	$id_entidad = $this->session->userdata('id_entidad');
                 	$data['action'] = 'nuevo';
                 	$data['section'] = 'categorias';
                 	$this->load->model("general_model");
-                	$data['categorias'] = $this->general_model->get_cats();
+                	$data['categorias'] = $this->general_model->get_cats($id_entidad);
                 	$this->load->view('admin',$data);
 		}
 		break;
@@ -819,87 +777,6 @@ class Admin extends CI_Controller {
 		echo json_encode($socio);
                 break;
 
-            case 'reinscribir':
-                $id_socio = $this->uri->segment(4);
-                $this->load->model('socios_model');
-                $socio = $this->socios_model->get_socio_full($id_socio);
-                if ( $socio->categoria == 1 || $socio->categoria == 4 || $socio->categoria == 6 || $socio->categoria == 7 ) {
-                        $data['mensaje1'] = "La categoria de ese socio no admite reinscripcion....";
-                        $data['baseurl'] = base_url();
-                        $data['section'] = 'ppal-mensaje';
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-                        $this->load->view('admin',$data);
-                } else {
-                        $this->load->model('pagos_model');
-			// Verifico si ya esta reinscripto
-                        $reinscripcion = $this->pagos_model->get_reinscripcion($id_socio);
-			if ( $reinscripcion ) {
-                                $data['mensaje1'] = "Ese socio ya se reinscribio el ".$reinscripcion->ts;
-                                $data['baseurl'] = base_url();
-                                $data['section'] = 'ppal-mensaje';
-                		$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
-                                $this->load->view('admin',$data);
-			} else {
-                        	$deuda = $this->pagos_model->get_deuda_monto($id_socio);
-                        	if ( $deuda ) {
-					if ( $deuda > 0 ) {
-						$observ="";
-                                		// Armar el movimiento de condonacion
-						$pago_deuda=$deuda*0.50;
-						$observ .= "Deuda de $pago_deuda. ";
-                        			$this->pagos_model->registrar_pago('haber',$id_socio,$pago_deuda,'Reinscripcion Mar2018',0,1);
-
-						// Si estaba suspendido lo reactivo
-						if ( $socio->suspendido == 1 ) {
-							$this->socios_model->suspender($id_socio,'no');
-							$observ .= "Lo reactivo. ";
-						}
-
-						// Verifico si tiene la cuota del mes y sino la facturo
-						$cta_mes = $this->pagos_model->busca_fact_mes($id_socio);
-						if ( !$cta_mes ) {
-                					$this->load->model('general_model');
-							$categoria = $this->general_model->get_cat($socio->categoria);
-							$mes=date('Ym');
-                        				$this->pagos_model->registrar_pago('debe',$id_socio,$categoria->precio,'Cuota Mes '.$mes,'cs',0);
-							$observ .= "Facturo cuota $mes de $categoria->nomb a $ $categoria->precio. ";
-						}
-
-						// Grabo el registro de reinscripcion
-						$this->pagos_model->reinscripcion($id_socio);
-
-                    				// Grabo log de cambios
-                    				$login = $this->session->userdata('username');
-                    				$nivel_acceso = $this->session->userdata('rango');
-                    				$tabla = "reinscripcion";
-                    				$llave = $id_socio;
-                    				$operacion = 4;
-                    				$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-	
-                                		redirect(base_url().'admin/socios/resumen/'.$id_socio);
-
-					} else {
-                                		$data['mensaje1'] = "Ese socio no tiene deuda....";
-                                		$data['baseurl'] = base_url();
-                                		$data['section'] = 'ppal-mensaje';
-                				$data['username'] = $this->session->userdata('username');
-                				$data['rango'] = $this->session->userdata('rango');
-                                		$this->load->view('admin',$data);
-					}
-                        	} else {
-                                	$data['mensaje1'] = "Ese socio no tiene deuda....";
-                                	$data['baseurl'] = base_url();
-                                	$data['section'] = 'ppal-mensaje';
-                			$data['username'] = $this->session->userdata('username');
-                			$data['rango'] = $this->session->userdata('rango');
-                                	$this->load->view('admin',$data);
-                        	}
-			}
-                }
-                break;
-
 
             case 'suspender':
                 $id_socio = $this->uri->segment(4);
@@ -908,16 +785,15 @@ class Admin extends CI_Controller {
 		$msj = 0;
 		// Verifico si ya esta suspendido
 		if ( $socio->suspendido == 1 ) {
+			$data = $this->carga_data();
 			$data['mensaje1'] = "Este socio ya esta Suspendido";
-			$data['baseurl'] = base_url();
 			$data['section'] = 'ppal-mensaje';
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
 			$this->load->view('admin',$data);
 		} else {
 			// Verifico si tiene deuda
+                	$id_entidad = $this->session->userdata('id_entidad');
                 	$this->load->model('pagos_model');
-			$deuda = $this->pagos_model->get_deuda_monto($id_socio);
+			$deuda = $this->pagos_model->get_deuda_monto($id_entidad, $id_socio);
                 	if ( $deuda ) {
 				if ( $deuda > 0 ) {
 					$msj = 1;
@@ -927,13 +803,13 @@ class Admin extends CI_Controller {
 
 			// Verifico si tiene Debito Automatico
                 	$this->load->model('debtarj_model');
-			$debtarj = $this->debtarj_model->get_debtarj_by_sid($id_socio);
+			$debtarj = $this->debtarj_model->get_debtarj_by_sid($id_entidad, $id_socio);
                 	if ( $debtarj ) {
 				$msj = 1;
 				$data['mensaje3'] = "Este socio tiene Debito Automatico de Tarjeta ";
 			}
 
-                        $financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+                        $financiacion = $this->pagos_model->get_financiado_mensual($id_entidad, $id_socio);
                         if ( $financiacion ) {
 				$fin=$financiacion[0];
                                 $msj = 1;
@@ -942,13 +818,11 @@ class Admin extends CI_Controller {
 
 			// Si tiene Deuda o Debito Automativo aviso
 			if ($msj > 0) {
+				$data = $this->carga_data();
 				$data['mensaje1'] = "Esta seguro de SUSPENDER a este socio ???";
-				$data['baseurl'] = base_url();
 				$data['msj_boton2'] = 'Igual Suspende';
 				$data['url_boton2'] = base_url().'admin/socios/suspender-do/'.$id_socio;
 				$data['section'] = 'ppal-mensaje';
-                		$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
 				$this->load->view('admin',$data);
 			} else {
                 		redirect(base_url().'admin/socios/suspender-do/'.$id_socio);
@@ -960,58 +834,60 @@ class Admin extends CI_Controller {
 
             case 'suspender-do':
                 $id_socio = $this->uri->segment(4);
+                $id_entidad = $this->session->userdata('id_entidad');
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
 		$observ="Suspendo manualmente a $id_socio. ";
-                $financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+                $financiacion = $this->pagos_model->get_financiado_mensual($id_entidad, $id_socio);
                 if ( $financiacion ) {
 			$fin=$financiacion[0];
 			$deuda_fin=$fin->monto-($fin->actual*($fin->monto/$fin->cuotas));
-                	$this->pagos_model->registrar_pago('debe',$id_socio,$deuda_fin,'Plan Financiacion Cuotas Impagas');
-                	$this->pagos_model->cancelar_plan($fin->Id);
+                	$this->pagos_model->registrar_pago($id_entidad,'debe',$id_socio,$deuda_fin,'Plan Financiacion Cuotas Impagas');
+                	$this->pagos_model->cancelar_plan($fin->id);
 			$observ .= "Cancelo finaciacion de $deuda_fin.";
                 }
 
                 $this->socios_model->suspender($id_socio);
-                $this->pagos_model->registrar_pago('debe',$id_socio,0.00,'Suspensión Manual desde el Sistema');
+                $this->pagos_model->registrar_pago($id_entidad,'debe',$id_socio,0.00,'Suspensión Manual desde el Sistema');
 		
                 // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "socios";
                 $llave = $id_socio;
                 $operacion = 2;
-                $this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                $this->log_cambios($id_entidad, login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                 redirect(base_url().'admin/socios/resumen/'.$id_socio);
                 break;
 
             case 'desuspender':
                 $id_socio = $this->uri->segment(4);
+                $id_entidad = $this->session->userdata('id_entidad');
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
 		$socio = $this->socios_model->get_socio($id_socio);
 		// Verifico si ya esta suspendido
 		if ( $socio->suspendido == 0 ) {
+			$data = $this->carga_data();
 			$data['mensaje1'] = "Este socio NO esta Suspendido";
 			$data['mensaje2'] = var_dump($socio);
-			$data['baseurl'] = base_url();
 			$data['section'] = 'ppal-mensaje';
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
 			$this->load->view('admin',$data);
 		} else {
                 	$this->socios_model->suspender($this->uri->segment(4),'no');
-                	$this->pagos_model->registrar_pago('debe',$id_socio,0.00,'Des-suspensión por Sistema');
+                	$this->pagos_model->registrar_pago($id_entidad, 'debe',$id_socio,0.00,'Des-suspensión por Sistema');
 
                 	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
                 	$login = $this->session->userdata('username');
                 	$nivel_acceso = $this->session->userdata('rango');
                 	$tabla = "socios";
                 	$llave = $id_socio;
 			$observ = "Des-suspendo ".substr(json_encode($socio),235);
                 	$operacion = 2;
-                	$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                 	$data['username'] = $this->session->userdata('username');
                 	$data['rango'] = $this->session->userdata('rango');
@@ -1021,6 +897,7 @@ class Admin extends CI_Controller {
 
             case 'enviar_resumen':
                 if(!$this->uri->segment(4)){return false;}
+                $id_entidad = $this->session->userdata('id_entidad');
                 $this->load->library('email');
 
                 $config['charset'] = 'utf-8';
@@ -1029,7 +906,7 @@ class Admin extends CI_Controller {
                 $this->email->initialize($config);
 
                 $this->load->model('socios_model');
-                $mail = $this->socios_model->get_resumen_mail($this->uri->segment(4));
+                $mail = $this->socios_model->get_resumen_mail($id_entidad, $this->uri->segment(4));
 
                 $cuota = $mail['resumen'];
 
@@ -1108,22 +985,23 @@ class Admin extends CI_Controller {
                 </table>';
 
                 // cupon
+                $ent_dir = $this->session->userdata('ent_directorio');
                 $this->load->model('pagos_model');
-                $cupon = $this->pagos_model->get_cupon($mail['sid']);
+                $cupon = $this->pagos_model->get_cupon($mail['sid'], $id_entidad);
                 if($cupon->monto == $cuota['total']){
-                    $cupon = base_url().'images/cupones/'.$cupon->Id.'.png';
+                    $cupon = base_url().'entidades/'.$ent_dir.'/images/cupones/'.$cupon->id.'.png';
                 }else{
                     $cupon = $this->cuentadigital($mail['sid'],$cuota['titular'],$cuota['total']);
                     if($cupon && $mail['sid'] != 0){
 
-                        $cupon_id = $this->pagos_model->generar_cupon($mail['sid'],$cuota['total'],$cupon);
+                        $cupon_id = $this->pagos_model->generar_cupon($id_entidad, $mail['sid'],$cuota['total'],$cupon);
                         $data = base64_decode($cupon['image']);
                         $img = imagecreatefromstring($data);
                         if ($img !== false) {
                             //@header('Content-Type: image/png');
-                            imagepng($img,'images/cupones/'.$cupon_id.'.png',0);
+                            imagepng($img,'entidades/'.$ent_dir.'/images/cupones/'.$cupon_id.'.png',0);
                             imagedestroy($img);
-                            $cupon = base_url().'images/cupones/'.$cupon_id.'.png';
+                            $cupon = base_url().'entidades/'.$ent_dir.'/images/cupones/'.$cupon_id.'.png';
                         }else {
                             echo 'Ocurrió un error.';
                             $cupon = '';
@@ -1159,10 +1037,8 @@ class Admin extends CI_Controller {
                 }else{
                     $data['enviado'] = 'no_mail';
                 }
-                    $data['baseurl'] = base_url();
+		    $data = $this->carga_data();
                     $data['section'] = 'socios-resumen_enviado';
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
                     $this->load->view('admin',$data);
                 break;
             /**
@@ -1170,12 +1046,14 @@ class Admin extends CI_Controller {
             **/
             case 'buscar':
                 if($_GET['dni']){
+                    $id_entidad = $this->session->userdata('username');
+                    $data['id_entidad'] = $id_entidad;
                     $data['username'] = $this->session->userdata('username');
                     $data['rango'] = $this->session->userdata('rango');
                     $this->load->model('socios_model');
-                    $socio = $this->socios_model->get_socio_by(array('dni'=>$_GET['dni']));
+                    $socio = $this->socios_model->get_socio_by($id_entidad, array('dni'=>$_GET['dni']));
                     if($socio){
-                        redirect(base_url().'admin/socios/resumen/'.$socio[0]->Id);
+                        redirect(base_url().'admin/socios/resumen/'.$socio[0]->id);
                     }else{
                         redirect(base_url().'admin/socios');
                     }
@@ -1184,21 +1062,22 @@ class Admin extends CI_Controller {
                 }
                 break;
             case 'agregar':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['action'] = 'nuevo';
                 $data['section'] = 'socios-nuevo';
                 $data['socio'] = '';
                 $this->load->model("general_model");
-                $data['categorias'] = $this->general_model->get_cats();
+                $data['categorias'] = $this->general_model->get_cats($id_entidad);
 
                 $this->load->model("socios_model");
-                $data['socios'] = $this->socios_model->get_socios();
+                $data['socios'] = $this->socios_model->get_socios($id_entidad);
                 $this->load->view('admin',$data);
                 break;
 
             case 'nuevo':
+                $id_entidad = $this->session->userdata('id_entidad');
+                $data['id_entidad'] = $id_entidad;
                 $data['username'] = $this->session->userdata('username');
                 $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
@@ -1207,29 +1086,18 @@ class Admin extends CI_Controller {
                 {
                     $datos[$key] = $this->input->post($key);
                 }
-                if($datos['socio_n'] >= 28852){
-                    $datos['socio_n'] = '';
-                    $error = "?e=socio_n";
-                }
-                $datos['r1'] = $datos['r1-id'];
-                $datos['r2'] = $datos['r2-id'];
-                $datos['tutor'] = $datos['r3-id'];
-                unset($datos['r1-id']);
-                unset($datos['r2-id']);
-                unset($datos['r3-id']);
-                unset($datos['r3']);
+
+		$datos['id_entidad'] = $id_entidad;
                 if(isset($datos['deuda'])){
                     $deuda = $datos['deuda'];
                     unset($datos['deuda']);
                 }
                 $this->load->model("socios_model");
 
-                if($prev_user = $this->socios_model->checkDNI($datos['dni'])){
+                if($prev_user = $this->socios_model->checkDNI($id_entidad, $datos['dni'])){
                     //el dni esta repetido, incluimos la vista de listado con el usuario coincidente
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
+		    $data = $this->carga_data();
                     $data['prev_user'] = $prev_user;
-                    $data['baseurl'] = base_url();
                     $data['section'] = 'socio-dni-repetido';
                     $this->load->view('admin',$data);
                 }else{
@@ -1240,27 +1108,33 @@ class Admin extends CI_Controller {
                     $uid = $this->socios_model->register($datos);
 
                 	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
                 	$login = $this->session->userdata('username');
                 	$nivel_acceso = $this->session->userdata('rango');
                 	$tabla = "socios";
                 	$operacion = 1;
                 	$llave = $uid;
                 	$observ = substr(json_encode($datos),0,255);
-                	$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
-                    if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){
-                        rename("images/temp/".$this->session->userdata('img_token').".jpg","images/socios/".$uid.".jpg");
+                    $ent_dir = $this->session->userdata('ent_directorio');
+                    $token = $this->session->userdata('img_token');
+                    if(file_exists(BASEPATH."../images/temp/".$token.".jpg")){
+                           $old_name = BASEPATH."../images/temp/".$token.".jpg";
+                           $new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$uid.".jpg";
+                           rename($old_name,$new_name);
                     }
                     //guardamos la variable con la data de la foto en una imagen
+
                     if($deuda){
                         //llamamos a la vista de financiar deuda para este usuario con el monto ingresado
-                        $this->socios_model->insert_deuda($uid,$deuda);
+                        $this->socios_model->insert_deuda($id_entidad,$uid,$deuda);
                     }
 
                     if(date('d') < $this->date_facturacion){ //si la fecha es anterior a la definida
                         if($datos['tutor'] == 0){ // y no es un integrante de grupo familiar
                             $this->load->model('pagos_model');
-                            $cuota = $this->pagos_model->get_monto_socio($uid);
+                            $cuota = $this->pagos_model->get_monto_socio($id_entidad, $uid);
 
                             $descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
                             if($cuota['categoria'] == 'Grupo Familiar'){
@@ -1278,6 +1152,7 @@ class Admin extends CI_Controller {
 
                             $pago = array(
                                 'sid' => $uid,
+                                'id_entidad' => $id_entidad,
                                 'tutor_id' => $uid,
                                 'aid' => 0,
                                 'generadoel' => date('Y-m-d'),
@@ -1294,6 +1169,7 @@ class Admin extends CI_Controller {
                             	$this->pagos_model->insert_pago_nuevo($pago);
 
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "pagos";
@@ -1301,23 +1177,25 @@ class Admin extends CI_Controller {
                 		$llave = $uid;
                 		$observ = substr(json_encode($pago),0,255);
 
-                            $facturacion = array(
-                                'sid' => $uid,
-                                'descripcion'=>$descripcion,
-                                'debe' => $cuota['cuota'],
-                                'haber' => 0,
-                                'total' => $cuota['cuota']*-1
-                                );
-                            $this->pagos_model->insert_facturacion($facturacion);
+                            	$facturacion = array(
+                                	'sid' => $uid,
+                                	'id_entidad' => $id_entidad,
+                                	'descripcion'=>$descripcion,
+                                	'debe' => $cuota['cuota'],
+                                	'haber' => 0,
+                                	'total' => $cuota['cuota']*-1
+                                	);
+                            	$this->pagos_model->insert_facturacion($facturacion);
 
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "facturacion";
                 		$operacion = 1;
                 		$llave = $uid;
                 		$observ = substr(json_encode($facturacion),0,255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         }
                     }
 
@@ -1328,84 +1206,74 @@ class Admin extends CI_Controller {
                 break;
 
             case 'nuevo-tutor':
+                $id_entidad = $this->session->userdata('id_entidad');
+                $data['id_entidad'] = $id_entidad;
                 $data['username'] = $this->session->userdata('username');
                 $data['rango'] = $this->session->userdata('rango');
                 $data['baseurl'] = base_url();
-                //if(!$this->session->userdata('username')){ redirect(base_url()."admin"); }
                 $tutor['nombre'] = $this->input->get("tutor-nombre");
                 $tutor['apellido'] = $this->input->get("tutor-apellido");
                 $tutor['dni'] = $this->input->get("tutor-dni");
                 $tutor['telefono'] = $this->input->get("tutor-telefono");
                 $tutor['mail'] = $this->input->get("tutor-mail");
                 $this->load->model("socios_model");
-                //echo $tutor['dni']; die;
-                if(!$tutor['dni'] || $prev_user = $this->socios_model->checkDNI($tutor['dni'])){
+                if(!$tutor['dni'] || $prev_user = $this->socios_model->checkDNI($id_entidad,$tutor['dni'])){
                     //el dni esta repetido, enviamos DNI para que jquery se encargue
                     echo "DNI";
                 }else{
                     $uid = $this->socios_model->register($tutor);
 
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "socios-tutor";
                 		$operacion = 1;
                 		$llave = $uid;
                 		$observ = substr(json_encode($tutor),0,255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
-                    $data = array("Id"=>$uid,"nombre"=>$tutor['nombre'],"apellido"=>$tutor['apellido'],"dni"=>$tutor['dni']);
+                    $data = array("id"=>$uid,"nombre"=>$tutor['nombre'],"apellido"=>$tutor['apellido'],"dni"=>$tutor['dni']);
                     echo (json_encode($data));
                 }
                 break;
 
             case 'agregar_imagen':
+		$ent_dir = $this->session->userdata('ent_directorio');
                 $token = $this->img_token();
-                if(move_uploaded_file($_FILES['webcam']['tmp_name'], 'images/temp/'.$token.'.jpg')){
+                if(move_uploaded_file($_FILES['webcam']['tmp_name'], BASEPATH.'../images/temp/'.$token.'.jpg')){
                     echo $token;
                 }
                 break;
 
             case 'subir_imagen':
-
                 $token = $this->img_token();
                 $this->load->library('UploadHandler');
-                die;
-                if(move_uploaded_file($_FILES['webcam']['tmp_name'], 'images/temp/'.$token.'.jpg')){
-                    echo $token;
-                }
                 break;
 
             case 'registrado':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['uid'] = $this->uri->segment(4);
                 $data['section'] = 'socios-registrado';
                 $this->load->view('admin',$data);
                 break;
 
             case 'editar':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['section'] = 'socios-editar';
                 $this->load->model("general_model");
-                $data['categorias'] = $this->general_model->get_cats();
-               // $data['localidad'] = $this->general_model->get_ciudades();
+                $data['categorias'] = $this->general_model->get_cats($id_entidad);
                 $this->load->model("socios_model");
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
                 if($data['socio']){
-                    $data['contacto1'] = $this->socios_model->get_socio($data['socio']->r1);
-                    $data['contacto2'] = $this->socios_model->get_socio($data['socio']->r2);
                     $data['tutor'] = $this->socios_model->get_socio($data['socio']->tutor);
-                    if(!$data['socio']->socio_n){
-                        $data['socio']->socio_n = $this->uri->segment(4);
+                    if(!$data['socio']->nro_socio){
+                        $data['socio']->nro_socio = $this->uri->segment(4);
                     }
                 }else{
 
                 }
-
                 $this->load->view('admin',$data);
                 break;
 
@@ -1417,56 +1285,51 @@ class Admin extends CI_Controller {
                 }
 
 
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-		if ( $datos['r3-id'] == $id ) {
+                $id_entidad = $this->session->userdata('id_entidad');
+                $datos['id_entidad'] = $id_entidad;
+		$data = $this->carga_data();
+		if ( $datos['tutor'] == $id ) {
 			$data['mensaje1'] = "No puede ponerse como tutor al mismo socio....";
-                    	$data['baseurl'] = base_url();
                     	$data['section'] = 'ppal-mensaje';
                     	$this->load->view('admin',$data);
 		} else {
                 	$this->load->model("socios_model");
-                	$socio_n = $this->socios_model->check_u_n($datos['socio_n']);
-                	if($datos['socio_n'] == 0){
-				$datos['socio_n'] = '';
+                	$nro_socio = $this->socios_model->check_u_n($id_entidad,$datos['nro_socio']);
+                	if($datos['nro_socio'] == 0){
+				$datos['nro_socio'] = '';
                 	}
-                	$socio_n = false;
-                	if(($datos['socio_n'] >= 28852 && $datos['socio_n'] != $id )|| $socio_n == true){
-                    		$datos['socio_n'] = '';
-                    		$error = "?e=socio_n";
+                	$nro_socio = false;
+                	if(($datos['nro_socio'] >= 28852 && $datos['nro_socio'] != $id )|| $nro_socio == true){
+                    		$datos['nro_socio'] = '';
+                    		$error = "?e=nro_socio";
                 	}
-                	$datos['r1'] = $datos['r1-id'];
-                	$datos['r2'] = $datos['r2-id'];
-                	$datos['tutor'] = $datos['r3-id'];
-                	unset($datos['r1-id']);
-                	unset($datos['r2-id']);
-                	unset($datos['r3-id']);
-                	unset($datos['r3']);
 
-                	if($prev_user = $this->socios_model->checkDNI($datos['dni'],$id)){
+                	if($prev_user = $this->socios_model->checkDNI($id_entidad,$datos['dni'],$id)){
                     		//el dni esta repetido, incluimos la vista de listado con el usuario coincidente
-                    		$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
                     		$data['prev_user'] = $prev_user;
-                    		$data['baseurl'] = base_url();
                     		$data['section'] = 'socio-dni-repetido';
                     		$this->load->view('admin',$data);
                 	} else {
+				$ent_dir = $this->session->userdata('ent_directorio');
                     		$token = $this->session->userdata('img_token');
-                    		if(file_exists("images/temp/".$token.".jpg")){
-                        		rename("images/temp/".$this->session->userdata('img_token').".jpg","images/socios/".$id.".jpg");
-                    		}
+
+                    		if(file_exists(BASEPATH."../images/temp/".$token.".jpg")){
+					$old_name = BASEPATH."../images/temp/".$token.".jpg";
+					$new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$id.".jpg";
+                        		rename($old_name,$new_name);
+				}
                     		unset($datos['files']);
-                    		$this->socios_model->update_socio($id,$datos);
+                    		$this->socios_model->update_socio($id_entidad,$id,$datos);
 
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "socios";
                 		$operacion = 2;
                 		$llave = $id;
                 		$observ = substr(json_encode($datos),0,255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                     		if(!isset($error)){
                         		$error = '';
@@ -1483,25 +1346,25 @@ class Admin extends CI_Controller {
                 $this->socios_model->borrar_socio($this->uri->segment(4));
                 $data['username'] = $this->session->userdata('username');
                 $data['rango'] = $this->session->userdata('rango');
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "socios";
-                		$operacion = 3;
-                		$llave = $this->uri->segment(4);
-                		$observ = "borrado";
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+               	// Grabo log de cambios
+               	$id_entidad = $this->session->userdata('id_entidad');
+               	$login = $this->session->userdata('username');
+               	$nivel_acceso = $this->session->userdata('rango');
+               	$tabla = "socios";
+               	$operacion = 3;
+               	$llave = $this->uri->segment(4);
+               	$observ = "borrado";
+               	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 redirect(base_url()."admin/socios");
                 break;
             case 'resumen':
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
-                $data['facturacion'] = $this->pagos_model->get_facturacion($this->uri->segment(4));
-                $data['cuota'] = $this->pagos_model->get_monto_socio($this->uri->segment(4));
+                $data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad,$this->uri->segment(4));
+                $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad,$this->uri->segment(4));
 		if ( $this->uri->segment(5) ) {
 			if ( $this->uri->segment(5) == "excel" ) {
 				$archivo="Resument_Cuenta_Asoc_".$this->uri->segment(4)."_".date('Ymd');
@@ -1526,31 +1389,26 @@ class Admin extends CI_Controller {
             case 'resumen2':
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
-                $data['facturacion'] = $this->pagos_model->get_facturacion($this->uri->segment(4));
+                $data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad,$this->uri->segment(4));
 /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-            	$array_ahg = $this->pagos_model->get_monto_socio($this->uri->segment(4));
+            	$array_ahg = $this->pagos_model->get_monto_socio($id_entidad, $this->uri->segment(4));
                 $data['cuota'] = $array_ahg['total'];
 /* Fin Modificacion AHG */
                 $data['section'] = 'socios-resumen2';
                 $this->load->view('socios-resumen2',$data);
                 break;
              case 'resumen-deuda':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['deuda'] = 'only';
                 $data['section'] = 'socios-resumen';
                 $this->load->view('admin',$data);
                 break;
 
              case 'resumen-sindeuda':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['deuda'] = 'no';
                 $data['section'] = 'socios-resumen';
                 $this->load->view('admin',$data);
@@ -1558,20 +1416,17 @@ class Admin extends CI_Controller {
 
 
             default:
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['section'] = 'socios';
-                //$this->load->model("socios_model");
-                //$data['socios'] = $this->socios_model->listar();
                 $this->load->view('admin',$data);
                 break;
         }
     }
 
-    public function log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ) {
+    public function log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ) {
 		$this->load->model("general_model");
 			$datos['log_ts'] = date('Y-m-d H:i:s');
+			$datos['id_entidad'] = $id_entidad;
 			$datos['login'] = $login;
 			$datos['nivel_acceso'] = $nivel_acceso;
 			$datos['tabla'] = $tabla;
@@ -1586,6 +1441,7 @@ class Admin extends CI_Controller {
                 case 'subearchivo':
 
                        $this->load->model("debtarj_model");
+                       $id_entidad = $this->session->userdata('id_entidad');
                        $id_marca = $this->uri->segment(4);
                        $fecha_debito = $this->uri->segment(5);
 			// Armo el periodo
@@ -1604,7 +1460,7 @@ class Admin extends CI_Controller {
 			}
 
                        if ( $this->uri->segment(6) == "excel" ) {
-				$result = $this->debtarj_model->get_deberr_by_marca_periodo($id_marca, $periodo);
+				$result = $this->debtarj_model->get_deberr_by_marca_periodo($id_entidad,$id_marca, $periodo);
 				$archivo="Errores_Debito_Tarj_".$id_marca."_".date('Ymd');
                                 $fila1=null;
                                 $titulo="Marca#".$id_marca."_".$fecha_debito;
@@ -1623,14 +1479,12 @@ class Admin extends CI_Controller {
 
 			$result=false;
 			switch ( $id_marca ) {
-				case 1: $result = $this->sube_visa($periodo, $fecha_debito); break;
-				case 2: $result = $this->sube_coopeplus($periodo, $id_marca,$fecha_debito); break;
-				case 3: $result = $this->sube_coopeplus($periodo, $id_marca,$fecha_debito); break;
+				case 1: $result = $this->sube_visa($id_entidad, $periodo, $fecha_debito); break;
+				case 2: $result = $this->sube_coopeplus($id_entidad, $periodo, $id_marca,$fecha_debito); break;
+				case 3: $result = $this->sube_coopeplus($$id_entidad, periodo, $id_marca,$fecha_debito); break;
 			}
 
-                        $data['baseurl'] = base_url();
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
+			$data = $this->carga_data();
 			if ( $result ) {
                                 $data['mensaje1'] = "Archivo procesado correctamente";
 				$data['datos_gen'] = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
@@ -1641,45 +1495,46 @@ class Admin extends CI_Controller {
                         	$data['msj_boton'] = "Vuelve Listado de Debitos";
                         	$data['section'] = 'load-debtarj-result';
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "debtarj";
                 		$operacion = 5;
                 		$llave = $id_marca;
                 		$observ = "subio archivo de $id_marca para el periodo $periodo con fecha debito = $fecha_debito";
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad,$login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                         } else {
                                 $data['mensaje1'] = "No se pudo procesar archivo";
-                        	$data['section'] = 'ppal-mensaje';
+                        	$data['ection'] = 'ppal-mensaje';
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "debtarj";
                 		$operacion = 5;
                 		$llave = $id_marca;
                 		$observ = "no pudo subir archivo de $id_marca para el periodo $periodo con fecha debito = $fecha_debito";
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         }
-                        $data['username'] = $this->session->userdata('username');
-                    	$data['rango'] = $this->session->userdata('rango');
                         $this->load->view("admin",$data);
 			break;
                 case 'gen_nvo':
+                        $id_entidad = $this->session->userdata('id_entidad');
                         $id_marca = $this->uri->segment(4);
                         $periodo = $this->uri->segment(5);
                         $this->load->model("debtarj_model");
                         $this->load->model("pagos_model");
 			// Si me viene el parametro de forzar ...
 			if ( $this->uri->segment(6) ) {
-				$this->debtarj_model->anula_periodo_marca($periodo, $id_marca);
+				$this->debtarj_model->anula_periodo_marca($id_entidad, $periodo, $id_marca);
 			} else {
 			// Chequeo si el periodo esta generado y quiero volver a generarlo
-				if ( $this->debtarj_model->exist_periodo_marca($periodo, $id_marca) ) {
+				if ( $this->debtarj_model->exist_periodo_marca($id_entidad,$periodo, $id_marca) ) {
                         		redirect(base_url()."admin/debtarj/gen-debtarj/1/".$periodo);
 		        	}
 			}
-                        $debtarjs = $this->debtarj_model->get_debtarjs();
+                        $debtarjs = $this->debtarj_model->get_debtarjs($id_entidad);
 			$result=array();
 			$renglon=1;
 			$asoc_gen=0;
@@ -1690,9 +1545,9 @@ class Admin extends CI_Controller {
 					$mensaje="";
 					if ( $debtarj->estado == 1 ) {
                                         	// Busco la cuota social del mes
-                                        	$cuota_socio = $this->pagos_model->get_monto_socio2($debtarj->sid);
+                                        	$cuota_socio = $this->pagos_model->get_monto_socio($id_entidad, $debtarj->sid);
                                         	// Busco el saldo del asociado
-                                        	$saldo = $this->pagos_model->get_saldo($debtarj->sid);
+                                        	$saldo = $this->pagos_model->get_saldo($id_entidad, $debtarj->sid);
                                         	// Si tiene saldo a favor lo descuento, sino la cuota mensual
                                         	if ( $saldo != 0 ) {
                                                 	$importe = $cuota_socio['total'] + $saldo;
@@ -1701,7 +1556,7 @@ class Admin extends CI_Controller {
                                         	}
 
                                         	// Busco si tiene financiacion activa
-                        			$financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+                        			$financiacion = $this->pagos_model->get_financiado_mensual($id_entidad, $id_socio);
 						$cuota_fin=0;
                         			if ( $financiacion ) {
                                 			$fin=$financiacion[0];
@@ -1725,11 +1580,12 @@ class Admin extends CI_Controller {
                                                 	$fecha = date('Y-m-d');
                                                 	$ts = date('Y-m-d H:i:s');
                                                 	// Inserto el debito del mes
-                                                	$this->debtarj_model->insert_debito($id_debito, $fecha, $importe );
+                                                	$this->debtarj_model->insert_debito($id_entidad, $id_debito, $fecha, $importe );
 
                                                 	// Actualizo el ultimo periodo y fecha de generacion
                                                 	$debtarj->ult_periodo_generado=$periodo;
                                                 	$debtarj->ult_fecha_generacion=$fecha;
+                                                	$debtarj->id_entidad=$id_entidad;
                                                 	$this->debtarj_model->actualizar($debtarj->id, $debtarj);
 
 							$asoc_gen++;
@@ -1749,6 +1605,7 @@ class Admin extends CI_Controller {
                                 }
                         }
 
+                        $datos['id_entidad'] = $id_entidad;
                         $datos['id_marca'] = $id_marca;
 			$datos['periodo'] = $periodo;
 			$datos['fecha_debito'] = date('Y-m-d');
@@ -1761,25 +1618,25 @@ class Admin extends CI_Controller {
 
 			$this->debtarj_model->insert_periodo_marca($datos);
 
-                 	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-                 	$data['baseurl'] = base_url();
+			$data = $this->carga_data();
                	 	$data['result'] = $result;
 
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "debtarj";
-                		$operacion = 5;
-                		$llave = $id_marca;
-                		$observ = "Genero debitos de $id_marca para el periodo $periodo con fecha debito = $fecha_debito por un total de $total_gen para $asoc_gen socios";
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+               		// Grabo log de cambios
+               		$id_entidad = $this->session->userdata('id_entidad');
+               		$login = $this->session->userdata('username');
+               		$nivel_acceso = $this->session->userdata('rango');
+               		$tabla = "debtarj";
+               		$operacion = 5;
+               		$llave = $id_marca;
+               		$observ = "Genero debitos de $id_marca para el periodo $periodo con fecha debito = $fecha_debito por un total de $total_gen para $asoc_gen socios";
+               		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
 	                $data['section'] = "gen-debtarj-result";
                  	$this->load->view('admin',$data);
                         break;
 
 		case 'baja_arch':
+               		$id_entidad = $this->session->userdata('id_entidad');
         		$id_marca = $this->input->post('id_marca');
         		$periodo = $this->input->post('periodo');
         		$totales = $this->input->get('tot');
@@ -1787,31 +1644,32 @@ class Admin extends CI_Controller {
 			$resultado=false;
 			switch ( $id_marca ) {
 				case 1:
-					$ok=$this->_genera_VISA($id_marca, $periodo);
+					$ok=$this->_genera_VISA($id_entidad,$id_marca, $periodo);
 					break;
 				case 2:
-                    if ( $totales ) {
-					    $ok=$this->_genera_COOPEPLUS_TOTAL($id_marca, $periodo);
-                    } else {
-					    $ok=$this->_genera_COOPEPLUS($id_marca, $periodo);
-                    }
+                    			if ( $totales ) {
+					    $ok=$this->_genera_COOPEPLUS_TOTAL($id_entidad,$id_marca, $periodo);
+                    			} else {
+					    $ok=$this->_genera_COOPEPLUS($id_entidad,$id_marca, $periodo);
+                    			}
 					break;
 				case 3:
-                    if ( $totales ) {
-					    $ok=$this->_genera_BBPS_TOTAL($id_marca, $periodo);
-                    } else {
-					    $ok=$this->_genera_BBPS($id_marca, $periodo);
-                    }
+                    			if ( $totales ) {
+					    $ok=$this->_genera_BBPS_TOTAL($id_entidad,$id_marca, $periodo);
+                    			} else {
+					    $ok=$this->_genera_BBPS($id_entidad,$id_marca, $periodo);
+                    			}
 					break;
 			}
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "debtarj";
-                		$operacion = 5;
-                		$llave = $id_marca;
-                		$observ = "Bajo archivo de $id_marca para el periodo $periodo ";
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+               		// Grabo log de cambios
+               		$id_entidad = $this->session->userdata('id_entidad');
+               		$login = $this->session->userdata('username');
+               		$nivel_acceso = $this->session->userdata('rango');
+               		$tabla = "debtarj";
+               		$operacion = 5;
+               		$llave = $id_marca;
+               		$observ = "Bajo archivo de $id_marca para el periodo $periodo ";
+               		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 			break;
 		case 'print':
 			break;
@@ -1824,11 +1682,10 @@ class Admin extends CI_Controller {
             case 'gen-debtarj':
                  $this->load->model('debtarj_model');
                  $this->load->model('tarjeta_model');
-                 $data['username'] = $this->session->userdata('username');
-                 $data['rango'] = $this->session->userdata('rango');
-                 $data['baseurl'] = base_url();
-               	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
-               	 $data['debitos_gen'] = $this->debtarj_model->get_debitos_gen();
+                 $id_entidad = $this->session->userdata('id_entidad');
+		 $data = $this->carga_data();
+               	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
+               	 $data['debitos_gen'] = $this->debtarj_model->get_debitos_gen($id_entidad);
                	 $mes = date('m');
                	 $anio = date('Y');
 		 $a1=$anio+1;
@@ -1851,18 +1708,15 @@ class Admin extends CI_Controller {
             case 'load-debtarj':
                  $this->load->model('debtarj_model');
                  $this->load->model('tarjeta_model');
-               	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
-                 $data['username'] = $this->session->userdata('username');
-                 $data['rango'] = $this->session->userdata('rango');
-                 $data['baseurl'] = base_url();
+                 $id_entidad = $this->session->userdata('id_entidad');
+		 $data = $this->carga_data();
+               	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
                  $data['section'] = "load-debtarj";
                  $this->load->view('admin',$data);
                 break;
             case 'list-debtarj':
                  $this->load->model('debtarj_model');
-                 $data['username'] = $this->session->userdata('username');
-                 $data['rango'] = $this->session->userdata('rango');
-                 $data['baseurl'] = base_url();
+		 $data = $this->carga_data();
                  if ( $this->uri->segment(4) ) {
                  	if ( $this->uri->segment(4) == "excel" ) {
 				$result = $this->arma_listdebitos();
@@ -1870,7 +1724,7 @@ class Admin extends CI_Controller {
                                 $fila1=null;
                                 $titulo="DebitosTarj#".date('Ymd');
                                 $headers=array();
-                                $headers[]="Id Debito";
+                                $headers[]="id Debito";
                                 $headers[]="SID";
                                 $headers[]="DNI";
                                 $headers[]="Apellido Nombre";
@@ -1890,19 +1744,18 @@ class Admin extends CI_Controller {
 		case 'imprimir':
                		$this->load->model('socios_model');
                		$this->load->model('debtarj_model');
-               		$data['baseurl'] = base_url();
-               		$data['username'] = $this->session->userdata('username');
-                        $data['rango'] = $this->session->userdata('rango');
-			        $debtarj = $this->debtarj_model->get_debtarj($this->uri->segment(4));
-			        $data['debtarj'] = $debtarj;
+		 	$data = $this->carga_data();
+			$debtarj = $this->debtarj_model->get_debtarj($this->uri->segment(4));
+			$data['debtarj'] = $debtarj;
                		$socio = $this->socios_model->get_socio($debtarj->sid);
                		$data['socio'] = $socio;
-			        $data['post'] = $this->input->post('id_marca');
+			$data['post'] = $this->input->post('id_marca');
                		$data['section'] = 'debtarj-print';
                		$this->load->view('admin',$data);
 			break;
 		case 'grabar':
                 	$datos['id'] = $this->input->post('id_debito');
+               		$datos['id_entidad'] = $this->session->userdata('id_entidad');
                 	$datos['sid'] = $this->input->post('sid');
                 	$datos['id_marca'] = $this->input->post('id_marca');
                 	$datos['nro_tarjeta'] = $this->input->post('nro_tarjeta');
@@ -1916,37 +1769,38 @@ class Admin extends CI_Controller {
                     			// Alta
                             		$aid = $this->debtarj_model->grabar($datos);
                 			// Grabo log de cambios
+                			$id_entidad = $this->session->userdata('id_entidad');
                 			$login = $this->session->userdata('username');
                 			$nivel_acceso = $this->session->userdata('rango');
                 			$tabla = "debtarj";
                 			$operacion = 1;
                 			$llave = $aid;
 					$observ = substr(json_encode($datos), 0, 255);
-                			$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                			$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                     		} else {
                     			// Modificacion
                             		$id = $datos['id'];
                             		$this->debtarj_model->actualizar($id, $datos);
                 			// Grabo log de cambios
+                			$id_entidad = $this->session->userdata('id_entidad');
                 			$login = $this->session->userdata('username');
                 			$nivel_acceso = $this->session->userdata('rango');
                 			$tabla = "debtarj";
                 			$operacion = 2;
                 			$llave = $id;
 					$observ = substr(json_encode($datos), 0, 255);
-                			$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                			$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                     		}
 			}
 			break;
 
                 case 'contracargo':
+			$id_entidad = $this->session->userdata('id_entidad');
                         if ( !$this->uri->segment(4) ) {
 				$this->load->model('debtarj_model');
 				$this->load->model('tarjeta_model');
-				$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
-				$data['username'] = $this->session->userdata('username');
-                  		$data['rango'] = $this->session->userdata('rango');
-				$data['baseurl'] = base_url();
+				$data = $this->carga_data();
+				$data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
 				$data['section'] = "contracargos";
 				$this->load->view('admin',$data);
 			} else  {
@@ -1956,7 +1810,7 @@ class Admin extends CI_Controller {
                 				$id_marca = $this->uri->segment(5);
                 				$periodo = $this->uri->segment(6);
 	                                        $this->load->model('debtarj_model');
-                                        	$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
+                                        	$gen = $this->debtarj_model->get_periodo_marca($id_entidad,$periodo, $id_marca);
 						if ($gen) { 
 							$salida=json_encode($gen); 
 						} else { 
@@ -1971,68 +1825,63 @@ class Admin extends CI_Controller {
                                                 $nrotarjeta = $this->input->post('nrotarjeta');
                                                 $importe = $this->input->post('importe');
                                                 $this->load->model('debtarj_model');
-                                                $retact = $this->debtarj_model->mete_contracargo($periodo, $id_marca, $nrotarjeta, $importe);
+                                                $retact = $this->debtarj_model->mete_contracargo($id_entidad,$periodo, $id_marca, $nrotarjeta, $importe);
 
 
                                                 if ( $retact ) {
                 					// Grabo log de cambios
+                					$id_entidad = $this->session->userdata('id_entidad');
                 					$login = $this->session->userdata('username');
                 					$nivel_acceso = $this->session->userdata('rango');
                 					$tabla = "debtarj";
                 					$operacion = 2;
                 					$llave = $retact['id'];
 							$observ = substr(json_encode($retact), 0, 255);
-                					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                					$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                                                         redirect(base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo);
                                                 } else {
-                                                        $data['baseurl'] = base_url();
+							$data = $this->carga_data();
                                                         $data['mensaje1'] = "No se encuentra esa tarjeta importe para hacer contracargo";
                                                         $data['msj_boton'] = "Volver a contracargo manual";
-                                                        //$data['url_boton'] = base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo;
                                                         $data['section'] = 'ppal-mensaje';
-                					$data['username'] = $this->session->userdata('username');
-                					$data['rango'] = $this->session->userdata('rango');
                                                         $this->load->view("admin",$data);
                                                 }
                                                 break;
                                         case 'view':
+                				$id_entidad = $this->session->userdata('id_entidad');
                 				$id_marca = $this->uri->segment(5);
                 				$periodo = $this->uri->segment(6);
 	                                        $this->load->model('debtarj_model');
                                         	$this->load->model('tarjeta_model');
                                         	$data['tarjeta'] = $this->tarjeta_model->get($id_marca);
-                                        	$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
+                                        	$gen = $this->debtarj_model->get_periodo_marca($id_entidad,$periodo, $id_marca);
                                         	if ( $gen ) {
                                                 	// Si es la primera vez que entro actualizo masivamente socios_debitos y actualizo cabecera socios_debitos_gen
                                                 	if ( $gen->cant_acreditada == 0 ) {
-                                                        	$this->debtarj_model->inicializa_contra($periodo, $id_marca);
+                                                        	$this->debtarj_model->inicializa_contra($id_entidad, $periodo, $id_marca);
                                                 	}
                                                 	// Si encuentro contracargos ya realizados los traigo sino arranco con un array vacio
-                                                	$contras = $this->debtarj_model->get_contracargos($periodo, $id_marca);
+                                                	$contras = $this->debtarj_model->get_contracargos($id_entidad, $periodo, $id_marca);
                                                 	if ( $contras ) {
                                                         	$tabla=$contras;
                                                 	} else {
                                                         	$tabla=array();
                                                 	}
+							$data = $this->carga_data();
                                                 	$data['id_marca'] = $id_marca;
                                                 	$data['periodo'] = $periodo;
                                                 	$data['fecha_debito'] = $gen->fecha_debito;
                                                 	$data['cant_generada'] = $gen->cant_generada;
                                                 	$data['total_generado'] = $gen->total_generado;
                                                 	$data['tabla'] = $tabla;
-                                                	$data['baseurl'] = base_url();
                                                 	$data['section'] = 'contracargos-get';
-                					$data['username'] = $this->session->userdata('username');
-                					$data['rango'] = $this->session->userdata('rango');
                                                 	$this->load->view('admin',$data);
 						} else {
-                                                        $data['baseurl'] = base_url();
+							$data = $this->carga_data();
                                                         $data['mensaje1'] = "No existe ese periodo para esa marca";
                                                         $data['msj_boton'] = "Volver a contracargo manual";
                                                         $data['url_boton'] = base_url()."admin/debtarj/contracargo/";
                                                         $data['section'] = 'ppal-mensaje';
-                					$data['username'] = $this->session->userdata('username');
-                					$data['rango'] = $this->session->userdata('rango');
                                                         $this->load->view("admin",$data);
 						}
 						break;
@@ -2045,52 +1894,50 @@ class Admin extends CI_Controller {
                         $this->debtarj_model->stopdebit($this->uri->segment(4));
                         $debtarj=$this->debtarj_model->get_debtarj($this->uri->segment(4));
                         $id_socio=$debtarj->sid;
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "debtarj";
-                		$operacion = 2;
-                		$llave = $debtarj->id;
-				$observ = substr(json_encode($debtarj), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+                	$tabla = "debtarj";
+                	$operacion = 2;
+                	$llave = $debtarj->id;
+			$observ = substr(json_encode($debtarj), 0, 255);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+			$data = $this->carga_data();
                         $data['id_socio'] = $id_socio;
                         $data['id_debito'] = $this->uri->segment(4);
-                        $data['baseurl'] = base_url();
                         if ( $debtarj->estado == 0 ) {
                                 $data['mensaje'] = "El debito se actualizo correctamente...";
                         } else {
                                 $data['mensaje'] = "El debito no se modifico .... ERROR!!!";
                         }
                         $data['section'] = 'debtarj-mensaje';
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
                         $this->load->view('admin',$data);
                         break;
 
 
 		case 'eliminar':
                 	$this->load->model('debtarj_model');
-                    $this->debtarj_model->borrar($this->uri->segment(4));
-			        $debtarj=$this->debtarj_model->get_debtarj($this->uri->segment(4));
-                    $id_socio=$debtarj->sid;
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "debtarj";
-                		$operacion = 3;
-                		$llave = $debtarj->id;
-				$observ = substr(json_encode($debtarj), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                    	$this->debtarj_model->borrar($this->uri->segment(4));
+			$debtarj=$this->debtarj_model->get_debtarj($this->uri->segment(4));
+                    	$id_socio=$debtarj->sid;
+                	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+                	$tabla = "debtarj";
+                	$operacion = 3;
+                	$llave = $debtarj->id;
+			$observ = substr(json_encode($debtarj), 0, 255);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+			$data = $this->carga_data();
                		$data['id_socio'] = $id_socio;
                		$data['id_debito'] = $this->uri->segment(4);
-               		$data['baseurl'] = base_url();
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-                    if ( $debtarj->estado == 0 ) {
-                        $data['mensaje'] = "El debito de dio de baja correctamente...";
-                    } else {
-                        $data['mensaje'] = "El debito no se dio de baja.... ERROR!!!";
-                    }
+                    	if ( $debtarj->estado == 0 ) {
+                        	$data['mensaje'] = "El debito de dio de baja correctamente...";
+                    	} else {
+                        	$data['mensaje'] = "El debito no se dio de baja.... ERROR!!!";
+                    	}
                		$data['section'] = 'debtarj-mensaje';
                		$this->load->view('admin',$data);
                 	break;
@@ -2100,13 +1947,12 @@ class Admin extends CI_Controller {
                		$this->load->model('debtarj_model');
                		$this->load->model('tarjeta_model');
 			$fecha=date('d-m-Y');
+			$data = $this->carga_data();
                		$data['fecha'] = $fecha;
-               		$data['username'] = $this->session->userdata('username');
-                  	$data['rango'] = $this->session->userdata('rango');
+               		$id_entidad = $this->session->userdata('id_entidad');
                		$data['socio'] = $this->socios_model->get_socio($this->uri->segment(3));
-               		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
-               		$data['baseurl'] = base_url();
-			$debtarj = $this->debtarj_model->get_debtarj_by_sid($this->uri->segment(3));
+               		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
+			$debtarj = $this->debtarj_model->get_debtarj_by_sid($id_entidad, $this->uri->segment(3));
 			$data['debtarj'] = $debtarj;
 			if ($debtarj) {
 				$fdb=$debtarj->fecha_adhesion;
@@ -2123,17 +1969,17 @@ class Admin extends CI_Controller {
     }
 
 
-    function _genera_VISA($id_marca, $periodo) {
+    function _genera_VISA($id_entidad, $id_marca, $periodo) {
 	try {
-       	$this->load->model("tarjeta_model");
+       		$this->load->model("tarjeta_model");
 		$tarjeta=$this->tarjeta_model->get($id_marca);
 		$nro_comercio=$tarjeta->nro_comercio_presentacion;
 		$fecha=date('Ymd');
 		$hora=date('Hi');
 
-        $this->load->model("debtarj_model");
-        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_marca, $periodo);
-        if ( $debitos ) {
+        	$this->load->model("debtarj_model");
+        	$debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad,$id_marca, $periodo);
+        	if ( $debitos ) {
 		    header('Content-Type: application/text');
 		    header('Content-Disposition: attachment;filename="DEBLIQC.TXT"');
 		    echo "0DEBLIQC ".$nro_comercio."900000    ".$fecha.$hora."0                                                         *\r\n";
@@ -2198,7 +2044,7 @@ class Admin extends CI_Controller {
 	return true;
     }
 
-    function _genera_COOPEPLUS($id_marca, $periodo) {
+    function _genera_COOPEPLUS($id_entidad,$id_marca, $periodo) {
         $exitoso=FALSE;
         $this->config->load("nuevacard");
         $this->load->model('debtarj_model');
@@ -2219,7 +2065,7 @@ class Admin extends CI_Controller {
         }
 
         $this->load->model("debtarj_model");
-        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_marca, $periodo);
+        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo);
 
         if ( $debitos ) {
 // Armo archivo de detalles
@@ -2247,7 +2093,7 @@ class Admin extends CI_Controller {
     }
 
 
-    function _genera_BBPS($id_marca, $periodo) {
+    function _genera_BBPS($id_entidad, $id_marca, $periodo) {
         $exitoso=FALSE;
         $this->config->load("nuevacard");
         $this->load->model('debtarj_model');
@@ -2268,7 +2114,7 @@ class Admin extends CI_Controller {
         }
 
         $this->load->model("debtarj_model");
-        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_marca, $periodo);
+        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo);
 
         if ( $debitos ) {
                 // Armo archivo de detalles
@@ -2295,7 +2141,7 @@ class Admin extends CI_Controller {
 	return true;
     }
 
-    function _genera_COOPEPLUS_TOTAL($id_marca, $periodo) {
+    function _genera_COOPEPLUS_TOTAL($id_entidad, $id_marca, $periodo) {
         $exitoso=FALSE;
         $this->config->load("nuevacard");
         $this->load->model('debtarj_model');
@@ -2316,7 +2162,7 @@ class Admin extends CI_Controller {
         }
 
         $this->load->model("debtarj_model");
-        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_marca, $periodo);
+        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo);
 
         if ( $debitos ) {
 	        // Armo archivo de detalles
@@ -2344,7 +2190,7 @@ class Admin extends CI_Controller {
     }
 
 
-    function _genera_BBPS_TOTAL($id_marca, $periodo) {
+    function _genera_BBPS_TOTAL($id_entidad, $id_marca, $periodo) {
         $exitoso=FALSE;
         $this->config->load("nuevacard");
         $this->load->model('debtarj_model');
@@ -2365,7 +2211,7 @@ class Admin extends CI_Controller {
         }
 
         $this->load->model("debtarj_model");
-        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_marca, $periodo);
+        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo);
 
         if ( $debitos ) {
                 // Armo archivo de detalles
@@ -2401,18 +2247,21 @@ class Admin extends CI_Controller {
                 $aid = $this->uri->segment(5);
                 $this->load->model("actividades_model");
                 $act = $this->actividades_model->act_baja($sid, $aid);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades_asociadas";
-                		$operacion = 3;
-                		$llave = $act->asoc_id;
-				$observ = substr(json_encode($act), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "actividades_asociadas";
+                $operacion = 3;
+                $llave = $act->asoc_id;
+		$observ = substr(json_encode($act), 0, 255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 echo $act;
                 break;
 
             case 'alta':
+                $id_entidad = $this->session->userdata('id_entidad');
+                $data['id_entidad'] = $id_entidad;
                 $data['sid'] = $this->uri->segment(4);
                 $data['aid'] = $this->uri->segment(5);
                 $facturar = $this->uri->segment(6);
@@ -2421,14 +2270,15 @@ class Admin extends CI_Controller {
                 $this->load->model("actividades_model");
                 $this->load->model("socios_model");
                 $act = $this->actividades_model->act_alta($data);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades_asociadas";
-                		$operacion = 1;
-                		$llave = $act->asoc_id;
-				$observ = substr(json_encode($act), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                // Grabo log de cambios
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "actividades_asociadas";
+                $operacion = 1;
+                $llave = $act->asoc_id;
+		$observ = substr(json_encode($act), 0, 255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
                 if(date('d') < $this->date_facturacion && $facturar == 'true'){ //si la fecha es anterior a la definida
 
                     $actividad = $this->actividades_model->get_actividad($data['aid']);
@@ -2444,26 +2294,25 @@ class Admin extends CI_Controller {
 		    // Si la actividad tiene cuota inicial la registro primero
 		    if ( $actividad->cuota_inicial > 0 ) {
                     	$descripcion = 'Cuota Inicial '.$actividad->nombre.' - $ '.$actividad->cuota_inicial;
-                    	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->cuota_inicial,'Cuota Inicial '.$actividad->nombre,$actividad->Id);
+                    	$this->pagos_model->registrar_pago($id_entidad, 'debe',$tutor_id,$actividad->cuota_inicial,'Cuota Inicial '.$actividad->nombre,$actividad->id);
 		    }
-
 
                     $descripcion = 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
 
-                    $this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->Id);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades_asociadas";
-                		$operacion = 1;
-                		$llave = $tutor_id;
-				$observ = "facturo actividad del mes ".$descripcion;
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                    $this->pagos_model->registrar_pago($id_entidad, 'debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->id);
+                    // Grabo log de cambios
+                    $login = $this->session->userdata('username');
+                    $nivel_acceso = $this->session->userdata('rango');
+                    $tabla = "actividades_asociadas";
+                    $operacion = 1;
+                    $llave = $tutor_id;
+		    $observ = "facturo actividad del mes ".$descripcion;
+                    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
 		    // Si la actividad tiene seguro y no es federado de la actividad lo registro
 		    if ( $actividad->seguro > 0 && $federado == 0 ) {
                     	$descripcion = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
-                    	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->Id);
+                    	$this->pagos_model->registrar_pago($id_entidad, 'debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->id);
 		    }
 
                 }
@@ -2472,24 +2321,22 @@ class Admin extends CI_Controller {
 
             case 'load-asoc-activ':
                 $this->load->model('actividades_model');
-                $data['actividades'] = $this->actividades_model->get_actividades();
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['section'] = 'load-asoc-activ';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
+                $id_entidad = $this->session->userdata('id_entidad');
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $this->load->view("admin",$data);
                 break;
 
             case 'subearchivo':
                 $this->load->model('actividades_model');
-
 		$id_actividad = $this->uri->segment(4);
 		$fuente = $this->uri->segment(5);
 		$userfile = $this->input->post('userfile');
-
+                $id_entidad = $this->session->userdata('id_entidad');
 		if ( $fuente == "txt" ) {
 			$dato1col = $this->uri->segment(6);
-			$data['asociados'] = $this->sube_asociados($id_actividad, $dato1col);
+			$data['asociados'] = $this->sube_asociados($id_entidad, $id_actividad, $dato1col);
 		} else {
 			$data['asociados'] = $this->actividades_model->get_socios_act($id_actividad);
 		}
@@ -2499,26 +2346,26 @@ class Admin extends CI_Controller {
 			$this->actividades_model->trunc_asoc_act();
 			foreach ( $data['asociados'] as $asoc ) {
 				// Inserto en la temporal de tmp_asoc_activ
-				$asocact = array ( 'sid' => $asoc['sid'],
+				$asocact = array ( 'id_entidad' => $id_entidad,
+						'sid' => $asoc['sid'],
 						'aid' => $id_actividad,
 						'existe_relacion' => $asoc['actividad']);
 				$this->actividades_model->insert_asoc_act($asocact);
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "actividades_asociadas";
                 		$operacion = 1;
                 		$llave = $asoc['sid'];
 				$observ = "inserto desde planilla".substr(json_encode($asocact), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 			}
-                	$data['baseurl'] = base_url();
+			$data = $this->carga_data();
                 	$data['section'] = 'actividades-check';
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
                 	$this->load->view("admin",$data);
 		} else {
-                	$data['baseurl'] = base_url();
+			$data = $this->carga_data();
 			if ( $fuente == "txt" ) {
 				$data['mensaje1'] = "No se pudo procesar el archivo";
 			} else {
@@ -2527,23 +2374,23 @@ class Admin extends CI_Controller {
 			$data['msj_boton'] = "Volver a cargar planilla";
 			$data['url_boton'] = base_url()."admin/actividades/load-asoc-activ";
                 	$data['section'] = 'ppal-mensaje';
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
                 	$this->load->view("admin",$data);
 		}
                 break;
 
             case 'alta-sin-relacionar':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $this->load->model('actividades_model');
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
-		$asociados = $this->actividades_model->get_asocact_exist(0);
+		$asociados = $this->actividades_model->get_asocact_exist($id_entidad, 0);
 		$asoc_relac=array();
 		foreach ( $asociados as $asociado ) {
 			$sid=$asociado->sid;
 			$aid=$asociado->aid;
                         $socio=$this->socios_model->get_socio($sid);
 
+                	$data['id_entidad'] = $id_entidad;
                 	$data['sid'] = $sid;
                 	$data['aid'] = $aid;
                 	$act = $this->actividades_model->act_alta($data);
@@ -2557,16 +2404,17 @@ class Admin extends CI_Controller {
                         	$tutor_id = $data['sid'];
                     	}
 
-                    	$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->Id);
+                    	$this->pagos_model->registrar_pago($id_entidad,'debe',$tutor_id,$actividad->precio,'Facturacion '.$actividad->nombre,$actividad->id);
 
                     	if($socio->tutor == 0){
-                        	$total = $this->pagos_model->get_socio_total($data['sid']);
+                        	$total = $this->pagos_model->get_socio_total($id_entidad, $data['sid']);
                     	} else {
-                        	$total = $this->pagos_model->get_socio_total($socio->tutor );          		      
+                        	$total = $this->pagos_model->get_socio_total($id_entidad, $socio->tutor );          		      
 			}
 
                     	$facturacion = array(
                         	'sid' => $tutor_id,
+                        	'id_entidad'=>$id_entidad,
                         	'descripcion'=>$descripcion,
                         	'debe' => $actividad->precio,
                         	'haber' => 0,
@@ -2576,14 +2424,15 @@ class Admin extends CI_Controller {
 			
 			if ( $activdad->seguro > 0 ) {
                     		$descripcion = 'Seguro '.$actividad->seguro.' - $ '.$actividad->seguro;
-                    		$this->pagos_model->registrar_pago('debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->Id);
+                    		$this->pagos_model->registrar_pago($id_entidad,'debe',$tutor_id,$actividad->seguro,'Seguro '.$actividad->nombre,$actividad->id);
                     		if($socio->tutor == 0){
-                        		$total = $this->pagos_model->get_socio_total($data['sid']);
+                        		$total = $this->pagos_model->get_socio_total($id_entidad, $data['sid']);
                     		} else {
-                        		$total = $this->pagos_model->get_socio_total($socio->tutor );          		      
+                        		$total = $this->pagos_model->get_socio_total($id_entidad, $socio->tutor );          		      
 				}
                     		$facturacion = array(
                         		'sid' => $tutor_id,
+                        		'id_entidad'=>$id_entidad,
                         		'descripcion'=>$descripcion,
                         		'debe' => $actividad->seguro,
                         		'haber' => 0,
@@ -2596,18 +2445,17 @@ class Admin extends CI_Controller {
 			$asoc_relac[]=$relac;
 		}
 
+		$data = $this->carga_data();
                 $data['asociados'] = $asoc_relac;
-                $data['baseurl'] = base_url();
                 $data['section'] = 'actividades-relacion';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view("admin",$data);
                 break;
 
             case 'baja-relacionadas':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $this->load->model('actividades_model');
                 $this->load->model('socios_model');
-                $asociados = $this->actividades_model->get_asocact_exist(1);
+                $asociados = $this->actividades_model->get_asocact_exist($id_entidad, 1);
                 $asoc_relac=array();
                 foreach ( $asociados as $asociado ) {
                         $sid=$asociado->sid;
@@ -2622,27 +2470,27 @@ class Admin extends CI_Controller {
                 	$operacion = 3;
                 	$llave = $sid;
                 	$observ = "doy de baja masivamente actividad ".$aid." del socio ".$sid;
-                	$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                         $relac = array ( 'sid' => $sid, 'apynom' => $socio->nombre.' '.$socio->apellido, 'dni'=>$socio->dni, 'accion' => 'Borre Relacion' );
                         $asoc_relac[]=$relac;
                 }
 
+
+		$data = $this->carga_data();
                 $data['asociados'] = $asoc_relac;
-                $data['baseurl'] = base_url();
                 $data['section'] = 'actividades-relacion';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view("admin",$data);
                 break;
 
             case 'bajarel-contrafact':
+                $id_entidad = $this->session->userdata('id_entidad');
 /* TODO - hacer que baje la relacion y que busque lo facturado para anularlo y ajustar el pago */
                 $this->load->model('actividades_model');
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
 		$periodo=date('Ym');
-                $asociados = $this->actividades_model->get_asocact_exist(1);
+                $asociados = $this->actividades_model->get_asocact_exist($id_entidad, 1);
                 $asoc_relac=array();
                 foreach ( $asociados as $asociado ) {
                         $sid=$asociado->sid;
@@ -2652,7 +2500,7 @@ class Admin extends CI_Controller {
 
 			// Si el socio esta activo revierto facturacion
 			if ( $socio->suspendido == 0 ) {
-                		$this->pagos_model->revertir_fact($sid, $aid, $periodo);
+                		$this->pagos_model->revertir_fact($id_entidad, $sid, $aid, $periodo);
 
                         	$relac = array ( 'sid' => $sid, 'apynom' => $socio->nombre.' '.$socio->apellido, 'dni'=>$socio->dni, 'accion' => 'Borre Relacion y reverti facturacion' );
                         	$asoc_relac[]=$relac;
@@ -2662,20 +2510,19 @@ class Admin extends CI_Controller {
 			}
                 }
 
+		$data = $this->carga_data();
                 $data['asociados'] = $asoc_relac;
-                $data['baseurl'] = base_url();
                 $data['section'] = 'actividades-relacion';
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view("admin",$data);
 
                 break;
 
             case 'get':
+		$data = $this->carga_data();
                 $data['sid'] = $this->uri->segment(4);
-                $data['baseurl'] = base_url();
                 $this->load->model('actividades_model');
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $id_entidad = $this->session->userdata('id_entidad');
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $data['actividades_asoc'] = $this->actividades_model->get_act_asoc($data['sid']);
                 $this->load->view('actividades-lista',$data);
                 break;
@@ -2684,63 +2531,66 @@ class Admin extends CI_Controller {
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
                 $act = $this->actividades_model->act_peso($aid);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades_asociadas";
-                		$operacion = 2;
-                		$llave = $aid;
-				$observ = "pone_peso".substr(json_encode($act), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "actividades_asociadas";
+                $operacion = 2;
+                $llave = $aid;
+		$observ = "pone_peso".substr(json_encode($act), 0, 255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 echo $act;
                 break;
+
             case 'pone_porc':
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
                 $act = $this->actividades_model->act_porc($aid);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades_asociadas";
-                		$operacion = 2;
-                		$llave = $aid;
-				$observ = "pone_porc".substr(json_encode($act), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "actividades_asociadas";
+                $operacion = 2;
+                $llave = $aid;
+		$observ = "pone_porc".substr(json_encode($act), 0, 255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 echo $act;
                 break;
+
             case 'federado':
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
                 $act = $this->actividades_model->act_federado($aid);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades_asociadas";
-                		$operacion = 2;
-                		$llave = $aid;
-				$observ = "federado".substr(json_encode($act), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "actividades_asociadas";
+                $operacion = 2;
+                $llave = $aid;
+		$observ = "federado".substr(json_encode($act), 0, 255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 echo $act;
                 break;
+
             case 'asociar':
+		$data = $this->carga_data();
                 $data['sid'] = $this->uri->segment(4);
                 $this->load->model('socios_model');
                 $data['socio'] = $this->socios_model->get_socio($data['sid']);
                 $data['section'] = 'actividades-asociar';
-                $data['baseurl'] = base_url();
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view("admin",$data);
                 break;
+
             case 'agregar':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['section'] = 'actividades-agregar';
                 $this->load->model("actividades_model");
-                $data['profesores'] = $this->actividades_model->get_profesores();
-                $data['lugares'] = $this->actividades_model->get_lugares();
-                $data['comisiones'] = $this->actividades_model->get_comisiones();
+                $data['profesores'] = $this->actividades_model->get_profesores($id_entidad);
+                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
                 $this->load->view('admin',$data);
                 break;
 
@@ -2749,17 +2599,21 @@ class Admin extends CI_Controller {
                     {
                         $datos[$key] = $this->input->post($key);
                     }
+                $id_entidad = $this->session->userdata('id_entidad');
+		$datos['id_entidad'] = $id_entidad;
+		
                 if($datos['nombre']){
                     $this->load->model('actividades_model');
                     $aid = $this->actividades_model->reg_actividad($datos);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades";
-                		$operacion = 1;
-                		$llave = $aid;
-				$observ = substr(json_encode($datos), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                    // Grabo log de cambios
+                    $id_entidad = $this->session->userdata('id_entidad');
+                    $login = $this->session->userdata('username');
+                    $nivel_acceso = $this->session->userdata('rango');
+                    $tabla = "actividades";
+                    $operacion = 1;
+                    $llave = $aid;
+		    $observ = substr(json_encode($datos), 0, 255);
+                    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                     redirect(base_url()."admin/actividades/guardada/".$aid);
                 }else{
                     redirect(base_url()."admin/actividades");
@@ -2767,22 +2621,19 @@ class Admin extends CI_Controller {
                 break;
 
             case 'guardada':
+		$data = $this->carga_data();
                 $data['aid'] = $this->uri->segment(4);
                 $data['section'] = 'actividades-guardada';
-                $data['baseurl'] = base_url();
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
                 $this->load->view("admin",$data);
                 break;
+
             case 'editar':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $this->load->model('actividades_model');
                 $data['actividad'] = $this->actividades_model->get_actividad($this->uri->segment(4));
-                $data['profesores'] = $this->actividades_model->get_profesores();
-                $data['lugares'] = $this->actividades_model->get_lugares();
-                $data['comisiones'] = $this->actividades_model->get_comisiones();
+                $data['profesores'] = $this->actividades_model->get_profesores($id_entidad);
+                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
                 $data['section'] = 'actividades-editar';
                 $this->load->view('admin',$data);
                 break;
@@ -2792,45 +2643,53 @@ class Admin extends CI_Controller {
                 {
                     $datos[$key] = $this->input->post($key);
                 }
+                $id_entidad = $this->session->userdata('id_entidad');
+		$datos['id_entidad'] = $id_entidad;
+
                 if($datos['nombre']){
-                    $this->load->model("actividades_model");
-                    $this->actividades_model->update_actividad($datos,$this->uri->segment(4));
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades";
-                		$operacion = 2;
-                		$llave = $this->uri->segment(4);
-				$observ = substr(json_encode($datos), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                    	$this->load->model("actividades_model");
+                    	$this->actividades_model->update_actividad($datos,$this->uri->segment(4));
+                	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+                	$tabla = "actividades";
+                	$operacion = 2;
+                	$llave = $this->uri->segment(4);
+			$observ = substr(json_encode($datos), 0, 255);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 	$data['username'] = $this->session->userdata('username');
 			$data['rango'] = $this->session->userdata('rango');
-                    redirect(base_url()."admin/actividades/guardada/".$this->uri->segment(4));
+                    	redirect(base_url()."admin/actividades/guardada/".$this->uri->segment(4));
                 }
                 break;
+
             case 'eliminar':
                 $this->load->model("actividades_model");
                 $this->actividades_model->del_actividad($this->uri->segment(4));
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "actividades";
-                		$operacion = 3;
-                		$llave = $this->uri->segment(4);
-				$observ = "Borro actividad". $this->uri->segment(4);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "actividades";
+                $operacion = 3;
+                $llave = $this->uri->segment(4);
+		$observ = "Borro actividad". $this->uri->segment(4);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 redirect(base_url()."admin/actividades");
                 break;
 
             case 'comisiones':
+                $id_entidad = $this->session->userdata('id_entidad');
                 if($this->uri->segment(4) == 'nuevo'){
-                    foreach($_POST as $key => $val)
-                    {
-                        $datos[$key] = $this->input->post($key);
-                    }
-                    if($datos['descripcion'] ){
-                        $this->load->model("actividades_model");
-                        $pid = $this->actividades_model->grabar_comision($datos);
+                    	foreach($_POST as $key => $val)
+                    	{
+                        	$datos[$key] = $this->input->post($key);
+                    	}
+			$datos['id_entidad'] = $id_entidad;
+                    	if($datos['descripcion'] ){
+                        	$this->load->model("actividades_model");
+                        	$pid = $this->actividades_model->grabar_comision($datos);
                 		// Grabo log de cambios
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
@@ -2838,218 +2697,79 @@ class Admin extends CI_Controller {
                 		$operacion = 1;
                 		$llave = $pid;
 				$observ = substr(json_encode($datos), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        redirect(base_url()."admin/actividades/comisiones/guardado/".$pid);
-                    }else{
-                        $data['comisiones'] = $this->actividades_model->get_comisiones();
-                        redirect(base_url()."admin/actividades/comisiones");
-                    }
-                }else if($this->uri->segment(4) == 'guardar'){
-                    foreach($_POST as $key => $val)
-                    {
-                        $datos[$key] = $this->input->post($key);
-                    }
-                    if($datos['descripcion']){
-                        $this->load->model("actividades_model");
-                        $this->actividades_model->actualizar_comision($datos,$this->uri->segment(5));
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                        	redirect(base_url()."admin/actividades/comisiones/guardado/".$pid);
+                    	}else{
+                        	$data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
+                        	redirect(base_url()."admin/actividades/comisiones");
+                    	}
+                } else if($this->uri->segment(4) == 'guardar'){
+                    	foreach($_POST as $key => $val)
+                    	{
+                        	$datos[$key] = $this->input->post($key);
+                    	}
+			$datos['id_entidad'] = $id_entidad;
+                    	if($datos['descripcion']){
+                        	$this->load->model("actividades_model");
+                        	$this->actividades_model->actualizar_comision($datos,$this->uri->segment(5));
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "comisiones";
                 		$operacion = 2;
                 		$llave = $this->uri->segment(5);
 				$observ = substr(json_encode($datos), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        redirect(base_url()."admin/actividades/comisiones/guardado/".$this->uri->segment(5));
-                    }
-                }else if($this->uri->segment(4) == 'editar'){
-                    $data['baseurl'] = base_url();
-                    $data['section'] = 'comisiones-editar';
-                    $this->load->model('actividades_model');
-                    $data['comision'] = $this->actividades_model->get_comision($this->uri->segment(5));
-                	$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-                    $this->load->view('admin',$data);
-                }else if($this->uri->segment(4) == 'guardado'){
-                    $data['pid'] = $this->uri->segment(5);
-                    $data['section'] = 'comisiones-guardado';
-                    $data['baseurl'] = base_url();
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $this->load->view("admin",$data);
-                }else if($this->uri->segment(4) == 'eliminar'){
-                    $this->load->model("actividades_model");
-                    $this->actividades_model->borrar_comision($this->uri->segment(5));
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "comisiones";
-                		$operacion = 3;
-                		$llave = $this->uri->segment(5);
-				$observ = "borre comision ".$this->uri->segment(5);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                    redirect(base_url()."admin/actividades/comisiones");
-                }else{
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $data['baseurl'] = base_url();
-                    $data['section'] = 'actividades-comisiones';
-                    $this->load->model('actividades_model');
-                    $data['comisiones'] = $this->actividades_model->get_comisiones();
-                    $this->load->view('admin',$data);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                        	redirect(base_url()."admin/actividades/comisiones/guardado/".$this->uri->segment(5));
+                    	}
+                } else if($this->uri->segment(4) == 'editar'){
+			$data = $this->carga_data();
+                    	$data['section'] = 'comisiones-editar';
+                    	$this->load->model('actividades_model');
+                    	$data['comision'] = $this->actividades_model->get_comision($this->uri->segment(5));
+                    	$this->load->view('admin',$data);
+                } else if($this->uri->segment(4) == 'guardado'){
+			$data = $this->carga_data();
+                    	$data['pid'] = $this->uri->segment(5);
+                    	$data['section'] = 'comisiones-guardado';
+                    	$this->load->view("admin",$data);
+                } else if($this->uri->segment(4) == 'eliminar'){
+                    	$this->load->model("actividades_model");
+                    	$this->actividades_model->borrar_comision($this->uri->segment(5));
+                	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+                	$tabla = "comisiones";
+                	$operacion = 3;
+                	$llave = $this->uri->segment(5);
+			$observ = "borre comision ".$this->uri->segment(5);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                    	redirect(base_url()."admin/actividades/comisiones");
+                } else {
+			$data = $this->carga_data();
+                    	$data['section'] = 'actividades-comisiones';
+                    	$this->load->model('actividades_model');
+                    	$data['comisiones'] = $this->actividades_model->get_comisiones($this->session->userdata('id_entidad'));
+                    	$this->load->view('admin',$data);
                 }
 		break;
-            case 'profesores':
-                if($this->uri->segment(4) == 'nuevo'){
-                    foreach($_POST as $key => $val)
-                    {
-                        $datos[$key] = $this->input->post($key);
-                    }
-                    if($datos['nombre'] && $datos['apellido']){
-                        $this->load->model("actividades_model");
-                        $pid = $this->actividades_model->reg_profesor($datos);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "profesores";
-                		$operacion = 1;
-                		$llave = $pid;
-				$observ = substr(json_encode($datos), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        redirect(base_url()."admin/actividades/profesores/guardado/".$pid);
-                    }else{
-                        $data['comisiones'] = $this->actividades_model->get_comisiones();
-                        redirect(base_url()."admin/actividades/profesores");
-                    }
-                }else if($this->uri->segment(4) == 'guardar'){
-                    foreach($_POST as $key => $val)
-                    {
-                        $datos[$key] = $this->input->post($key);
-                    }
-                    if($datos['nombre'] && $datos['apellido']){
-                        $this->load->model("actividades_model");
-                        $this->actividades_model->update_profesor($datos,$this->uri->segment(5));
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "profesores";
-                		$operacion = 2;
-                		$llave = $this->uri->segment(5);
-				$observ = substr(json_encode($datos), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        redirect(base_url()."admin/actividades/profesores/guardado/".$this->uri->segment(5));
-                    }
-                }else if($this->uri->segment(4) == 'editar'){
-                    $data['baseurl'] = base_url();
-                    $data['section'] = 'profesores-editar';
-                    $this->load->model('actividades_model');
-                    $data['profesor'] = $this->actividades_model->get_profesor($this->uri->segment(5));
-                    $data['comisiones'] = $this->actividades_model->get_comisiones();
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $this->load->view('admin',$data);
-                }else if($this->uri->segment(4) == 'guardado'){
-                    $data['pid'] = $this->uri->segment(5);
-                    $data['section'] = 'profesores-guardado';
-                    $data['baseurl'] = base_url();
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $this->load->view("admin",$data);
-                }else if($this->uri->segment(4) == 'eliminar'){
-                    $this->load->model("actividades_model");
-                    $this->actividades_model->del_profesor($this->uri->segment(5));
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "profesores";
-                		$operacion = 3;
-                		$llave = $this->uri->segment(5);
-				$observ = "borre profesor ".$this->uri->segment(5);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                    redirect(base_url()."admin/actividades/profesores");
-                }else{
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $data['baseurl'] = base_url();
-                    $data['section'] = 'actividades-profesores';
-                    $this->load->model('actividades_model');
-                    $data['profesores'] = $this->actividades_model->get_profesores();
-                    $data['comisiones'] = $this->actividades_model->get_comisiones();
-                    $this->load->view('admin',$data);
-                }
-                break;
 
-            case 'lugares':
-                if($this->uri->segment(4) == 'nuevo'){
-                    foreach($_POST as $key => $val)
-                    {
-                        $datos[$key] = $this->input->post($key);
-                    }
-                    if($datos['nombre']){
-                        $this->load->model("actividades_model");
-                        $pid = $this->actividades_model->reg_lugar($datos);
-                        redirect(base_url()."admin/actividades/lugares/guardado/".$pid);
-                    }else{
-                        redirect(base_url()."admin/actividades/lugares");
-                    }
-                }else if($this->uri->segment(4) == 'guardar'){
-                    foreach($_POST as $key => $val)
-                    {
-                        $datos[$key] = $this->input->post($key);
-                    }
-                    if($datos['nombre']){
-                        $this->load->model("actividades_model");
-                        $this->actividades_model->update_lugar($datos,$this->uri->segment(5));
-                        redirect(base_url()."admin/actividades/lugares/guardado/".$this->uri->segment(5));
-                    }
-                }else if($this->uri->segment(4) == 'editar'){
-                    $data['baseurl'] = base_url();
-                    $data['section'] = 'lugares-editar';
-                    $this->load->model('actividades_model');
-                    $data['lugar'] = $this->actividades_model->get_lugar($this->uri->segment(5));
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $this->load->view('admin',$data);
-                }else if($this->uri->segment(4) == 'guardado'){
-                    $data['pid'] = $this->uri->segment(5);
-                    $data['section'] = 'lugares-guardado';
-                    $data['baseurl'] = base_url();
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $this->load->view("admin",$data);
-                }else if($this->uri->segment(4) == 'eliminar'){
-                    $this->load->model("actividades_model");
-                    $this->actividades_model->del_lugar($this->uri->segment(5));
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    redirect(base_url()."admin/actividades/lugares");
-                }else{
-                    $data['username'] = $this->session->userdata('username');
-                    $data['rango'] = $this->session->userdata('rango');
-                    $data['baseurl'] = base_url();
-                    $data['section'] = 'actividades-lugares';
-                    $this->load->model('actividades_model');
-                    $data['lugares'] = $this->actividades_model->get_lugares();
-                    $this->load->view('admin',$data);
-                }
-                break;
 
             case 'becar':
                 $id = $this->input->post('id');
                 $beca = $this->input->post('beca');
                 $this->load->model('actividades_model');
-
-$this->actividades_model->becar($id,$beca);
+		$this->actividades_model->becar($id,$beca);
                 break;
 
-
             default:
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['section'] = 'actividades';
                 $this->load->model('actividades_model');
-                $data['actividades'] = $this->actividades_model->get_actividades();
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $this->load->view('admin',$data);
                 break;
         }
@@ -3062,27 +2782,27 @@ $this->actividades_model->becar($id,$beca);
                 switch($this->uri->segment(4)){
                     case 'do':
                         $this->load->model("pagos_model");
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "pagos";
-                		$operacion = 1;
-                		$llave = $_POST['sid'];
-				$observ = substr(json_encode($data), 0, 255);
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        $data = $this->pagos_model->registrar_pago($_POST['tipo'],$_POST['sid'],$_POST['monto'],$_POST['des'],$_POST['actividad'],$_POST['ajuing']);
+                	// Grabo log de cambios
+                	$id_entidad = $this->session->userdata('id_entidad');
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+                	$tabla = "pagos";
+                	$operacion = 1;
+                	$llave = $_POST['sid'];
+			$observ = substr(json_encode($data), 0, 255);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                        $data = $this->pagos_model->registrar_pago($id_entidad, $_POST['tipo'],$_POST['sid'],$_POST['monto'],$_POST['des'],$_POST['actividad'],$_POST['ajuing']);
                         echo $data;
-                    break;
+                    	break;
                     case 'get':
 			$sid=$this->uri->segment(5);
                         $this->load->model('socios_model');
                         $this->load->model('pagos_model');
                         $this->load->model('actividades_model');
-                        $data['username'] = $this->session->userdata('username');
-                        $data['rango'] = $this->session->userdata('rango');
-                        $data['baseurl'] = base_url();
+                        $id_entidad = $this->session->userdata('id_entidad');
+			$data = $this->carga_data();
                         $data['socio'] = $this->socios_model->get_socio($sid);
-                        $data['facturacion'] = $this->pagos_model->get_facturacion($sid);
+                        $data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad,$sid);
 
 			if ( $this->socios_model->es_tutor($sid) ) {
                         	$data['activ_asoc'] = $this->actividades_model->get_act_asoc_tutor($sid);
@@ -3093,25 +2813,23 @@ $this->actividades_model->becar($id,$beca);
                     break;
 
                     default:
-                        $data['username'] = $this->session->userdata('username');
-                        $data['rango'] = $this->session->userdata('rango');
-                        $data['baseurl'] = base_url();
+                        $id_entidad = $this->session->userdata('id_entidad');
+			$data = $this->carga_data();
                         $data['section'] = 'pagos-registrar';
                         $data['sid'] = $this->uri->segment(4);
                         $this->load->model('socios_model');
                             if($data['sid']){
                                 $this->load->model('pagos_model');
-                                $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
+                                $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad,$data['sid']);
                             }
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $this->load->view('admin',$data);
                     break;
                 }
                 break;
+
             case 'facturacion':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['section'] = 'pagos-facturacion';
                 $this->load->view('admin',$data);
                 break;
@@ -3120,26 +2838,30 @@ $this->actividades_model->becar($id,$beca);
                 switch($this->uri->segment(4)){
                     case 'imprimir':
                         $this->load->model('pagos_model');
-                        $data['baseurl'] = base_url();
+			$data = $this->carga_data();
+                        $id_entidad = $this->session->userdata('id_entidad');
                         $data['cupon'] = $this->pagos_model->get_cupon_by_id($this->uri->segment(5));
                         $this->load->view('cupon-imprimir',$data);
                         break;
                     case 'get':
+                	$id_entidad = $this->session->userdata('id_entidad');
+			$data = $this->carga_data();
                         $data['sid'] = $this->uri->segment(5);
                         $this->load->model('pagos_model');
-                        $data['baseurl'] = base_url();
-                        $data['cupon'] = $this->pagos_model->get_cupon($data['sid']);
-                        $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
+                        $data['cupon'] = $this->pagos_model->get_cupon($data['sid'], $id_entidad);
+                        $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad, $data['sid']);
                         $this->load->view('pagos-cupon-get',$data);
                         break;
                     case 'generar':
                         if($_POST['id'] && $_POST['monto']){
+                	    $ent_dir = $this->session->userdata('ent_directorio');
+                	    $id_entidad = $this->session->userdata('id_entidad');
                             $this->load->model('socios_model');
                             $socio = $this->socios_model->get_socio($_POST['id']);
                             $cupon = $this->cuentadigital($_POST['id'],$socio->nombre.' '.$socio->apellido,$_POST['monto']);
                             if($cupon){
                                 $this->load->model('pagos_model');
-                                $cupon_id = $this->pagos_model->generar_cupon($_POST['id'],$_POST['monto'],$cupon);
+                                $cupon_id = $this->pagos_model->generar_cupon($id_entidad,$_POST['id'],$_POST['monto'],$cupon);
                                 $data = base64_decode($cupon['image']);
                                 $img = imagecreatefromstring($data);
                 		// Grabo log de cambios
@@ -3149,10 +2871,10 @@ $this->actividades_model->becar($id,$beca);
                 		$operacion = 1;
                 		$llave = $_POST['id'];
 				$observ = "genere el cupon ".$cupon_id." con data ".$data;
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                                     if ($img !== false) {
                                         @header('Content-Type: image/png');
-                                        imagepng($img,'images/cupones/'.$cupon_id.'.png',0);
+                                        imagepng($img,'entidades/'.$ent_dir.'/images/cupones/'.$cupon_id.'.png',0);
                                         imagedestroy($img);
                                     }
                                     else {
@@ -3163,15 +2885,14 @@ $this->actividades_model->becar($id,$beca);
                         }
                         break;
                     default:
-                        $data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-                        $data['baseurl'] = base_url();
+                        $id_entidad = $this->session->userdata('id_entidad');
+			$data = $this->carga_data();
                         $data['section'] = 'pagos-cupon';
                         $data['sid'] = $this->uri->segment(4);
                         $this->load->model('socios_model');
                         if($data['sid']){
                             $this->load->model('pagos_model');
-                            $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
+                            $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad,$data['sid']);
                         }
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $this->load->view('admin',$data);
@@ -3180,11 +2901,13 @@ $this->actividades_model->becar($id,$beca);
                     break;
 
             case 'deuda':
+                $id_entidad = $this->session->userdata('id_entidad');
                 switch ($this->uri->segment(4)) {
                     case 'get':
                         $this->load->model('pagos_model');
-                        $data['deuda'] = $this->pagos_model->get_deuda($this->uri->segment(5));
-                        $data['planes'] = $this->pagos_model->get_planes($this->uri->segment(5));
+			$data = $this->carga_data();
+                        $data['deuda'] = $this->pagos_model->get_deuda($id_entidad, $this->uri->segment(5));
+                        $data['planes'] = $this->pagos_model->get_planes($id_entidad, $this->uri->segment(5));
                         $this->load->view('pagos-deuda-get',$data);
                         break;
 
@@ -3194,78 +2917,73 @@ $this->actividades_model->becar($id,$beca);
                         $cuotas = $this->input->post('cuotas');
                         $detalle = $this->input->post('detalle');
                         if($socio && $monto && $cuotas){
-                            $this->load->model('pagos_model');
-                            $this->pagos_model->financiar_deuda($socio,$monto,$cuotas,$detalle);
+                            	$this->load->model('pagos_model');
+                            	$this->pagos_model->financiar_deuda($id_entidad,$socio,$monto,$cuotas,$detalle);
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "financiacion";
                 		$operacion = 1;
                 		$llave = $socio;
 				$observ = "genere financiacion socio ".$socio." en $cuotas cuotas ".$detalle;
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         }
                         break;
 
                     case 'cancelar_plan':
                         $id = $this->input->post('id');
                         if($id){
-                            $this->load->model('pagos_model');
-                            $this->pagos_model->cancelar_plan($id);
+                            	$this->load->model('pagos_model');
+                            	$this->pagos_model->cancelar_plan($id);
                 		// Grabo log de cambios
+                		$id_entidad = $this->session->userdata('id_entidad');
                 		$login = $this->session->userdata('username');
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "financiacion";
                 		$operacion = 3;
                 		$llave = $id;
 				$observ = "cancele financiacion ".$id;
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         }
                         break;
 
                     default:
-
+                    	$id_entidad = $this->session->userdata('id_entidad');
                 	$id_socio = $this->uri->segment(4);
 	                $this->load->model('socios_model');
                 	$socio = $this->socios_model->get_socio_full($id_socio);
                         $this->load->model('pagos_model');
 			// Verifico si ya esta reinscripto
-                        $financiacion = $this->pagos_model->get_financiado_mensual($id_socio);
+                        $financiacion = $this->pagos_model->get_financiado_mensual($id_entidad, $id_socio);
 			if ( $financiacion ) {
+				$data = $this->carga_data();
                                 $data['mensaje1'] = "Ese socio ya tiene plan de financiacion activo ";
-                                $data['baseurl'] = base_url();
                                 $data['section'] = 'ppal-mensaje';
-                    		$data['username'] = $this->session->userdata('username');
-                    		$data['rango'] = $this->session->userdata('rango');
                                 $this->load->view('admin',$data);
 				break;
 			} else {
-                        	$deuda = $this->pagos_model->get_deuda_monto($id_socio);
+                    		$id_entidad = $this->session->userdata('id_entidad');
+                        	$deuda = $this->pagos_model->get_deuda_monto($id_entidad, $id_socio);
                         	if ( $deuda ) {
 					if ( $deuda <= 0 ) {
+						$data = $this->carga_data();
                                 		$data['mensaje1'] = "Ese socio no tiene deuda....";
-                                		$data['baseurl'] = base_url();
                                 		$data['section'] = 'ppal-mensaje';
-                    				$data['username'] = $this->session->userdata('username');
-                    				$data['rango'] = $this->session->userdata('rango');
                                 		$this->load->view('admin',$data);
 						break;
 					}
                         	} else {
+					$data = $this->carga_data();
                                 	$data['mensaje1'] = "Ese socio no tiene deuda....";
-                                	$data['baseurl'] = base_url();
                                 	$data['section'] = 'ppal-mensaje';
-                    			$data['username'] = $this->session->userdata('username');
-                    			$data['rango'] = $this->session->userdata('rango');
                                 	$this->load->view('admin',$data);
 					break;
                         	}
 			}
 
 
-                        $data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-                        $data['baseurl'] = base_url();
+			$data = $this->carga_data();
                         $this->load->model('socios_model');
                         $data['sid'] = $id_socio;
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
@@ -3274,19 +2992,16 @@ $this->actividades_model->becar($id,$beca);
                         break;
                 }
                 break;
+
             case 'deuda-socio':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['section'] = 'pagos-deuda';
                 $data['socio'] = 'socio';
                 $this->load->view('admin',$data);
                 break;
 
             case 'editar':
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+		$data = $this->carga_data();
                 $data['section'] = 'pagos-editar';
                 $data['socio'] = 'socio';
                 $data['sid'] = $this->uri->segment(4);
@@ -3298,43 +3013,28 @@ $this->actividades_model->becar($id,$beca);
             case 'get_pagos':
                 $socio_id = $this->uri->segment(4);
                 $this->load->model('pagos_model');
-                $data['pagos'] = $this->pagos_model->get_pagos_edit($socio_id);
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
+                $data['pagos'] = $this->pagos_model->get_pagos_edit($id_entidad,$socio_id);
                 $this->load->view('pagos-get-edit', $data, FALSE);
                 break;
 
             case 'eliminar':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $id = $this->uri->segment(4);
                 $this->load->model('pagos_model');
-                $socio_id = $this->pagos_model->eliminar_pago($id);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "pagos";
-                		$operacion = 3;
-                		$llave = $socio_id;
-				$observ = "elimine pago";
-                		$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                $socio_id = $this->pagos_model->eliminar_pago($id_entidad, $id);
+                // Grabo log de cambios
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "pagos";
+                $operacion = 3;
+                $llave = $socio_id;
+		$observ = "elimine pago";
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 redirect(base_url().'admin/pagos/editar/'.$socio_id,'refresh');
                 break;
 
-            default:
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
-                $data['section'] = 'listado_imprimir';
-/*
-                $this->load->model('pagos_model');
-                $comision = null;
-                $actividad = null;
-                $data['morosos'] = $this->pagos_model->get_morosos($comision, $actividad);
-                $this->load->model('actividades_model');
-                $data['comision_sel'] = $comision;
-                $data['actividad_sel'] = $actividad;
-                $data['comisiones'] = $this->actividades_model->get_comisiones();
-                $data['actividades'] = $this->actividades_model->get_actividades();
-*/
-                $this->load->view('admin',$data);
-                break;
         }
 
     }
@@ -3350,17 +3050,38 @@ $this->actividades_model->becar($id,$beca);
 	}
     }
 
+    public function reportes() {
+	$funcion = $this->uri->segment(3);
+	$data = $this->carga_data();
+	switch ( $funcion ) {
+		case 'socios':
+                	$data['section'] = 'listado_imprimir';
+                	$this->load->view('admin',$data);
+			break;
+		case 'cobros':
+                	$data['section'] = 'cobros_imprimir';
+                	$this->load->view('admin',$data);
+			break;
+		case 'exportar':
+                	$data['section'] = 'export_imprimir';
+                	$this->load->view('admin',$data);
+			break;
+		default:
+                	redirect(base_url().'admin','refresh');
+			
+	}
+    }
+
     public function estadisticas()
     {
+        $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('estadisticas_model');
         $opcion=$this->uri->segment(3);
 	switch ( $opcion ) {
         	case 'facturacion':
-			$data['username'] = $this->session->userdata('username');
-                	$data['rango'] = $this->session->userdata('rango');
-			$data['baseurl'] = base_url();
-			$data['facturacion_mensual'] = $this->estadisticas_model->facturacion_mensual();
-			$data['facturacion_anual'] = $this->estadisticas_model->facturacion_anual();
+			$data = $this->carga_data();
+			$data['facturacion_mensual'] = $this->estadisticas_model->facturacion_mensual($id_entidad);
+			$data['facturacion_anual'] = $this->estadisticas_model->facturacion_anual($id_entidad);
 			$data['section'] = 'estadisticas-facturacion';
 			$this->load->view('admin',$data);
 			break;
@@ -3368,22 +3089,18 @@ $this->actividades_model->becar($id,$beca);
 			if ( $this->uri->segment(4) ) {
 				$id_actividad = $this->uri->segment(4);
                 		$this->load->model('actividades_model');
-                		$data['actividades'] = $this->actividades_model->get_actividades();
-				$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
-				$data['baseurl'] = base_url();
-				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_actividad);
+				$data = $this->carga_data();
+                		$data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad,$id_actividad);
 				$data['section'] = 'estadisticas-cobranza';
 				$data['id_actividad'] = $id_actividad;
 				$this->load->view('admin',$data);
 				break;
 			} else {
                 		$this->load->model('actividades_model');
-                		$data['actividades'] = $this->actividades_model->get_actividades();
-				$data['username'] = $this->session->userdata('username');
-                		$data['rango'] = $this->session->userdata('rango');
-				$data['baseurl'] = base_url();
-				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla();
+				$data = $this->carga_data();
+                		$data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad);
 				$data['id_actividad'] = -1;
 				$data['section'] = 'estadisticas-cobranza';
 				$this->load->view('admin',$data);
@@ -3391,6 +3108,7 @@ $this->actividades_model->becar($id,$beca);
 			}
         }
     }
+
     function mostrar_fecha($fecha)
     {
         $fecha = explode('-', $fecha);
@@ -3443,10 +3161,8 @@ $this->actividades_model->becar($id,$beca);
         switch ($action) {
             case 'enviar':
                 $this->load->model('general_model');
+		$data = $this->carga_data();
                 $data['envio'] = $this->general_model->get_envio($id);
-                $data['username'] = $this->session->userdata('username');
-            	$data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
                 $data['section'] = 'envios-enviar';
                 $this->load->view('admin',$data);
                 break;
@@ -3463,9 +3179,7 @@ $this->actividades_model->becar($id,$beca);
                     $this->email->message($envio_info->body);
                     $this->email->send();
 
-                    //echo $this->email->print_debugger();
-
-                    $this->general_model->enviado($envio->Id);
+                    $this->general_model->enviado($envio->id);
                     $data['estado'] = date('H:i:s').' - '.$envio->email.' <i class="fa fa-check" style="color:#1e9603"></i>';
                     $data['enviados'] = $this->general_model->get_enviados($id);
                     $data = json_encode($data);
@@ -3478,36 +3192,38 @@ $this->actividades_model->becar($id,$beca);
             case 'nuevo':
                 $this->load->model('general_model');
                 $this->load->model('actividades_model');
-                $data['categorias'] = $this->general_model->get_cats();
-                $data['actividades'] = $this->actividades_model->get_actividades();
-                $data['comisiones'] = $this->actividades_model->get_comisiones();
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
+                $data['categorias'] = $this->general_model->get_cats($id_entidad);
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
                 $data['section'] = 'envios-nuevo';
                 $this->load->view('admin',$data);
                 break;
 
             case 'guardar':
                 $this->load->model('general_model');
-                $envio = array('body' => $this->input->post('text') );
+                $id_entidad = $this->session->userdata('id_entidad');
+                $envio = array('id_entidad' => $id_entidad, 'body' => $this->input->post('text') );
                 $this->general_model->update_envio($id,$envio);
                 break;
 
             case 'agregar':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $titulo = $this->input->post('titulo');
                 $grupo = $this->input->post('grupo');
                 $data = $this->input->post('data');
                 $activ = $this->input->post('activ');
                 $envio = array(
                     'titulo' => $titulo,
+                    'id_entidad' => $id_entidad,
                     'grupo' => $grupo,
                     'data' => json_encode($data),
                     'activos' => $activ
                     );
                 $this->load->model('general_model');
                 $id = $this->general_model->insert_envio($envio);
-                $socios = $this->general_model->get_socios_by($grupo,$data,$activ);
+                $socios = $this->general_model->get_socios_by($id_entidad,$grupo,$data,$activ);
                 $this->load->helper('email');
                 if($socios){
                     $emails = array();
@@ -3527,6 +3243,7 @@ $this->actividades_model->becar($id,$beca);
                     if(count($emails) <= 0){
                         echo 'no_mails';
                     }else{
+			$data = $this->carga_data();
                         $data['id'] = $id;
                         $data['body'] = false;
                         $data['titulo'] = $titulo;
@@ -3548,23 +3265,24 @@ $this->actividades_model->becar($id,$beca);
             case 'editar':
                 $this->load->model('general_model');
                 $this->load->model('actividades_model');
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
                 $data['envio'] = $this->general_model->get_envio($id);
-                $data['categorias'] = $this->general_model->get_cats();
-                $data['actividades'] = $this->actividades_model->get_actividades();
-                $data['profesores'] = $this->actividades_model->get_profesores();
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $data['categorias'] = $this->general_model->get_cats($id_entidad);
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+                $data['profesores'] = $this->actividades_model->get_profesores($id_entidad);
                 $data['section'] = 'envios-editar';
                 $this->load->view('admin',$data);
                 break;
 
             case 'edicion':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $titulo = $this->input->post('titulo');
                 $grupo = $this->input->post('grupo');
                 $data = $this->input->post('data');
                 $envio = array(
                     'titulo' => $titulo,
+                    'id_entidad' => $id_entidad,
                     'grupo' => $grupo,
                     'data' => json_encode($data),
                     );
@@ -3573,7 +3291,7 @@ $this->actividades_model->becar($id,$beca);
                 $this->general_model->update_envio($id,$envio);
                 if($old_envio->grupo != $grupo){
                     $this->general_model->clear_envio_data($id);
-                    $socios = $this->general_model->get_socios_by($grupo,$data);
+                    $socios = $this->general_model->get_socios_by($id_entidad,$grupo,$data);
                     $this->load->helper('email');
                     if($socios){
                         $emails = array();
@@ -3593,6 +3311,7 @@ $this->actividades_model->becar($id,$beca);
                         if(count($emails) <= 0){
                             echo 'no_mails';
                         }else{
+			    $data = $this->carga_data();
                             $data['id'] = $id;
                             $data['titulo'] = $titulo;
                             $data['body'] = $old_envio->body;
@@ -3604,6 +3323,7 @@ $this->actividades_model->becar($id,$beca);
                     }
                 }else{
                     $envios_data = $this->general_model->get_envios_data($id);
+		    $data = $this->carga_data();
                     $data['id'] = $id;
                     $data['titulo'] = $titulo;
                     $data['body'] = $old_envio->body;
@@ -3614,10 +3334,9 @@ $this->actividades_model->becar($id,$beca);
 
             default:
                 $this->load->model('general_model');
-                $data['envios'] = $this->general_model->get_envios();
-                $data['username'] = $this->session->userdata('username');
-                $data['rango'] = $this->session->userdata('rango');
-                $data['baseurl'] = base_url();
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data = $this->carga_data();
+                $data['envios'] = $this->general_model->get_envios($id_entidad);
                 $data['section'] = 'envios';
                 $this->load->view('admin',$data);
                 break;

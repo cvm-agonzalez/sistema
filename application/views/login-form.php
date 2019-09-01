@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Club Villa Mitre</title>
+        <title>Ingreso Gestion de Socios</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -29,7 +29,7 @@
     <div class="signin-header">
         <div class="container text-center">
             <section class="logo">
-                <a href="#/">Villa Mitre</a>
+                <a href="#/">Ingreso Gestion de Socios</a>
             </section>
         </div>
     </div>
@@ -43,6 +43,7 @@
                 </section>
 
                 <?php
+                $entidad = array('entidad' => 'entidad', 'placeholder' => 'Entidad');
                 $username = array('name' => 'username', 'placeholder' => 'Usuario');
                 $password = array('name' => 'password',    'placeholder' => 'Contraseña');
                 $submit = array('name' => 'submit', 'value' => 'Iniciar sesión', 'title' => 'Iniciar sesión');
@@ -53,6 +54,32 @@
                         <div ng-show="flash">
                             <div data-alert class="alert-box alert round"></div>
                         </div>                        
+                        <div class="form-group">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-home"></span>
+                                </span>
+<?
+        if ( $id_entidad ) {
+?>
+                                <input type="text"
+                                       class="form-control"
+                                       name ="entidad"                                       
+                                       value= "<?=$id_entidad.'-'.$ent_nombre?>"
+                                       disabled >
+<?
+        } else {
+?>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Entidad"
+                                       name ="entidad"                                       
+                                       >
+<?
+        } 
+?>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <div class="input-group input-group-lg">
                                 <span class="input-group-addon">

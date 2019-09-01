@@ -32,7 +32,7 @@
                            <?
                            foreach ($categorias as $cat) {                           
                            ?>
-                           <option value="<?=$cat->Id?>" <? if($envio->grupo == 'categorias' && in_array($cat->Id, $grupo_data)){ echo 'selected'; } ?>><?=$cat->nomb?></option>                           
+                           <option value="<?=$cat->id?>" <? if($envio->grupo == 'categorias' && in_array($cat->id, $grupo_data)){ echo 'selected'; } ?>><?=$cat->nombre?></option>                           
                            <?
                            }
                            ?>
@@ -44,7 +44,7 @@
                            <?
                            foreach ($actividades as $actividad) {                           
                            ?>
-                           <option value="<?=$actividad->Id?>" <? if($envio->grupo == 'actividades' && in_array($actividad->Id, $grupo_data)){ echo 'selected'; } ?>><?=$actividad->nombre?></option>                           
+                           <option value="<?=$actividad->id?>" <? if($envio->grupo == 'actividades' && in_array($actividad->id, $grupo_data)){ echo 'selected'; } ?>><?=$actividad->nombre?></option>                           
                            <?
                            }
                            ?>
@@ -56,7 +56,7 @@
                            <?
                            foreach ($comisiones as $comision) {                           
                            ?>
-                           <option value="<?=$comision->Id?>" <? if( ( $envio->grupo == 'soccomision' || $envio->grupo == 'titcomision' ) && in_array($comision->Id, $grupo_data)){ echo 'selected'; } ?>><?=$comsion->descripcion?> </option>                           
+                           <option value="<?=$comision->id?>" <? if( ( $envio->grupo == 'soccomision' || $envio->grupo == 'titcomision' ) && in_array($comision->id, $grupo_data)){ echo 'selected'; } ?>><?=$comsion->descripcion?> </option>                           
                            <?
                            }
                            ?>

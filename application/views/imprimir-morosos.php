@@ -17,7 +17,7 @@
 			Actividad: <?=$actividad?>
 		</div>
 		<div style="float:left; width:50%" align="right">
-			<img src="<?=base_url()?>images/g1.jpg" width="100">
+			<img src="<?=$baseurl?>entidades/<?=$ent_directorio?>/g1.jpg" alt="" width="100">
 		</div>
 		<br><br>
 		<table id="clientes" border="1" style="border:1px solid #CCC" width="100%">
@@ -37,7 +37,7 @@
                 foreach ($morosos as $moroso) {                                        
                 ?>
                 <tr>
-                    <td><?=$moroso->nomb?></td>
+                    <td><?=$moroso->nombre?></td>
                     <td>$ <?=$moroso->deuda*-1?></td>                    
                 </tr>
                 <?

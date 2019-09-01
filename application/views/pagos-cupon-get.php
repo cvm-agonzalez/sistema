@@ -132,8 +132,8 @@
 		    	?>
 		    </div>
 		    <div class="col-sm-6" style="margin-top:30px;" align="center">
-		    	<img src="<?=$baseurl?>images/cupones/<?=$cupon->Id?>.png"><br><br>
-				<button class="btn btn-primary" id="print_cupon" data-id="<?=$cupon->Id?>">Imprimir</button>
+		    	<img src="<?=$baseurl?>images/cupones/<?=$cupon->id?>.png"><br><br>
+				<button class="btn btn-primary" id="print_cupon" data-id="<?=$cupon->id?>">Imprimir</button>
 				
 			</div>
 	    	<table class="table table-hover" width="80%;">

@@ -13,32 +13,33 @@ class Login_model extends CI_Model {
         parent::__construct();
     }
     
-    public function login_user($username,$password)
+    public function login_user($id_entidad,$username,$password)
     {
-        
-        $this->db->where('user',$username);
-        $this->db->where('pass',$password);
 
-        $query = $this->db->get('admin');    
-        if($query->num_rows() == 1)
+        $qry = "SELECT *, DATEDIFF(CURDATE(),DATE(last_chgpwd)) ult_cambio FROM admin 
+		WHERE user = '$username' AND pass = '$password' AND id_entidad = $id_entidad;";
+        $query = $this->db->query($qry)->result();
+        if($query)
         {
-            return $query->row();
+            return $query[0];
         }else{
             $this->session->set_flashdata('usuario_incorrecto','Los datos introducidos son incorrectos');
             redirect(base_url().'admin#/pages/signin','refresh');
         }
+        
     }
     public function update_lCon()
     {   
         $uid = $this->session->userdata('id_usuario');
         $fecha = date("Y-m-d G:i:s");
         $data = array('lCon'=>$fecha);
-        $this->db->where('Id',$uid);
+        $this->db->where('id',$uid);
         $this->db->update('admin',$data);
     }
 
-    public function log_comision($email,$pass)
+    public function log_comision($id_entidad,$email,$pass)
     {
+        $this->db->where('id_entidad',$id_entidad);
         $this->db->where('mail',$email);
         $this->db->where('pass',$pass);
         $this->db->where('estado',1);
@@ -48,8 +49,9 @@ class Login_model extends CI_Model {
         $query->free_result();
         return $comision;
     }    
-    public function upd_pwd_comision($email,$old_pass,$new_pass)
+    public function upd_pwd_comision($id_entidad, $email,$old_pass,$new_pass)
     {
+        $this->db->where('id_entidad',$id_entidad);
         $this->db->where('mail',$email);
         $this->db->where('pass',$old_pass);
         $this->db->where('estado',1);

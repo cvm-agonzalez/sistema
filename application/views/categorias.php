@@ -28,20 +28,20 @@
                     <th><div class="th">
                         Código
                         <span class="glyphicon glyphicon-chevron-up"
-                              data-ng-click=" order('Id') "
-                              data-ng-class="{active: row == 'Id'}"></span>
+                              data-ng-click=" order('cid') "
+                              data-ng-class="{active: row == 'cid'}"></span>
                         <span class="glyphicon glyphicon-chevron-down"
-                              data-ng-click=" order('-Id') "
-                              data-ng-class="{active: row == '-Id'}"></span>
+                              data-ng-click=" order('-cid') "
+                              data-ng-class="{active: row == '-cid'}"></span>
                     </div></th>
                     <th><div class="th">
                         Categoria Socio
                         <span class="glyphicon glyphicon-chevron-up"
-                              data-ng-click=" order('nomb') "
-                              data-ng-class="{active: row == 'nomb'}"></span>
+                              data-ng-click=" order('nombre') "
+                              data-ng-class="{active: row == 'nombre'}"></span>
                         <span class="glyphicon glyphicon-chevron-down"
-                              data-ng-click=" order('-nomb') "
-                              data-ng-class="{active: row == '-nomb'}"></span>
+                              data-ng-click=" order('-nombre') "
+                              data-ng-class="{active: row == '-nombre'}"></span>
                     </div></th>                    
                     <th><div class="th">
                         Precio
@@ -87,15 +87,15 @@
 			}
                 ?>
 		  <tr>
-                    <td><?=$categoria->Id?></td>
-                    <td><?=$categoria->nomb?></td>
+                    <td><?=$categoria->cid?></td>
+                    <td><?=$categoria->nombre?></td>
                     
                     <td><?=$categoria->precio?></td>
                     <td><?=$categoria->precio_unit?></td>
                     <td><?=$xcateg?></td>
                     <td>
-			<a href="<?=base_url()?>admin/socios/categorias/editar/<?=$categoria->Id?>">Editar</a> | 
-                        <a id="btn-eliminar-categoria" href="<?=base_url()?>admin/socios/categorias/eliminar/<?=$categoria->Id?>">Eliminiar</a>
+			<a href="<?=base_url()?>admin/socios/categorias/editar/<?=$categoria->id?>">Editar</a> | 
+                        <a id="btn-eliminar-categoria" href="<?=base_url()?>admin/socios/categorias/eliminar/<?=$categoria->id?>">Eliminar</a>
 		    </td>
                 <?
                 }

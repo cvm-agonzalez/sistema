@@ -48,19 +48,19 @@
                     <tr>
 
                       <? $cont = 0; foreach ($cats as $categoria) { ?>                     
-                      <th><?=$categoria->nomb?></th>                      
+                      <th><?=$categoria->nombre?></th>                      
                       <? $cont ++; } ?>
                     </tr>
                     <tr>   
                       <?foreach ($cats as $categoria) { ?>                       
                       <td style="width:<?=100/$cont;?>%;">
                         <div class="input-group"><span class="input-group-addon">$</span>
-                          <input type="text" class="form-control" id="cat-precio" data-id="<?=$categoria->Id?>" value="<?=$categoria->precio?>">
-                          <? if($categoria->nomb == 'Grupo Familiar'){ ?>                         
+                          <input type="text" class="form-control" id="cat-precio" data-id="<?=$categoria->id?>" value="<?=$categoria->precio?>">
+                          <? if($categoria->nombre == 'Grupo Familiar'){ ?>                         
                         </div>
                         Precio por Familiar Excedente
                         <div class="input-group"><span class="input-group-addon">$</span>
-                          <input type="text" class="form-control" id="cat-precio_unit" data-id="<?=$categoria->Id?>" value="<?=$categoria->precio_unit?>">                          
+                          <input type="text" class="form-control" id="cat-precio_unit" data-id="<?=$categoria->id?>" value="<?=$categoria->precio_unit?>">                          
                           <? } ?>
                         </div>
                       </td>
