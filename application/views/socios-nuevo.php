@@ -3,6 +3,20 @@
         <div class="panel-heading"><strong><span class="fa fa-plus"></span> Agregar Socio</strong></div>
         <div class="panel-body">
             <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/socios/<?=$action?>" method="post">
+
+                <div class="form-group col-lg-6">
+                    <label for="" class="col-sm-3">Socio #</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="nro_socio" class="form-control" value="<?=$prox_nsocio?>">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <p>
+                        <li>El número de socio personalizado respetr numeracion anterior al sistema - NO PUEDE REPETIRSE</li>
+                        <li>El sistema sugiere un numero consecutivo en base al ultimo usado</li>
+                    </p>
+                </div>
+
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Nombre</label>
                     <div class="col-sm-9">
@@ -81,14 +95,18 @@
                 <div class="clearfix"></div>
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Tutor de Grupo Familiar</label>
-                        <div id="tutor-data">
+                        <div id="tutor_dni-data">
                             <div class="col-sm-5">
-                                <input type="text" name="tutor" id="tutor" class="form-control">
+                                <input type="number" name="tutor_dni" id="tutor_dni" value='0' class="form-control">
+                                <input type="hidden" name="tutor_sid" id="tutor_sid" value='0' class="form-control">
                             </div>
                             <div class="col-sm-4">
-                                <a href="#" id="r-buscar" data-id="tutor" class="btn btn-primary">Buscar</a> <i id="tutor-loading" class="fa fa-spinner fa-spin hidden"></i>
+                                <a href="#" id="r-buscar" data-id="tutor_dni" class="btn btn-primary">Buscar</a> <i id="tutor_dni-loading" class="fa fa-spinner fa-spin hidden"></i>
                             </div>
                         </div>
+                        <div id="tutor_dni-result" >
+                        </div>
+
                 </div>
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Categoría de Socio</label>
@@ -142,7 +160,8 @@
                             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                             <input type="date"
                                    class="form-control"                                   
-                                   close-text="Cerrar" name="alta" value="">
+				   <?$ingreso=date('Y-m-d')?>
+                                   close-text="Cerrar" name="alta" value="<?=$ingreso?>">
                         </div>  
                     </div>
                 </div>
@@ -152,18 +171,7 @@
                         <input type="text" name="deuda" class="form-control">
                     </div>
                 </div> <div class="clearfix"></div>
-                <div class="form-group col-lg-6">
-                    <label for="" class="col-sm-3">Socio #</label>
-                    <div class="col-sm-9">
-                        <input type="number" name="nro_socio" class="form-control" value="">                        
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <p>
-                        <li>El número de socio personalizado servira para respectar numeracion anterior al sistema</li>
-                        <li>Si no desea utilizar un número personalizado deje este campo en blanco</li>
-                    </p>
-                </div>
+
                 <div class="clearfix"></div>
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Descuento $</label>

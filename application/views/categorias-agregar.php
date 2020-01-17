@@ -12,13 +12,7 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2">Precio</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="precio">
-                    </div>
-                </div>                               
-                <div class="form-group">
-                    <label for="" class="col-sm-2">Precio Unitario Adicional</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" name="precio_unit">
+                        <input type="number" class="form-control" name="precio" value='0'>
                     </div>
                 </div>                               
                 

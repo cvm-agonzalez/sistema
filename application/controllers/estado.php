@@ -27,7 +27,7 @@ class Estado extends CI_Controller {
 
 		if($socio){
 			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad, $socio->id);
-			$socio->cuota = $this->pagos_model->get_monto_socio($id_entidad, $socio->id)['total'];			
+			$socio->cuota = $this->pagos_model->get_monto_socio($socio->id)['total'];			
 			$socio->facturacion = $this->pagos_model->get_facturacion($id_entidad, $socio->id);
 			if($socio->nro_socio == ''){
 				$nro_socio = $socio->id;
@@ -91,7 +91,7 @@ class Estado extends CI_Controller {
 		}
 		if($socio){
 			$socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad,$socio->id);
-			$socio->cuota = $this->pagos_model->get_monto_socio($id_entidad,$socio->id)['total'];			
+			$socio->cuota = $this->pagos_model->get_monto_socio($socio->id)['total'];			
 			$socio->facturacion = $this->pagos_model->get_facturacion($id_entidad,$socio->id);
 			if($socio->nro_socio == ''){
 				$nro_socio = $socio->id;

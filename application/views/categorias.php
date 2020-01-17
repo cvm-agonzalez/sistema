@@ -53,15 +53,6 @@
                               data-ng-class="{active: row == '-precio'}"></span>
                     </div></th>
                     <th><div class="th">
-                        Precio Individual
-                        <span class="glyphicon glyphicon-chevron-up"
-                              data-ng-click=" order('precio_unit') "
-                              data-ng-class="{active: row == 'precio_unit'}"></span>
-                        <span class="glyphicon glyphicon-chevron-down"
-                              data-ng-click=" order('-precio_unit') "
-                              data-ng-class="{active: row == '-precio_unit'}"></span>
-                    </div></th>
-                    <th><div class="th">
                         Estado
                         <span class="glyphicon glyphicon-chevron-up"
                               data-ng-click=" order('estado') "
@@ -90,8 +81,7 @@
                     <td><?=$categoria->cid?></td>
                     <td><?=$categoria->nombre?></td>
                     
-                    <td><?=$categoria->precio?></td>
-                    <td><?=$categoria->precio_unit?></td>
+                    <td align='right'><?=$categoria->precio?></td>
                     <td><?=$xcateg?></td>
                     <td>
 			<a href="<?=base_url()?>admin/socios/categorias/editar/<?=$categoria->id?>">Editar</a> | 

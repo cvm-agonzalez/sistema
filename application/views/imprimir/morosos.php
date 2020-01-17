@@ -8,6 +8,7 @@
 					<select class="form-control" name="comisiones" id="comisiones">
 		
 						<option value="" >Seleccione Comision</option>
+						<option value="-1" <? if('-1' == $comision_sel){ echo 'selected'; } ?>>Cuota Social</option>
 						<? foreach ($comisiones as $comision) { 
 							?>
 							<option value="<?=$comision->id?>" <? if($comision_sel == $comision->id){ echo 'selected'; } ?>><?=$comision->descripcion?></option>
@@ -20,7 +21,6 @@
 					<label>Actividad</label>
 					<select class="form-control" name="morosos_activ" id="morosos_activ" >
 						<option value="">Seleccionar</option>
-						<option value="-1" <? if('-1' == $actividad_sel){ echo 'selected'; } ?>>Cuota Social</option>
 						<?
 						foreach ($actividades as $actividad) {                        
 							?>

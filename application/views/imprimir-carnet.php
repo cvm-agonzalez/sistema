@@ -80,8 +80,8 @@
             ?>
         </div>
         <? 
-        if($socio->nro_socios){
-            $num = $socio->nro_socios;
+        if($socio->nro_socio){
+            $num = $socio->nro_socio;
         }else{
             $num = $socio->id;
         }        
@@ -96,6 +96,7 @@
             <div class="nap" style="font-weight:bold">Socio No. <?=$num?></div>
             <div class="nap" style="font-weight:bold">Ingreso <?=$fecha?></div>
         </div>
+<!-- TODO luego poner bien el tema de barra del cupon
         <div align="right" class="barcode">
             <?
             if( file_exists("images/cupones/".$cupon->id.".png") ){
@@ -107,6 +108,7 @@
             ?>
         </div>
     </div>
+-->
 
     <!--
 		<div style="float:left; width:48%">

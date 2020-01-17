@@ -254,12 +254,6 @@ class Imprimir extends CI_Controller {
                 $this->load->view('imprimir/morosos',$data);
                 break;
 
-            case 'financiacion':
-                $this->load->model('pagos_model');
-                $data['socios'] = $this->pagos_model->get_socios_financiados($id_entidad);
-                $this->load->view('imprimir/financiacion',$data);                
-                break;
-
              case 'becas':
                 $this->load->model('actividades_model');
                 $this->load->model('pagos_model');
@@ -374,7 +368,6 @@ class Imprimir extends CI_Controller {
                 $this->load->model('pagos_model');
                 $this->load->model('actividades_model');
                 $data['actividad'] = $this->actividades_model->get_actividad($id);
-                $data['profesor'] = $this->actividades_model->get_profesor($data['actividad']->profesor);
                 $data['socios'] = $this->pagos_model->get_pagos_actividad($id_entidad, $id);
                 $this->load->view('imprimir/actividades_listado',$data);
                 break;
@@ -396,7 +389,7 @@ class Imprimir extends CI_Controller {
                     foreach ($socios as $socio) {
                         $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad, $socio->id);
                         /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-			$array_ahg = $this->pagos_model->get_monto_socio($id_entidad, $socio->id);
+			$array_ahg = $this->pagos_model->get_monto_socio($socio->id);
                         $socio->cuota = $array_ahg['total'];
                         /* Fin Modificacion AHG */
                     }
@@ -408,7 +401,7 @@ class Imprimir extends CI_Controller {
                     foreach ($socios as $socio) {
                         $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad,$socio->id);
                         /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-			            $array_ahg = $this->pagos_model->get_monto_socio($id_entidad, $socio->id);
+			            $array_ahg = $this->pagos_model->get_monto_socio($socio->id);
                         $socio->cuota = $array_ahg['total'];
                         /* Fin Modificacion AHG */
                     }
@@ -454,7 +447,7 @@ class Imprimir extends CI_Controller {
         $id_entidad = $this->session->userdata('id_entidad');
         $socio = $data['socio'] = $this->socios_model->get_socio($id);
         $data['cupon'] = $this->pagos_model->get_cupon($id, $id_entidad);
-        $monto = $this->pagos_model->get_monto_socio($id_entidad, $id);
+        $monto = $this->pagos_model->get_monto_socio($id);
         $data['monto'] = $monto = $monto['total'];
 /* Comentado para probar sin cuentadigital
         if($data['cupon']->monto == 0 || $data['cupon']->monto != $monto){
@@ -1094,79 +1087,6 @@ class Imprimir extends CI_Controller {
                         ->setCellValue('E'.$cont, $cliente->nacimiento)  
                         ->setCellValue('F'.$cont, $cliente->date)  
                         ->setCellValue('G'.$cont, $deuda);
-                        $cont ++;
-        } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
-    
-    // end: setExcel
-    }
-    public function financiacion_excel(){
-            
-        $id_entidad = $this->session->userdata('id_entidad');
-        $this->load->model('pagos_model');
-        $this->load->model('actividades_model');
-        
-        $clientes = $this->pagos_model->get_socios_financiados($id_entidad);            
-        $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
-        $titulo = $ent_abrev." - Financiación  - ".date('d-m-Y');
-        
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:G1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
-
-        // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Socio')
-                    ->setCellValue('C1', 'Detalle')
-                    ->setCellValue('D1', 'Cuotas')
-                    ->setCellValue('E1', 'Cuota Actual')
-                    ->setCellValue('F1', 'Monto')                 
-                    ->setCellValue('G1', 'Inicio - Fin');
-        
-        $cont = 2;
-        foreach ($clientes as $cliente) {            
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, $cliente->sid)  
-                        ->setCellValue('C'.$cont, $cliente->detalle)  
-                        ->setCellValue('D'.$cont, $cliente->cuotas)  
-                        ->setCellValue('E'.$cont, $cliente->actual)  
-                        ->setCellValue('F'.$cont, $cliente->monto)  
-                        ->setCellValue('G'.$cont, $cliente->inicio.' | '.$cliente->fin);
                         $cont ++;
         } 
         // Renombramos la hoja de trabajo

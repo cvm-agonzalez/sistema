@@ -7,7 +7,7 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css">
         <!-- needs images, font... therefore can not be part of ui.css -->
         <link rel="stylesheet" href="<?=$baseurl?>bower_components/font-awesome/css/font-awesome.min.css">
 
@@ -44,7 +44,6 @@
                         <div class="logo">
                             <a href="<?=$baseurl?>admin">
                                 <span><?=$ent_nombre?></span>
-			<?var_dump($data)?>
                             </a>
                         </div>
 
@@ -161,6 +160,36 @@
                 .parent().addClass($.support.fileInput ? undefined : 'disabled');
         });
         </script>
+
+        <script>
+        /*jslint unparam: true */
+        /*global window, $ */
+        $(function () {
+            'use strict';
+            // Change this to the location of your server-side upload handler:
+
+            $('#fileupload_mail').fileupload({
+                url: '<?=base_url()?>admin/envios/subir_imagen',
+                dataType: 'json',
+                done: function (e, data) {
+                    $.each(data.result.files, function (index, file) {
+                        $("#my_result").html('<img src="<?=$baseurl?>images/temp/'+file.name+'" width="100%">');
+                        $('#progress .progress-bar').hide();
+                    });
+                },
+                progressall: function (e, data) {
+                    $('#progress .progress-bar').show();
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $('#progress .progress-bar').css(
+                        'width',
+                        progress + '%'
+                    );
+                }
+            }).prop('disabled', !$.support.fileInput)
+                .parent().addClass($.support.fileInput ? undefined : 'disabled');
+        });
+        </script>
+
 
         <script type="text/javascript">
 
@@ -375,19 +404,36 @@
         Webcam.setSWFLocation("<?=$baseurl?>scripts/webcam.swf");
         Webcam.attach( '#my_camera' );
 
-        function take_snapshot() {
+	<!-- Configure a few settings and attach camera -->
+ 	Webcam.set({
+  		width: 320,
+  		height: 240,
+  		image_format: 'jpeg',
+  		jpeg_quality: 90
+ 	});
+ 	Webcam.attach( '#my_camera' );
+
+	<!-- Code to handle taking the snapshot and displaying it locally -->
+	function take_snapshot() {
             $("#save_btn").attr("disabled", "disabled");
             $("#save_btn").html("Guardando imagen...");
-            var data_uri = Webcam.snap();
-            document.getElementById('my_result').innerHTML = '<img src="'+data_uri+'"/>';
-            Webcam.upload( data_uri, '<?=$baseurl?>admin/socios/agregar_imagen', function(code, text) {
+ 
+ 		// take snapshot and get image data
+ 		Webcam.snap( function(data_uri) {
+  		// display results in page
+  		document.getElementById('my_result').innerHTML = 
+  		'<img id="imageprev" src="'+data_uri+'"/>';
+  		} );
+
+	var base64image = document.getElementById("imageprev").src;
+        Webcam.upload( base64image, '<?=$baseurl?>admin/socios/agregar_imagen', function(code, text) {
                 $("#save_btn").removeAttr("disabled");
                 $("#save_btn").html("Guardar");
                 // 'code' will be the HTTP response code from the server, e.g. 200
                 // 'text' will be the raw response content
-            } );
-        }
+        } );
 
+	}
 
 
         a= $('#nombre').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/search/socios-nombre' });
@@ -407,6 +453,7 @@
                     $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
+                    $("#tutor_sid").val(socio[0].id);
                     $("#"+id+"-id").val(socio[0].id);
                 }else{
                    angular.element("#modal_open").triggerHandler('click');
@@ -436,7 +483,8 @@
         }
         function cleear(id){
             $("#"+id+"-data").removeClass('hidden');
-            $("#"+id+"-id").val('0');
+            $("#tutor_sid").val(0);
+            $("#tutor_dni").val(0);
             $("#"+id+"-result").addClass('hidden');
         }
         </script>

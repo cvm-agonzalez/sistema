@@ -149,7 +149,7 @@ class Admin extends CI_Controller {
 			if ( $socio ) {
 				$sid=$socio->id;
 				$existe=0;
-				$act_asoc=$this->actividades_model->get_act_asoc_puntual($sid,$id_actividad);
+				$act_asoc=$this->actividades_model->get_act_asoc_puntual($id_entidad,$sid,$id_actividad);
 				if ( $act_asoc ) {
 					$socios[] = array(
             					'sid' => $sid,
@@ -488,7 +488,8 @@ class Admin extends CI_Controller {
 				$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
 				$data = $this->carga_data();
-                		$this->load->view('admin',$data);
+                                redirect(base_url().'admin');
+
 			}
 		}
     	}
@@ -695,6 +696,8 @@ class Admin extends CI_Controller {
        			                $datos['precio'] = $this->input->post('precio');
        			                $datos['precio_unit'] = $this->input->post('precio_unit');
        			                $datos['estado'] = $this->input->post('estado');
+					if ( $datos['precio'] == '' ) { $datos['precio'] = 0; }
+					if ( $datos['precio_unit'] == '' ) { $datos['precio_unit'] = 0; }
                         		$this->general_model->update_cat($idcateg,$datos);
 
 					// Grabo log de cambios
@@ -738,6 +741,8 @@ class Admin extends CI_Controller {
        			                $datos['precio'] = $this->input->post('precio');
        			                $datos['precio_unit'] = $this->input->post('precio_unit');
        			                $datos['estado'] = 1;
+					if ( $datos['precio'] == '' ) { $datos['precio'] = 0; }
+					if ( $datos['precio_unit'] == '' ) { $datos['precio_unit'] = 0; }
                         		$this->general_model->insert_cat($datos);
 
 					// Grabo log de cambios
@@ -838,17 +843,9 @@ class Admin extends CI_Controller {
                 $this->load->model('socios_model');
                 $this->load->model('pagos_model');
 		$observ="Suspendo manualmente a $id_socio. ";
-                $financiacion = $this->pagos_model->get_financiado_mensual($id_entidad, $id_socio);
-                if ( $financiacion ) {
-			$fin=$financiacion[0];
-			$deuda_fin=$fin->monto-($fin->actual*($fin->monto/$fin->cuotas));
-                	$this->pagos_model->registrar_pago($id_entidad,'debe',$id_socio,$deuda_fin,'Plan Financiacion Cuotas Impagas');
-                	$this->pagos_model->cancelar_plan($fin->id);
-			$observ .= "Cancelo finaciacion de $deuda_fin.";
-                }
 
                 $this->socios_model->suspender($id_socio);
-                $this->pagos_model->registrar_pago($id_entidad,'debe',$id_socio,0.00,'Suspensión Manual desde el Sistema');
+                $this->pagos_model->registrar_pago($id_entidad,'debe',$id_socio,0.00,'Suspensión Manual desde el Sistema', 'cs', 1);
 		
                 // Grabo log de cambios
                 $id_entidad = $this->session->userdata('id_entidad');
@@ -1071,7 +1068,10 @@ class Admin extends CI_Controller {
                 $data['categorias'] = $this->general_model->get_cats($id_entidad);
 
                 $this->load->model("socios_model");
-                $data['socios'] = $this->socios_model->get_socios($id_entidad);
+                //$data['socios'] = $this->socios_model->get_socios($id_entidad);
+		$prox_nsocio = $this->socios_model->get_prox_nsocio($id_entidad);
+                $data['prox_nsocio'] = (int)$prox_nsocio;
+
                 $this->load->view('admin',$data);
                 break;
 
@@ -1105,6 +1105,11 @@ class Admin extends CI_Controller {
                     //$fecha = explode('-',$datos['nacimiento']);
                     //$datos['nacimiento'] = $fecha[2].'-'.$fecha[1].'-'.$fecha[0];
                     unset($datos['files']);
+                    unset($datos['tutor_dni']);
+                    $tutor = $datos['tutor_sid'];
+                    unset($datos['tutor_sid']);
+                    $datos['tutor']=$tutor;
+                    if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
                     $uid = $this->socios_model->register($datos);
 
                 	// Grabo log de cambios
@@ -1134,7 +1139,7 @@ class Admin extends CI_Controller {
                     if(date('d') < $this->date_facturacion){ //si la fecha es anterior a la definida
                         if($datos['tutor'] == 0){ // y no es un integrante de grupo familiar
                             $this->load->model('pagos_model');
-                            $cuota = $this->pagos_model->get_monto_socio($id_entidad, $uid);
+                            $cuota = $this->pagos_model->get_monto_socio($uid);
 
                             $descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
                             if($cuota['categoria'] == 'Grupo Familiar'){
@@ -1268,9 +1273,6 @@ class Admin extends CI_Controller {
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
                 if($data['socio']){
                     $data['tutor'] = $this->socios_model->get_socio($data['socio']->tutor);
-                    if(!$data['socio']->nro_socio){
-                        $data['socio']->nro_socio = $this->uri->segment(4);
-                    }
                 }else{
 
                 }
@@ -1288,56 +1290,59 @@ class Admin extends CI_Controller {
                 $id_entidad = $this->session->userdata('id_entidad');
                 $datos['id_entidad'] = $id_entidad;
 		$data = $this->carga_data();
-		if ( $datos['tutor'] == $id ) {
+		if ( $datos['tutor_sid'] == $id ) {
 			$data['mensaje1'] = "No puede ponerse como tutor al mismo socio....";
                     	$data['section'] = 'ppal-mensaje';
                     	$this->load->view('admin',$data);
 		} else {
                 	$this->load->model("socios_model");
-                	$nro_socio = $this->socios_model->check_u_n($id_entidad,$datos['nro_socio']);
-                	if($datos['nro_socio'] == 0){
-				$datos['nro_socio'] = '';
-                	}
-                	$nro_socio = false;
-                	if(($datos['nro_socio'] >= 28852 && $datos['nro_socio'] != $id )|| $nro_socio == true){
-                    		$datos['nro_socio'] = '';
-                    		$error = "?e=nro_socio";
-                	}
 
-                	if($prev_user = $this->socios_model->checkDNI($id_entidad,$datos['dni'],$id)){
+                	if( $datos['tutor_sid'] > 0 ) {
+				$soctut = $this->socios_model->get_socio($datos['tutor_sid']);
+				if ( (int)$soctut->tutor > 0 ) {
+					$data['mensaje1'] = "No puede ponerse como tutor a un tutoreado....";
+                    			$data['section'] = 'ppal-mensaje';
+                    			$this->load->view('admin',$data);
+				}
+			} else if($prev_user = $this->socios_model->checkDNI($id_entidad,$datos['dni'],$id)){
                     		//el dni esta repetido, incluimos la vista de listado con el usuario coincidente
                     		$data['prev_user'] = $prev_user;
                     		$data['section'] = 'socio-dni-repetido';
                     		$this->load->view('admin',$data);
-                	} else {
-				$ent_dir = $this->session->userdata('ent_directorio');
-                    		$token = $this->session->userdata('img_token');
-
-                    		if(file_exists(BASEPATH."../images/temp/".$token.".jpg")){
-					$old_name = BASEPATH."../images/temp/".$token.".jpg";
-					$new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$id.".jpg";
-                        		rename($old_name,$new_name);
-				}
-                    		unset($datos['files']);
-                    		$this->socios_model->update_socio($id_entidad,$id,$datos);
-
-                		// Grabo log de cambios
-                		$id_entidad = $this->session->userdata('id_entidad');
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "socios";
-                		$operacion = 2;
-                		$llave = $id;
-                		$observ = substr(json_encode($datos),0,255);
-                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-
-                    		if(!isset($error)){
-                        		$error = '';
-                    		}
-                    		redirect(base_url()."admin/socios/registrado/".$id.$error);
-                	}
-		}
-
+                		} else {
+					$ent_dir = $this->session->userdata('ent_directorio');
+                    			$token = $this->session->userdata('img_token');
+	
+                    			if(file_exists(BASEPATH."../images/temp/".$token.".jpg")){
+						$old_name = BASEPATH."../images/temp/".$token.".jpg";
+						$new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$id.".jpg";
+                        			rename($old_name,$new_name);
+					}
+                    			unset($datos['files']);
+                    			unset($datos['tutor_dni']);
+					$tutor = $datos['tutor_sid'];
+                    			unset($datos['tutor_sid']);
+					$datos['tutor']=$tutor;
+					if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
+                    			$this->socios_model->update_socio($id_entidad,$id,$datos);
+	
+                			// Grabo log de cambios
+                			$id_entidad = $this->session->userdata('id_entidad');
+                			$login = $this->session->userdata('username');
+                			$nivel_acceso = $this->session->userdata('rango');
+                			$tabla = "socios";
+                			$operacion = 2;
+                			$llave = $id;
+                			$observ = substr(json_encode($datos),0,255);
+                			$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+	
+                    			if(!isset($error)){
+                        			$error = '';
+                    			}
+                    			redirect(base_url()."admin/socios/registrado/".$id.$error);
+                		}
+			}
+	
                 break;
 
             case 'borrar':
@@ -1364,7 +1369,7 @@ class Admin extends CI_Controller {
 		$data = $this->carga_data();
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
                 $data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad,$this->uri->segment(4));
-                $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad,$this->uri->segment(4));
+                $data['cuota'] = $this->pagos_model->get_monto_socio($this->uri->segment(4));
 		if ( $this->uri->segment(5) ) {
 			if ( $this->uri->segment(5) == "excel" ) {
 				$archivo="Resument_Cuenta_Asoc_".$this->uri->segment(4)."_".date('Ymd');
@@ -1394,7 +1399,7 @@ class Admin extends CI_Controller {
                 $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
                 $data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad,$this->uri->segment(4));
 /* Modificado AHG para manejo de array en PHP 5.3 que tengo en mi maquina */
-            	$array_ahg = $this->pagos_model->get_monto_socio($id_entidad, $this->uri->segment(4));
+            	$array_ahg = $this->pagos_model->get_monto_socio($this->uri->segment(4));
                 $data['cuota'] = $array_ahg['total'];
 /* Fin Modificacion AHG */
                 $data['section'] = 'socios-resumen2';
@@ -1545,9 +1550,9 @@ class Admin extends CI_Controller {
 					$mensaje="";
 					if ( $debtarj->estado == 1 ) {
                                         	// Busco la cuota social del mes
-                                        	$cuota_socio = $this->pagos_model->get_monto_socio($id_entidad, $debtarj->sid);
+                                        	$cuota_socio = $this->pagos_model->get_monto_socio($debtarj->sid);
                                         	// Busco el saldo del asociado
-                                        	$saldo = $this->pagos_model->get_saldo($id_entidad, $debtarj->sid);
+                                        	$saldo = $this->pagos_model->get_saldo($debtarj->sid);
                                         	// Si tiene saldo a favor lo descuento, sino la cuota mensual
                                         	if ( $saldo != 0 ) {
                                                 	$importe = $cuota_socio['total'] + $saldo;
@@ -2243,18 +2248,19 @@ class Admin extends CI_Controller {
     {
         switch ($this->uri->segment(3)) {
             case 'baja':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $sid = $this->uri->segment(4);
                 $aid = $this->uri->segment(5);
                 $this->load->model("actividades_model");
-                $act = $this->actividades_model->act_baja($sid, $aid);
+                $act = $this->actividades_model->act_baja($id_entidad,$sid, $aid);
                 // Grabo log de cambios
                 $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "actividades_asociadas";
                 $operacion = 3;
-                $llave = $act->asoc_id;
-		$observ = substr(json_encode($act), 0, 255);
+                $llave = $aid;
+		$observ = "Di de baja la actividad $llave para el asociado $sid";
                 $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                 echo $act;
                 break;
@@ -2275,8 +2281,9 @@ class Admin extends CI_Controller {
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "actividades_asociadas";
                 $operacion = 1;
-                $llave = $act->asoc_id;
-		$observ = substr(json_encode($act), 0, 255);
+                $llave = $data['sid'];
+                $nactiv = $data['aid'];
+		$observ = "Relacione actividad $nactiv al socio $llave";
                 $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
                 if(date('d') < $this->date_facturacion && $facturar == 'true'){ //si la fecha es anterior a la definida
@@ -2461,7 +2468,7 @@ class Admin extends CI_Controller {
                         $sid=$asociado->sid;
                         $aid=$asociado->aid;
                         $socio=$this->socios_model->get_socio($sid);
-                	$this->actividades_model->act_baja_asoc($sid, $aid);
+                	$this->actividades_model->act_baja_asoc($id_entidad, $sid, $aid);
                 	
 			// Grabo log de cambios
                 	$login = $this->session->userdata('username');
@@ -2496,7 +2503,7 @@ class Admin extends CI_Controller {
                         $sid=$asociado->sid;
                         $aid=$asociado->aid;
                         $socio=$this->socios_model->get_socio($sid);
-                	$this->actividades_model->act_baja_asoc($sid, $aid);
+                	$this->actividades_model->act_baja_asoc($id_entidad, $sid, $aid);
 
 			// Si el socio esta activo revierto facturacion
 			if ( $socio->suspendido == 0 ) {
@@ -2518,21 +2525,21 @@ class Admin extends CI_Controller {
                 break;
 
             case 'get':
+                $id_entidad = $this->session->userdata('id_entidad');
 		$data = $this->carga_data();
                 $data['sid'] = $this->uri->segment(4);
                 $this->load->model('actividades_model');
-                $id_entidad = $this->session->userdata('id_entidad');
                 $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
-                $data['actividades_asoc'] = $this->actividades_model->get_act_asoc($data['sid']);
+                $data['actividades_asoc'] = $this->actividades_model->get_act_asoc($id_entidad, $data['sid']);
                 $this->load->view('actividades-lista',$data);
                 break;
 
             case 'pone_peso':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
-                $act = $this->actividades_model->act_peso($aid);
+                $act = $this->actividades_model->act_peso($id_entidad,$aid);
                 // Grabo log de cambios
-                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "actividades_asociadas";
@@ -2544,11 +2551,11 @@ class Admin extends CI_Controller {
                 break;
 
             case 'pone_porc':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
-                $act = $this->actividades_model->act_porc($aid);
+                $act = $this->actividades_model->act_porc($id_entidad,$aid);
                 // Grabo log de cambios
-                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "actividades_asociadas";
@@ -2560,11 +2567,11 @@ class Admin extends CI_Controller {
                 break;
 
             case 'federado':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $aid = $this->uri->segment(4);
                 $this->load->model('actividades_model');
-                $act = $this->actividades_model->act_federado($aid);
+                $act = $this->actividades_model->act_federado($id_entidad,$aid);
                 // Grabo log de cambios
-                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "actividades_asociadas";
@@ -2614,17 +2621,8 @@ class Admin extends CI_Controller {
                     $llave = $aid;
 		    $observ = substr(json_encode($datos), 0, 255);
                     $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                    redirect(base_url()."admin/actividades/guardada/".$aid);
-                }else{
-                    redirect(base_url()."admin/actividades");
                 }
-                break;
-
-            case 'guardada':
-		$data = $this->carga_data();
-                $data['aid'] = $this->uri->segment(4);
-                $data['section'] = 'actividades-guardada';
-                $this->load->view("admin",$data);
+                redirect(base_url()."admin/actividades");
                 break;
 
             case 'editar':
@@ -2658,10 +2656,8 @@ class Admin extends CI_Controller {
                 	$llave = $this->uri->segment(4);
 			$observ = substr(json_encode($datos), 0, 255);
                 	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                	$data['username'] = $this->session->userdata('username');
-			$data['rango'] = $this->session->userdata('rango');
-                    	redirect(base_url()."admin/actividades/guardada/".$this->uri->segment(4));
                 }
+                redirect(base_url()."admin/actividades");
                 break;
 
             case 'eliminar':
@@ -2721,7 +2717,7 @@ class Admin extends CI_Controller {
                 		$llave = $this->uri->segment(5);
 				$observ = substr(json_encode($datos), 0, 255);
                 		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        	redirect(base_url()."admin/actividades/comisiones/guardado/".$this->uri->segment(5));
+                        	redirect(base_url()."admin/actividades/comisiones/");
                     	}
                 } else if($this->uri->segment(4) == 'editar'){
 			$data = $this->carga_data();
@@ -2729,11 +2725,6 @@ class Admin extends CI_Controller {
                     	$this->load->model('actividades_model');
                     	$data['comision'] = $this->actividades_model->get_comision($this->uri->segment(5));
                     	$this->load->view('admin',$data);
-                } else if($this->uri->segment(4) == 'guardado'){
-			$data = $this->carga_data();
-                    	$data['pid'] = $this->uri->segment(5);
-                    	$data['section'] = 'comisiones-guardado';
-                    	$this->load->view("admin",$data);
                 } else if($this->uri->segment(4) == 'eliminar'){
                     	$this->load->model("actividades_model");
                     	$this->actividades_model->borrar_comision($this->uri->segment(5));
@@ -2789,7 +2780,8 @@ class Admin extends CI_Controller {
                 	$tabla = "pagos";
                 	$operacion = 1;
                 	$llave = $_POST['sid'];
-			$observ = substr(json_encode($data), 0, 255);
+                        $comentario = $_POST['tipo']."-".$_POST['sid']."-".$_POST['monto']."-".$_POST['des']."-".$_POST['actividad']."-".$_POST['ajuing'];
+			$observ = substr($comentario, 0, 255);
                 	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         $data = $this->pagos_model->registrar_pago($id_entidad, $_POST['tipo'],$_POST['sid'],$_POST['monto'],$_POST['des'],$_POST['actividad'],$_POST['ajuing']);
                         echo $data;
@@ -2804,10 +2796,10 @@ class Admin extends CI_Controller {
                         $data['socio'] = $this->socios_model->get_socio($sid);
                         $data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad,$sid);
 
-			if ( $this->socios_model->es_tutor($sid) ) {
-                        	$data['activ_asoc'] = $this->actividades_model->get_act_asoc_tutor($sid);
+			if ( $this->socios_model->es_tutor($id_entidad, $sid) ) {
+                        	$data['activ_asoc'] = $this->actividades_model->get_act_asoc_tutor($id_entidad, $sid);
 			} else {
-                        	$data['activ_asoc'] = $this->actividades_model->get_act_asoc($sid);
+                        	$data['activ_asoc'] = $this->actividades_model->get_act_asoc($id_entidad, $sid);
 			}
                         $this->load->view('pagos-registrar-get',$data);
                     break;
@@ -2820,7 +2812,7 @@ class Admin extends CI_Controller {
                         $this->load->model('socios_model');
                             if($data['sid']){
                                 $this->load->model('pagos_model');
-                                $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad,$data['sid']);
+                                $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
                             }
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $this->load->view('admin',$data);
@@ -2849,7 +2841,7 @@ class Admin extends CI_Controller {
                         $data['sid'] = $this->uri->segment(5);
                         $this->load->model('pagos_model');
                         $data['cupon'] = $this->pagos_model->get_cupon($data['sid'], $id_entidad);
-                        $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad, $data['sid']);
+                        $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
                         $this->load->view('pagos-cupon-get',$data);
                         break;
                     case 'generar':
@@ -2892,7 +2884,7 @@ class Admin extends CI_Controller {
                         $this->load->model('socios_model');
                         if($data['sid']){
                             $this->load->model('pagos_model');
-                            $data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad,$data['sid']);
+                            $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
                         }
                         $data['socio'] = $this->socios_model->get_socio($data['sid']);
                         $this->load->view('admin',$data);
@@ -2906,7 +2898,7 @@ class Admin extends CI_Controller {
                     case 'get':
                         $this->load->model('pagos_model');
 			$data = $this->carga_data();
-                        $data['deuda'] = $this->pagos_model->get_deuda($id_entidad, $this->uri->segment(5));
+                        $data['deuda'] = $this->pagos_model->get_deuda($this->uri->segment(5));
                         $data['planes'] = $this->pagos_model->get_planes($id_entidad, $this->uri->segment(5));
                         $this->load->view('pagos-deuda-get',$data);
                         break;
@@ -3202,9 +3194,19 @@ class Admin extends CI_Controller {
                 break;
 
             case 'guardar':
-                $this->load->model('general_model');
                 $id_entidad = $this->session->userdata('id_entidad');
+                $dir_ent = $this->session->userdata('ent_directorio');
+                $this->load->model('general_model');
+// AHG  mover imagen de temp a directorio attach
                 $envio = array('id_entidad' => $id_entidad, 'body' => $this->input->post('text') );
+                $this->general_model->update_envio($id,$envio);
+                if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){
+                        rename("images/temp/".$this->session->userdata('img_token').".jpg","entidades/".$dir_ent."/emails/".$id.".jpg");
+                        unlink("images/temp/".$this->session->userdata('img_token').".jpg");
+                }
+                break;
+
+
                 $this->general_model->update_envio($id,$envio);
                 break;
 
@@ -3253,6 +3255,11 @@ class Admin extends CI_Controller {
                 }else{
                     echo 'no_mails';
                 }
+                break;
+
+            case 'subir_imagen':
+                $token = $this->img_token();
+                $this->load->library('UploadHandler');
                 break;
 
             case 'eliminar':

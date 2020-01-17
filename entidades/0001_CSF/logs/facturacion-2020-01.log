@@ -1,0 +1,22 @@
+09:16:36: Inicio de Cron... 
+09:16:36 - Truncate mails\n09:16:36 - Indicador facturado en 0 \n09:16:36 - Cambio de categoria mayor \n09:16:36: Se encontraron 8 socios a facturar 
+09:16:36: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:16:36: Socio #3 DNI=333333-s, s facturado 
+09:16:36: Socio #5 DNI=22222-, we facturado 
+09:16:36: Socio #7 DNI=222222222-,  facturado 
+09:16:36: Socio #8 DNI=949494949-otra vez, probando carga de nuevo facturado 
+09:16:36: Socio #9 DNI=949494-,  facturado 
+09:16:36: Socio #10 DNI=34444-,  facturado 
+09:16:36: Socio #11 DNI=34444333-,  facturado 
+09:16:36: Cron Finalizado 
+10:36:30 - Procesando 1-Club San Francisco\n10:36:30: Inicio de Cron... 
+10:36:30 - Truncate mails\n10:36:30 - Indicador facturado en 0 \n10:36:30 - Cambio de categoria mayor \n10:36:30: Se encontraron 8 socios a facturar 
+10:36:30: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+10:36:30: Socio #3 DNI=333333-s, s facturado 
+10:36:30: Socio #5 DNI=22222-, we facturado 
+10:36:30: Socio #7 DNI=222222222-,  facturado 
+10:36:30: Socio #8 DNI=949494949-otra vez, probando carga de nuevo facturado 
+10:36:30: Socio #9 DNI=949494-,  facturado 
+10:36:30: Socio #10 DNI=34444-,  facturado 
+10:36:30: Socio #11 DNI=34444333-,  facturado 
+10:36:30: Cron Finalizado 

@@ -220,9 +220,8 @@ class Debtarj_model extends CI_Model {
         return $debtarj;
     }
 
-    public function get_debtarj_by_sid($id_entidad,$sid)
+    public function get_debtarj_by_sid($sid)
     {
-        $this->db->where('id_entidad', $id_entidad);
         $this->db->where('sid', $sid);
         $this->db->where('estado', 1);
         $query = $this->db->get('socios_debito_tarj');

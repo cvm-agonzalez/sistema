@@ -27,23 +27,6 @@
                     </div>
                 </div>    
                 <div class="form-group">
-                    <label for="" class="col-sm-2">Lugar</label>
-                    <div class="col-sm-10">
-                        <select name="lugar" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
-                            <option value="">---------</option>
-                        <?
-                        foreach ($lugares as $lugar) {                                            
-                        ?>
-                        <option value="<?=$lugar->id?>" <? if($lugar->id == $actividad->lugar){ echo 'selected';} ?>>
-                            <?=$lugar->nombre?> [<?=$lugar->direccion?>]
-                        </option>
-                        <?
-                        }
-                        ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label for="" class="col-sm-2">Precio</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control" value="<?=$actividad->precio?>" name="precio">

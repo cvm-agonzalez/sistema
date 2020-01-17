@@ -97,9 +97,9 @@
                 <tr data-ng-repeat="store in currentPageStores">                    
                     <td>{{store.aid}}</td>
                     <td>{{store.name}}</td>
-                    <td>{{store.price}}</td>
-                    <td>{{store.cta_inic}}</td>
-                    <td>{{store.seguro}}</td>
+                    <td align="right">{{store.price}}</td>
+                    <td align="right">{{store.cta_inic}}</td>
+                    <td align="right">{{store.seguro}}</td>
                     <td>{{store.solo_socios}}</td>
                     <td>{{store.estado}}</td>
                     <td>
@@ -117,7 +117,7 @@
                     <td><?=$actividad->aid?></td>
                     <td><?=$actividad->nombre?></td>
                     
-                    <td><?=$actividad->precio?></td>
+                    <td align="right"><?=$actividad->precio?></td>
                     <td><a href="<?=base_url()?>admin/actividades/editar/<?=$actividad->id?>">Editar</a> | 
                       <a id="btn-eliminar-actividad" href="<?=base_url()?>admin/actividades/eliminar/<?=$actividad->id?>">Eliminiar</a></td>
                 </tr>-->

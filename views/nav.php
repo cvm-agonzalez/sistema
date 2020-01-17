@@ -80,23 +80,14 @@ function is_active($uri,$actual){
         			<ul class="sub-nav" <? is_active($_GET['section'],'pagos') ?>>
             			<!--                <li><a href="<?=$_GET['baseurl']?>admin/pagos"><i class="fa fa-caret-right"></i><span data-i18n="Impresión de Listados"></span></a></li>-->
             			<li><a href="<?=$_GET['baseurl']?>admin/pagos/registrar"><i class="fa fa-caret-right"></i><span data-i18n="Registrar Pago"></span></a></li>            
-            			<li><a href="<?=$_GET['baseurl']?>admin/pagos/deuda"><i class="fa fa-caret-right"></i><span data-i18n="Financiar Deuda"></span></a></li>
             			<li><a href="<?=$_GET['baseurl']?>admin/pagos/cupon"><i class="fa fa-caret-right"></i><span data-i18n="Generar Cupón"></span></a></li>
             			<li><a href="<?=$_GET['baseurl']?>admin/pagos/editar"><i class="fa fa-caret-right"></i><span data-i18n="Editar Pagos"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/debtarj/list-debtarj"><i class="fa fa-caret-right"></i><span data-i18n="Debito Tarjetas"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/debtarj/gen-debtarj"><i class="fa fa-caret-right"></i><span data-i18n="Genera Debitos"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/debtarj/load-debtarj"><i class="fa fa-caret-right"></i><span data-i18n="Importa Liquidacion Tarjetas"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/debtarj/contracargo"><i class="fa fa-caret-right"></i><span data-i18n="Carga Contracargos Manualmente"></span></a></li>
-            			<li><a href="<?=$_GET['baseurl']?>admin/cobranza_col"><i class="fa fa-caret-right"></i><span data-i18n="Cobranza en La Coope"></span></a></li>
         			</ul>
     			</li>        
 	<?		break;
 		case '2': ?>
     			<li>
         			<a href="<?=$_GET['baseurl']?>admin/pagos"><i class="fa fa-dollar"><span class="icon-bg bg-success"></span></i><span data-i18n="Pagos"></span></a>
-        			<ul class="sub-nav" <? is_active($_GET['section'],'pagos') ?>>
-            			<li><a href="<?=$_GET['baseurl']?>admin/debtarj/list-debtarj"><i class="fa fa-caret-right"></i><span data-i18n="Debito Tarjetas"></span></a></li>
-        			</ul>
     			</li>
 	<? 		break;
 		} ?>

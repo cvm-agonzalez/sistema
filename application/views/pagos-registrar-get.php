@@ -169,6 +169,7 @@ $("#reg-pago-form").submit(function(){
 	}
 	var monto = $("#monto").val();
 	var des = $("#des").val();
+
 	$.post("<?=$baseurl?>admin/pagos/registrar/do",{sid: <?=$socio->id?>, tipo: tipo, monto: monto, des: des, actividad:actividad, ajuing:ajuing})
 	.done(function(data){
 		var data = $.parseJSON(data);

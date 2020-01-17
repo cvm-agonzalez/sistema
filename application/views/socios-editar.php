@@ -23,6 +23,19 @@
 		<? } ?>
 
                 <div class="form-group col-lg-6">
+                    <label for="" class="col-sm-3">Socio #</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="nro_socio" class="form-control" value="<?=$socio->nro_socio?>">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <p>
+                        <li>El número de socio personalizado respeta numeracion anterior al sistema - NO PUEDE REPETIRSE</li>
+                        <li>El sistema sugiere un numero consecutivo en base al ultimo usado</li>
+                    </p>
+                </div>
+
+                <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Nombre</label>
                     <div class="col-sm-9">
                         <input type="text" id="nombre" value="<?=$socio->nombre?>" name="nombre" class="form-control">
@@ -99,17 +112,18 @@
 
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Tutor de Grupo Familiar</label>
-                        <div id="tutor-data" <? if($tutor->id != 0){ echo 'class="hidden"'; }?>>
+                        <div id="tutor_dni-data" <? if($tutor->id != 0){ echo 'class="hidden"'; }?>>
                             <div class="col-sm-5">
-                                <input type="text" name="tutor" id="tutor" class="form-control">
+                                <input type="number" name="tutor_dni" id="tutor_dni" value='0' class="form-control">
+                                <input type="hidden" name="tutor_sid" id="tutor_sid" value='0' class="form-control">
                             </div>
                             <div class="col-sm-4">
-                                <a href="#" id="r-buscar" data-id="tutor" class="btn btn-primary">Buscar</a> <i id="tutor-loading" class="fa fa-spinner fa-spin hidden"></i>
+                                <a href="#" id="r-buscar" data-id="tutor_dni" class="btn btn-primary">Buscar</a> <i id="tutor_dni-loading" class="fa fa-spinner fa-spin hidden"></i>
                             </div>
                         </div>
-                        <div id="tutor-result" <? if($tutor->id == 0){ echo 'class="hidden"'; }?>>
+                        <div id="tutor_dni-result" <? if($tutor->id == 0){ echo 'class="hidden"'; }?>>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <? echo $tutor->nombre.' '.$tutor->apellido.' ('.$tutor->dni.')'; ?> <a href="#" onclick="cleear('tutor')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>                        
+                        <? echo $tutor->nombre.' '.$tutor->apellido.' ('.$tutor->dni.')'; ?> <a href="#" onclick="cleear('tutor_dni')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>                        
                         </div>
                 </div>
                 <div class="form-group col-lg-6">
@@ -168,18 +182,6 @@
                     </div>
                 </div>                 
                 <div class="clearfix"></div>   
-                <div class="form-group col-lg-6">
-                    <label for="" class="col-sm-3">Socio #</label>
-                    <div class="col-sm-9">
-                        <input type="number" name="nro_socio" class="form-control" value="<?=$socio->nro_socio?>" required>                        
-                    </div>
-                </div> 
-                <div class="col-lg-6">
-                    <p>
-                        <li>El número de socio personalizado sirve si se quiere respetar numeracion anterior</li>
-                        <li>Para volver al número de socio de sistema ingrese 0 (cero)</li>
-                    </p>
-                </div>
                 <?
                 $alta = explode(' ',$socio->alta);
                 ?>

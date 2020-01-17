@@ -37,13 +37,9 @@
                             </button><ul class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop1">
                                 <li><a id="acceso_actividad" href="<?=$baseurl?>admin/actividades/asociar/<?=$socio->id?>">Asociar Actividad</a></li>
                                 <li><a id="acceso_pago" href="<?=$baseurl?>admin/pagos/registrar/<?=$socio->id?>">Registrar Pago</a></li>
-                                <li><a id="acceso_deuda" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->id?>">Financiar Deuda</a></li>
                                 <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->id?>">Enviar Resumen</a></li>
-                                <li><a id="acceso_debtarj" href="<?=$baseurl?>admin/debtarj/<?=$socio->id?>">Adherir Debito Tarjeta</a></li>
                                 <li><a id="imprimir_carnet" data-id="<?=$socio->id?>" href="#">Imprimir Carnet</a></li>
-                                <li><a id="acceso_financiar" href="<?=$baseurl?>admin/pagos/deuda/<?=$socio->id?>">Financiar Deuda</a></li>
                                 <li><a id="acceso_suspender" href="<?=$baseurl?>admin/socios/suspender/<?=$socio->id?>">Suspender Socio</a></li>
-                                <li><a id="acceso_reinscribir" href="<?=$baseurl?>admin/socios/reinscribir/<?=$socio->id?>">Reinscribir Socio</a></li>
 
                             </ul>
                         </div>

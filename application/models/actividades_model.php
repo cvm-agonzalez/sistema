@@ -83,7 +83,8 @@ class Actividades_model extends CI_Model {
 /* Fin de funciones para trabajar con la tabla actividades */
 
 /* Funciones para trabajar con la tabla actividades_asociadas */
-    public function get_act_asoc_puntual($sid, $aid){
+    public function get_act_asoc_puntual($id_entidad,$sid, $aid){
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("sid", $sid);
         $this->db->where("aid", $aid);
         $this->db->where("estado", 1);
@@ -104,12 +105,14 @@ class Actividades_model extends CI_Model {
                 $actividad->federado = $asoc->federado;
                 $actividad->descuento = $asoc->descuento;
                 $actividad->monto_porcentaje = $asoc->monto_porcentaje;
+                $actividad->id_entidad = $id_entidad;
                 return $actividad;
 	}
     }
 
-    public function get_act_asoc($sid){
+    public function get_act_asoc($id_entidad, $sid){
         $this->db->order_by("estado", "desc");
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("sid", $sid);
         $query = $this->db->get("actividades_asociadas");
         if ($query->num_rows() == 0){
@@ -129,13 +132,15 @@ class Actividades_model extends CI_Model {
                 $actividad->federado = $asoc->federado;
                 $actividad->descuento = $asoc->descuento;
                 $actividad->monto_porcentaje = $asoc->monto_porcentaje;
+                $actividad->id_entidad = $id_entidad;
                 $act_asoc[] = $actividad;
             }            
             return $act_asoc;
         } 
     }
 
-    public function get_act_asoc_tutor($tutor_id){
+    public function get_act_asoc_tutor($id_entidad, $tutor_id){
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("tutor", $tutor_id);
         $query = $this->db->get("socios");
         if ($query->num_rows() == 0){
@@ -162,6 +167,7 @@ class Actividades_model extends CI_Model {
                 		$actividad->federado = $asoc->federado;
                 		$actividad->descuento = $asoc->descuento;
                 		$actividad->monto_porcentaje = $asoc->monto_porcentaje;
+                		$actividad->id_entidad = $id_entidad;
                 		$act_asoc[] = $actividad;
             		}
 		        }
@@ -170,8 +176,9 @@ class Actividades_model extends CI_Model {
         }
     }
 
-    public function act_baja_asoc($sid,$aid){
+    public function act_baja_asoc($id_entidad,$sid,$aid){
 
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("sid", $sid);
         $this->db->where("aid", $aid);
         $this->db->where("estado", '1');
@@ -179,19 +186,22 @@ class Actividades_model extends CI_Model {
         $fecha = $query->row();
         $fecha = $fecha->date;
 
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("sid", $sid);
         $this->db->where("aid", $aid);
         $this->db->where("estado", '1');
         $query = $this->db->update("actividades_asociadas",array('estado'=>'0','date_alta'=>$fecha));
     }
 
-    public function act_baja($sid,$aid){
+    public function act_baja($id_entidad,$sid,$aid){
         
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("id", $aid);
         $query = $this->db->get('actividades_asociadas');
         $fecha = $query->row();
         $fecha = $fecha->date;
 
+        $this->db->where("id_entidad", $id_entidad);
         $this->db->where("sid", $sid);
         $this->db->where("id", $aid);
         $query = $this->db->update("actividades_asociadas",array('estado'=>'0','date_alta'=>$fecha));
@@ -220,7 +230,8 @@ class Actividades_model extends CI_Model {
         return $fecha2[0].'/'.$fecha[1].'/'.$fecha[0];
     }
 
-    public function act_federado($aid){        
+    public function act_federado($id_entidad,$aid){        
+        $this->db->where('id_entidad',$id_entidad);
         $this->db->where('id',$aid);
         $query = $this->db->get('actividades_asociadas');
         $actual = $query->row();
@@ -233,13 +244,15 @@ class Actividades_model extends CI_Model {
         return true;
     } 
 
-    public function act_peso($aid){        
+    public function act_peso($id_entidad,$aid){        
+        $this->db->where('id_entidad',$id_entidad);
         $this->db->where('id',$aid);
         $query = $this->db->update("actividades_asociadas",array('monto_porcentaje'=>'0'));
         return true;
     } 
 
-    public function act_porc($aid){        
+    public function act_porc($id_entidad,$aid){        
+        $this->db->where('id_entidad',$id_entidad);
         $this->db->where('id',$aid);
         $query = $this->db->update("actividades_asociadas",array('monto_porcentaje'=>'1'));
         return true;

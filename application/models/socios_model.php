@@ -30,6 +30,12 @@ class Socios_model extends CI_Model {
         }
     }
 
+    public function get_prox_nsocio($id_entidad) {
+	$qry="SELECT MAX(nro_socio) max_nsocio FROM socios WHERE id_entidad = $id_entidad; ";
+        $resultado = $this->db->query($qry)->result();
+	return $resultado[0]->max_nsocio+1;
+    }
+
     public function listar($id_entidad){
 /*	Cambiado por el SQL con JOIN para optimizar lecturas Ago2017 */
         $this->load->model('pagos_model');
@@ -44,7 +50,7 @@ class Socios_model extends CI_Model {
         $socios = array();
         foreach ( $resultado as $socio ) {
             $socios[$socio->id]['datos'] = $socio;
-            $cuota = $this->pagos_model->get_monto_socio($id_entidad,$socio->id);
+            $cuota = $this->pagos_model->get_monto_socio($socio->id);
 	    if ( !$cuota ) { $cuota = 0; };
             $socios[$socio->id]['cuota'] = $cuota;
         }        
@@ -251,6 +257,7 @@ class Socios_model extends CI_Model {
         $query = $this->db->query($query1." UNION ".$query2);
         return $query->result();
     }
+
     public function actualizar_menor($id_menor){
         $this->db->where('id',$id_menor);
         $this->db->update('socios',array('tutor'=>'0','categoria'=>'2'));
@@ -258,6 +265,7 @@ class Socios_model extends CI_Model {
 	$this->pagos_model->registrar_pago('debe',$id_menor,0.00,'Cambio de Categoria de Menor a Mayor - Proceso Facturacion',0,0);
 
     }
+
     public function get_socios_pagan($id_entidad, $facturado=false){
         if($facturado){
             $this->db->where('facturado', 0);
@@ -269,6 +277,7 @@ class Socios_model extends CI_Model {
         $query = $this->db->get('socios');
         return $query->result();
     }
+
     public function check_u_n($id_entidad, $sn){
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('nro_socio', $sn);
@@ -281,21 +290,16 @@ class Socios_model extends CI_Model {
         }
     }
 
-    public function get_resumen_mail($id_entidad, $sid){
+    public function get_resumen_mail($sid){
         $this->load->model('pagos_model');
         $this->load->model('debtarj_model');
-        $resumen = $this->pagos_model->get_monto_socio($id_entidad,$sid);
+        $resumen = $this->pagos_model->get_monto_socio($sid);
         $res['resumen'] = $resumen;
         $socio = $this->get_socio($sid);
         $res['mail'] = $socio->mail;
-        $res['deuda'] = $this->pagos_model->get_deuda_sinhoy($id_entidad,$sid);
+        $res['deuda'] = $this->pagos_model->get_deuda_sinhoy($sid);
         $res['sid'] = $sid;
-	$debtarj = $this->debtarj_model->get_debtarj_by_sid($id_entidad, $sid);
-	if ( $debtarj ) {
-        	$res['debtarj'] = $debtarj;
-	} else {
-        	$res['debtarj'] = null;
-	}
+        $res['debtarj'] = null;
 	
         return $res;
     }

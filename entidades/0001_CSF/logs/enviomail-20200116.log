@@ -1,0 +1,647 @@
+Club San Francisco - Envio de Emails 2020-01-16 11:55:35
+16/01/2020 11:55:35: Buscando correos para enviar... 
+16/01/2020 11:55:35: Se encontraron 2 correos. Enviando... 
+16/01/2020 11:55:35: Enviando: agonzalez.lacoope@gmail.com ----> Error de Envio:The following SMTP error was encountered: 110 Connection timed out<br />Unable to send data: AUTH LOGIN<br />Failed to send AUTH LOGIN command. Error: <br />Unable to send data: MAIL FROM:<csf@gestionsocios.com.ar><br /><pre>from: </pre>The following SMTP error was encountered: <br />Unable to send data: RCPT TO:<agonzalez.lacoope@gmail.com><br /><pre>to: </pre>The following SMTP error was encountered: <br />Unable to send data: DATA<br /><pre>data: </pre>The following SMTP error was encountered: <br />Unable to send data: User-Agent: CodeIgniter
+Date: Thu, 16 Jan 2020 11:55:35 -0300
+From: "Club San Francisco" <csf@gestionsocios.com.ar>
+Return-Path: <csf@gestionsocios.com.ar>
+To: agonzalez.lacoope@gmail.com
+Subject: =?utf-8?Q?Resumen_de_Cuenta_al_16/01/2020?=
+Reply-To: "csf@gestionsocios.com.ar" <csf@gestionsocios.com.ar>
+X-Sender: csf@gestionsocios.com.ar
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: <5e2079674e551@gestionsocios.com.ar>
+Mime-Version: 1.0
+Content-Type: multipart/alternative; boundary="B_ALT_5e2079674e58c"
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e2079674e58c
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+CLUB VILLA MITRETitular: 1-gonzalez adrianAl d&iacute;a de la fecha Ud.
+adeuda $ 2442PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR SU
+SITUACIONIntegrantesGuillermo Volpintesta
+ 
+ 
+ Facturaci&oacute;n del Mes
+ Monto 
+ 
+ 
+ 
+ Cuota Mensual Grupo Familiar
+ $ 1000
+ 
+ Cuota Mensual probando otra actividad
+ $ 1000.00
+ 
+ Seguro Actividad probando otra actividad
+ $ 10.00
+ 
+ Cuota Mensual basquet escuela
+ $ 402.00
+ 
+ Seguro Actividad basquet escuela
+ $ 4.00
+ 
+ 
+ 
+ TOTAL FACTURADO DEL MES
+ $ 2402 
+ 
+ DEUDA ANTERIOR
+ $ 2442 
+ 
+ 
+ TOTAL A ABONAR
+ $ 4844 
+ Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n,
+contactese con SecretariaLe informamos que los socios que paguen sus cuotas
+con tarjeta de credito VISA, COOPEPLUS o BBPS tendran beneficios extras como
+sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de
+comida, entradas al cine, etc; entre otros. LLAME A SECRETARIA Y HAGA EL
+CAMBIO Recuerde que estando al dia Ud. puede disfrutar de los beneficios de
+nuestra RED En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y
+DESCUENTOS ADMINISTRACION CLUB VILLA MITRE - BAHIA BLANCA Garibaldi 149 -
+(291)-4817878
+
+
+--B_ALT_5e2079674e58c
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<table class=3D'table table-hover' style=3D'font-family:verdana' width=3D'1=
+00%' ><thead><tr style=3D'background-color: #105401 ;'><th> <img src=3D'htt=
+p://clubvillamitre.com/images/Escudo-CVM_100.png' alt=3D'' ></th><th style=
+=3D'font-size:30; background-color: #105401; color:#FFF' align=3D'center'>C=
+LUB VILLA MITRE</th></tr></thead></table><h3 style=3D"font-family:verdana">=
+<strong>Titular:</strong> 1-gonzalez adrian</h3><h4 style=3D'font-family:ve=
+rdana' ><strong>Al d&iacute;a de la fecha Ud. adeuda $ 2442</strong></h4><h=
+4 style=3D'font-family:verdana' ><strong>PONGASE EN CONTACTO CON SECRETARIA=
+ PARA REGULARIZAR SU SITUACION</strong></h4><h5 style=3D'font-family:verdan=
+a;'><strong>Integrantes</strong></h5><ul><li style=3D'font-family:verdana;'=
+>Guillermo Volpintesta</li></ul><table class=3D"table table-hover" width=3D=
+"100%" style=3D"font-family: "Verdana";">
+ 			<thead>
+ 		 	<tr style=3D"background-color: #666 !important; color:#FFF;">=20
+ 	 	<th style=3D"padding:5px;" align=3D"left">Facturaci&oacute;n del Mes</t=
+h>
+ 	 	<th style=3D"padding:5px;" align=3D"right">Monto</th>=20
+ 		 	</tr>
+ 			</thead>
+ 	 	<tbody> <tr style=3D"background: #CCC;">
+ 		<td style=3D"padding: 5px;">Cuota Mensual Grupo Familiar</td>
+ 		<td style=3D"padding: 5px;" align=3D"right">$ 1000</td>
+ 	 	</tr><tr style=3D"background: #CCC;">
+ 	 	<td style=3D"padding: 5px;">Cuota Mensual probando otra actividad</td>
+ 	 	<td style=3D"padding: 5px;" align=3D"right">$ 1000.00</td>
+ 			</tr><tr style=3D"background: #CCC;">
+ 	 		<td style=3D"padding: 5px;">Seguro Actividad probando otra actividad</=
+td>
+ 	 		<td style=3D"padding: 5px;" align=3D"right">$ 10.00</td>
+ 				</tr><tr style=3D"background: #CCC;">
+ 	 	<td style=3D"padding: 5px;">Cuota Mensual basquet escuela</td>
+ 	 	<td style=3D"padding: 5px;" align=3D"right">$ 402.00</td>
+ 			</tr><tr style=3D"background: #CCC;">
+ 	 		<td style=3D"padding: 5px;">Seguro Actividad basquet escuela</td>
+ 	 		<td style=3D"padding: 5px;" align=3D"right">$ 4.00</td>
+ 				</tr></tbody>
+ 		<tfoot>
+ 		<tr>=20
+ 		<th style=3D"font-family:verdana;" align=3D"left">TOTAL FACTURADO DEL ME=
+S</th>
+ 		<th style=3D"font-family:verdana;" align=3D"right">$ 2402</th>=20
+ 		</tr> <tr>=20
+ 			<th style=3D"font-family:verdana;" align=3D"left">DEUDA ANTERIOR</th>
+ 			<th style=3D"font-family:verdana;" align=3D"right">$ 2442</th>=20
+ 		 	</tr>=20
+ 		 	<tr>=20
+ 			<th style=3D"font-family:verdana;" align=3D"left">TOTAL A ABONAR</th>
+ 			<th style=3D"font-family:verdana;" align=3D"right">$ 4844</th>=20
+ 		 	</tr> </tfoot> </table><p style=3D"font-family:verdana; font-style:ita=
+lic;">Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n=
+, contactese con Secretaria</p><p style=3D'font-family:verdana'>Le informam=
+os que los socios que paguen sus cuotas con <b>tarjeta de credito VISA, COO=
+PEPLUS o BBPS</b> tendran beneficios extras como sorteos de entradas a even=
+tos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine=
+, etc; entre otros. <b>LLAME A SECRETARIA Y HAGA EL CAMBIO</b> </p><p style=
+=3D'font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de=
+ los <b>beneficios de nuestra RED</b> </p><p style=3D'font-family:verdana'>=
+ <a href=3D'https://villamitre.com.ar/beneficios-2/'>En este link podr&aacu=
+te; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS<img src=3D'http://clubvillam=
+itre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'></a></p><br> <br><p style=
+=3D'font-family:verdana'> <b>ADMINISTRACION</b></p><p style=3D'font-family:=
+verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p><p style=3D'font-family=
+:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p><br> <br><img src=3D'ht=
+tp://clubvillamitre.com/images/2doZocalo3.png' alt=3D''>
+
+--B_ALT_5e2079674e58c--<br />Unable to send data: .<br /><br />The following SMTP error was encountered: <br />Unable to send email using PHP SMTP.  Your server might not be configured to send mail using this method.<br /><pre>User-Agent: CodeIgniter
+Date: Thu, 16 Jan 2020 11:55:35 -0300
+From: &quot;Club San Francisco&quot; &lt;csf@gestionsocios.com.ar&gt;
+Return-Path: &lt;csf@gestionsocios.com.ar&gt;
+To: agonzalez.lacoope@gmail.com
+Subject: =?utf-8?Q?Resumen_de_Cuenta_al_16/01/2020?=
+Reply-To: &quot;csf@gestionsocios.com.ar&quot; &lt;csf@gestionsocios.com.ar&gt;
+X-Sender: csf@gestionsocios.com.ar
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;5e2079674e551@gestionsocios.com.ar&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_5e2079674e58c&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e2079674e58c
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+CLUB VILLA MITRETitular: 1-gonzalez adrianAl d&amp;iacute;a de la fecha Ud.
+adeuda $ 2442PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR SU
+SITUACIONIntegrantesGuillermo Volpintesta
+ 
+ 
+ Facturaci&amp;oacute;n del Mes
+ Monto 
+ 
+ 
+ 
+ Cuota Mensual Grupo Familiar
+ $ 1000
+ 
+ Cuota Mensual probando otra actividad
+ $ 1000.00
+ 
+ Seguro Actividad probando otra actividad
+ $ 10.00
+ 
+ Cuota Mensual basquet escuela
+ $ 402.00
+ 
+ Seguro Actividad basquet escuela
+ $ 4.00
+ 
+ 
+ 
+ TOTAL FACTURADO DEL MES
+ $ 2402 
+ 
+ DEUDA ANTERIOR
+ $ 2442 
+ 
+ 
+ TOTAL A ABONAR
+ $ 4844 
+ Recuerde que iene 10 d&amp;iacute;as para regularizar su situaci&amp;oacute;n,
+contactese con SecretariaLe informamos que los socios que paguen sus cuotas
+con tarjeta de credito VISA, COOPEPLUS o BBPS tendran beneficios extras como
+sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de
+comida, entradas al cine, etc; entre otros. LLAME A SECRETARIA Y HAGA EL
+CAMBIO Recuerde que estando al dia Ud. puede disfrutar de los beneficios de
+nuestra RED En este link podr&amp;aacute; encontrar COMERCIOS ADHERIDOS Y
+DESCUENTOS ADMINISTRACION CLUB VILLA MITRE - BAHIA BLANCA Garibaldi 149 -
+(291)-4817878
+
+
+--B_ALT_5e2079674e58c
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+&lt;table class=3D'table table-hover' style=3D'font-family:verdana' width=3D'1=
+00%' &gt;&lt;thead&gt;&lt;tr style=3D'background-color: #105401 ;'&gt;&lt;th&gt; &lt;img src=3D'htt=
+p://clubvillamitre.com/images/Escudo-CVM_100.png' alt=3D'' &gt;&lt;/th&gt;&lt;th style=
+=3D'font-size:30; background-color: #105401; color:#FFF' align=3D'center'&gt;C=
+LUB VILLA MITRE&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;/table&gt;&lt;h3 style=3D&quot;font-family:verdana&quot;&gt;=
+&lt;strong&gt;Titular:&lt;/strong&gt; 1-gonzalez adrian&lt;/h3&gt;&lt;h4 style=3D'font-family:ve=
+rdana' &gt;&lt;strong&gt;Al d&amp;iacute;a de la fecha Ud. adeuda $ 2442&lt;/strong&gt;&lt;/h4&gt;&lt;h=
+4 style=3D'font-family:verdana' &gt;&lt;strong&gt;PONGASE EN CONTACTO CON SECRETARIA=
+ PARA REGULARIZAR SU SITUACION&lt;/strong&gt;&lt;/h4&gt;&lt;h5 style=3D'font-family:verdan=
+a;'&gt;&lt;strong&gt;Integrantes&lt;/strong&gt;&lt;/h5&gt;&lt;ul&gt;&lt;li style=3D'font-family:verdana;'=
+&gt;Guillermo Volpintesta&lt;/li&gt;&lt;/ul&gt;&lt;table class=3D&quot;table table-hover&quot; width=3D=
+&quot;100%&quot; style=3D&quot;font-family: &quot;Verdana&quot;;&quot;&gt;
+ 			&lt;thead&gt;
+ 		 	&lt;tr style=3D&quot;background-color: #666 !important; color:#FFF;&quot;&gt;=20
+ 	 	&lt;th style=3D&quot;padding:5px;&quot; align=3D&quot;left&quot;&gt;Facturaci&amp;oacute;n del Mes&lt;/t=
+h&gt;
+ 	 	&lt;th style=3D&quot;padding:5px;&quot; align=3D&quot;right&quot;&gt;Monto&lt;/th&gt;=20
+ 		 	&lt;/tr&gt;
+ 			&lt;/thead&gt;
+ 	 	&lt;tbody&gt; &lt;tr style=3D&quot;background: #CCC;&quot;&gt;
+ 		&lt;td style=3D&quot;padding: 5px;&quot;&gt;Cuota Mensual Grupo Familiar&lt;/td&gt;
+ 		&lt;td style=3D&quot;padding: 5px;&quot; align=3D&quot;right&quot;&gt;$ 1000&lt;/td&gt;
+ 	 	&lt;/tr&gt;&lt;tr style=3D&quot;background: #CCC;&quot;&gt;
+ 	 	&lt;td style=3D&quot;padding: 5px;&quot;&gt;Cuota Mensual probando otra actividad&lt;/td&gt;
+ 	 	&lt;td style=3D&quot;padding: 5px;&quot; align=3D&quot;right&quot;&gt;$ 1000.00&lt;/td&gt;
+ 			&lt;/tr&gt;&lt;tr style=3D&quot;background: #CCC;&quot;&gt;
+ 	 		&lt;td style=3D&quot;padding: 5px;&quot;&gt;Seguro Actividad probando otra actividad&lt;/=
+td&gt;
+ 	 		&lt;td style=3D&quot;padding: 5px;&quot; align=3D&quot;right&quot;&gt;$ 10.00&lt;/td&gt;
+ 				&lt;/tr&gt;&lt;tr style=3D&quot;background: #CCC;&quot;&gt;
+ 	 	&lt;td style=3D&quot;padding: 5px;&quot;&gt;Cuota Mensual basquet escuela&lt;/td&gt;
+ 	 	&lt;td style=3D&quot;padding: 5px;&quot; align=3D&quot;right&quot;&gt;$ 402.00&lt;/td&gt;
+ 			&lt;/tr&gt;&lt;tr style=3D&quot;background: #CCC;&quot;&gt;
+ 	 		&lt;td style=3D&quot;padding: 5px;&quot;&gt;Seguro Actividad basquet escuela&lt;/td&gt;
+ 	 		&lt;td style=3D&quot;padding: 5px;&quot; align=3D&quot;right&quot;&gt;$ 4.00&lt;/td&gt;
+ 				&lt;/tr&gt;&lt;/tbody&gt;
+ 		&lt;tfoot&gt;
+ 		&lt;tr&gt;=20
+ 		&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;left&quot;&gt;TOTAL FACTURADO DEL ME=
+S&lt;/th&gt;
+ 		&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;right&quot;&gt;$ 2402&lt;/th&gt;=20
+ 		&lt;/tr&gt; &lt;tr&gt;=20
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;left&quot;&gt;DEUDA ANTERIOR&lt;/th&gt;
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;right&quot;&gt;$ 2442&lt;/th&gt;=20
+ 		 	&lt;/tr&gt;=20
+ 		 	&lt;tr&gt;=20
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;left&quot;&gt;TOTAL A ABONAR&lt;/th&gt;
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;right&quot;&gt;$ 4844&lt;/th&gt;=20
+ 		 	&lt;/tr&gt; &lt;/tfoot&gt; &lt;/table&gt;&lt;p style=3D&quot;font-family:verdana; font-style:ita=
+lic;&quot;&gt;Recuerde que iene 10 d&amp;iacute;as para regularizar su situaci&amp;oacute;n=
+, contactese con Secretaria&lt;/p&gt;&lt;p style=3D'font-family:verdana'&gt;Le informam=
+os que los socios que paguen sus cuotas con &lt;b&gt;tarjeta de credito VISA, COO=
+PEPLUS o BBPS&lt;/b&gt; tendran beneficios extras como sorteos de entradas a even=
+tos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine=
+, etc; entre otros. &lt;b&gt;LLAME A SECRETARIA Y HAGA EL CAMBIO&lt;/b&gt; &lt;/p&gt;&lt;p style=
+=3D'font-family:verdana'&gt;Recuerde que estando al dia Ud. puede disfrutar de=
+ los &lt;b&gt;beneficios de nuestra RED&lt;/b&gt; &lt;/p&gt;&lt;p style=3D'font-family:verdana'&gt;=
+ &lt;a href=3D'https://villamitre.com.ar/beneficios-2/'&gt;En este link podr&amp;aacu=
+te; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS&lt;img src=3D'http://clubvillam=
+itre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'&gt;&lt;/a&gt;&lt;/p&gt;&lt;br&gt; &lt;br&gt;&lt;p style=
+=3D'font-family:verdana'&gt; &lt;b&gt;ADMINISTRACION&lt;/b&gt;&lt;/p&gt;&lt;p style=3D'font-family:=
+verdana'&gt; &lt;b&gt;CLUB VILLA MITRE - BAHIA BLANCA&lt;/b&gt;&lt;/p&gt;&lt;p style=3D'font-family=
+:verdana'&gt; &lt;b&gt;Garibaldi 149 - (291)-4817878&lt;/b&gt; &lt;/p&gt;&lt;br&gt; &lt;br&gt;&lt;img src=3D'ht=
+tp://clubvillamitre.com/images/2doZocalo3.png' alt=3D''&gt;
+
+--B_ALT_5e2079674e58c--</pre> 
+16/01/2020 11:55:40: Enviando: otroemail@gmail.com ----> Error de Envio:The following SMTP error was encountered: 110 Connection timed out<br />Unable to send data: AUTH LOGIN<br />Failed to send AUTH LOGIN command. Error: <br />Unable to send data: MAIL FROM:<csf@gestionsocios.com.ar><br /><pre>from: </pre>The following SMTP error was encountered: <br />Unable to send data: RCPT TO:<agonzalez.lacoope@gmail.com><br /><pre>to: </pre>The following SMTP error was encountered: <br />Unable to send data: DATA<br /><pre>data: </pre>The following SMTP error was encountered: <br />Unable to send data: User-Agent: CodeIgniter
+Date: Thu, 16 Jan 2020 11:55:35 -0300
+From: "Club San Francisco" <csf@gestionsocios.com.ar>
+Return-Path: <csf@gestionsocios.com.ar>
+To: agonzalez.lacoope@gmail.com
+Subject: =?utf-8?Q?Resumen_de_Cuenta_al_16/01/2020?=
+Reply-To: "csf@gestionsocios.com.ar" <csf@gestionsocios.com.ar>
+X-Sender: csf@gestionsocios.com.ar
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: <5e2079674e551@gestionsocios.com.ar>
+Mime-Version: 1.0
+Content-Type: multipart/alternative; boundary="B_ALT_5e2079674e58c"
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e2079674e58c
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+CLUB VILLA MITRETitular: 1-gonzalez adrianAl d&iacute;a de la fecha Ud.
+adeuda $ 2442PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR SU
+SITUACIONIntegrantesGuillermo Volpintesta
+ 
+ 
+ Facturaci&oacute;n del Mes
+ Monto 
+ 
+ 
+ 
+ Cuota Mensual Grupo Familiar
+ $ 1000
+ 
+ Cuota Mensual probando otra actividad
+ $ 1000.00
+ 
+ Seguro Actividad probando otra actividad
+ $ 10.00
+ 
+ Cuota Mensual basquet escuela
+ $ 402.00
+ 
+ Seguro Actividad basquet escuela
+ $ 4.00
+ 
+ 
+ 
+ TOTAL FACTURADO DEL MES
+ $ 2402 
+ 
+ DEUDA ANTERIOR
+ $ 2442 
+ 
+ 
+ TOTAL A ABONAR
+ $ 4844 
+ Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n,
+contactese con SecretariaLe informamos que los socios que paguen sus cuotas
+con tarjeta de credito VISA, COOPEPLUS o BBPS tendran beneficios extras como
+sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de
+comida, entradas al cine, etc; entre otros. LLAME A SECRETARIA Y HAGA EL
+CAMBIO Recuerde que estando al dia Ud. puede disfrutar de los beneficios de
+nuestra RED En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y
+DESCUENTOS ADMINISTRACION CLUB VILLA MITRE - BAHIA BLANCA Garibaldi 149 -
+(291)-4817878
+
+
+--B_ALT_5e2079674e58c
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<table class=3D'table table-hover' style=3D'font-family:verdana' width=3D'1=
+00%' ><thead><tr style=3D'background-color: #105401 ;'><th> <img src=3D'htt=
+p://clubvillamitre.com/images/Escudo-CVM_100.png' alt=3D'' ></th><th style=
+=3D'font-size:30; background-color: #105401; color:#FFF' align=3D'center'>C=
+LUB VILLA MITRE</th></tr></thead></table><h3 style=3D"font-family:verdana">=
+<strong>Titular:</strong> 1-gonzalez adrian</h3><h4 style=3D'font-family:ve=
+rdana' ><strong>Al d&iacute;a de la fecha Ud. adeuda $ 2442</strong></h4><h=
+4 style=3D'font-family:verdana' ><strong>PONGASE EN CONTACTO CON SECRETARIA=
+ PARA REGULARIZAR SU SITUACION</strong></h4><h5 style=3D'font-family:verdan=
+a;'><strong>Integrantes</strong></h5><ul><li style=3D'font-family:verdana;'=
+>Guillermo Volpintesta</li></ul><table class=3D"table table-hover" width=3D=
+"100%" style=3D"font-family: "Verdana";">
+ 			<thead>
+ 		 	<tr style=3D"background-color: #666 !important; color:#FFF;">=20
+ 	 	<th style=3D"padding:5px;" align=3D"left">Facturaci&oacute;n del Mes</t=
+h>
+ 	 	<th style=3D"padding:5px;" align=3D"right">Monto</th>=20
+ 		 	</tr>
+ 			</thead>
+ 	 	<tbody> <tr style=3D"background: #CCC;">
+ 		<td style=3D"padding: 5px;">Cuota Mensual Grupo Familiar</td>
+ 		<td style=3D"padding: 5px;" align=3D"right">$ 1000</td>
+ 	 	</tr><tr style=3D"background: #CCC;">
+ 	 	<td style=3D"padding: 5px;">Cuota Mensual probando otra actividad</td>
+ 	 	<td style=3D"padding: 5px;" align=3D"right">$ 1000.00</td>
+ 			</tr><tr style=3D"background: #CCC;">
+ 	 		<td style=3D"padding: 5px;">Seguro Actividad probando otra actividad</=
+td>
+ 	 		<td style=3D"padding: 5px;" align=3D"right">$ 10.00</td>
+ 				</tr><tr style=3D"background: #CCC;">
+ 	 	<td style=3D"padding: 5px;">Cuota Mensual basquet escuela</td>
+ 	 	<td style=3D"padding: 5px;" align=3D"right">$ 402.00</td>
+ 			</tr><tr style=3D"background: #CCC;">
+ 	 		<td style=3D"padding: 5px;">Seguro Actividad basquet escuela</td>
+ 	 		<td style=3D"padding: 5px;" align=3D"right">$ 4.00</td>
+ 				</tr></tbody>
+ 		<tfoot>
+ 		<tr>=20
+ 		<th style=3D"font-family:verdana;" align=3D"left">TOTAL FACTURADO DEL ME=
+S</th>
+ 		<th style=3D"font-family:verdana;" align=3D"right">$ 2402</th>=20
+ 		</tr> <tr>=20
+ 			<th style=3D"font-family:verdana;" align=3D"left">DEUDA ANTERIOR</th>
+ 			<th style=3D"font-family:verdana;" align=3D"right">$ 2442</th>=20
+ 		 	</tr>=20
+ 		 	<tr>=20
+ 			<th style=3D"font-family:verdana;" align=3D"left">TOTAL A ABONAR</th>
+ 			<th style=3D"font-family:verdana;" align=3D"right">$ 4844</th>=20
+ 		 	</tr> </tfoot> </table><p style=3D"font-family:verdana; font-style:ita=
+lic;">Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n=
+, contactese con Secretaria</p><p style=3D'font-family:verdana'>Le informam=
+os que los socios que paguen sus cuotas con <b>tarjeta de credito VISA, COO=
+PEPLUS o BBPS</b> tendran beneficios extras como sorteos de entradas a even=
+tos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine=
+, etc; entre otros. <b>LLAME A SECRETARIA Y HAGA EL CAMBIO</b> </p><p style=
+=3D'font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de=
+ los <b>beneficios de nuestra RED</b> </p><p style=3D'font-family:verdana'>=
+ <a href=3D'https://villamitre.com.ar/beneficios-2/'>En este link podr&aacu=
+te; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS<img src=3D'http://clubvillam=
+itre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'></a></p><br> <br><p style=
+=3D'font-family:verdana'> <b>ADMINISTRACION</b></p><p style=3D'font-family:=
+verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p><p style=3D'font-family=
+:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p><br> <br><img src=3D'ht=
+tp://clubvillamitre.com/images/2doZocalo3.png' alt=3D''>
+
+--B_ALT_5e2079674e58c--<br />Unable to send data: .<br /><br />The following SMTP error was encountered: <br />Unable to send email using PHP SMTP.  Your server might not be configured to send mail using this method.<br />The following SMTP error was encountered: 110 Connection timed out<br />Unable to send data: AUTH LOGIN<br />Failed to send AUTH LOGIN command. Error: <br />Unable to send data: MAIL FROM:<csf@gestionsocios.com.ar><br /><pre>from: </pre>The following SMTP error was encountered: <br />Unable to send data: RCPT TO:<otroemail@gmail.com><br /><pre>to: </pre>The following SMTP error was encountered: <br />Unable to send data: DATA<br /><pre>data: </pre>The following SMTP error was encountered: <br />Unable to send data: User-Agent: CodeIgniter
+Date: Thu, 16 Jan 2020 11:55:35 -0300
+From: "Club San Francisco" <csf@gestionsocios.com.ar>
+Return-Path: <csf@gestionsocios.com.ar>
+To: otroemail@gmail.com
+Subject: =?utf-8?Q?Resumen_de_Cuenta_al_16/01/2020?=
+Reply-To: "csf@gestionsocios.com.ar" <csf@gestionsocios.com.ar>
+X-Sender: csf@gestionsocios.com.ar
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: <5e20796cec2cd@gestionsocios.com.ar>
+Mime-Version: 1.0
+Content-Type: multipart/alternative; boundary="B_ALT_5e20796cec31c"
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e20796cec31c
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+CLUB VILLA MITRETitular: 8-otra vez probando carga de nuevoAl d&iacute;a de
+la fecha Ud. adeuda $ 156PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR
+SU SITUACION
+ 
+ 
+ Facturaci&oacute;n del Mes
+ Monto 
+ 
+ 
+ 
+ Cuota Mensual Socios Mayores II
+ $ 156
+ 
+ 
+ 
+ TOTAL FACTURADO DEL MES
+ $ 156 
+ 
+ DEUDA ANTERIOR
+ $ 156 
+ 
+ 
+ TOTAL A ABONAR
+ $ 312 
+ Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n,
+contactese con SecretariaLe informamos que los socios que paguen sus cuotas
+con tarjeta de credito VISA, COOPEPLUS o BBPS tendran beneficios extras como
+sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de
+comida, entradas al cine, etc; entre otros. LLAME A SECRETARIA Y HAGA EL
+CAMBIO Recuerde que estando al dia Ud. puede disfrutar de los beneficios de
+nuestra RED En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y
+DESCUENTOS ADMINISTRACION CLUB VILLA MITRE - BAHIA BLANCA Garibaldi 149 -
+(291)-4817878
+
+
+--B_ALT_5e20796cec31c
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<table class=3D'table table-hover' style=3D'font-family:verdana' width=3D'1=
+00%' ><thead><tr style=3D'background-color: #105401 ;'><th> <img src=3D'htt=
+p://clubvillamitre.com/images/Escudo-CVM_100.png' alt=3D'' ></th><th style=
+=3D'font-size:30; background-color: #105401; color:#FFF' align=3D'center'>C=
+LUB VILLA MITRE</th></tr></thead></table><h3 style=3D"font-family:verdana">=
+<strong>Titular:</strong> 8-otra vez probando carga de nuevo</h3><h4 style=
+=3D'font-family:verdana' ><strong>Al d&iacute;a de la fecha Ud. adeuda $ 15=
+6</strong></h4><h4 style=3D'font-family:verdana' ><strong>PONGASE EN CONTAC=
+TO CON SECRETARIA PARA REGULARIZAR SU SITUACION</strong></h4><table class=
+=3D"table table-hover" width=3D"100%" style=3D"font-family: "Verdana";">
+ 			<thead>
+ 		 	<tr style=3D"background-color: #666 !important; color:#FFF;">=20
+ 	 	<th style=3D"padding:5px;" align=3D"left">Facturaci&oacute;n del Mes</t=
+h>
+ 	 	<th style=3D"padding:5px;" align=3D"right">Monto</th>=20
+ 		 	</tr>
+ 			</thead>
+ 	 	<tbody> <tr style=3D"background: #CCC;">
+ 		<td style=3D"padding: 5px;">Cuota Mensual Socios Mayores II</td>
+ 		<td style=3D"padding: 5px;" align=3D"right">$ 156</td>
+ 	 	</tr></tbody>
+ 		<tfoot>
+ 		<tr>=20
+ 		<th style=3D"font-family:verdana;" align=3D"left">TOTAL FACTURADO DEL ME=
+S</th>
+ 		<th style=3D"font-family:verdana;" align=3D"right">$ 156</th>=20
+ 		</tr> <tr>=20
+ 			<th style=3D"font-family:verdana;" align=3D"left">DEUDA ANTERIOR</th>
+ 			<th style=3D"font-family:verdana;" align=3D"right">$ 156</th>=20
+ 		 	</tr>=20
+ 		 	<tr>=20
+ 			<th style=3D"font-family:verdana;" align=3D"left">TOTAL A ABONAR</th>
+ 			<th style=3D"font-family:verdana;" align=3D"right">$ 312</th>=20
+ 		 	</tr> </tfoot> </table><p style=3D"font-family:verdana; font-style:ita=
+lic;">Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n=
+, contactese con Secretaria</p><p style=3D'font-family:verdana'>Le informam=
+os que los socios que paguen sus cuotas con <b>tarjeta de credito VISA, COO=
+PEPLUS o BBPS</b> tendran beneficios extras como sorteos de entradas a even=
+tos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine=
+, etc; entre otros. <b>LLAME A SECRETARIA Y HAGA EL CAMBIO</b> </p><p style=
+=3D'font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de=
+ los <b>beneficios de nuestra RED</b> </p><p style=3D'font-family:verdana'>=
+ <a href=3D'https://villamitre.com.ar/beneficios-2/'>En este link podr&aacu=
+te; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS<img src=3D'http://clubvillam=
+itre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'></a></p><br> <br><p style=
+=3D'font-family:verdana'> <b>ADMINISTRACION</b></p><p style=3D'font-family:=
+verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p><p style=3D'font-family=
+:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p><br> <br><img src=3D'ht=
+tp://clubvillamitre.com/images/2doZocalo3.png' alt=3D''>
+
+--B_ALT_5e20796cec31c--<br />Unable to send data: .<br /><br />The following SMTP error was encountered: <br />Unable to send email using PHP SMTP.  Your server might not be configured to send mail using this method.<br /><pre>User-Agent: CodeIgniter
+Date: Thu, 16 Jan 2020 11:55:35 -0300
+From: &quot;Club San Francisco&quot; &lt;csf@gestionsocios.com.ar&gt;
+Return-Path: &lt;csf@gestionsocios.com.ar&gt;
+To: otroemail@gmail.com
+Subject: =?utf-8?Q?Resumen_de_Cuenta_al_16/01/2020?=
+Reply-To: &quot;csf@gestionsocios.com.ar&quot; &lt;csf@gestionsocios.com.ar&gt;
+X-Sender: csf@gestionsocios.com.ar
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;5e20796cec2cd@gestionsocios.com.ar&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_5e20796cec31c&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e20796cec31c
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+CLUB VILLA MITRETitular: 8-otra vez probando carga de nuevoAl d&amp;iacute;a de
+la fecha Ud. adeuda $ 156PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR
+SU SITUACION
+ 
+ 
+ Facturaci&amp;oacute;n del Mes
+ Monto 
+ 
+ 
+ 
+ Cuota Mensual Socios Mayores II
+ $ 156
+ 
+ 
+ 
+ TOTAL FACTURADO DEL MES
+ $ 156 
+ 
+ DEUDA ANTERIOR
+ $ 156 
+ 
+ 
+ TOTAL A ABONAR
+ $ 312 
+ Recuerde que iene 10 d&amp;iacute;as para regularizar su situaci&amp;oacute;n,
+contactese con SecretariaLe informamos que los socios que paguen sus cuotas
+con tarjeta de credito VISA, COOPEPLUS o BBPS tendran beneficios extras como
+sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de
+comida, entradas al cine, etc; entre otros. LLAME A SECRETARIA Y HAGA EL
+CAMBIO Recuerde que estando al dia Ud. puede disfrutar de los beneficios de
+nuestra RED En este link podr&amp;aacute; encontrar COMERCIOS ADHERIDOS Y
+DESCUENTOS ADMINISTRACION CLUB VILLA MITRE - BAHIA BLANCA Garibaldi 149 -
+(291)-4817878
+
+
+--B_ALT_5e20796cec31c
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+&lt;table class=3D'table table-hover' style=3D'font-family:verdana' width=3D'1=
+00%' &gt;&lt;thead&gt;&lt;tr style=3D'background-color: #105401 ;'&gt;&lt;th&gt; &lt;img src=3D'htt=
+p://clubvillamitre.com/images/Escudo-CVM_100.png' alt=3D'' &gt;&lt;/th&gt;&lt;th style=
+=3D'font-size:30; background-color: #105401; color:#FFF' align=3D'center'&gt;C=
+LUB VILLA MITRE&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;/table&gt;&lt;h3 style=3D&quot;font-family:verdana&quot;&gt;=
+&lt;strong&gt;Titular:&lt;/strong&gt; 8-otra vez probando carga de nuevo&lt;/h3&gt;&lt;h4 style=
+=3D'font-family:verdana' &gt;&lt;strong&gt;Al d&amp;iacute;a de la fecha Ud. adeuda $ 15=
+6&lt;/strong&gt;&lt;/h4&gt;&lt;h4 style=3D'font-family:verdana' &gt;&lt;strong&gt;PONGASE EN CONTAC=
+TO CON SECRETARIA PARA REGULARIZAR SU SITUACION&lt;/strong&gt;&lt;/h4&gt;&lt;table class=
+=3D&quot;table table-hover&quot; width=3D&quot;100%&quot; style=3D&quot;font-family: &quot;Verdana&quot;;&quot;&gt;
+ 			&lt;thead&gt;
+ 		 	&lt;tr style=3D&quot;background-color: #666 !important; color:#FFF;&quot;&gt;=20
+ 	 	&lt;th style=3D&quot;padding:5px;&quot; align=3D&quot;left&quot;&gt;Facturaci&amp;oacute;n del Mes&lt;/t=
+h&gt;
+ 	 	&lt;th style=3D&quot;padding:5px;&quot; align=3D&quot;right&quot;&gt;Monto&lt;/th&gt;=20
+ 		 	&lt;/tr&gt;
+ 			&lt;/thead&gt;
+ 	 	&lt;tbody&gt; &lt;tr style=3D&quot;background: #CCC;&quot;&gt;
+ 		&lt;td style=3D&quot;padding: 5px;&quot;&gt;Cuota Mensual Socios Mayores II&lt;/td&gt;
+ 		&lt;td style=3D&quot;padding: 5px;&quot; align=3D&quot;right&quot;&gt;$ 156&lt;/td&gt;
+ 	 	&lt;/tr&gt;&lt;/tbody&gt;
+ 		&lt;tfoot&gt;
+ 		&lt;tr&gt;=20
+ 		&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;left&quot;&gt;TOTAL FACTURADO DEL ME=
+S&lt;/th&gt;
+ 		&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;right&quot;&gt;$ 156&lt;/th&gt;=20
+ 		&lt;/tr&gt; &lt;tr&gt;=20
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;left&quot;&gt;DEUDA ANTERIOR&lt;/th&gt;
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;right&quot;&gt;$ 156&lt;/th&gt;=20
+ 		 	&lt;/tr&gt;=20
+ 		 	&lt;tr&gt;=20
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;left&quot;&gt;TOTAL A ABONAR&lt;/th&gt;
+ 			&lt;th style=3D&quot;font-family:verdana;&quot; align=3D&quot;right&quot;&gt;$ 312&lt;/th&gt;=20
+ 		 	&lt;/tr&gt; &lt;/tfoot&gt; &lt;/table&gt;&lt;p style=3D&quot;font-family:verdana; font-style:ita=
+lic;&quot;&gt;Recuerde que iene 10 d&amp;iacute;as para regularizar su situaci&amp;oacute;n=
+, contactese con Secretaria&lt;/p&gt;&lt;p style=3D'font-family:verdana'&gt;Le informam=
+os que los socios que paguen sus cuotas con &lt;b&gt;tarjeta de credito VISA, COO=
+PEPLUS o BBPS&lt;/b&gt; tendran beneficios extras como sorteos de entradas a even=
+tos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine=
+, etc; entre otros. &lt;b&gt;LLAME A SECRETARIA Y HAGA EL CAMBIO&lt;/b&gt; &lt;/p&gt;&lt;p style=
+=3D'font-family:verdana'&gt;Recuerde que estando al dia Ud. puede disfrutar de=
+ los &lt;b&gt;beneficios de nuestra RED&lt;/b&gt; &lt;/p&gt;&lt;p style=3D'font-family:verdana'&gt;=
+ &lt;a href=3D'https://villamitre.com.ar/beneficios-2/'&gt;En este link podr&amp;aacu=
+te; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS&lt;img src=3D'http://clubvillam=
+itre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'&gt;&lt;/a&gt;&lt;/p&gt;&lt;br&gt; &lt;br&gt;&lt;p style=
+=3D'font-family:verdana'&gt; &lt;b&gt;ADMINISTRACION&lt;/b&gt;&lt;/p&gt;&lt;p style=3D'font-family:=
+verdana'&gt; &lt;b&gt;CLUB VILLA MITRE - BAHIA BLANCA&lt;/b&gt;&lt;/p&gt;&lt;p style=3D'font-family=
+:verdana'&gt; &lt;b&gt;Garibaldi 149 - (291)-4817878&lt;/b&gt; &lt;/p&gt;&lt;br&gt; &lt;br&gt;&lt;img src=3D'ht=
+tp://clubvillamitre.com/images/2doZocalo3.png' alt=3D''&gt;
+
+--B_ALT_5e20796cec31c--</pre> 
+16/01/2020 11:55:45: Envio Finalizado 
+Club San Francisco - Envio de Emails 2020-01-16 12:02:06
+16/01/2020 12:02:06: Buscando correos para enviar... 
+16/01/2020 12:02:06: Se encontraron 2 correos. Enviando... 
+16/01/2020 12:02:06: Enviando: agonzalez.lacoope@gmail.com ----> Error de Envio:The following SMTP error was encountered: 110 Connection timed out<br />Unable to send data: AUTH LOGIN<br />Failed to send AUTH LOGIN command. Error: <br />Unable to send data: MAIL FROM:<csf@gestion 
+16/01/2020 12:02:11: Enviando: otroemail@gmail.com ----> Error de Envio:The following SMTP error was encountered: 110 Connection timed out<br />Unable to send data: AUTH LOGIN<br />Failed to send AUTH LOGIN command. Error: <br />Unable to send data: MAIL FROM:<csf@gestion 
+16/01/2020 12:02:16: Envio Finalizado 

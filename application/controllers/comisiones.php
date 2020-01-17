@@ -268,7 +268,7 @@ class Comisiones extends CI_Controller {
 		$data['baseurl'] = base_url();
 		$data['socio'] = $this->socios_model->get_socio($id_socio);
 		$data['facturacion'] = $this->pagos_model->get_facturacion($id_entidad, $id_socio);
-		$data['cuota'] = $this->pagos_model->get_monto_socio($id_entidad, $id_socio);
+		$data['cuota'] = $this->pagos_model->get_monto_socio($id_socio);
                 if ( $accion ) {
                         if ( $accion == "excel" ) {
                                 $archivo="Resument_Cuenta_Asoc_".$id_socio."_".date('Ymd');

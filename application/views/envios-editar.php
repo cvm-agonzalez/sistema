@@ -62,6 +62,13 @@
                            ?>
                         </select>
                      </div>
+                <div class="form-group">
+                                <span class="btn btn-success fileinput-button">
+                                    <span><i class="fa fa-cloud-upload"></i> Subir Imágen</span>
+                                    <input id="fileupload_mail" type="file" name="files[]" multiple>
+                                </span>
+                </div>
+
                      <div align="right">
                         <button type="submit" id="envios-continuar" class="btn btn-success btn-block">Continuar <i class="fa fa-arrow-right"></i></button>
                      </div>

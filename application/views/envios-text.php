@@ -12,9 +12,15 @@
 				if($body){
 					echo $body;
 				}else{
-					?>
-					<img src="http://clubvillamitre.com/images/vm-head.png">
-					<?
+
+					$imagen_default=BASEPATH."../entidades/".$ent_directorio."/email_head.png";
+					if(file_exists($imagen_default)){
+						?>
+						<img src="<?=$imagen_default?>">
+						<?
+					} else {
+						echo $imagen_default;
+					}
 				}
 				?>
 

@@ -13,13 +13,7 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2">Precio</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" value="<?=$categoria->precio?>" name="precio">
-                    </div>
-                </div>                                 
-                <div class="form-group">
-                    <label for="" class="col-sm-2">Precio Unitario Adicional</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" value="<?=$categoria->precio_unit?>" name="precio_unit">
+                        <input type="number" class="form-control" value="<?=$categoria->precio?>" name="precio">
                     </div>
                 </div>                                 
                 <div class="form-group">
