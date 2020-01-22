@@ -28,6 +28,13 @@ class General_model extends CI_Model {
         return $query->row();
     }
 
+    public function get_cat_tipo($id_entidad, $tipo){
+        $this->db->where('id_entidad',$id_entidad);
+        $this->db->where('tipo',$tipo);
+        $query = $this->db->get("categorias");
+        return $query->row();
+    }
+
     public function update_cat($idcateg,$categ='')
     {
         $this->db->where('id',$idcateg);
@@ -37,7 +44,7 @@ class General_model extends CI_Model {
     public function insert_cat($categ='')
     {
 	$id_entidad = $categ['id_entidad'];
-	$qry = "SELECT MAX(cid) max_id FROM categorias WHERE id_entidad = $id_entidad; ";
+	$qry = "SELECT IF(MAX(cid)>10, MAX(cid), 10) max_id FROM categorias WHERE id_entidad = $id_entidad; ";
 	$resultado = $this->db->query($qry)->row();
 	if ( $resultado->max_id ) {
 		$categ['cid'] = $resultado->max_id+1;
@@ -53,16 +60,6 @@ class General_model extends CI_Model {
     {
     	$this->db->where('id',$idcateg);
 	$this->db->update('categorias',array('estado'=>0));
-    }
-
-    public function save_cat_config($precios,$fam){
-        for ($i=1; $i < count($precios)+1; $i++) { 
-            $this->db->where('id',$i);
-            $this->db->update('categorias',array('precio'=>$precios[$i-1]));
-	
-        }
-        $this->db->where('id','4');
-        $this->db->update('categorias',array('precio_unit'=>$fam));
     }
 
 /* entidades */

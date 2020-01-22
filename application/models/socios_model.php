@@ -233,36 +233,56 @@ class Socios_model extends CI_Model {
     }
     public function get_cumpleanios($id_entidad){ // esta funcion devuelve los socios que cumplen 18 años entre el 21 del mes pasado y el 20 de este mes
         
-        $mes = date('m'); //mes actual
-        $mes_ant = date('m')-1; //mes anterior
-        if(count($mes_ant) == 1){ 
-            $mes_ant = '0'.$mes_ant;
-        }
-        $anio = date('Y')-18; //18 años antes
+	$this->load->model('general_model');
+        $cat_menor = $this->general_model->get_cat_tipo($id_entidad, "m");
+	if ( $cat_menor ) {
 
-        $this->db->where($anio, 'YEAR(nacimiento)' , FALSE);
-        $this->db->where($mes_ant, 'MONTH(nacimiento)' , FALSE);
-        $this->db->where('21 <=', 'DAY(nacimiento)' , FALSE);
-        $this->db->where('id_entidad', $id_entidad);
-        $this->db->get('socios');
-        $query1 = $this->db->last_query(); //buscamos los que nacieron el mes anterior despues del 21 inclusive
+        	$mes = date('m'); //mes actual
+        	$mes_ant = date('m')-1; //mes anterior
+        	if(count($mes_ant) == 1){ 
+            	$mes_ant = '0'.$mes_ant;
+        	}
+        	$anio = date('Y')-18; //18 años antes
+	
+        	$this->db->where($anio, 'YEAR(nacimiento)' , FALSE);
+        	$this->db->where($mes_ant, 'MONTH(nacimiento)' , FALSE);
+        	$this->db->where('21 <=', 'DAY(nacimiento)' , FALSE);
+        	$this->db->where('id_entidad', $id_entidad);
+        	$this->db->where('categoria', $cat_menor->id);
+        	$this->db->get('socios');
+        	$query1 = $this->db->last_query(); //buscamos los que nacieron el mes anterior despues del 21 inclusive
+	
+        	$this->db->where($anio, 'YEAR(nacimiento)' , FALSE);
+        	$this->db->where($mes, 'MONTH(nacimiento)' , FALSE);
+        	$this->db->where('20 >=', 'DAY(nacimiento)' , FALSE);
+        	$this->db->where('id_entidad', $id_entidad);
+        	$this->db->where('categoria', $cat_menor->id);
+        	$this->db->get('socios');
+        	$query2 = $this->db->last_query(); // buscamos los que nacieron este mes antes del 20 inclusive
+	
+        	$query = $this->db->query($query1." UNION ".$query2);
+        	return $query->result();
+		
+	} else {
 
-        $this->db->where($anio, 'YEAR(nacimiento)' , FALSE);
-        $this->db->where($mes, 'MONTH(nacimiento)' , FALSE);
-        $this->db->where('20 >=', 'DAY(nacimiento)' , FALSE);
-        $this->db->where('id_entidad', $id_entidad);
-        $this->db->get('socios');
-        $query2 = $this->db->last_query(); // buscamos los que nacieron este mes antes del 20 inclusive
+		return false;
+	}
 
-        $query = $this->db->query($query1." UNION ".$query2);
-        return $query->result();
     }
 
     public function actualizar_menor($id_menor){
-        $this->db->where('id',$id_menor);
-        $this->db->update('socios',array('tutor'=>'0','categoria'=>'2'));
-	$this->load->model('pagos_model');
-	$this->pagos_model->registrar_pago('debe',$id_menor,0.00,'Cambio de Categoria de Menor a Mayor - Proceso Facturacion',0,0);
+	$this->load->model('general_model');
+        $cat_mayor = $this->general_model->get_cat_tipo($id_entidad, "M");
+
+	if ( $cat_mayor ) {
+        	$this->db->where('id',$id_menor);
+        	$this->db->update('socios',array('tutor'=>'0','categoria'=>$cat_mayor->id));
+		$this->load->model('pagos_model');
+		$this->pagos_model->registrar_pago('debe',$id_menor,0.00,'Cambio de Categoria de Menor a Mayor - Proceso Facturacion',0,0);
+		return true;
+	} else {
+		return false;
+	}
 
     }
 

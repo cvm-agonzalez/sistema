@@ -73,6 +73,12 @@
                                     <ul class="dropdown-menu with-arrow pull-right">
 					<? if ( $rango == 0 ) { ?>
                                         	<li>
+                                            		<a href="<?=$baseurl?>admin/entidades">
+                                                	<i class="fa fa-user"></i>
+                                                	<span data-i18n="Entidades"></span>
+                                            		</a>
+                                        	</li>
+                                        	<li>
                                             		<a href="<?=$baseurl?>admin/admins">
                                                 	<i class="fa fa-user"></i>
                                                 	<span data-i18n="Administradores"></span>

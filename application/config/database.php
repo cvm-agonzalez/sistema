@@ -49,13 +49,13 @@ $active_group = 'default';
 $active_record = TRUE;
 
 /*
-Seteo del sitio hosteado en hostingbahia
+//Seteo del sitio hosteado en Bahia Host
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'vmhostin_root';
-$db['default']['password'] = 'HBvm123456';
-$db['default']['database'] = 'vmhostin_db2';
-$db['default']['dbdriver'] = 'mysql';
+$db['default']['username'] = 'gestionsocioscom_ges_socios';
+$db['default']['password'] = 'FHO229ri!';
+$db['default']['database'] = 'gestionsocioscom_gestion_socios';
+$db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = '';
 $db['default']['pconnect'] = TRUE;
 $db['default']['db_debug'] = TRUE;
@@ -67,6 +67,7 @@ $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 */
+
 $db['default']['hostname'] = 'localhost';
 $db['default']['username'] = 'cvm';
 $db['default']['password'] = 'cvm';

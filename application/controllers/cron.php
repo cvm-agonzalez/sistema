@@ -132,12 +132,20 @@ class Cron extends CI_Controller {
 
     			$cumpleanios = $this->socios_model->get_cumpleanios($id_entidad); //buscamos los que cumplen 18 años
 			$cump=0;
-    			foreach ($cumpleanios as $menor) {
-    				$this->socios_model->actualizar_menor($menor->id); //los quitamos del grupo familiar y cambiamos la categoria a mayor
-                		$txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->id.'-'.$menor->apellido.', '.$menor->nombre." \n";
-                		fwrite($log, $txt);   
-				$cump++;
-    			}
+			if ( $cumpleanios ) {
+    				foreach ($cumpleanios as $menor) {
+    					if ( $this->socios_model->actualizar_menor($menor->id) ) {
+						//los quitamos del grupo familiar y cambiamos la categoria a mayor
+                				$txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->id.'-'.$menor->apellido.', '.$menor->nombre." \n";
+                				fwrite($log, $txt);   
+						$cump++;
+					} else {
+                				$txt = date('H:i:s').": ERROR NO EXISTE CATEGORIA M para mayores";
+					}
+    				}
+			} else {
+            			fwrite($log, date('H:i:s').' - ERROR NO EXISTE CATEGORIA m para menores \n');
+			}
             		fwrite($log, date('H:i:s').' - Cambio de categoria mayor \n');                        
 
 	    		// Actualizo el registro de facturacion_cron con los socios que cambiaron de categoria por mayoria de edad
@@ -169,7 +177,7 @@ class Cron extends CI_Controller {
 
 			// Si tiene categoria de NO SOCIO no genero cuota
 			$descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
-			if ( $cuota['categoria'] != 'No Socio' ) {
+			if ( $cuota['categ_tipo'] != 'N' ) {
 				// Si es un grupo familiar detallo los integrantes
 				if($cuota['categoria'] == 'Grupo Familiar'){
 					$descripcion .= '<br><strong>Integrantes:</strong> ';
@@ -387,6 +395,44 @@ class Cron extends CI_Controller {
 			// Actualizo en facturacion_cron el asociado facturado
 			$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,3, 1, $cuota['total']);
 	
+			// armo mail
+			$this->armo_emails($socio->id, $deuda);
+		 
+			// Registro pago2 verificar.....
+            		$this->pagos_model->registrar_pago2($socio->id,0);
+	
+			// Actualizado el estado de socios como facturado (facturado=1)
+            		$this->db->where('id', $socio->id);
+            		$this->db->update('socios', array('facturado'=>1));
+	
+			// Registro en el log que asociado facture
+            		$txt = date('H:i:s').": Socio #".$socio->id." DNI=".$socio->dni."-".TRIM($socio->apellido).", ".TRIM($socio->nombre)." facturado \n";
+            		fwrite($log, $txt);            
+	
+		}
+		// Actualizo en la tabla facturacion_cron que termino el proceso de facturacion
+        	$this->db->like('date',$xhoy,'after');
+        	$this->db->update('facturacion_cron', array('id_entidad'=>$id_entidad,'en_curso'=>0));
+		// Registro en el log que el proceso de facturacion termino
+        	$txt = date('H:i:s').": Cron Finalizado \n";
+        	fwrite($log, $txt);            
+        	fclose($log);      
+        	fclose($col);      
+
+		$totales=$this->pagos_model->get_facturacion_cron($id_entidad, $xperiodo);
+		if ( $totales ) {
+			$info_total="Los totales facturados son: <br> Socios Suspendidos: $totales->socios_suspendidos <br> Socios Pasados a Mayores: $totales->socios_cambio_mayor <br> Socios Facturados: $totales->socios_facturados por un total de $ $totales->total_facturado <br> Socios en Debito Tarjeta: $totales->socios_debito por un total de $ $totales->total_debito <br> Mandado a Cobranza COL: $totales->socios_col socios por un total de $ $totales->total_col";
+		} else {
+			$info_total="No encontre registro en facturacion_cron !!!!";
+		}
+	
+		// Me mando email de aviso que el proceso termino OK
+        	mail('cvm.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
+	}
+
+    public function armo_emails($id_socio, $log) {
+
+			// TODO sacar de aca la grabacion cobranza COL
 			// armo mail
 			$mail = $this->socios_model->get_resumen_mail($socio->id);
 	
@@ -648,6 +694,7 @@ class Cron extends CI_Controller {
 	
 			$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
 	
+// TODO ver todas las direcciones de email y textos referentes al club
             		$email = array(
                     		'email' => $mail['mail'],
                     		'id_entidad' => $id_entidad,
@@ -659,39 +706,7 @@ class Cron extends CI_Controller {
             		}
 	
 			// fin armado mail
-	
-		 
-			// Registro pago2 verificar.....
-            		$this->pagos_model->registrar_pago2($socio->id,0);
-	
-			// Actualizado el estado de socios como facturado (facturado=1)
-            		$this->db->where('id', $socio->id);
-            		$this->db->update('socios', array('facturado'=>1));
-	
-			// Registro en el log que asociado facture
-            		$txt = date('H:i:s').": Socio #".$socio->id." DNI=".$socio->dni."-".TRIM($socio->apellido).", ".TRIM($socio->nombre)." facturado \n";
-            		fwrite($log, $txt);            
-	
-		}
-		// Actualizo en la tabla facturacion_cron que termino el proceso de facturacion
-        	$this->db->like('date',$xhoy,'after');
-        	$this->db->update('facturacion_cron', array('id_entidad'=>$id_entidad,'en_curso'=>0));
-		// Registro en el log que el proceso de facturacion termino
-        	$txt = date('H:i:s').": Cron Finalizado \n";
-        	fwrite($log, $txt);            
-        	fclose($log);      
-        	fclose($col);      
-
-		$totales=$this->pagos_model->get_facturacion_cron($id_entidad, $xperiodo);
-		if ( $totales ) {
-			$info_total="Los totales facturados son: <br> Socios Suspendidos: $totales->socios_suspendidos <br> Socios Pasados a Mayores: $totales->socios_cambio_mayor <br> Socios Facturados: $totales->socios_facturados por un total de $ $totales->total_facturado <br> Socios en Debito Tarjeta: $totales->socios_debito por un total de $ $totales->total_debito <br> Mandado a Cobranza COL: $totales->socios_col socios por un total de $ $totales->total_col";
-		} else {
-			$info_total="No encontre registro en facturacion_cron !!!!";
-		}
-	
-		// Me mando email de aviso que el proceso termino OK
-        	mail('cvm.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
-	}
+    }
 
     public function debitos_tarjetas($xperiodo, $log) {
 
@@ -768,11 +783,13 @@ class Cron extends CI_Controller {
     {
         $this->load->model('socios_model');
 	$this->load->model('pagos_model');
+	$this->load->model('general_model');
         $socios = $this->socios_model->get_socios_pagan($id_entidad);
 	$cant = 0 ;
         foreach ($socios as $socio) {
-            // Excluyo del analisis a los vitalicios TODO ver manejo vitalicios
-	    if ( $socio->categoria != 5 ) {
+	    $cat = $this->general_model->get_cat($socio->categoria);
+            // Excluyo del analisis a los vitalicios 
+	    if ( $cat->tipo != "V" ) {
 		$this->db->where('tutor_id', $socio->id);
             	$this->db->where('tipo', 1);
             	$this->db->where('estado', 1);

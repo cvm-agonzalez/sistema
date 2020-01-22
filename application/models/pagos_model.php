@@ -57,14 +57,16 @@ class Pagos_model extends CI_Model {
         $grupo_familiar = $tutor = false;
         $monto = 0;
 
-	// Pongo el valor del excedente de grupo familiar de 4 al 10% del valor de la cuota del grupo
-	// TODO Esta harcodeado el valor 3 ahora le pongo valor fijo de $100
-        $precio_excedente = 100;
-
         //buscamos si el socio pertenece a un grupo familiar
         $this->load->model("socios_model");
         $socio = $this->socios_model->get_socio($sid);
 	$id_entidad = $socio->id_entidad;
+
+	// Pongo el valor del excedente de grupo familiar de 4 al 10% del valor de la cuota del grupo
+        $this->load->model("general_model");
+        $cat_flia = $this->general_model->get_cat_tipo($id_entidad, "F");
+	$precio_grupo = $cat_flia->precio;
+        $precio_excedente = $precio_grupo * 0.10;
 
         //obtenemos el precio de su categoria
         $this->load->model("general_model");
@@ -98,9 +100,8 @@ class Pagos_model extends CI_Model {
                 $monto_excedente = $monto_excedente + $precio_excedente;
             }
 
-	    // TODO como poner el valor del grupo familiar..... Ahora harcodeo 1000 de valor de grupo familiar
             //$monto = $cats['3']->precio - ($cats['3']->precio * $socio->descuento / 100); //valor de la cuota de grupo familiar
-            $monto = 1000 - ( 1000 * $socio->descuento / 100); //valor de la cuota de grupo familiar
+            $monto = $precio_grupo - ( $precio_grupo * $socio->descuento / 100); //valor de la cuota de grupo familiar
             $total = $monto + ( $monto_excedente - ($monto_excedente * $socio->descuento / 100) ); //cuota mensual mas el excedente en caso de ser mas socios de lo permitido en el girpo fliar
 
             foreach ($socio_actividades['actividad'] as $actividad) {
@@ -147,6 +148,7 @@ class Pagos_model extends CI_Model {
                 "titular" => $socio->apellido.' '.$socio->nombre,
                 "total" => $total,
                 "categoria" => 'Grupo Familiar',
+                "categ_tipo" => $cat_flia->tipo,
                 "cuota" => $monto,
                 "familiares" => $familiares,
                 "actividades" => $socio_actividades,
@@ -154,8 +156,7 @@ class Pagos_model extends CI_Model {
                 "monto_excedente" => $monto_excedente- ($monto_excedente * $socio->descuento / 100),
                 "financiacion" => $financiacion,
                 "descuento" => $socio->descuento,
-// TODO hardcodeo 1000$ cuota grupo 
-                "cuota_neta"=>1000
+                "cuota_neta"=>$precio_grupo
             );
             return $cuota;
 
@@ -193,6 +194,7 @@ class Pagos_model extends CI_Model {
                 "titular" => $socio->apellido.' '.$socio->nombre,
                 "total" => $total,
                 "categoria" => $cat->nombre,
+                "categ_tipo" => $cat->tipo,
                 "cuota" => $socio_cuota,
                 "familiares" => '0',
                 "actividades" => $socio_actividades,

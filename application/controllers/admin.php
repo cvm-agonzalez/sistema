@@ -669,6 +669,82 @@ class Admin extends CI_Controller {
         }
     }
 
+    public function entidades($action='',$id='')
+    {
+        $this->load->model('general_model');
+	$data = $this->carga_data();
+        switch ($action) {
+            case 'agregar':
+                $entidad = $this->input->post(null, true);
+                $id = $this->general_model->insert_ent($entidad);
+
+		// TODO agregar todas las configuraciones default y creacion de directorios
+
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "entidades";
+                $operacion = 1;
+                $llave = $id;
+                $observ = substr(json_encode($entidad),0,255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+                redirect(base_url().'admin/entidades','refresh');
+                break;
+
+            case 'editar':
+		$data = $this->carga_data();
+		$id_ent =  $this->uri->segment(4);
+		$data['entidad'] = $this->general_model->get_ent($id_ent);
+                $data['action'] = "edit";
+                $data['section'] = 'entidades-editar';
+                $this->load->view('admin',$data);
+                break;
+
+            case 'guardar':
+                $entidad = $this->input->post(null, true);
+                $this->general_model->update_ent($id,$entidad);
+
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "entidades";
+                $operacion = 2;
+                $llave = $id;
+                $observ = substr(json_encode($admin),0,255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+                redirect(base_url().'admin/entidades','refresh');
+                break;
+
+            case 'eliminar':
+                $entidad = array('estado' => 0 );
+                $this->admins_model->update_ent($id,$entidad);
+
+                // Grabo log de cambios
+                $id_entidad = $this->session->userdata('id_entidad');
+                $login = $this->session->userdata('username');
+                $nivel_acceso = $this->session->userdata('rango');
+                $tabla = "entidades";
+                $operacion = 3;
+                $llave = $id;
+                $observ = substr(json_encode($admin),0,255);
+                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+                redirect(base_url().'admin/entidades','refresh');
+                break;
+
+            default:
+		$data = $this->carga_data();
+		$id_entidad  = $this->session->userdata('id_entidad');
+                $data['listaEntidades'] = $this->general_model->get_ents();
+                $data['section'] = 'entidades';
+                $this->load->view('admin',$data);
+                break;
+        }
+    }
     public function socios()
     {
         switch ($this->uri->segment(3)) {
@@ -694,10 +770,8 @@ class Admin extends CI_Controller {
        			                $datos['id'] = $idcateg;
        			                $datos['nombre'] = $this->input->post('nombre');
        			                $datos['precio'] = $this->input->post('precio');
-       			                $datos['precio_unit'] = $this->input->post('precio_unit');
        			                $datos['estado'] = $this->input->post('estado');
 					if ( $datos['precio'] == '' ) { $datos['precio'] = 0; }
-					if ( $datos['precio_unit'] == '' ) { $datos['precio_unit'] = 0; }
                         		$this->general_model->update_cat($idcateg,$datos);
 
 					// Grabo log de cambios
@@ -739,10 +813,8 @@ class Admin extends CI_Controller {
                 			$datos['id_entidad'] = $this->session->userdata('id_entidad');
        			                $datos['nombre'] = $this->input->post('nombre');
        			                $datos['precio'] = $this->input->post('precio');
-       			                $datos['precio_unit'] = $this->input->post('precio_unit');
        			                $datos['estado'] = 1;
 					if ( $datos['precio'] == '' ) { $datos['precio'] = 0; }
-					if ( $datos['precio_unit'] == '' ) { $datos['precio_unit'] = 0; }
                         		$this->general_model->insert_cat($datos);
 
 					// Grabo log de cambios
@@ -893,133 +965,20 @@ class Admin extends CI_Controller {
                 break;
 
             case 'enviar_resumen':
-                if(!$this->uri->segment(4)){return false;}
-                $id_entidad = $this->session->userdata('id_entidad');
-                $this->load->library('email');
+//TODO llamar a rutina del CRON
+                if(!$this->uri->segment(4)) {
+			return false;	
+		} else {
+			$id_socio = $this->uri->segment(4);
+		}
+		$id_entidad = $this->session->userdata('id_entidad');
 
-                $config['charset'] = 'utf-8';
-                $config['mailtype'] = 'html';
-
-                $this->email->initialize($config);
-
-                $this->load->model('socios_model');
-                $mail = $this->socios_model->get_resumen_mail($id_entidad, $this->uri->segment(4));
-
-                $cuota = $mail['resumen'];
-
-                $cuerpo = '<h3><strong>Titular:</strong> '.$cuota['titular'].'</h3>';
-                $cuerpo .= '<h5><strong>Categor&iacute;a:</strong> '.$cuota['categoria'].'</h5>';
-
-                if($cuota['categoria'] == 'Grupo Familiar'){
-
-                    $cuerpo .= '<h5><strong>Integrantes</strong></h5><ul>';
-                    foreach ($cuota['familiares'] as $familiar) {
-                        $cuerpo .= '<li>'.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'</li>';
-                    }
-                    $cuerpo .= '</ul>';
-                }
-
-                $cuerpo .= '<table class="table table-hover" width="50%;" border="1">
-                    <thead>
-                        <tr>
-                            <th align="left">Descripci&oacute;n</th>
-                            <th align="left">Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Cuota Mensual '.$cuota['categoria'].'</td>
-                            <td>$'.$cuota['cuota'].'</td>
-                        </tr>';
-                        foreach ($cuota['actividades']['actividad'] as $actividad) {
-                        $cuerpo .= '<tr>
-                            <td>Cuota Mensual '.$actividad->nombre.'</td>
-                            <td>$'.$actividad->precio.'</td>
-                        </tr>';
-                        }
-                        if($cuota['familiares'] != 0){
-                            foreach ($cuota['familiares'] as $familiar) {
-                                foreach($familiar['actividades']['actividad'] as $actividad){
-
-                                $cuerpo .= '<tr>
-                                    <td>Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.' ]</td>
-                                    <td>$ '.$actividad->precio.'</td>
-                                </tr>';
-                                }
-                            }
-                        }
-                        if($cuota['excedente'] >= 1){
-
-                        $cuerpo .='<tr>
-                                    <td>Socio Extra (x'.$cuota['excedente'].')</td>
-                                    <td>$'.$cuota['monto_excedente'].'</td>
-                                </tr>';
-                        }
-                        if($cuota['financiacion']){
-                            foreach ($cuota['financiacion'] as $plan) {
-
-                                $cuerpo .= '<tr>
-                                    <td>Financiación de Deuda ('.$plan->detalle.')</td>
-                                    <td>$'.round($plan->monto/$plan->cuotas,2).'</td>
-                                </tr>';
-
-                            }
-                        }
-                        if($cuota['descuento'] != 0.00){
-                            $cuerpo .= '<tr>
-                                    <td>Descuento</td>
-                                    <td>$'.$cuota['descuento'].'</td>
-                                </tr>';
-                        }
-                        $cuerpo .= '
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Total</th>
-                            <th>$'.$cuota['total'].'</th>
-                        </tr>
-                    </tfoot>
-                </table>';
-
-                // cupon
-                $ent_dir = $this->session->userdata('ent_directorio');
                 $this->load->model('pagos_model');
-                $cupon = $this->pagos_model->get_cupon($mail['sid'], $id_entidad);
-                if($cupon->monto == $cuota['total']){
-                    $cupon = base_url().'entidades/'.$ent_dir.'/images/cupones/'.$cupon->id.'.png';
-                }else{
-                    $cupon = $this->cuentadigital($mail['sid'],$cuota['titular'],$cuota['total']);
-                    if($cupon && $mail['sid'] != 0){
+                $deuda = $this->pagos_model->get_deuda($id_socio);
 
-                        $cupon_id = $this->pagos_model->generar_cupon($id_entidad, $mail['sid'],$cuota['total'],$cupon);
-                        $data = base64_decode($cupon['image']);
-                        $img = imagecreatefromstring($data);
-                        if ($img !== false) {
-                            //@header('Content-Type: image/png');
-                            imagepng($img,'entidades/'.$ent_dir.'/images/cupones/'.$cupon_id.'.png',0);
-                            imagedestroy($img);
-                            $cupon = base_url().'entidades/'.$ent_dir.'/images/cupones/'.$cupon_id.'.png';
-                        }else {
-                            echo 'Ocurrió un error.';
-                            $cupon = '';
-                        }
+                $this->load->model('cron');
+                $cuerpo = $this->cron->armo_emails($id_socio, $deuda);
 
-                    }
-                }
-
-                if($cupon){
-                    $cuerpo .= '<br><br><img src="'.$cupon.'">';
-                }
-
-
-                $cuerpo .= '';
-
-                $total = ($mail['deuda']*-1);
-
-                $cuerpo .= '<h3>Su deuda total con el Club es de: $ '.$total.'</h3>';
-
-                //echo($cuerpo);
-                //die;
                 $this->email->from('pagos@clubvillamitre.com');
                 $this->email->to($mail['mail']);
 
