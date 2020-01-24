@@ -4,23 +4,10 @@
 		<div id="actividades_print">
 			<form class="row" method="post" action="<?=base_url()?>imprimir/listado/morosos">
 				<div class="col-sm-5">
-					<label>Comision</label>
-					<select class="form-control" name="comisiones" id="comisiones">
-		
-						<option value="" >Seleccione Comision</option>
-						<option value="-1" <? if('-1' == $comision_sel){ echo 'selected'; } ?>>Cuota Social</option>
-						<? foreach ($comisiones as $comision) { 
-							?>
-							<option value="<?=$comision->id?>" <? if($comision_sel == $comision->id){ echo 'selected'; } ?>><?=$comision->descripcion?></option>
-							<?
-						}
-						?>
-					</select>
-				</div>
-				<div class="col-sm-5">
 					<label>Actividad</label>
 					<select class="form-control" name="morosos_activ" id="morosos_activ" >
 						<option value="">Seleccionar</option>
+						<option value="-1" <? if('-1' == $actividad_sel){ echo 'selected'; } ?>>Cuota Social</option>
 						<?
 						foreach ($actividades as $actividad) {                        
 							?>
@@ -38,12 +25,9 @@
 		</div>
 	</div>
 	<div id="listado_morosos">
-		<? 
-		if($morosos){
-		?>
 		<div class="pull-right hidden-print">
 		    <button class="btn btn-info" onclick="print()"><i class="fa fa-print"></i> Imprimir</button>
-		    <a href="<?=base_url()?>imprimir/morosos_excel/<?=$comision_sel?>/<?=$actividad_sel?>/" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
+		    <a href="<?=base_url()?>imprimir/morosos_excel/<?=$actividad_sel?>/" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
 		</div>
 		<h3 class="page-header">Listado de Morosos </h3>
 		<table class="table table-striped table-bordered" cellspacing="0" width="100%" id="morosos_table">
@@ -67,13 +51,14 @@
 		    <tbody>
 		    	<?
 		    	
-		    	foreach ($morosos as $ingreso) {    	
-				switch ( $ingreso['estado'] ) {
-					case 1: $xestado="SUSP"; break;
-					case 0: $xestado="ACTI"; break;
-				}
+			if ( $morosos ) {
+		    		foreach ($morosos as $ingreso) {    	
+					switch ( $ingreso['estado'] ) {
+						case 1: $xestado="SUSP"; break;
+						case 0: $xestado="ACTI"; break;
+					}
 		    	?>
-		        <tr>			        	
+		        	<tr>			        	
 		        	<td><?=$ingreso['dni']?></td>
 		        	<td><?=$ingreso['sid']?></td>
 		        	<td><?=$ingreso['apynom']?></td>
@@ -88,11 +73,11 @@
 		        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso['sid']?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        
 		        </tr>
 		        <?
-		    	}		    	
+		    		}		    	
+			}
 		    	?>
 		    </tbody>
 		</table>
-		<? } ?>
 	</div>	
 
 </div><!-- /.container -->

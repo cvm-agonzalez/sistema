@@ -3057,6 +3057,29 @@ class Admin extends CI_Controller {
 				$this->load->view('admin',$data);
 				break;
 			}
+                case 'ingresos':
+                        $this->load->model('pagos_model');
+			$meses = $this->pagos_model->get_meses_ingresos($id_entidad);
+                        if ( $this->uri->segment(4) ) {
+                                $mes = $this->uri->segment(4);
+                                $data = $this->carga_data();
+                                $data['ingresos_tabla'] = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
+                                $data['section'] = 'estadisticas-ingresos';
+                                $data['meses'] = $meses;
+                                $data['mes'] = $mes;
+                                $this->load->view('admin',$data);
+                                break;
+                        } else {
+                                $mes = date('Ym');
+                                $data = $this->carga_data();
+                                $data['meses'] = $meses;
+                                $data['mes'] = $mes;
+                                $data['ingresos_tabla'] = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
+                                $data['section'] = 'estadisticas-ingresos';
+                                $this->load->view('admin',$data);
+                                break;
+                        }
+
         }
     }
 

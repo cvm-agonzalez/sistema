@@ -80,9 +80,35 @@ class Estadisticas_model extends CI_Model {
     }
 
 
+    public function ingresos_tabla($id_entidad, $mes){        
+        $qry = "SELECT DATE_FORMAT(f.date, '%d-%m-%Y') dia, 
+                        SUM(IF(f.origen=1 , f.haber, 0 )) ing_col,
+                        SUM(IF(f.origen=2 , f.haber, 0 )) ing_cd,
+                        SUM(IF(f.origen=3 , f.haber, 0 )) ing_manual,
+                        SUM(IF(f.origen=0 , f.haber, 0 )) ajustes
+                FROM facturacion f 
+		WHERE DATE_FORMAT(f.date,'%Y%m') = $mes AND
+			haber > 0 
+		GROUP BY 1
+		ORDER BY 1; ";
+
+        $resultado = $this->db->query($qry)->result();
+        return $resultado;
+
+    }
+
     public function cobranza_tabla($id_entidad, $id_actividad='-1', $id_comision='0'){        
 	$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_cobranza;";
         $this->db->query($qry);
+
+        $qry = "CREATE TEMPORARY TABLE tmp_cobranza
+                SELECT DATE_FORMAT(p.generadoel, '%Y%m') periodo, COUNT(DISTINCT p.tutor_id) socios, COUNT(*) cuotas, SUM(p.monto) facturado,
+                        $id_actividad id_act,
+                        SUM(IF(p.estado=0 AND DATE_FORMAT(p.pagadoel, '%Y%m') = DATE_FORMAT(p.generadoel, '%Y%m'), p.pagado, 0 )) pagado_mes,
+                        SUM(IF(p.estado=0 AND DATE_FORMAT(p.pagadoel, '%Y%m') > DATE_FORMAT(p.generadoel, '%Y%m'), p.pagado, 0 )) pagado_mora,
+                        SUM(IF(p.estado=1 AND p.pagado > 0,  p.pagado, 0 )) pago_parcial,
+                        SUM(IF(p.estado=1 AND p.pagado = 0,  p.monto, 0 )) impago
+                FROM pagos p ";
 
 	if ( $id_comision > 0 ) {
 		$qry1 ="DROP TEMPORARY TABLE IF EXISTS tmp_actividades; ";

@@ -978,6 +978,16 @@ $("#load-asoc-activ-form").submit(function(){
 	return true;
 
 })
+$("#estad-ingreso-form").submit(function(){
+        var mes = $("#meses").val();
+        var url = "<?=$baseurl?>admin/estadisticas/ingresos" + "/" + mes;
+
+        $("#estad-ingreso-form").attr("action",url);
+        $("#estad-ingreso-form").submit();
+
+	return true;
+})
+
 $("#estad-activ-form").submit(function(){
         var actividad = $("#actividad").val();
         var url = "<?=$baseurl?>admin/estadisticas/cobranza" + "/" + actividad;

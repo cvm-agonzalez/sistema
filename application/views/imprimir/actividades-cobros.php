@@ -5,8 +5,10 @@
 		
 		if($fecha1 && $fecha2){
 			$value = 'value="'.date('Y-m-d',strtotime($fecha1)).' - '.date('Y-m-d',strtotime($fecha2)).'"';
+			$inicio = false;
 		}else{
 			$value = '';
+			$inicio = true;
 		}
 		?>
 		<form class="row" method="post" action="<?=base_url()?>imprimir/cobros/actividades">
@@ -56,7 +58,9 @@
 		    <a href="<?=base_url()?>imprimir/cobros_actividad_excel/<?=$fecha1?>/<?=$fecha2?>/<?=$actividad_s?>/<?=$categoria?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
 		</div>
 		<h3 class="page-header">Pagos ingresados del <?=date('d/m/Y',strtotime($fecha1))?> al <?=date('d/m/Y',strtotime($fecha2))?></h3>
-		<? if(isset($actividad_info)){ ?>
+		<? if(isset($actividad_info)){ 
+var_dump($actividad_info);
+?>
         <h3>ACTIVIDAD: <?=$actividad_info->nombre?></h3>
         <? } ?>
 	</div>
@@ -130,6 +134,15 @@
 	    </tfoot>
 	</table>
 	<?
-	}
-	?>
+        } else {
+                if ( !$inicio ) {
+                        ?>
+                                <div class="">
+                                        <h3 class="label label-danger">NO EXISTE INFORMACION</h3>
+                                </div>
+                        <?
+                }
+        }
+                ?>
+
 </div>

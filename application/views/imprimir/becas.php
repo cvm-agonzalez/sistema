@@ -21,9 +21,6 @@
     </select>
 </div>
 <div class="clearfix"></div>
-<?
-if($socios){
-?>
 <div class="pull-left">
     <h3>Becas | <?=date('d/m/Y H:i')?></h3>
 </div>
@@ -47,20 +44,23 @@ if($socios){
             
     <tbody>
         <?
-    	foreach ($socios as $socio) {    	
-    	?>
-        <tr>
-            <td><?=$socio->nombre?> <?=$socio->apellido?></td>
-            <td><?=$socio->id?></td>
-            <td><?=$socio->telefono?></td>
-            <td><?=$socio->dni?></td>
-            <td><?=$socio->nacimiento?></td>
-            <td><?=$socio->alta?></td>
-            <td><?=$socio->descuento?><? if ( $socio->monto_porcentaje == 0 ) { echo '$'; } else { echo '%'; } ?></td>
-            <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
-        </tr>
-        <? }  ?>
+	if ( $socios  ) {
+    		foreach ($socios as $socio) {    	
+    		?>
+        	<tr>
+            		<td><?=$socio->nombre?> <?=$socio->apellido?></td>
+            		<td><?=$socio->id?></td>
+            		<td><?=$socio->telefono?></td>
+            		<td><?=$socio->dni?></td>
+            		<td><?=$socio->nacimiento?></td>
+            		<td><?=$socio->alta?></td>
+            		<td><?=$socio->descuento?><? if ( $socio->monto_porcentaje == 0 ) { echo '$'; } else { echo '%'; } ?></td>
+            		<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
+        	</tr>
+	<? }
+	}
+	 ?>
+
     </tbody>
 </table>
-<? } ?>
 </div>

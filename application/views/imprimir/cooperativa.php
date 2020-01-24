@@ -1,6 +1,6 @@
 <div class="container" style="margin-top:50px;">
 	<div class="starter-template hidden-print">
-		<h1>Cuenta Digital</h1>
+		<h1>Cooperativa</h1>
 		<?
 		if($fecha1 && $fecha2){
 			$value = 'value="'.date('d/m/Y',strtotime($fecha1)).' - '.date('d/m/Y',strtotime($fecha2)).'"';
@@ -18,7 +18,7 @@
 	<div class="">
 		<div class="pull-right hidden-print">
 		    <button class="btn btn-info" onclick="print()"><i class="fa fa-print"></i> Imprimir</button>
-		    <a href="<?=base_url()?>imprimir/cuentadigital_excel/<?=$fecha1?>/<?=$fecha2?>/" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
+		    <a href="<?=base_url()?>imprimir/cooperativa_excel/<?=$fecha1?>/<?=$fecha2?>/" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
 		</div>
 		<h3 class="page-header">Pagos ingresados del <?=date('d/m/Y',strtotime($fecha1))?> al <?=date('d/m/Y',strtotime($fecha2))?></h3>
 	</div>
@@ -36,10 +36,10 @@
 	    	<?
 	    	$total = 0;	    	
 	    	foreach ($ingresos as $ingreso) {   
-	    		$total = $total + $ingreso->monto;
+	    		$total = $total + $ingreso->importe;
 	    	?>
 	        <tr>
-	        	<td><?=$ingreso->fecha?> <?=$ingreso->hora?></td>	        	
+	        	<td><?=$ingreso->fecha_pago?></td>	        	
 	        	<td>
 	        		#<?=$ingreso->sid?> - 
 	        		<? 
@@ -54,7 +54,7 @@
 	        		}
 	        		?>
 	        	</td>
-	        	<td>$ <?=$ingreso->monto?></td>	        	
+	        	<td>$ <?=$ingreso->importe?></td>	        	
 	        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->sid?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        
 	        </tr>
 	        <?

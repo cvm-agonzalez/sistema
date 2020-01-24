@@ -8,9 +8,6 @@
 					<th>Abreviatura</th>
 					<th>Descripcion</th>
 					<th>CUIT</th>
-					<th>Cuenta Digital ID</th>
-					<th>Cuenta Digital Control</th>
-					<th>Nro Prov COL</th>
 					<th>Email Origen</th>
 					<th>Opciones</th>
 				</tr>
@@ -22,9 +19,6 @@
 					<td><?=$aa->abreviatura?></td>
 					<td><?=$aa->descripcion?></td>
 					<td><?=$aa->cuit?></td>
-					<td><?=$aa->cd_id?></td>
-					<td><?=$aa->cd_control?></td>
-					<td><?=$aa->nprov_col?></td>
 					<td><?=$aa->email_sistema?></td>
 					<td>
 						<a href="<?=base_url()?>admin/entidades/editar/<?=$aa->id?>"><i class="fa fa-gear"></i> Editar</a>  | 

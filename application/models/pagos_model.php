@@ -467,7 +467,7 @@ class Pagos_model extends CI_Model {
         $total = $this->get_deuda($pago['sid']);
         $total = $total + $pago['monto'];
         $descripcion = "Pago acreditado desde: La Coope <br>Fecha: ".$pago['fecha'].' '.$pago['hora'];
-        $this->db->insert('facturacion',array('id_entidad'=>$id_entidad,'sid'=>$pago['sid'],'haber'=>$pago['monto'],'total'=>$total,'descripcion'=>$descripcion));
+        $this->db->insert('facturacion',array('id_entidad'=>$id_entidad,'sid'=>$pago['sid'],'haber'=>$pago['monto'],'total'=>$total,'descripcion'=>$descripcion,'origen'=>'1'));
 
     }
 
@@ -476,11 +476,11 @@ class Pagos_model extends CI_Model {
         $total = $this->get_deuda($pago['sid']);
         $total = $total + $pago['monto'];
         $descripcion = "Pago acreditado desde: CuentaDigital <br>Fecha: ".$pago['fecha'].' '.$pago['hora'];
-        $this->db->insert('facturacion',array('id_entidad'=>$id_entidad, 'sid'=>$pago['sid'],'haber'=>$pago['monto'],'total'=>$total,'descripcion'=>$descripcion));
+        $this->db->insert('facturacion',array('id_entidad'=>$id_entidad, 'sid'=>$pago['sid'],'haber'=>$pago['monto'],'total'=>$total,'descripcion'=>$descripcion,'origen'=>'2'));
 
     }
 
-    public function registrar_pago($id_entidad,$tipo,$sid,$monto,$des,$actividad,$ajuste)
+    public function registrar_pago($id_entidad,$tipo,$sid,$monto,$des,$actividad,$ajuste='0',$origen='0')
     {
         $total = $this->get_socio_total($sid);
         if($tipo == 'debe'){
@@ -524,7 +524,8 @@ class Pagos_model extends CI_Model {
                 "descripcion" => $des,
                 "debe" => $debe,
                 "haber" => $haber,
-                "total" => $total
+                "total" => $total,
+		"origen" => $origen
             );
         $this->db->insert("facturacion",$data);
         $data['iid'] = $this->db->insert_id();
@@ -671,26 +672,24 @@ class Pagos_model extends CI_Model {
              		$this->db->where('id_entidad',$id_entidad);
              		$this->db->where('comision',$comision);
              		$query = $this->db->get('actividades');
+	     		if ( $actividad ) {
+             			$this->db->where('id',$actividad);
+             			$query = $this->db->get('actividades');
+	     		}
 		} else {
 		// Si viene comision = -1 es solo cuota social
 			$actividades = null;
 			$solo_cta_social = 1;
 		}
-	} else {
-	// Si viene seteada una actividad esa actividad puntual
-	     if ( $actividad ) {
-             		$this->db->where('id',$actividad);
-             		$query = $this->db->get('actividades');
-	     }
 	}
 
 	// Si vino algun parametro y el SQL no encontro nada salgo con false
-	if ( $comision > 0 || $actividad ) {
-        	if($query->num_rows() == 0){return false;}
-		$actividades = $query->result();
-	} else {
+	if ( $comision == -1 ) {
 		// Sino vino parametros  vino -1 pongo null la variable p luego tomar TODOS LOS SOCIOS de la cuota social
 		$actividades = null;
+	} else {
+		if($query->num_rows() == 0){return false;}
+		$actividades = $query->result();
 	}
 
 	// Busco el conjunto de socios morosos (tanto p actividad como p cuota social)
@@ -1015,6 +1014,22 @@ class Pagos_model extends CI_Model {
         return $pagos;
     }
 
+     public function get_ingresos_cooperativa($id_entidad, $fecha1='',$fecha2='')
+    {
+        $this->load->model('socios_model');
+        $this->db->where('fecha_pago >=',$fecha1);
+        $this->db->where('fecha_pago <=',$fecha2);
+        $this->db->where('id_entidad', $id_entidad);
+        $query = $this->db->get('cobranza_col');
+        if($query->num_rows() == 0){ return false; }
+        $pagos = $query->result();
+        foreach ($pagos as $pago) {
+            $pago->socio = $this->socios_model->get_socio($pago->sid);
+        }
+        return $pagos;
+    }
+
+
     public function get_cobros_actividad($id_entidad, $fecha1='',$fecha2='',$actividad=false,$categoria=false)
     {
         $this->load->model('actividades_model');
@@ -1056,7 +1071,7 @@ class Pagos_model extends CI_Model {
         $res = array();
         foreach ($pagos as $pago) {
             $pago->socio = $this->socios_model->get_socio($pago->sid);
-            $pago->deuda = $this->get_deuda_cuota($pago->sid);
+            $pago->deuda = $this->get_deuda_cuota($id_entidad, $pago->sid);
             if($categoria != ''){
                 if(date('Y',strtotime($pago->socio->nacimiento)) != $categoria){
                     continue;
@@ -1228,41 +1243,6 @@ class Pagos_model extends CI_Model {
         return $ultimo_pago;
     }
 
-    public function get_pagos_actividad_anterior($id_entidad,$act){
-        $this->db->where('id_entidad',$id_entidad);
-        $this->db->where('aid',$act);
-        $this->db->where('estado',1);
-        $query = $this->db->get('actividades_asociadas');
-        $asoc = $query->result();
-        $query->free_result();
-
-        $this->load->model("socios_model");
-
-        foreach ($asoc as $a) {
-            $socio = $this->socios_model->get_socio($a->sid);
-            $a->id = $socio->id;
-            $a->socio = @$socio->nombre.' '.@$socio->apellido;
-            $a->telefono = @$socio->telefono;
-            $a->nacimiento = @$socio->nacimiento;
-            $a->dni = @$socio->dni;
-            $a->suspendido = @$socio->suspendido;
-            $a->act_nombre = $this->actividades_model->get_actividad($a->aid)->nombre;
-            //@$a->deuda = $this->pagos_model->get_deuda($socio->id);
-            $a->deuda = 0;
-            $this->db->where('sid',$a->id);
-            $this->db->where('id_entidad',$id_entidad);
-            $this->db->where('tipo',1);
-            $this->db->where('monto >',0);
-            $this->db->where('descripcion','Deuda Anterior');
-            //$this->db->where('generadoel <','2015-05-01 00:00:00');
-            $query = $this->db->get('pagos');
-            if($query->num_rows != 0){
-                $a->deuda = $query->row()->estado;
-            }
-        }
-        return $asoc;
-    }
-
     public function get_socios_financiados($id_entidad)
     {
         $this->db->where('fn.id_entidad',$id_entidad);
@@ -1372,7 +1352,8 @@ class Pagos_model extends CI_Model {
 		'descripcion'=> "REVERSION FACTURACION",
 		'debe'=>0,
 		'haber'=>$monto,
-		'total'=>$total+$monto
+		'total'=>$total+$monto,
+		'origen'=>0
 	);
 	$this->db->insert('facturacion', $facturacion);
 
@@ -1423,7 +1404,8 @@ class Pagos_model extends CI_Model {
                 'id_entidad'=> $id_entidad,
                 'debe'=>0,
                 'haber'=>$facturacion,
-                'total'=>$total+$facturacion
+                'total'=>$total+$facturacion,
+		'origen'=>3
             );
             $this->db->insert('facturacion', $facturacion);
         }
@@ -1434,9 +1416,48 @@ class Pagos_model extends CI_Model {
         return $pago->tutor_id;
     }
 
+    public function get_meses_ingresos($id_entidad) {
+	$qry="DROP TEMPORARY TABLE IF EXISTS tmp_meses; ";
+        $this->db->query($qry);
+	$qry="CREATE TEMPORARY TABLE tmp_meses ( mes integer, descr_mes char(30), INDEX(mes) );  ";
+        $this->db->query($qry);
+	$qry=" INSERT INTO tmp_meses VALUES (  1, 'Enero' ); ";
+        $this->db->query($qry);
+	$qry=" INSERT INTO tmp_meses VALUES (  2, 'Febrero' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  3, 'Marzo' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  4, 'Abril' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  5, 'Mayo' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  6, 'Junio' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  7, 'Julio' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  8, 'Agosto' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES (  9, 'Setiembre' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES ( 10, 'Octubre' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES ( 11, 'Noviembre' );";
+        $this->db->query($qry);
+	$qry="INSERT INTO tmp_meses VALUES ( 12, 'Diciembre' ); ";
+        $this->db->query($qry);
+	$qry="SELECT DATE_FORMAT(f.date,'%Y%m') mes, CONCAT(m.descr_mes,'-',DATE_FORMAT(f.date,'%Y')) descr_mes, COUNT(*) movimientos 
+		FROM facturacion f
+			JOIN tmp_meses m ON DATE_FORMAT(f.date, '%m') = m.mes
+		WHERE f.date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) 
+		GROUP BY 1; ";
+        $meses = $this->db->query($qry)->result();
+
+        return $meses;
+    }
+
     public function get_facturacion_all($id_entidad)
     {
-        $qry="SELECT f.sid, f.id, f.date, f.descripcion, IF(f.debe == 0, 'H', 'D') tipo, f.importe FROM facturacion f WHERE id_entidad = $id_entidad ORDER BY f.id; ";
+        $qry="SELECT f.sid, f.id, f.date, f.descripcion, IF(f.debe = 0, 'H', 'D') tipo, IF(f.debe = 0, haber, debe) importe FROM facturacion f WHERE id_entidad = $id_entidad ORDER BY f.id; ";
         $facturacion = $this->db->query($qry)->result();
 
         return $facturacion;

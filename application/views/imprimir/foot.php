@@ -79,12 +79,6 @@
         }
         ?>
 
-        $("#actividades_select_anterior").change(function(){
-            var id = $(this).val();
-            if(id == ''){return false;}
-            document.location.href = '<?=base_url()?>imprimir/cobros/anterior/'+id
-        })
-
     	$("#profesores_select").change(function(){
     		var id = $(this).val();
     		if(id == ''){return false;}
@@ -134,6 +128,21 @@
     				document.location.href = '<?=base_url()?>imprimir/cobros/ingresos/'+start.format('YYYY-MM-DD')+'/'+end.format('YYYY-MM-DD');				
     			});
     		<? } ?>
+
+        <? if($this->uri->segment(3) == 'cooperativa'){ ?>
+            $('input[name="daterange"]').daterangepicker({
+                format: 'DD/MM/YYYY',
+                <?
+                if($fecha1 && $fecha2){
+                    ?>
+                    startDate: '<?=date("d-m-Y",strtotime($fecha1))?>',
+                    endDate: '<?=date("d-m-Y",strtotime($fecha2))?>'
+                    <? } ?>
+                },
+                function(start, end, label) {
+                    document.location.href = '<?=base_url()?>imprimir/cobros/cooperativa/'+start.format('YYYY-MM-DD')+'/'+end.format('YYYY-MM-DD');
+                });
+            <? } ?>
 
         <? if($this->uri->segment(3) == 'cuentadigital'){ ?>
             $('input[name="daterange"]').daterangepicker({

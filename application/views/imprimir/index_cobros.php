@@ -44,8 +44,8 @@ function is_active($seccion1,$seccion2)
               <ul class="dropdown-menu">
                 <li class=""><a href="<?=base_url()?>imprimir/cobros/ingresos">Ingresos</a></li>              
                 <li class=""><a href="<?=base_url()?>imprimir/cobros/actividades">Actividades</a></li>
-                <li class=""><a href="<?=base_url()?>imprimir/cobros/anterior">Deuda Anterior</a></li>
                 <li class=""><a href="<?=base_url()?>imprimir/cobros/cuentadigital">CuentaDigital</a></li>
+                <li class=""><a href="<?=base_url()?>imprimir/cobros/cooperativa">Cooperativa</a></li>
               </ul>
             </li>
 	  </ul>

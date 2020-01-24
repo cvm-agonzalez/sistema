@@ -30,7 +30,7 @@ class General_model extends CI_Model {
 
     public function get_cat_tipo($id_entidad, $tipo){
         $this->db->where('id_entidad',$id_entidad);
-        $this->db->where('tipo',$tipo);
+        $this->db->where('tipo  COLLATE latin1_general_cs = ',$tipo);
         $query = $this->db->get("categorias");
         return $query->row();
     }
@@ -337,5 +337,246 @@ COMISIONES
         $reporte->socios = $socios;        
         return $reporte;
     }
+
+    public function armo_cuerpo_email($id_socio) {
+	// armo mail
+	$mail = $this->socios_model->get_resumen_mail($id_socio);
+	$deuda = $this->pagos_model->get_deuda($id_socio);
+	
+	$cuota3 = $mail['resumen'];            
+	
+	// Armo encabezado con escudo y datos de cabecera
+	$cuerpo  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
+        $cuerpo .= "<thead>";
+	$cuerpo .= "<tr style='background-color: #105401 ;'>";
+	$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
+        $cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
+        $cuerpo .= "</tr>";
+        $cuerpo .= "</thead>";
+	$cuerpo .= "</table>";
+
+	// Datos del Titular
+        $cuerpo .= '<h3 style="font-family:verdana"><strong>Titular:</strong> '.$mail['sid'].'-'.$cuota3['titular'].'</h3>';
+	
+	// Analizo deuda previa a la facturación para poner mensaje acorde
+        if($deuda < 0 ){
+		$cuerpo .= "<h4 style='font-family:verdana' ><strong>Al d&iacute;a de la fecha Ud. adeuda $ ".abs($deuda)."</strong></h4>";
+                $cuerpo .= "<h4 style='font-family:verdana' ><strong>PONGASE EN CONTACTO CON SECRETARIA PARA REGULARIZAR SU SITUACION</strong></h4>";
+	} else {
+		if($deuda == 0) {
+			$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted esta al d&iacute;a con sus cuotas</strong></h4>";
+		} else {
+			if ( $mail['debtarj'] == null ) {
+				$cuerpo .= "<h4 style='font-family:verdana' ><strong>Usted posee un saldo a favor de $ ".abs($deuda)."</strong></h4>";                
+			}
+		}
+	}
+	
+	// Si es con grupo familiar
+	if($cuota3['categ_tipo'] == 'F'){
+		$cuerpo .= "<h5 style='font-family:verdana;'><strong>Integrantes</strong></h5><ul>";
+		foreach ($cuota3['familiares'] as $familiar) {          
+			$cuerpo .= "<li style='font-family:verdana;'>".$familiar['datos']->nombre." ".$familiar['datos']->apellido."</li>";                    
+                }                    
+		$cuerpo .= '</ul>';            
+	}
+           	 
+	
+	// Armo tabla de conceptos facturados en el mes
+	
+	// Titulos
+	$cuerpo .= '<table class="table table-hover" width="100%" style="font-family: "Verdana";">
+			<thead>
+				<tr style="background-color: #666 !important; color:#FFF;">                        
+					<th style="padding:5px;" align="left">Facturaci&oacute;n del Mes</th>
+					<th style="padding:5px;" align="right">Monto</th>                        
+				</tr>
+			</thead>
+		<tbody> ';
+	
+	// Cuota de Socio
+	$cuerpo .= '<tr style="background: #CCC;">
+			<td style="padding: 5px;">Cuota Mensual '.$cuota3['categoria'].'</td>
+			<td style="padding: 5px;" align="right">$ '.$cuota3['cuota'].'</td>
+		</tr>';
+	// Si tiene descuento en la cuota social
+	if($cuota3['descuento'] != 0.00){                        
+		$cuerpo .= '<tr style="background: #CCC;">                    
+				<td style="padding: 5px;">Descuento sobre cuota social</td>
+				<td style="padding: 5px;" align="right">'.$cuota3['descuento'].'%</td>
+			</tr>';                        
+	}
+		
+	// Actividades
+	foreach ($cuota3['actividades']['actividad'] as $actividad) {
+		$cuerpo .= '<tr style="background: #CCC;">
+				<td style="padding: 5px;">Cuota Mensual '.$actividad->nombre.'</td>
+				<td style="padding: 5px;" align="right">$ '.$actividad->precio.'</td>
+			</tr>';                        
+	
+		// Si tiene descuento lo pongo detallado
+		if ( $actividad->descuento > 0 ) {
+			if ( $actividad->monto_porcentaje == 0 ) {
+				$msj_act=$actividad->descuento."$ ";
+				$msj_act_valor=$actividad->precio-$actividad->descuento;
+			} else {
+				$msj_act=$actividad->descuento."% ";
+				$msj_act_valor=$actividad->precio * $actividad->descuento / 100;
+			}
+			$cuerpo .= '<tr style="background: #CCC;">
+					<td style="padding: 5px;">Descuento sobre Actividad '.$actividad->nombre.$msj_act.'</td>
+					<td style="padding: 5px;" align="right">-$ '.$msj_act_valor.'</td>
+				</tr>';                        
+		}
+		// Si tiene seguro lo pongo detallado
+		if ( $actividad->seguro > 0 ) {
+			$cuerpo .= '<tr style="background: #CCC;">
+					<td style="padding: 5px;">Seguro Actividad '.$actividad->nombre.'</td>
+					<td style="padding: 5px;" align="right">$ '.$actividad->seguro.'</td>
+				</tr>';                        
+		}
+	} 
+	
+	// Familiares
+	if($cuota3['familiares'] != 0){
+		foreach ($cuota3['familiares'] as $familiar) {
+			foreach($familiar['actividades']['actividad'] as $actividad){                           
+				$cuerpo .= '<tr style="background: #CCC;">                    
+						<td style="padding: 5px;">Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.' ]</td>
+						<td style="padding: 5px;" align="right">$ '.$actividad->precio.'</td>
+					</tr>';
+				// Si tiene descuento lo pongo detallado
+				if ( $actividad->descuento > 0 ) {
+					if ( $actividad->monto_porcentaje == 0 ) {
+						$msj_act=$actividad->descuento."$ ";
+						$msj_act_valor=$actividad->precio-$actividad->descuento;
+					} else {
+						$msj_act=$actividad->descuento."% ";
+						$msj_act_valor=$actividad->precio * $actividad->descuento / 100;
+					}
+					$cuerpo .= '<tr style="background: #CCC;">
+							<td style="padding: 5px;">Descuento sobre Actividad '.$actividad->nombre.$msj_act.'</td>
+							<td style="padding: 5px;" align="right">-$ '.$msj_act_valor.'</td>
+						</tr>';                        
+				}
+				// Si tiene seguro lo pongo detallado
+				if ( $actividad->seguro > 0 ) {
+					$cuerpo .= '<tr style="background: #CCC;">
+							<td style="padding: 5px;">Seguro Actividad '.$actividad->nombre.'</td>
+							<td style="padding: 5px;" align="right">$ '.$actividad->seguro.'</td>
+						</tr>';                        
+				}
+		
+			}                                   
+		}
+	}
+	
+	// Cuota Excedente
+	if($cuota3['excedente'] >= 1){
+		$cuerpo .='<tr style="background: #CCC;">                    
+				<td style="padding: 5px;">Socio Extra (x'.$cuota3['excedente'].')</td>
+				<td style="padding: 5px;" align="right">$ '.$cuota3['monto_excedente'].'</td>
+			</tr>';                        
+	}
+	
+	// Financiacion
+	if($cuota3['financiacion']){
+		foreach ($cuota3['financiacion'] as $plan) {                 
+			$cuerpo .= '<tr style="background: #CCC;">                    
+					<td style="padding: 5px;">Financiaci&oacute;n de Deuda - Cuota '.$plan->actual.'/'.$plan->cuotas.' ('.$plan->detalle.')</td>
+					<td style="padding: 5px;" align="right">$ '.round($plan->monto/$plan->cuotas,2).'</td>
+				</tr>';
+		}
+	}
+	
+	$cuerpo .= '</tbody>
+			<tfoot>
+			<tr>                        
+				<th style="font-family:verdana;" align="left">TOTAL FACTURADO DEL MES</th>
+				<th style="font-family:verdana;" align="right">$ '.$cuota3['total'].'</th>                        
+			</tr> ';
+	
+	$resta_pagar = $cuota3['total'];
+	$abonar=0;
+	if ( $deuda < 0 ) {
+		$abs_deuda = abs($deuda);
+		$abonar = abs($deuda)+$cuota3['total'];
+		$cuerpo .= '<tr>                        
+				<th style="font-family:verdana;" align="left">DEUDA ANTERIOR</th>
+				<th style="font-family:verdana;" align="right">$ '.$abs_deuda.'</th>                        
+			</tr> 
+			<tr>                        
+				<th style="font-family:verdana;" align="left">TOTAL A ABONAR</th>
+				<th style="font-family:verdana;" align="right">$ '.$abonar.'</th>                        
+			</tr> ';
+	} else { 
+		if ( $deuda > 0 ) {
+			if ( $mail['debtarj'] == null ) {
+				$cuerpo .= '<tr>                        
+						<th style="font-family:verdana;" align="left">SALDO A FAVOR ANTERIOR</th>
+						<th style="font-family:verdana;" align="right">$ '.abs($deuda).'</th>                        
+					</tr> ';
+			} else {
+				$cuerpo .= '<tr>                        
+						<th style="font-family:verdana;" align="left">UD. ESTA ADHERIDO AL DEBITO AUTOMATICO</th>
+					</tr> ';
+			}
+			$resta_pagar=$cuota3['total']-$deuda;
+			if ( $resta_pagar > 0 ) {
+				$cuerpo .= '<tr>                        
+					<th style="font-family:verdana;" align="left">TOTAL A ABONAR</th>
+					<th style="font-family:verdana;" align="right">$ '.$resta_pagar.'</th>
+				</tr> ';
+			} else { 
+				if ( $resta_pagar < 0 ) {
+					$cuerpo .= '<tr>                        
+							<th style="font-family:verdana;" align="left">QUEDA A FAVOR</th>
+							<th style="font-family:verdana;" align="right">$ '.abs($resta_pagar).'</th>                        
+						</tr>';
+				} else {
+					if ( $resta_pagar == 0 ) {
+						$cuerpo .= '<tr>                        
+								<th style="font-family:verdana;" align="left">USTED ESTA AL DIA CON SUS PAGOS</th>
+								<th style="font-family:verdana;" align="right">$ 0</th>                        
+							</tr>';
+					}
+				}
+			}
+		}
+	}
+	
+	$cuerpo .= '</tfoot> </table>';
+	$cuerpo .= '';
+	
+	$acobrar= $mail['deuda'] - $cuota3['total'];
+
+	$total=0;
+	if($acobrar < 0){
+		$cuerpo .= '<p style="font-family:verdana; font-style:italic;">Recuerde que iene 10 d&iacute;as para regularizar su situaci&oacute;n, contactese con Secretaria</p>';
+	} else {
+		if ($resta_pagar > 0 ) {
+			$cuerpo .= '<p style="font-family:verdana; font-style:italic;">Recuerde que tiene hasta el d&iacute;a 10 para cancelar su saldo</p>';
+		}
+	}
+	
+	$cuerpo .= "<p style='font-family:verdana'>Le informamos que los socios que paguen sus cuotas con <b>tarjeta de credito VISA, COOPEPLUS o BBPS</b> tendran beneficios extras como sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine, etc; entre otros. <b>LLAME A SECRETARIA Y HAGA EL CAMBIO</b> </p>";
+	$cuerpo .= "<p style='font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de los <b>beneficios de nuestra RED</b> </p>";
+	$cuerpo .= "<p style='font-family:verdana'> <a href='https://villamitre.com.ar/beneficios-2/'>En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS<img src='http://clubvillamitre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'></a></p>";
+	$cuerpo .= "<br> <br>";
+	$cuerpo .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
+	$cuerpo .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
+	$cuerpo .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
+	$cuerpo .= "<br> <br>";
+	$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
+	
+	$arr_return = array (
+		'acobrar' => $abonar,
+		'cuerpo' => $cuerpo,
+		'mail_destino' => $mail['mail']
+	);
+
+	return $arr_return;
+    }
+
 }
 ?>

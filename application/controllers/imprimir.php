@@ -22,7 +22,7 @@ class Imprimir extends CI_Controller {
 
         private function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
 	        $ent_abrev = $this->session->userdata('ent_abreviatura');
-        	$ent_nombre = $this->session->userdata('ent_ent_nombre');
+        	$ent_nombre = $this->session->userdata('ent_nombre');
 
                 $this->load->library('PHPExcel');
                 $this->phpexcel->getProperties()->setCreator($ent_nombre)
@@ -70,17 +70,17 @@ class Imprimir extends CI_Controller {
     		);
 
 
+$i=0;
                 foreach ($datos as $dato) {
                 	$this->phpexcel->setActiveSheetIndex(0);
-
-			$this->phpexcel->getActiveSheet()->fromArray(
-        			(array)$dato,   	// The data to set
-        			NULL,        	// Array values with this value will not be set
-        			'A'.$cont       // Top left coordinate of the worksheet range where
-                     				//    we want to set these values (default is A1)
-    			);
+                	foreach(range('A',"$letra_fin") as $columnID) {
+echo "dentro foreach ".$i++;
+var_dump($dato);
+die;
+                    		$this->phpexcel->setCellValue($columnID.$cont, $dato[$cont]);
+                	}
                         $cont ++;
-                }
+		}
                 // Renombramos la hoja de trabajo
                 $this->phpexcel->getActiveSheet()->setTitle("$titulo");
 
@@ -106,7 +106,7 @@ class Imprimir extends CI_Controller {
     {
         $id_entidad = $this->session->userdata('id_entidad');
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $ent_nombre = $this->session->userdata('ent_nombre');
         $data['listado'] = false;
         switch ($action) {
             case 'socios':
@@ -148,9 +148,9 @@ class Imprimir extends CI_Controller {
                 $this->load->model('socios_model');
                 $actividades = $this->actividades_model->get_act_asoc_all($id_entidad);
         	$ent_abrev = $this->session->userdata('ent_abreviatura');
-        	$ent_nombre = $this->session->userdata('ent_ent_nombre');
+        	$ent_nombre = $this->session->userdata('ent_nombre');
                     
-                $titulo = $ent_abrev." - Actividades - ".date('d-m-Y');
+                $titulo = $ent_nombre." - Actividades - ".date('d-m-Y');
 		$fila1 = false;
 
                 $archivo="Listado de Actividades"."_".date('Ymd');
@@ -172,9 +172,9 @@ class Imprimir extends CI_Controller {
                 $facturaciones = $this->pagos_model->get_facturacion_all($id_entidad);
                     
         	$ent_abrev = $this->session->userdata('ent_abreviatura');
-        	$ent_nombre = $this->session->userdata('ent_ent_nombre');
+        	$ent_nombre = $this->session->userdata('ent_nombre');
 
-                $titulo = $ent_abrev." - Cuentas Corrientes - ".date('d-m-Y');
+                $titulo = $ent_nombre." - Cuentas Corrientes - ".date('d-m-Y');
 		$fila1 = false;
                 
                 $archivo="Listado de Cuenta Corriente"."_".date('Ymd');
@@ -186,7 +186,7 @@ class Imprimir extends CI_Controller {
                 $headers[]='Tipo (D/H)';
                 $headers[]='Importe';
 
-                $datos=$actividades;
+                $datos=$facturaciones;
                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 
                 break;
@@ -200,12 +200,13 @@ class Imprimir extends CI_Controller {
         $this->load->view('imprimir/foot');
     }
 
-    public function listado($listado,$id=false)
+    public function listado($action='',$id=false)
     {
         $id_entidad = $this->session->userdata('id_entidad');
-        $data['listado'] = $listado;
+        $data = array();
         $this->load->view('imprimir/index_listado',$data);
-        switch ($listado) {
+
+        switch ($action) {
             case 'actividades':
                 $this->load->model('actividades_model');
                 $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
@@ -239,17 +240,14 @@ class Imprimir extends CI_Controller {
             case 'morosos':                
                 $data['baseurl'] = base_url();                
                 $this->load->model('pagos_model');
-                $comision = $this->input->post('comisiones');
                 $actividad = $this->input->post('morosos_activ'); 
-                if($comision || $actividad){                           
-                    	$data['morosos'] = $this->pagos_model->get_morosos($id_entidad, $comision, $actividad);
+                if($actividad){                           
+                    $data['morosos'] = $this->pagos_model->get_morosos($id_entidad, $actividad);
                 }else{
                     $data['morosos'] = false;
                 }
                 $this->load->model('actividades_model');
                 $data['actividad_sel'] = $actividad;
-                $data['comision_sel'] = $comision;
-                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
                 $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
                 $this->load->view('imprimir/morosos',$data);
                 break;
@@ -324,23 +322,13 @@ class Imprimir extends CI_Controller {
                 $data['fecha2'] = $fecha2;
                 $this->load->model('actividades_model');
                 $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
-                $data['actividad_info'] = $this->actividades_model->get_actividad($actividad);
+		if ( $actividad < 0 ) {
+			$arr_activ = array( 'nombre' => 'Cuota Social');
+                	$data['actividad_info'] = (object) $arr_activ;
+		} else {
+                	$data['actividad_info'] = $this->actividades_model->get_actividad($actividad);
+		}
                 $this->load->view('imprimir/actividades-cobros', $data, FALSE);
-                break;
-
-            case 'anterior':
-                $this->load->model('actividades_model');
-                $id = $this->uri->segment(4);
-                $data['actividad'] = new STDClass();
-                $data['actividad']->id = false;
-                if($id){
-                    $data['socios'] = $this->pagos_model->get_pagos_actividad_anterior($id_entidad, $id);
-                    $data['actividad'] = $this->actividades_model->get_actividad($id);
-                }else{
-                    $data['socios'] = false;                    
-                }
-                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
-                $this->load->view('imprimir/anterior',$data);
                 break;
 
             case 'cuentadigital':
@@ -352,6 +340,17 @@ class Imprimir extends CI_Controller {
                 $data['fecha2'] = $fecha2;
                 $this->load->view('imprimir/cuentadigital', $data, FALSE);
                 break;
+
+            case 'cooperativa':
+                $data['ingresos'] = false;
+                if($fecha1 && $fecha2){
+                    $data['ingresos'] = $this->pagos_model->get_ingresos_cooperativa($id_entidad, $fecha1,$fecha2);
+                }
+                $data['fecha1'] = $fecha1;
+                $data['fecha2'] = $fecha2;
+                $this->load->view('imprimir/cooperativa', $data, FALSE);
+                break;
+
             
             default:
                 # code...
@@ -524,17 +523,59 @@ class Imprimir extends CI_Controller {
             return $result;
     }
 
+    public function cuentadigital_excel($fecha1='',$fecha2=''){
+
+                $id_entidad = $this->session->userdata('id_entidad');
+                $ent_abrev = $this->session->userdata('ent_abreviatura');
+                $this->load->model('pagos_model');
+        	$cobros = $this->pagos_model->get_ingresos_cuentadigital($id_entidad,$fecha1,$fecha2);
+
+        	$titulo = $ent_abrev." - Ingresos de Cuenta Digital del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
+                $fila1 = false;
+
+                $archivo="Ingresos de Cuenta Digital"."_".date('Ymd');
+
+                $headers=array();
+                $headers[]='Fecha';
+                $headers[]='Socio';
+                $headers[]='Importe';
+
+                $datos=$cobros;
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+    }
+
+    public function cooperativa_excel($fecha1='',$fecha2=''){
+
+                $id_entidad = $this->session->userdata('id_entidad');
+                $ent_abrev = $this->session->userdata('ent_abreviatura');
+                $this->load->model('pagos_model');
+        	$cobros = $this->pagos_model->get_ingresos_cooperativa($id_entidad,$fecha1,$fecha2);
+
+        	$titulo = $ent_abrev." - Ingresos de Cooperativa del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
+                $fila1 = false;
+
+                $archivo="Ingresos de Cooperativa "."_".date('Ymd');
+
+                $headers=array();
+                $headers[]='Fecha';
+                $headers[]='Socio';
+                $headers[]='Importe';
+
+                $datos=$cobros;
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+    }
+
     public function socios_excel($type=''){
 		$id_entidad = $this->session->userdata('id_entidad');
 		$this->load->model('pagos_model'); 
 		$ent_abrev = $this->session->userdata('ent_abreviatura');
-		$ent_nombre = $this->session->userdata('ent_ent_nombre');
+		$ent_nombre = $this->session->userdata('ent_nombre');
 		if($type=='suspendidos'){    
 			$clientes = $this->pagos_model->get_usuarios_suspendidos($id_entidad);
-			$titulo = $ent_abrev." - Socios Suspendidos - ".date('d-m-Y');
+			$titulo = $ent_abrev." - Socios Suspendidos - generado el ".date('d-m-Y');
 		}else{
 			$clientes = $this->pagos_model->get_socios_activos($id_entidad);
-			$titulo = $ent_abrev." - Socios Activos - ".date('d-m-Y');
+			$titulo = $ent_abrev." - Socios Activos - generado el ".date('d-m-Y');
 		}
                 $fila1 = false;
 
@@ -564,8 +605,8 @@ class Imprimir extends CI_Controller {
         $actividad = $this->actividades_model->get_actividad($id);        
         $clientes = $this->pagos_model->get_pagos_actividad($id_entidad,$id);        
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
-        $titulo = $ent_abrev." - ".$actividad->nombre." - ".date('d-m-Y');
+        $ent_nombre = $this->session->userdata('ent_nombre');
+        $titulo = $ent_abrev." - ".$actividad->nombre." - generado el ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
         //$this->load->library('PHPExcel/IOFactory');
@@ -671,7 +712,7 @@ class Imprimir extends CI_Controller {
         $clientes = $this->pagos_model->get_pagos_categorias($id_entidad,$id);
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $ent_nombre = $this->session->userdata('ent_nombre');
         $titulo = $ent_abrev." - ".$categoria->nombre." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
@@ -760,7 +801,7 @@ class Imprimir extends CI_Controller {
         $clientes = $data['ingresos'] = $this->pagos_model->get_ingresos($id_entidad,$fecha1,$fecha2);
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $ent_nombre = $this->session->userdata('ent_nombre');
         $titulo = $ent_abrev." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
@@ -834,14 +875,15 @@ class Imprimir extends CI_Controller {
         if($actividad != '-1'){
             $clientes = $data['ingresos'] = $this->pagos_model->get_cobros_actividad($id_entidad,$fecha1,$fecha2,$actividad,$categoria);
             $data['actividad_s'] = $actividad;                        
+            $actividad = $this->actividades_model->get_actividad($actividad);
         }else{
             $clientes = $data['ingresos'] = $this->pagos_model->get_cobros_cuota($id_entidad,$fecha1,$fecha2,$categoria);
             $data['actividad_s'] = '-1';
+            $actividad = (object)array("id"=>'-1',"nombre"=>"Cuota Social");
         }
-        $actividad = $this->actividades_model->get_actividad($actividad);
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $ent_nombre = $this->session->userdata('ent_nombre');
         $titulo = $ent_abrev." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - ".date('d-m-Y');
         
         $this->load->library('PHPExcel');
@@ -940,16 +982,16 @@ class Imprimir extends CI_Controller {
     // end: setExcel
     }
 
-    public function morosos_excel($comision='',$actividad=''){
+    public function morosos_excel($actividad=''){
                     
         $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
                 
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
-	if($comision || $actividad){
-		$clientes = $this->pagos_model->get_morosos($id_entidad,$comision, $actividad);
+        $ent_nombre = $this->session->userdata('ent_nombre');
+	if($actividad){
+		$clientes = $this->pagos_model->get_morosos($id_entidad,$actividad);
             	$titulo = $ent_abrev." - Morosos - ".date('d-m-Y');
 	} else {
 		return false;
@@ -1031,95 +1073,12 @@ class Imprimir extends CI_Controller {
     // end: setExcel
     }
 
-    public function anterior_excel($id=''){
-            
-        $id_entidad = $this->session->userdata('id_entidad');
-        $this->load->model('pagos_model');
-        $this->load->model('actividades_model');
-        $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
-        if($id != ''){
-            $clientes = $this->pagos_model->get_pagos_actividad_anterior($id_entidad,$id);
-            $actividad = $this->actividades_model->get_actividad($id);       
-            $titulo = $ent_abrev." - Deuda Anterior - ".$actividad->nombre." - ".date('d-m-Y');
-        }else{
-            die();
-        }
-        
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:G1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
-
-        // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Socio')
-                    ->setCellValue('C1', 'Teléfono')
-                    ->setCellValue('D1', 'DNI')
-                    ->setCellValue('E1', 'Fecha de Nacimiento')
-                    ->setCellValue('F1', 'Fecha de Alta')                 
-                    ->setCellValue('G1', 'Sin deuda hasta el 30/04/2015');
-        
-        $cont = 2;
-        foreach ($clientes as $cliente) {        
-        if($cliente->deuda == 0){
-            $deuda = "Si";
-        }else{
-            $deuda = "No";
-        }
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->socio)
-                        ->setCellValue('B'.$cont, $cliente->id)  
-                        ->setCellValue('C'.$cont, $cliente->telefono)  
-                        ->setCellValue('D'.$cont, $cliente->dni)  
-                        ->setCellValue('E'.$cont, $cliente->nacimiento)  
-                        ->setCellValue('F'.$cont, $cliente->date)  
-                        ->setCellValue('G'.$cont, $deuda);
-                        $cont ++;
-        } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
-    
-    // end: setExcel
-    }
-
     public function becas_excel($actividad=false){       
         $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $ent_nombre = $this->session->userdata('ent_nombre');
         if($actividad){
             $clientes = $this->pagos_model->get_becas($id_entidad,$actividad);
             if($actividad != '-1'){
@@ -1203,7 +1162,7 @@ class Imprimir extends CI_Controller {
         $clientes = $this->pagos_model->get_sin_actividades($id_entidad);
             
         $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_ent_nombre');
+        $ent_nombre = $this->session->userdata('ent_nombre');
         $titulo = $ent_abrev." - Socios Sin Actividades Asociadas - ".date('d-m-Y');
         
         
