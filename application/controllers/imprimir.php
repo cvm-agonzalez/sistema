@@ -70,23 +70,23 @@ class Imprimir extends CI_Controller {
     		);
 
 
-$i=0;
-                foreach ($datos as $dato) {
-                	$this->phpexcel->setActiveSheetIndex(0);
-                	foreach(range('A',"$letra_fin") as $columnID) {
-echo "dentro foreach ".$i++;
-var_dump($dato);
-die;
-                    		$this->phpexcel->setCellValue($columnID.$cont, $dato[$cont]);
+		$f=$cont;
+                foreach ($datos as $fila) {
+			$c=0;
+                	foreach ($fila as $columna) {
+                		$this->phpexcel->getActiveSheet()->setCellValueByColumnAndRow($c, $f, $columna);
+                        	$c++;
                 	}
-                        $cont ++;
+			$f++;
 		}
+
                 // Renombramos la hoja de trabajo
                 $this->phpexcel->getActiveSheet()->setTitle("$titulo");
 
-                foreach(range('A',"$letra_fin") as $columnID) {
-                    $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                        ->setAutoSize(true);
+		$col = 0;
+	 	while ( $col < $cant_col ) {
+			$columnID=$letra[$col++];
+                    	$this->phpexcel->getActiveSheet()->getColumnDimension($columnID)->setAutoSize(true);
                 }
                 // configuramos el documento para que la hoja
                 // de trabajo número 0 sera la primera en mostrarse
@@ -115,10 +115,10 @@ die;
                 $this->load->model('pagos_model');                
                 $clientes = $this->socios_model->get_socios($id_entidad);
                     
-                $titulo = $ent_abrev." - Socios - ".date('d-m-Y');
-		$fila1 = false;
+                $titulo = $ent_abrev."Socios";
+		$fila1 = $ent_nombre." - Listado de Socios - generado el ".date('d-m-Y');
 
-		$archivo="Listado de Socios"."_".date('Ymd');
+		$archivo="Listado_Socios"."_".date('Ymd');
 		$headers=array();
 		$headers[]='#';
 		$headers[]='Apellido';
@@ -139,7 +139,31 @@ die;
 		$headers[]='Observaciones';
 		$headers[]='Saldo en Cuenta Corriente';
 
-		$datos=$clientes;
+                $datos=array();
+                foreach ( $clientes as $cliente ) {
+                        $dato = array (
+                                "id"=> $cliente->id,
+                                "apellido"=> $cliente->apellido,
+                                "nombre"=> $cliente->nombre,
+                                "dni"=> $cliente->dni,
+                                "domicilio"=> $cliente->domicilio,
+                                "localidad"=> $cliente->localidad,
+                                "nacionalidad"=> $cliente->nacionalidad,
+                                "nacimiento"=> $cliente->nacimiento,
+                                "telefono"=> $cliente->telefono,
+                                "mail"=> $cliente->mail,
+                                "celular"=> $cliente->celular,
+                                "tutor"=> $cliente->tutor,
+                                "categoria"=> $cliente->categoria,
+                                "descuento"=> $cliente->descuento,
+                                "ingreso"=> $cliente->alta,
+                                "estado"=> $cliente->suspendido,
+                                "observaciones"=> $cliente->suspendido,
+                                "saldo"=> 0
+                        );
+                        $datos[]=$dato;
+                }
+
 		$this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
                 break;
 
@@ -527,20 +551,30 @@ die;
 
                 $id_entidad = $this->session->userdata('id_entidad');
                 $ent_abrev = $this->session->userdata('ent_abreviatura');
+                $ent_nombre = $this->session->userdata('ent_nombre');
                 $this->load->model('pagos_model');
         	$cobros = $this->pagos_model->get_ingresos_cuentadigital($id_entidad,$fecha1,$fecha2);
 
-        	$titulo = $ent_abrev." - Ingresos de Cuenta Digital del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
-                $fila1 = false;
+        	$fila1 = $ent_nombre." - Ingresos de Cuenta Digital del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
+        	$titulo = $ent_abrev."_IngresosCD";
 
-                $archivo="Ingresos de Cuenta Digital"."_".date('Ymd');
+                $archivo="Ingresos_CuentaDigital_".date('Ymd');
 
                 $headers=array();
                 $headers[]='Fecha';
                 $headers[]='Socio';
                 $headers[]='Importe';
 
-                $datos=$cobros;
+        	$datos = array();
+        	foreach ($cobros as $cobro) {
+                	$dato = array (
+                        	'fecha' =>  date('d/m/Y',strtotime($cobro->fecha)),                     
+                        	'socio' => "#".$cobro->sid."-".$cobro->socio->nombre.", ".$cobro->socio->apellido,
+                        	'monto' => $cobro->monto
+                	);
+                	$datos[]=$dato;
+        	}
+    
                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     }
 
@@ -548,20 +582,30 @@ die;
 
                 $id_entidad = $this->session->userdata('id_entidad');
                 $ent_abrev = $this->session->userdata('ent_abreviatura');
+                $ent_nombre = $this->session->userdata('ent_nombre');
                 $this->load->model('pagos_model');
         	$cobros = $this->pagos_model->get_ingresos_cooperativa($id_entidad,$fecha1,$fecha2);
 
-        	$titulo = $ent_abrev." - Ingresos de Cooperativa del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
-                $fila1 = false;
+        	$fila1 = $ent_nombre." - Ingresos de Cooperativa del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
+        	$titulo = $ent_abrev."_IngresosCoope";
 
-                $archivo="Ingresos de Cooperativa "."_".date('Ymd');
+                $archivo="Ingresos_Cooperativa_".date('Ymd');
 
                 $headers=array();
                 $headers[]='Fecha';
                 $headers[]='Socio';
                 $headers[]='Importe';
 
-                $datos=$cobros;
+        	$datos = array();
+        	foreach ($cobros as $cobro) {
+                	$dato = array (
+                        	'fecha' =>  date('d/m/Y',strtotime($cobro->fecha_pago)),                     
+                        	'socio' => "#".$cobro->sid."-".$cobro->socio->nombre.", ".$cobro->socio->apellido,
+                        	'monto' => $cobro->importe
+                	);
+                	$datos[]=$dato;
+        	}
+    
                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     }
 
@@ -570,14 +614,15 @@ die;
 		$this->load->model('pagos_model'); 
 		$ent_abrev = $this->session->userdata('ent_abreviatura');
 		$ent_nombre = $this->session->userdata('ent_nombre');
-		if($type=='suspendidos'){    
+		if( $type=='suspendidos' ) {    
 			$clientes = $this->pagos_model->get_usuarios_suspendidos($id_entidad);
-			$titulo = $ent_abrev." - Socios Suspendidos - generado el ".date('d-m-Y');
-		}else{
+			$fila1 = $ent_nombre." - Socios Suspendidos - generado el ".date('d-m-Y');
+			$titulo = $ent_abrev."SocSusp";
+		} else {
 			$clientes = $this->pagos_model->get_socios_activos($id_entidad);
-			$titulo = $ent_abrev." - Socios Activos - generado el ".date('d-m-Y');
+			$fila1 = $ent_nombre." - Socios Activos - generado el ".date('d-m-Y');
+			$titulo = $ent_abrev."SocActiv";
 		}
-                $fila1 = false;
 
                 $archivo="Listado de Socios"."_".date('Ymd');
 
@@ -590,51 +635,77 @@ die;
                 $headers[]='Monto Adeudado';
                 $headers[]='Meses Adeudados';
 
-                $datos=$clientes;
+                $datos=array();
+                foreach ( $clientes as $cliente ) {
+			if($cliente->deuda){
+                    		$hoy = new DateTime();
+                    		$d2 = new DateTime($cliente->deuda->generadoel);
+                    		$interval = $d2->diff($hoy);
+                    		$meses = $interval->format('%m');
+                    		if($meses > 0){
+                        		$adeudados = "Debe ".$meses;
+                        		if($meses > 1){
+                            			$adeudados .= ' Meses';
+                        		}else{
+                            			$adeudados .= ' Mes';
+                        		}
+                    		}else{
+                        		if( $hoy->format('%m') == $d2->format('%m')){
+                            			$adeudados = "Mes Actual";
+                        		}else{
+                            			$adeudados = "Cuota al Día";
+                        		}
+                    		}
+                	}else{
+                    		$adeudados = "Cuota al Día";
+                	}
+
+                        $dato = array (
+                                "apynom"=> $cliente->id."-".$cliente->nombre.", ".$cliente->apellido,
+                                "telefono"=> $cliente->telefono,
+                                "domicilio"=> $cliente->domicilio,
+                                "dni"=> $cliente->dni,
+                                "fch_alta"=> $cliente->alta,
+                                "deuda_pesos"=> $cliente->deuda_monto,
+                                "deuda_meses"=> $adeudados
+                        );
+                        $datos[]=$dato;
+                }
+
                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 
 
     }
 
     public function actividades_excel($id=''){
+
         $id_entidad = $this->session->userdata('id_entidad');
-        
         $this->load->model('actividades_model');
         $this->load->model('pagos_model');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_nombre');
 
         $actividad = $this->actividades_model->get_actividad($id);        
         $clientes = $this->pagos_model->get_pagos_actividad($id_entidad,$id);        
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $titulo = $ent_abrev." - ".$actividad->nombre." - generado el ".date('d-m-Y');
-        
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:I1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
-        // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Teléfono')
-                    ->setCellValue('C1', 'DNI')
-                    ->setCellValue('D1', 'Fecha de Nacimiento')
-                    ->setCellValue('E1', 'Fecha de Alta')                  
-                    ->setCellValue('F1', 'Observaciones')                  
-                    ->setCellValue('G1', 'Monto Adeudado')                  
-                    ->setCellValue('H1', 'Meses Adeudados')
-                    ->setCellValue('I1', 'Estado');                    
-        
+        $fila1 = $ent_nombre." - ".$actividad->nombre." - generado el ".date('d-m-Y');
+        $titulo = $ent_abrev."_".$actividad->nombre;
+
+	$archivo="Socios_Actividades"."_".date('Ymd');
+
+        $headers=array();
+        $headers[]='Nombre y Apellido';
+        $headers[]='Telefono';
+        $headers[]='DNI';
+        $headers[]='Fecha Nacimiento';
+        $headers[]='Fecha de Alta';
+        $headers[]='Observaciones';
+        $headers[]='Monto Adeudado';
+        $headers[]='Meses Adeudados';
+        $headers[]='Estado';
+
+	$datos=array();
         $cont = 2;
         foreach ($clientes as $cliente) {
 
@@ -666,41 +737,21 @@ die;
                     $estado = 'ACTIVO'; 
                 }
 
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->socio)
-                        ->setCellValue('B'.$cont, $cliente->telefono)
-                        ->setCellValue('C'.$cont, $cliente->dni)
-                        ->setCellValue('D'.$cont, $cliente->nacimiento)
-                        ->setCellValue('E'.$cont, date('d/m/Y',strtotime($cliente->date)))                     
-                        ->setCellValue('F'.$cont, $cliente->observaciones)
-                        ->setCellValue('G'.$cont, number_format($cliente->monto_adeudado*-1,2))
-                        ->setCellValue('H'.$cont, $adeudados)                    
-                        ->setCellValue('I'.$cont, $estado);                        
-                        $cont ++;
+		$dato = array (
+                        'socio' => $cliente->socio,
+                        'telefono' => $cliente->telefono,
+                        'dni' => $cliente->dni,
+                        'nacimiento' => $cliente->nacimiento,
+                        'alta' => date('d/m/Y',strtotime($cliente->date)),                     
+                        'observaciones' => $cliente->observaciones,
+                        'deuda' => $cliente->monto_adeudado*-1,
+                        'meses' => $adeudados,
+                        'estado' => $estado
+		);
+		$datos[] = $dato;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','H') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
-    
-    // end: setExcel
+
+	$this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     }
 
 
@@ -713,83 +764,35 @@ die;
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $titulo = $ent_abrev." - ".$categoria->nombre." - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - ".$categoria->nombre." - ".date('d-m-Y');
+        $titulo = $ent_abrev."_".$categoria->nombre;
+        $archivo = "Cat_".$categoria->nombre;
         
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:F1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
         // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Socio')
-                    ->setCellValue('C1', 'Teléfono')
-                    ->setCellValue('D1', 'DNI')
-                    ->setCellValue('E1', 'Fecha de Alta')                    
-                    ->setCellValue('F1', 'Meses Adeudados');                    
-        
-        $cont = 2;
+                $headers=array();
+                $headers[]='Nombre y Apellido';
+                $headers[]='Socio';
+                $headers[]='Telefono';
+                $headers[]='DNI';
+                $headers[]='Fecha de Ingreso';
+                $headers[]='Meses Adeudados';
+         
+        $datos = array();
         foreach ($clientes as $cliente) {   
 
-            $meses = @round($cliente->deuda/$cliente->cuota);
-            if($meses < 0){
-                $meses = $meses * -1;
-                if($meses == 1){
-                    $adeudados = "Debe ".$meses." mes";                        
-                }else{
-                    $adeudados = "Debe ".$meses." meses";                        
-                }
-            }else if($meses > 0){
-                if($meses == 1){
-                    $adeudados = $meses." mes pagado por adelantado";
-                }else{
-                    $adeudados = $meses." meses pagados por adelantado";                
-                }
-            }else if($meses == 0){
-                $adeudados = "Socio sin Deuda";
-            }
+		$dato = array (
+                        'apynom' => $cliente->nombre.' '.$cliente->apellido,
+                        'sid' => '# '.$cliente->id,
+                        'telefono' => $cliente->telefono,
+                        'dni' => $cliente->dni,
+                        'alta' => $cliente->alta,
+                        'meses' => $cliente->meses
+		);
+		$datos[]=$dato;
 
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, '# '.$cliente->id)
-                        ->setCellValue('C'.$cont, $cliente->telefono)
-                        ->setCellValue('D'.$cont, $cliente->dni)
-                        ->setCellValue('E'.$cont, date('d/m/Y',strtotime($cliente->alta)))
-                        ->setCellValue('F'.$cont, $adeudados);
-                        $cont ++;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
          
-        foreach(range('A','F') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     
     // end: setExcel
     }
@@ -802,66 +805,36 @@ die;
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $titulo = $ent_abrev." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".date('d-m-Y');
+        $titulo = $ent_abrev."_Ingresos";
+        $archivo = "Ingresos_".date('Ymd');
         
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:G1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
         // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Facturado El')
-                    ->setCellValue('B1', 'Pagado El')                                   
-                    ->setCellValue('C1', 'Descripción')
-                    ->setCellValue('D1', 'Monto')
-                    ->setCellValue('E1', 'Pagado')
-                    ->setCellValue('F1', 'Socio/Tutor')                                
-                    ->setCellValue('G1', 'Observaciones');
+                $headers=array();
+                $headers[]='Facturado El';
+                $headers[]='Pagado El';
+                $headers[]='Descripcion';
+                $headers[]='Monto';
+                $headers[]='Pagado';
+                $headers[]='Socio/Tutor';
+                $headers[]='Observaciones';
+         
         
-        $cont = 2;
+        $datos = array();
         foreach ($clientes as $cliente) {        
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, date('d/m/Y',strtotime($cliente->generadoel)))
-                        ->setCellValue('B'.$cont, date('d/m/Y',strtotime($cliente->pagadoel)))
-                        ->setCellValue('C'.$cont, strip_tags($cliente->descripcion))
-                        ->setCellValue('D'.$cont, $cliente->monto)
-                        ->setCellValue('E'.$cont, $cliente->pagado)              
-                        ->setCellValue('F'.$cont, '#'.$cliente->sid.' - '.$cliente->socio->nombre.' '.$cliente->socio->apellido)             
-                        ->setCellValue('G'.$cont, $cliente->socio->observaciones);
-                        $cont ++;
+		$dato = array (
+                        'generadoel' => date('d/m/Y',strtotime($cliente->generadoel)),
+                        'pagadoel' => date('d/m/Y',strtotime($cliente->pagadoel)),
+                        'descripcion' => strip_tags($cliente->descripcion),
+                        'monto' => $cliente->monto,
+                        'pagado' => $cliente->pagado,
+                        'apynom' => '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido,
+                        'observaciones' => $cliente->socio->observaciones
+		);
+		$datos[]=$dato;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
+
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     
     // end: setExcel
     }
@@ -884,36 +857,22 @@ die;
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $titulo = $ent_abrev." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - ".date('d-m-Y');
-        
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:G1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
+        $fila1 = $ent_nombre." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - ".date('d-m-Y');
+        $titulo = $ent_abrev."_Ingresos_".$actividad->nombre;
+        $archivo = "Ingresos_".$actividad->nombre."_".date('Ymd');
          
         // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Facturado El')
-                    ->setCellValue('B1', 'Pagado El')                    
-                    ->setCellValue('C1', 'Monto')
-                    ->setCellValue('D1', 'Activ/Seguro')
-                    ->setCellValue('E1', 'Socio')                    
-                    ->setCellValue('F1', 'Fecha de Nacimiento')
-                    ->setCellValue('G1', 'Observaciones')
-                    ->setCellValue('H1', 'Deuda');
-        
-        $cont = 2;        
+                $headers=array();
+                $headers[]='Facturado El';
+                $headers[]='Pagado El';
+                $headers[]='Monto';
+                $headers[]='Activ/Seguro';
+                $headers[]='Socio';
+                $headers[]='Fecha de Nacimiento';
+                $headers[]='Observaciones';
+                $headers[]='Deuda';
 
+	$datos=array();
         foreach ($clientes as $cliente) {
 
             if($cliente->deuda){                      
@@ -945,39 +904,19 @@ die;
 	    } else {
 		$concepto = "Actividad";
 	    }
-
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, date('d/m/Y',strtotime($cliente->generadoel)))
-                        ->setCellValue('B'.$cont, date('d/m/Y',strtotime($cliente->pagadoel)))
-                        ->setCellValue('C'.$cont, $cliente->pagado)
-                        ->setCellValue('D'.$cont, $concepto)              
-                        ->setCellValue('E'.$cont, '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido)              
-                        ->setCellValue('F'.$cont, $cliente->socio->nacimiento)
-                        ->setCellValue('G'.$cont, $cliente->socio->observaciones)
-                        ->setCellValue('H'.$cont, $deuda);                     
-                        $cont ++;
+		$dato = array (
+                        'generadoel' => date('d/m/Y',strtotime($cliente->generadoel)),
+                        'pagadoel' => date('d/m/Y',strtotime($cliente->pagadoel)),
+                        'pagado' => $cliente->pagado,
+                        'concepto' => $concepto,
+                        'apynom' => '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido,
+                        'nacimiento' => date('d/m/Y',strtotime($cliente->socio->nacimiento)),
+                        'observaciones' => $cliente->socio->observaciones,
+                        'deuda' => $deuda
+		);
+		$datos[]=$dato;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     
     // end: setExcel
     }
@@ -992,41 +931,28 @@ die;
         $ent_nombre = $this->session->userdata('ent_nombre');
 	if($actividad){
 		$clientes = $this->pagos_model->get_morosos($id_entidad,$actividad);
-            	$titulo = $ent_abrev." - Morosos - ".date('d-m-Y');
+            	$fila1 = $ent_nombre." - Morosos - ".date('d-m-Y');
+            	$titulo = $ent_abrev."_Morosos";
 	} else {
 		return false;
 	}
+	$archivo="Listado_Morosos"."_".date('Ymd');
 
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:C1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
         // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'DNI')
-                    ->setCellValue('B1', 'ID')
-                    ->setCellValue('C1', 'Nombre')
-                    ->setCellValue('D1', 'Teléfonos')
-                    ->setCellValue('E1', 'Domicilio')
-                    ->setCellValue('F1', 'Actividad')                   
-                    ->setCellValue('G1', 'Estado')                   
-                    ->setCellValue('H1', 'Deuda Cta Social')                   
-                    ->setCellValue('I1', 'Último Pago Cta Social')
-                    ->setCellValue('J1', 'Deuda Actividad')
-                    ->setCellValue('K1', 'Último Pago Actividad');
+                $headers=array();
+                $headers[]='DNI';
+                $headers[]='SID';
+                $headers[]='Nombre';
+                $headers[]='Telefonos';
+                $headers[]='Domicilio';
+                $headers[]='Actividad';
+                $headers[]='Estado';
+                $headers[]='Deuda Cta Social';
+                $headers[]='Ult Pago Cta Social';
+                $headers[]='Deuda Actividad';
+                $headers[]='Ult Pago Actividad';
         
-        $cont = 2;
+	$datos=array();
         foreach ($clientes as $cliente) {        
 
 		switch ( $cliente['estado'] ) {
@@ -1034,46 +960,28 @@ die;
 			case 0: $xestado="ACTI"; break;
 		}
 
-            	$this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente['dni'])
-                        ->setCellValue('B'.$cont, $cliente['sid'])
-                        ->setCellValue('C'.$cont, $cliente['apynom'])
-                        ->setCellValue('D'.$cont, $cliente['telefono'])
-                        ->setCellValue('E'.$cont, $cliente['domicilio'])
-                        ->setCellValue('F'.$cont, $cliente['actividad'])
-                        ->setCellValue('G'.$cont, $xestado)
-                        ->setCellValue('H'.$cont, $cliente['deuda_cuota']*-1)
-                        ->setCellValue('I'.$cont, $cliente['gen_cuota'])
-                        ->setCellValue('J'.$cont, $cliente['deuda_activ']*-1)
-                        ->setCellValue('K'.$cont, $cliente['gen_activ']);                       
-                        $cont ++;
+		$dato = array (
+                        'dni' => $cliente['dni'],
+                        'sid' => $cliente['sid'],
+                        'apynom' => $cliente['apynom'],
+                        'telefono' => $cliente['telefono'],
+                        'domicilio' => $cliente['domicilio'],
+                        'actividad' => $cliente['actividad'],
+                        'estado' => $xestado,
+                        'deuda_cs' => $cliente['deuda_cuota']*-1,
+                        'ult_cs' => date('d/m/Y',strtotime($cliente['gen_cuota'])),
+                        'deuda_act' => $cliente['deuda_activ']*-1,
+                        'ult_act' => date('d/m/Y',strtotime($cliente['gen_activ']))
+		);
+		$datos[]=$dato;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','E') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     
     // end: setExcel
     }
 
     public function becas_excel($actividad=false){       
+
         $id_entidad = $this->session->userdata('id_entidad');
         $this->load->model('pagos_model');
         $this->load->model('actividades_model');
@@ -1087,71 +995,38 @@ die;
                 $a = new STDClass();
                 $a->nombre = 'Cuota Social';
             }
-            $titulo = $ent_abrev." - Becados - ".$a->nombre." - ".date('d-m-Y');
+            $titulo = $ent_abrev."_Becas_".$a->nombre;
+            $fila1 = $ent_nombre." - Becados - ".$a->nombre." - ".date('d-m-Y');
         }else{
             die();
         }
+        $archivo = "Becas_".$a->nombre."_".date('Ymd');
         
-        
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:G1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
-
-        // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Socio')
-                    ->setCellValue('C1', 'Teléfono')
-                    ->setCellValue('D1', 'DNI')
-                    ->setCellValue('E1', 'Fecha de Nacimiento')
-                    ->setCellValue('F1', 'Fecha de Alta')                 
-                    ->setCellValue('G1', 'Porcentaje Becado');
-        
-        $cont = 2;
+        // agregamos información a los titulos
+        $headers=array();
+        $headers[]='Nombre y Apellido';
+        $headers[]='SID';
+        $headers[]='Telefono';
+        $headers[]='DNI';
+        $headers[]='Fecha de Nacimiento';
+        $headers[]='Fecha de Ingreso';
+        $headers[]='% Becado';
+       
+        $datos = array();
         foreach ($clientes as $cliente) {            
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, $cliente->id)  
-                        ->setCellValue('C'.$cont, $cliente->telefono)  
-                        ->setCellValue('D'.$cont, $cliente->dni)  
-                        ->setCellValue('E'.$cont, $cliente->nacimiento)  
-                        ->setCellValue('F'.$cont, $cliente->alta)  
-                        ->setCellValue('G'.$cont, $cliente->descuento.'%');
-                        $cont ++;
+                $dato = array (
+                        'apynom' => $cliente->nombre.", ".$cliente->apellido,
+                        'sid' => $cliente->id,
+                        'telefono' => $cliente->telefono,
+                        'dni' => $cliente->dni,
+                        'nacimiento' => date('d/m/Y',strtotime($cliente->nacimiento)),
+                        'alta' => date('d/m/Y',strtotime($cliente->alta)),
+                        'beca' => $cliente->descuento."%"
+                );
+                $datos[]=$dato;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
          
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     
     // end: setExcel
     }
@@ -1163,68 +1038,35 @@ die;
             
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $titulo = $ent_abrev." - Socios Sin Actividades Asociadas - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - Socios Sin Actividades Asociadas - ".date('d-m-Y');
+        $titulo = $ent_abrev."_SocSinActiv";
+        $archivo = "SociosSinActividad_".date('Ymd');
         
+        // agregamos información a los titulos
+        $headers=array();
+        $headers[]='Nombre y Apellido';
+        $headers[]='SID';
+        $headers[]='Telefono';
+        $headers[]='DNI';
+        $headers[]='Fecha de Nacimiento';
+        $headers[]='Fecha de Ingreso';
         
-        
-        $this->load->library('PHPExcel');
-        //$this->load->library('PHPExcel/IOFactory');
-        // configuramos las propiedades del documento
-        $this->phpexcel->getProperties()->setCreator("Club Villa Mitre")
-                                     ->setLastModifiedBy("Club Villa Mitre")
-                                     ->setTitle("Listado")
-                                     ->setSubject("Listado de Socios");
-        
-        $this->phpexcel->getActiveSheet()->getStyle('A1:G1')->getFill()->applyFromArray(
-            array(
-                'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                'startcolor' => array('rgb' => 'E9E9E9'),
-            )
-        );
-         
 
-        // agregamos información a las celdas
-        $this->phpexcel->setActiveSheetIndex(0)
-                    ->setCellValue('A1', 'Nombre y Apellido')
-                    ->setCellValue('B1', 'Socio')
-                    ->setCellValue('C1', 'Teléfono')
-                    ->setCellValue('D1', 'DNI')
-                    ->setCellValue('E1', 'Fecha de Nacimiento')
-                    ->setCellValue('F1', 'Fecha de Alta');                 
-        
-        $cont = 2;
+        $datos = array();
         foreach ($clientes as $cliente) {            
-            $this->phpexcel->setActiveSheetIndex(0)
-                        ->setCellValue('A'.$cont, $cliente->nombre.' '.$cliente->apellido)
-                        ->setCellValue('B'.$cont, $cliente->id)  
-                        ->setCellValue('C'.$cont, $cliente->telefono)  
-                        ->setCellValue('D'.$cont, $cliente->dni)  
-                        ->setCellValue('E'.$cont, $cliente->nacimiento)  
-                        ->setCellValue('F'.$cont, $cliente->alta);                        
-                        $cont ++;
+                $dato = array (
+                        'apynom' => $cliente->nombre.", ".$cliente->apellido,
+                        'sid' => $cliente->id,
+                        'telefono' => $cliente->telefono,
+                        'dni' => $cliente->dni,
+                        'nacimiento' => date('d/m/Y',strtotime($cliente->nacimiento)),
+                        'alta' => date('d/m/Y',strtotime($cliente->alta))
+                );
+                $datos[]=$dato;
         } 
-        // Renombramos la hoja de trabajo
-        $this->phpexcel->getActiveSheet()->setTitle('Clientes');
-         
-        foreach(range('A','G') as $columnID) {
-            $this->phpexcel->getActiveSheet()->getColumnDimension($columnID)
-                ->setAutoSize(true);
-        }
-        // configuramos el documento para que la hoja
-        // de trabajo número 0 sera la primera en mostrarse
-        // al abrir el documento
-        $this->phpexcel->setActiveSheetIndex(0);
-         
-         
-        // redireccionamos la salida al navegador del cliente (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$titulo.'.xlsx"');
-        header('Cache-Control: max-age=0');
-         
-        $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
-        $objWriter->save('php://output');
-         
-    
+
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+        
     // end: setExcel
     }
 }

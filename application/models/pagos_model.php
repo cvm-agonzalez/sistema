@@ -518,6 +518,11 @@ class Pagos_model extends CI_Model {
             $total = $total + $haber;
             $this->registrar_pago2($id_entidad,$sid,$monto,$ajuste);
         }
+	if ( $ajuste == 1 ) {
+		$orig=4;
+	} else {
+		$orig=3;
+	}
         $data = array(
                 "sid" => $sid,
                 "id_entidad" => $id_entidad,
@@ -525,7 +530,7 @@ class Pagos_model extends CI_Model {
                 "debe" => $debe,
                 "haber" => $haber,
                 "total" => $total,
-		"origen" => $origen
+		"origen" => $orig
             );
         $this->db->insert("facturacion",$data);
         $data['iid'] = $this->db->insert_id();

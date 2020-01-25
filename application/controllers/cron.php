@@ -519,7 +519,7 @@ class Cron extends CI_Controller {
 				"debe" => '0',
 				"haber" => $importe,
 				"total" => $saldo_cc,
-				"origen" => 4
+				"origen" => 5
 			);
 
 
