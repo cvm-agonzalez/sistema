@@ -15,29 +15,6 @@ class Cron extends CI_Controller {
 		return false;
 	}
 
-    public function decode($value='')
-    {
-        $this->load->database();
-        $this->db->where('barcode', '');
-        $query = $this->db->get('cupones',10,0);        
-        if( $query->num_rows() == 0 ){ return false; }
-        $cupones = $query->result();
-        $query->free_result();
-        foreach ($cupones as $cupon) {
-            var_dump($cupon);
-            $content = file_get_contents("https://zxing.org/w/decode?u=http%3A%2F%2Fclubvillamitre.com%2Fimages%2Fcupones%2F".$cupon->id.".png");
-            list($a,$estado1) = explode('<title>',$content);
-            $estado = explode('</title>',$estado1);
-            if($estado[0] == "Decode Succeeded"){
-                list($a,$pre1) = explode('<pre>',$estado[1]);
-                $pre = explode('</pre>',$pre1);                
-                $cup = array('barcode' => $pre[0]);
-                $this->db->where('id', $cupon->id);
-                $this->db->update('cupones', $cup);
-            }
-        }
-    }
-
     function depuracion_files(){ // esta funcion depura archivos viejos
         $this->load->model("pagos_model");
 	$cupones = $this->pagos_model->get_cupones_old();
@@ -652,8 +629,10 @@ class Cron extends CI_Controller {
                 			$txt_mail  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
                 			$txt_mail .= "<thead>";
                 			$txt_mail .= "<tr style='background-color: #105401 ;'>";
-                			$txt_mail .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
-                			$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
+                			$txt_mail .= "<th> Imagen de la Entidad ABC  ></th>";
+                			$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>ENTIDAD ABC</th>";
+                			//$txt_mail .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
+                			//$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
                 			$txt_mail .= "</tr>";
                 			$txt_mail .= "</thead>";
                 			$txt_mail .= "</table>";
@@ -675,15 +654,13 @@ class Cron extends CI_Controller {
 					$txt_mail .= "<br>";
 					$txt_mail .= '<p style="font-family:verdana; ">Al club lo hacemos entre todos y es de suma importancia su aporte </p>';
 					$txt_mail .= "<br>";
-					$txt_mail .= '<p style="font-family:verdana; ">Mas informaci&oacuten en <a href="https://www.villamitre.com.ar/"> www.villamitre.com.ar</a></p>';
-					$txt_mail .= "<br>";
 		
                 			$txt_mail .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
-	                		$txt_mail .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
-                			$txt_mail .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
+	                		$txt_mail .= "<p style='font-family:verdana'> <b>ENTIDAD ABC - BAHIA BLANCA</b></p>";
+                			$txt_mail .= "<p style='font-family:verdana'> <b>Domicilio     - (291)-Telefono</b> </p>";
                 			$txt_mail .= "<br> <br>";
 		
-                			$txt_mail .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
+                			//$txt_mail .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
 		
 		
 					// grabo el detalle del email
@@ -1408,8 +1385,9 @@ class Cron extends CI_Controller {
                 $id_entidad = $entidad->id;
                 $this->load->model("general_model");
                 $ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
-		$email_from = $entidad->email_sistema;
+		$email_from = 'aviso@gestionsocios.com.ar';
 		$email_nombre = $entidad->descripcion;
+		$reply_to = $entidad->email_sistema;
 
                 $fecha=date('Ymd');
                 $file = './entidades/'.$ent_dir.'/logs/enviomail-'.$fecha.'.log';
@@ -1442,6 +1420,7 @@ class Cron extends CI_Controller {
 			$this->load->library('email');
 			$enviados=0;
 			foreach ($query->result() as $email) {
+                		$this->email->reply_to($reply_to);
                 		$this->email->from($email_from,$email_nombre);
                 		$this->email->to($email->email);                 
 

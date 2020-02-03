@@ -21,7 +21,8 @@
             <th>Socio</th>
             <th>Teléfono</th>
             <th>DNI</th>
-            <th>Fecha de Alta</th>            
+            <th>Fecha de Nacimiento</th>            
+            <th>Fecha de Ingreso</th>            
             <th class="hidden-print">Resumen</th>
         </tr>
     </thead>
@@ -36,6 +37,7 @@
             <td><?=@$socio->id?></td>
             <td><?=@$socio->telefono?></td>
             <td><?=@$socio->dni?></td>
+            <td><?=@$socio->nacimiento?></td>            
             <td><?=@$socio->alta?></td>            
             <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>           
         </tr> 

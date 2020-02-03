@@ -7,19 +7,24 @@
 		</div>
 		<div class="form-group">
 			<label>Mensaje</label>			
+
+
 			<textarea>
 				<?
 				if($body){
 					echo $body;
 				}else{
-
-					$imagen_default=BASEPATH."../entidades/".$ent_directorio."/email_head.png";
-					if(file_exists($imagen_default)){
+                			$img_path=$baseurl."entidades/".$ent_directorio;
+					$imagen_default=$img_path."/email_head.png";
 						?>
-						<img src="<?=$imagen_default?>">
+							<img src="<?=$imagen_default?>">
+							<br>
+                    			        <?
+                    			if ( $img_attach ) {
+                        			?>
+                            			<img src="<?=$img_path?>/emails/<?=$img_attach?>" >
+	
 						<?
-					} else {
-						echo $imagen_default;
 					}
 				}
 				?>

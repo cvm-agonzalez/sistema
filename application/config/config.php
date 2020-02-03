@@ -15,6 +15,7 @@
 |
 */
 $config['base_url']	= 'http://localhost/gestion_socios';
+//$config['base_url']	= 'https://gestionsocios.com.ar';
 
 /*
 |--------------------------------------------------------------------------
@@ -126,7 +127,7 @@ $config['subclass_prefix'] = 'MY_';
 | DO NOT CHANGE THIS UNLESS YOU FULLY UNDERSTAND THE REPERCUSSIONS!!
 |
 */
-$config['permitted_uri_chars'] = 'a-z 0-9~%.:_\-';
+$config['permitted_uri_chars'] = 'a-z 0-9~%.:_\-|';
 
 
 /*
@@ -328,6 +329,7 @@ $config['compress_output'] = FALSE;
 | regarding date handling.
 |
 */
+$config['time_diff'] = '-4';
 $config['time_reference'] = 'gmt';
 
 

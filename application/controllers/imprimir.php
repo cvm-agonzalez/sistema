@@ -41,6 +41,7 @@ class Imprimir extends CI_Controller {
 
 		$str_style=$letra_ini."1:".$letra_fin."1";
 
+
                 $this->phpexcel->getActiveSheet()->getStyle("$str_style")->getFill()->applyFromArray(
                     array(
                         'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -84,7 +85,7 @@ class Imprimir extends CI_Controller {
                 $this->phpexcel->getActiveSheet()->setTitle("$titulo");
 
 		$col = 0;
-	 	while ( $col < $cant_col ) {
+	 	while ( $col <= $cant_col ) {
 			$columnID=$letra[$col++];
                     	$this->phpexcel->getActiveSheet()->getColumnDimension($columnID)->setAutoSize(true);
                 }
@@ -95,134 +96,13 @@ class Imprimir extends CI_Controller {
 
                 // redireccionamos la salida al navegador del cliente (Excel2007)
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="'.$archivo.'.xlsx"');
+                header('Content-Disposition: attachment;filename="'.$archivo.'.xls"');
                 header('Cache-Control: max-age=0');
 
-                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
+                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel5');
                 $objWriter->save('php://output');
         }
 
-    public function exportar($action='')
-    {
-        $id_entidad = $this->session->userdata('id_entidad');
-        $ent_abrev = $this->session->userdata('ent_abreviatura');
-        $ent_nombre = $this->session->userdata('ent_nombre');
-        $data['listado'] = false;
-        switch ($action) {
-            case 'socios':
-                $this->load->model('socios_model');                
-                $this->load->model('general_model');                
-                $this->load->model('pagos_model');                
-                $clientes = $this->socios_model->get_socios($id_entidad);
-                    
-                $titulo = $ent_abrev."Socios";
-		$fila1 = $ent_nombre." - Listado de Socios - generado el ".date('d-m-Y');
-
-		$archivo="Listado_Socios"."_".date('Ymd');
-		$headers=array();
-		$headers[]='#';
-		$headers[]='Apellido';
-		$headers[]='Nombre';
-		$headers[]='DNI';
-		$headers[]='Domicilio';
-		$headers[]='Localidad';
-		$headers[]='Nacionalidad';
-		$headers[]='Fecha de Nacimiento';
-		$headers[]='Teléfono';
-		$headers[]='Email';
-		$headers[]='Celular';
-		$headers[]='Tutor de grupo Familiar';
-		$headers[]='Categoría de Socio';
-		$headers[]='Descuento';
-		$headers[]='Fecha de Ingreso';
-		$headers[]='Estado';
-		$headers[]='Observaciones';
-		$headers[]='Saldo en Cuenta Corriente';
-
-                $datos=array();
-                foreach ( $clientes as $cliente ) {
-                        $dato = array (
-                                "id"=> $cliente->id,
-                                "apellido"=> $cliente->apellido,
-                                "nombre"=> $cliente->nombre,
-                                "dni"=> $cliente->dni,
-                                "domicilio"=> $cliente->domicilio,
-                                "localidad"=> $cliente->localidad,
-                                "nacionalidad"=> $cliente->nacionalidad,
-                                "nacimiento"=> $cliente->nacimiento,
-                                "telefono"=> $cliente->telefono,
-                                "mail"=> $cliente->mail,
-                                "celular"=> $cliente->celular,
-                                "tutor"=> $cliente->tutor,
-                                "categoria"=> $cliente->categoria,
-                                "descuento"=> $cliente->descuento,
-                                "ingreso"=> $cliente->alta,
-                                "estado"=> $cliente->suspendido,
-                                "observaciones"=> $cliente->suspendido,
-                                "saldo"=> 0
-                        );
-                        $datos[]=$dato;
-                }
-
-		$this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
-                break;
-
-            case 'actividades':
-                $this->load->model('actividades_model');
-                $this->load->model('socios_model');
-                $actividades = $this->actividades_model->get_act_asoc_all($id_entidad);
-        	$ent_abrev = $this->session->userdata('ent_abreviatura');
-        	$ent_nombre = $this->session->userdata('ent_nombre');
-                    
-                $titulo = $ent_nombre." - Actividades - ".date('d-m-Y');
-		$fila1 = false;
-
-                $archivo="Listado de Actividades"."_".date('Ymd');
-                $headers=array();
-                $headers[]='Socio #';
-                $headers[]='Apellido';
-                $headers[]='Nombre';
-                $headers[]='Actividad #';
-                $headers[]='Descripcion Actividad';
-                $headers[]='Descuento';
-
-                $datos=$actividades;
-                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
-
-                break;
-
-            case 'cuenta_corriente':
-                $this->load->model('pagos_model');                
-                $facturaciones = $this->pagos_model->get_facturacion_all($id_entidad);
-                    
-        	$ent_abrev = $this->session->userdata('ent_abreviatura');
-        	$ent_nombre = $this->session->userdata('ent_nombre');
-
-                $titulo = $ent_nombre." - Cuentas Corrientes - ".date('d-m-Y');
-		$fila1 = false;
-                
-                $archivo="Listado de Cuenta Corriente"."_".date('Ymd');
-                $headers=array();
-                $headers[]='Socio #';
-                $headers[]='Facturacion #';
-                $headers[]='Fecha';
-                $headers[]='Descripcion';
-                $headers[]='Tipo (D/H)';
-                $headers[]='Importe';
-
-                $datos=$facturaciones;
-                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
-
-                break;
-            
-            default:                
-                $this->load->view('imprimir/index_exportar',$data);
-                $this->load->view('imprimir/exportar',$data);
-                $this->load->view('imprimir/foot');
-                break;
-        }
-        $this->load->view('imprimir/foot');
-    }
 
     public function listado($action='',$id=false)
     {
@@ -547,6 +427,7 @@ class Imprimir extends CI_Controller {
             return $result;
     }
 
+
     public function cuentadigital_excel($fecha1='',$fecha2=''){
 
                 $id_entidad = $this->session->userdata('id_entidad');
@@ -607,6 +488,151 @@ class Imprimir extends CI_Controller {
         	}
     
                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+    }
+
+    public function exportar()
+    {
+        	$data = array();
+                $this->load->view('imprimir/index_exportar',$data);
+                $this->load->view('imprimir/exportar',$data);
+                $this->load->view('imprimir/foot');
+    }
+
+    public function exportar_cuenta_corriente() {
+        $id_entidad = $this->session->userdata('id_entidad');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_nombre');
+                $this->load->model('pagos_model');
+                $facturaciones = $this->pagos_model->get_facturacion_all($id_entidad);
+
+                $ent_abrev = $this->session->userdata('ent_abreviatura');
+                $ent_nombre = $this->session->userdata('ent_nombre');
+
+                $fila1 = $ent_nombre." - Cuentas Corrientes - generado el".date('d-m-Y');
+                $titulo = "CtaCte";
+
+                $archivo="Listado_Cuenta_Corriente"."_".date('Ymd');
+                $headers=array();
+                $headers[]='Socio #';
+                $headers[]='Facturacion #';
+                $headers[]='Fecha';
+                $headers[]='Descripcion';
+                $headers[]='Tipo (D/H)';
+                $headers[]='Importe Debe';
+                $headers[]='Importe Haber';
+
+                $datos=array();
+                foreach ( $facturaciones as $fact ) {
+                        $dato = array (
+				'sid' => $fact->sid,
+				'id' => $fact->id,
+                        	'fecha' =>  date('d/m/Y',strtotime($fact->date)),                     
+				'descripcion' => $fact->descripcion,
+				'tipo' => $fact->tipo,
+				'debe' => $fact->debe,
+				'haber' => $fact->haber
+			);
+			$datos[] = $dato;
+		}
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+
+    }
+
+    public function exportar_actividades() {
+        $id_entidad = $this->session->userdata('id_entidad');
+        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        $ent_nombre = $this->session->userdata('ent_nombre');
+                $this->load->model('actividades_model');
+                $this->load->model('socios_model');
+                $actividades = $this->actividades_model->get_act_asoc_all($id_entidad);
+                $ent_abrev = $this->session->userdata('ent_abreviatura');
+                $ent_nombre = $this->session->userdata('ent_nombre');
+
+                $titulo = $ent_abrev."_Actividades";
+                $fila1 = $ent_nombre." - Actividades - generado el".date('d-m-Y');
+
+                $archivo="Listado_Actividades"."_".date('Ymd');
+                $headers=array();
+                $headers[]='Socio #';
+                $headers[]='Apellido';
+                $headers[]='Nombre';
+                $headers[]='Actividad #';
+                $headers[]='Descripcion Actividad';
+                $headers[]='Descuento';
+
+                $datos=array();
+                foreach ( $actividades as $actividad ) {
+                        $dato = array (
+				'sid' => $actividad->sid,
+				'apellido' => $actividad->socio_apellido,
+				'nombre' => $actividad->socio_nombre,
+				'act_n' => $actividad->aid,
+				'act_x' => $actividad->actividad_nombre,
+				'descuento' => $actividad->descuento
+			);
+                	$datos[] = $dato;
+		}
+                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+    }
+
+    public function exportar_socios() {
+        	$id_entidad = $this->session->userdata('id_entidad');
+        	$ent_abrev = $this->session->userdata('ent_abreviatura');
+        	$ent_nombre = $this->session->userdata('ent_nombre');
+                $this->load->model('socios_model');                
+                $clientes = $this->socios_model->get_socios_export($id_entidad);
+                    
+                $titulo = $ent_abrev."_Socios";
+		$fila1 = $ent_nombre." - Listado de Socios - generado el ".date('d-m-Y');
+
+		$archivo="Listado_Socios"."_".date('Ymd');
+
+		$headers=array();
+		$headers[]='SID';
+		$headers[]='Apellido';
+		$headers[]='Nombre';
+		$headers[]='DNI';
+		$headers[]='Domicilio';
+		$headers[]='Localidad';
+		$headers[]='Nacionalidad';
+		$headers[]='Fecha de Nacimiento';
+		$headers[]='Telefono';
+		$headers[]='Email';
+		$headers[]='Celular';
+		$headers[]='Tutor de grupo Familiar';
+		$headers[]='Categoría de Socio';
+		$headers[]='Descuento';
+		$headers[]='Fecha de Ingreso';
+		$headers[]='Suspendido';
+		$headers[]='Observaciones';
+		$headers[]='Saldo en Cuenta Corriente';
+
+                $datos=array();
+                foreach ( $clientes as $cliente ) {
+                        $dato = array (
+                                "id"=> $cliente->id,
+                                "apellido"=> $cliente->apellido,
+                                "nombre"=> $cliente->nombre,
+                                "dni"=> $cliente->dni,
+                                "domicilio"=> $cliente->domicilio,
+                                "localidad"=> $cliente->localidad,
+                                "nacionalidad"=> $cliente->nacionalidad,
+                                "nacimiento"=> $cliente->nacimiento,
+                                "telefono"=> $cliente->telefono,
+                                "mail"=> $cliente->mail,
+                                "celular"=> $cliente->celular,
+                                "tutor"=> $cliente->apynom_tutor,
+                                "categoria"=> $cliente->categ_nombre,
+                                "descuento"=> $cliente->descuento,
+                        	'ingreso' =>  date('d/m/Y',strtotime($cliente->alta)),                     
+                                "estado"=> $cliente->suspendido,
+                                "observaciones"=> $cliente->observaciones,
+                                "saldo"=> $cliente->saldo
+                        );
+                        $datos[]=$dato;
+                }
+
+		$this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
     }
 
     public function socios_excel($type=''){
@@ -764,7 +790,7 @@ class Imprimir extends CI_Controller {
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $fila1 = $ent_nombre." - ".$categoria->nombre." - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - ".$categoria->nombre." - generado el ".date('d-m-Y');
         $titulo = $ent_abrev."_".$categoria->nombre;
         $archivo = "Cat_".$categoria->nombre;
         
@@ -775,6 +801,7 @@ class Imprimir extends CI_Controller {
                 $headers[]='Telefono';
                 $headers[]='DNI';
                 $headers[]='Fecha de Ingreso';
+                $headers[]='Monto Deuda';
                 $headers[]='Meses Adeudados';
          
         $datos = array();
@@ -786,6 +813,7 @@ class Imprimir extends CI_Controller {
                         'telefono' => $cliente->telefono,
                         'dni' => $cliente->dni,
                         'alta' => $cliente->alta,
+                        'deuda' => $cliente->deuda_monto*-1,
                         'meses' => $cliente->meses
 		);
 		$datos[]=$dato;
@@ -805,7 +833,7 @@ class Imprimir extends CI_Controller {
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $fila1 = $ent_nombre." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - generado el ".date('d-m-Y');
         $titulo = $ent_abrev."_Ingresos";
         $archivo = "Ingresos_".date('Ymd');
         
@@ -857,7 +885,7 @@ class Imprimir extends CI_Controller {
         
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $fila1 = $ent_nombre." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - Ingresos del ".date('d-m-Y',strtotime($fecha1))." al ".date('d-m-Y',strtotime($fecha2))." - ".$actividad->nombre." - generado el ".date('d-m-Y');
         $titulo = $ent_abrev."_Ingresos_".$actividad->nombre;
         $archivo = "Ingresos_".$actividad->nombre."_".date('Ymd');
          
@@ -931,7 +959,7 @@ class Imprimir extends CI_Controller {
         $ent_nombre = $this->session->userdata('ent_nombre');
 	if($actividad){
 		$clientes = $this->pagos_model->get_morosos($id_entidad,$actividad);
-            	$fila1 = $ent_nombre." - Morosos - ".date('d-m-Y');
+            	$fila1 = $ent_nombre." - Morosos - generado el ".date('d-m-Y');
             	$titulo = $ent_abrev."_Morosos";
 	} else {
 		return false;
@@ -996,7 +1024,7 @@ class Imprimir extends CI_Controller {
                 $a->nombre = 'Cuota Social';
             }
             $titulo = $ent_abrev."_Becas_".$a->nombre;
-            $fila1 = $ent_nombre." - Becados - ".$a->nombre." - ".date('d-m-Y');
+            $fila1 = $ent_nombre." - Becados - ".$a->nombre." - generado el ".date('d-m-Y');
         }else{
             die();
         }
@@ -1038,7 +1066,7 @@ class Imprimir extends CI_Controller {
             
         $ent_abrev = $this->session->userdata('ent_abreviatura');
         $ent_nombre = $this->session->userdata('ent_nombre');
-        $fila1 = $ent_nombre." - Socios Sin Actividades Asociadas - ".date('d-m-Y');
+        $fila1 = $ent_nombre." - Socios Sin Actividades Asociadas - generado el ".date('d-m-Y');
         $titulo = $ent_abrev."_SocSinActiv";
         $archivo = "SociosSinActividad_".date('Ymd');
         

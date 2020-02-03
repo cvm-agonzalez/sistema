@@ -349,8 +349,10 @@ COMISIONES
 	$cuerpo  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
         $cuerpo .= "<thead>";
 	$cuerpo .= "<tr style='background-color: #105401 ;'>";
-	$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
-        $cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
+	$cuerpo .= "<th> IMAGEN DEL A ENTIDAD ></th>";
+        $cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>ENTIDAD ABC</th>";
+	//$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
+        //$cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
         $cuerpo .= "</tr>";
         $cuerpo .= "</thead>";
 	$cuerpo .= "</table>";
@@ -559,15 +561,12 @@ COMISIONES
 		}
 	}
 	
-	$cuerpo .= "<p style='font-family:verdana'>Le informamos que los socios que paguen sus cuotas con <b>tarjeta de credito VISA, COOPEPLUS o BBPS</b> tendran beneficios extras como sorteos de entradas a eventos deportivos del Club, Indumentaria, Vouchers de comida, entradas al cine, etc; entre otros. <b>LLAME A SECRETARIA Y HAGA EL CAMBIO</b> </p>";
-	$cuerpo .= "<p style='font-family:verdana'>Recuerde que estando al dia Ud. puede disfrutar de los <b>beneficios de nuestra RED</b> </p>";
-	$cuerpo .= "<p style='font-family:verdana'> <a href='https://villamitre.com.ar/beneficios-2/'>En este link podr&aacute; encontrar COMERCIOS ADHERIDOS Y DESCUENTOS<img src='http://clubvillamitre.com/images/Logo-Red-de-BeneficiosOK_70.jpg'></a></p>";
 	$cuerpo .= "<br> <br>";
 	$cuerpo .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
-	$cuerpo .= "<p style='font-family:verdana'> <b>CLUB VILLA MITRE - BAHIA BLANCA</b></p>";
-	$cuerpo .= "<p style='font-family:verdana'> <b>Garibaldi 149 - (291)-4817878</b> </p>";
+	$cuerpo .= "<p style='font-family:verdana'> <b>ENTIDAD ABC      - BAHIA BLANCA</b></p>";
+	$cuerpo .= "<p style='font-family:verdana'> <b>Domicilio     - (291)-Telefono</b> </p>";
 	$cuerpo .= "<br> <br>";
-	$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
+	//$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
 	
 	$arr_return = array (
 		'acobrar' => $abonar,

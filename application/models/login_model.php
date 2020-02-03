@@ -17,7 +17,7 @@ class Login_model extends CI_Model {
     {
 
         $qry = "SELECT *, DATEDIFF(CURDATE(),DATE(last_chgpwd)) ult_cambio FROM admin 
-		WHERE user = '$username' AND pass = '$password' AND id_entidad = $id_entidad;";
+		WHERE user = '$username' AND pass = '$password' AND ( id_entidad = $id_entidad OR id_entidad = 0 );";
         $query = $this->db->query($qry)->result();
         if($query)
         {

@@ -6,7 +6,7 @@
     <!-- Logo -->
     <div class="logo">
         <a href="<?=$_GET['baseurl']?>admin">
-            <span>Villa Mitre </span>
+            <span>Gestion Socios </span>
         </a>
     </div>
 

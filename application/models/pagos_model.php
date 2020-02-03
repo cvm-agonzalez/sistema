@@ -1462,7 +1462,7 @@ class Pagos_model extends CI_Model {
 
     public function get_facturacion_all($id_entidad)
     {
-        $qry="SELECT f.sid, f.id, f.date, f.descripcion, IF(f.debe = 0, 'H', 'D') tipo, IF(f.debe = 0, haber, debe) importe FROM facturacion f WHERE id_entidad = $id_entidad ORDER BY f.id; ";
+        $qry="SELECT f.sid, f.id, f.date, f.descripcion, IF(f.debe = 0, 'H', 'D') tipo, debe, haber FROM facturacion f WHERE id_entidad = $id_entidad ORDER BY f.id; ";
         $facturacion = $this->db->query($qry)->result();
 
         return $facturacion;

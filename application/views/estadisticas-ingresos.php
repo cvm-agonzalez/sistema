@@ -12,8 +12,8 @@
                      		<div class="col-sm-5">
                        			<span class=" ui-select">
                        			<select name="meses" id="meses" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
-                       			<? foreach ( $meses as $mes ) { ?>
-				                        <option value="<?=$mes->mes?>" <? if($mes->mes == $mes){ echo 'selected'; } ?>><?=$mes->descr_mes?></option>
+                       			<? foreach ( $meses as $mesx ) { ?>
+				                        <option value="<?=$mesx->mes?>" <? if($mesx->mes == $mes){ echo 'selected'; } ?>><?=$mesx->descr_mes?></option>
                         			<?}?>
                        			</select>
                        			</span>
@@ -22,8 +22,9 @@
 	
                 	<div class="form-group col-lg-18">
                      		<div class="col-sm-5">
-                                        	<button class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
-	
+                                                <button id="btn_procesar" class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
+                                                <button id="estad_excel" value="" class="btn btn-success">EXCEL</button>
+                                                <input type="hidden" name="arma_excel" id="arma_excel" value='0' class="form-control">
                      		</div>
                 	</div>
 		</form>

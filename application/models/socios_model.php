@@ -146,6 +146,19 @@ class Socios_model extends CI_Model {
         return $result;
     }
 
+    public function get_socios_export($id_entidad)
+    {
+	$query="SELECT s.* , CONCAT(c.id,'-',c.nombre) categ_nombre, IF(t.apellido IS NULL,'', CONCAT(t.id,'#',t.nombre,', ',t.apellido)) apynom_tutor, SUM(p.pagado-p.monto) saldo
+		FROM socios s 
+			LEFT JOIN categorias c ON ( s.categoria = c.id ) 
+			LEFT JOIN socios t ON ( s.tutor = t.id ) 
+			LEFT JOIN pagos p ON ( s.id = p.tutor_id ) 
+		WHERE s.id_entidad = $id_entidad AND s.suspendido = 0 
+		GROUP BY s.id"; 
+        $result = $this->db->query($query)->result(); 
+        return $result;
+    }
+
     public function get_socios($id_entidad)
     {
         $query = $this->db->get_where('socios',array('id_entidad'=>$id_entidad,'estado'=>1));

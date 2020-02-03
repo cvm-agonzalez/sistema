@@ -25,8 +25,9 @@
 	
                 	<div class="form-group col-lg-18">
                      		<div class="col-sm-5">
-                                        	<button class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
-	
+                                        	<button id="btn_procesar" class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
+                                        	<button id="estad_excel" value="" class="btn btn-success">EXCEL</button>
+						<input type="hidden" name="arma_excel" id="arma_excel" value='0' class="form-control">
                      		</div>
                 	</div>
 		</form>
@@ -57,7 +58,7 @@
 	    		?>
 				<tr>				
 					<td><?=$mes->periodo?></td>
-					<td>Todas</td>
+					<td><?=$xactiv?></td>
 					<td align="right"><?=$mes->socios?></td>
 					<td align="right"><?=$mes->cuotas?></td>
 					<td align="right"><?=$mes->facturado?></td>

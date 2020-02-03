@@ -1751,7 +1751,7 @@ function () {
                 var path;
                 return path = $location.path(), _.contains(["/404", "/pages/500", "/pages/login", "/pages/signin", "/pages/signin1", "/pages/signin2", "/pages/signup", "/pages/signup1", "/pages/signup2", "/pages/lock-screen"], path)
             }, $scope.main = {
-                brand: "Villa Mitre",
+                brand: "Gestion Socios",
                 name: "Admin"
             }
         }

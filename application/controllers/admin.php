@@ -20,6 +20,7 @@ class Admin extends CI_Controller {
 		$data['ent_nombre'] = $this->session->userdata('ent_nombre');
 		$data['ent_directorio'] = $this->session->userdata('ent_directorio');
 		$data['ent_abreviatura'] = $this->session->userdata('abreviatura');
+		$data['email_reply'] = $this->session->userdata('email_sistema');
 		$data['id_entidad'] = $this->session->userdata('id_entidad');
 		$data['username'] = $this->session->userdata('username');
 		$data['rango'] = $this->session->userdata('rango');
@@ -65,7 +66,85 @@ class Admin extends CI_Controller {
     }
 
 	private function gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1) {
-		include('gen_EXCEL.php');
+	        $ent_abrev = $this->session->userdata('ent_abreviatura');
+        	$ent_nombre = $this->session->userdata('ent_nombre');
+
+                $this->load->library('PHPExcel');
+                $this->phpexcel->getProperties()->setCreator($ent_nombre)
+                                             ->setLastModifiedBy($ent_nombre)
+                                             ->setTitle($titulo)
+                                             ->setSubject($titulo);
+
+		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
+		$letras=$letras."AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK,AL,AM,AN,AO,AP,AQ,AR,AS,AT,AU,AV,AW,AX,AY,AZ";
+		$letras=$letras."BA,BB,BC,BD,BE,BF,BG,BH,BI,BJ,BK,BL,BM,BN,BO,BP,BQ,BR,BS,BT,BU,BV,BW,BX,BY,BZ";
+
+		$letra=explode(",",$letras);
+		$cant_col=count($headers);
+		$letra_ini=$letra[0];
+		$letra_fin=$letra[$cant_col];
+
+		$str_style=$letra_ini."1:".$letra_fin."1";
+
+                $this->phpexcel->getActiveSheet()->getStyle("$str_style")->getFill()->applyFromArray(
+                    array(
+                        'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+                        'startcolor' => array('rgb' => 'E9E9E9'),
+                    )
+                );
+
+
+		if ( $fila1 ) {
+                	$this->phpexcel->setActiveSheetIndex(0)
+                        	->setCellValue('A1', $fila1);
+			$cont = 3;
+			$inicio="A2";
+		} else {
+                	$cont = 2;
+			$inicio="A1";
+		}
+
+                // agregamos información a las celdas
+                $this->phpexcel->setActiveSheetIndex(0);
+
+		$this->phpexcel->getActiveSheet()->fromArray(
+        		$headers,   	// The data to set
+        		NULL,        	// Array values with this value will not be set
+        		"$inicio"       // Top left coordinate of the worksheet range where
+                     			//    we want to set these values (default is A1)
+    		);
+
+
+		$f=$cont;
+                foreach ($datos as $fila) {
+			$c=0;
+                	foreach ($fila as $columna) {
+                		$this->phpexcel->getActiveSheet()->setCellValueByColumnAndRow($c, $f, $columna);
+                        	$c++;
+                	}
+			$f++;
+		}
+
+                // Renombramos la hoja de trabajo
+                $this->phpexcel->getActiveSheet()->setTitle("$titulo");
+
+		$col = 0;
+	 	while ( $col < $cant_col ) {
+			$columnID=$letra[$col++];
+                    	$this->phpexcel->getActiveSheet()->getColumnDimension($columnID)->setAutoSize(true);
+                }
+                // configuramos el documento para que la hoja
+                // de trabajo número 0 sera la primera en mostrarse
+                // al abrir el documento
+                $this->phpexcel->setActiveSheetIndex(0);
+
+                // redireccionamos la salida al navegador del cliente (Excel2007)
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="'.$archivo.'.xlsx"');
+                header('Cache-Control: max-age=0');
+
+                $objWriter = PHPExcel_IOFactory::createWriter($this->phpexcel, 'Excel2007');
+                $objWriter->save('php://output');
 	}
 
 
@@ -426,13 +505,13 @@ class Admin extends CI_Controller {
 			redirect(base_url().'admin');
 		}else{
 			if ( !$this->session->userdata('id_entidad') ) {
-				$entidad = $this->input->post('entidad');
+				$id_entidad = $this->input->post('entidad');
 			} else {	
-				$entidad = $this->session->userdata('id_entidad');
+				$id_entidad = $this->session->userdata('id_entidad');
 			}
 			$username = $this->input->post('username');
 			$password = sha1($this->input->post('password'));
-			$check_user = $this->login_model->login_user($entidad, $username,$password);
+			$check_user = $this->login_model->login_user($id_entidad, $username,$password);
 			if($check_user == TRUE)
 			{
 				// Valido ultimo cambio de contraseña
@@ -460,16 +539,17 @@ class Admin extends CI_Controller {
 				}
 				// Busco datos Entidad
         			$this->load->model('general_model');
-				$entidad = $this->general_model->get_ent_dir($check_user->id_entidad);
+				$entidad = $this->general_model->get_ent_dir($id_entidad);
 
 				// Seteo variables de sesion
 				$data = array( 'is_logued_in'     =>         TRUE,
-						'id_entidad'     =>         $check_user->id_entidad,
+						'id_entidad'     =>         $id_entidad,
 						'id_usuario'     =>         $check_user->id,
 						'rango'        =>        $check_user->rango,
 						'mail'        =>        $check_user->mail,
 						'username'         =>         $check_user->user,
 						'ent_abreviatura' => $entidad->abreviatura,
+						'email_sistema' => $entidad->email_sistema,
 						'ent_nombre' => $entidad->descripcion,
 						'ent_directorio' => $entidad->dir_name,
 						'prox_vto'	=> $prox_vto,
@@ -979,7 +1059,8 @@ class Admin extends CI_Controller {
                 $this->load->model('cron');
                 $cuerpo = $this->cron->armo_emails($id_socio, $deuda);
 
-                $this->email->from('pagos@clubvillamitre.com');
+                $ent_nombre = $this->session->userdata('ent_nombre');
+                $this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
                 $this->email->to($mail['mail']);
 
                 $this->email->subject('Resumen de Cuenta');
@@ -1253,6 +1334,7 @@ class Admin extends CI_Controller {
 			$data['mensaje1'] = "No puede ponerse como tutor al mismo socio....";
                     	$data['section'] = 'ppal-mensaje';
                     	$this->load->view('admin',$data);
+			break;
 		} else {
                 	$this->load->model("socios_model");
 
@@ -1262,45 +1344,47 @@ class Admin extends CI_Controller {
 					$data['mensaje1'] = "No puede ponerse como tutor a un tutoreado....";
                     			$data['section'] = 'ppal-mensaje';
                     			$this->load->view('admin',$data);
+					break;
 				}
 			} else if($prev_user = $this->socios_model->checkDNI($id_entidad,$datos['dni'],$id)){
                     		//el dni esta repetido, incluimos la vista de listado con el usuario coincidente
                     		$data['prev_user'] = $prev_user;
                     		$data['section'] = 'socio-dni-repetido';
                     		$this->load->view('admin',$data);
-                		} else {
-					$ent_dir = $this->session->userdata('ent_directorio');
-                    			$token = $this->session->userdata('img_token');
-	
-                    			if(file_exists(BASEPATH."../images/temp/".$token.".jpg")){
-						$old_name = BASEPATH."../images/temp/".$token.".jpg";
-						$new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$id.".jpg";
-                        			rename($old_name,$new_name);
-					}
-                    			unset($datos['files']);
-                    			unset($datos['tutor_dni']);
-					$tutor = $datos['tutor_sid'];
-                    			unset($datos['tutor_sid']);
-					$datos['tutor']=$tutor;
-					if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
-                    			$this->socios_model->update_socio($id_entidad,$id,$datos);
-	
-                			// Grabo log de cambios
-                			$id_entidad = $this->session->userdata('id_entidad');
-                			$login = $this->session->userdata('username');
-                			$nivel_acceso = $this->session->userdata('rango');
-                			$tabla = "socios";
-                			$operacion = 2;
-                			$llave = $id;
-                			$observ = substr(json_encode($datos),0,255);
-                			$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-	
-                    			if(!isset($error)){
-                        			$error = '';
-                    			}
-                    			redirect(base_url()."admin/socios/registrado/".$id.$error);
-                		}
-			}
+				break;
+                		} 
+		}
+
+		$ent_dir = $this->session->userdata('ent_directorio');
+		$token = $this->session->userdata('img_token');
+
+		if(file_exists(BASEPATH."../images/temp/".$token.".jpg")){
+			$old_name = BASEPATH."../images/temp/".$token.".jpg";
+			$new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$id.".jpg";
+			rename($old_name,$new_name);
+		}
+		unset($datos['files']);
+		unset($datos['tutor_dni']);
+		$tutor = $datos['tutor_sid'];
+		unset($datos['tutor_sid']);
+		$datos['tutor']=$tutor;
+		if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
+		$this->socios_model->update_socio($id_entidad,$id,$datos);
+		
+		// Grabo log de cambios
+		$id_entidad = $this->session->userdata('id_entidad');
+		$login = $this->session->userdata('username');
+		$nivel_acceso = $this->session->userdata('rango');
+		$tabla = "socios";
+		$operacion = 2;
+		$llave = $id;
+		$observ = substr(json_encode($datos),0,255);
+		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+		
+		if(!isset($error)){
+			$error = '';
+		}
+		redirect(base_url()."admin/socios/registrado/".$id.$error);
 	
                 break;
 
@@ -3037,50 +3121,153 @@ class Admin extends CI_Controller {
 			$this->load->view('admin',$data);
 			break;
         	case 'cobranza':
-			if ( $this->uri->segment(4) ) {
-				$id_actividad = $this->uri->segment(4);
-                		$this->load->model('actividades_model');
-				$data = $this->carga_data();
-                		$data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
-				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad,$id_actividad);
-				$data['section'] = 'estadisticas-cobranza';
-				$data['id_actividad'] = $id_actividad;
-				$this->load->view('admin',$data);
-				break;
+        		$actividad = $this->input->post('actividad');
+        		$excel = $this->input->post('arma_excel');
+			if ( $excel == '1' ) {
+				$id_actividad = $actividad;
+				$this->exportar_estad_cobranza($id_entidad, $id_actividad);
 			} else {
-                		$this->load->model('actividades_model');
-				$data = $this->carga_data();
-                		$data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
-				$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad);
-				$data['id_actividad'] = -1;
-				$data['section'] = 'estadisticas-cobranza';
-				$this->load->view('admin',$data);
-				break;
+				if ( $actividad ) {
+					$id_actividad = $actividad;
+					$this->load->model('actividades_model');
+					$data = $this->carga_data();
+					if ( $id_actividad > 0 ) {
+                				$actividad = $this->actividades_model->get_actividad($id_actividad);
+						$data['xactiv'] = $id_actividad.'-'.$actividad->nombre;
+					} else {
+						if ( $id_actividad == -1 ) { $data['xactiv'] = 'Todas'; }
+						if ( $id_actividad == -2 ) { $data['xactiv'] = 'Socio Hincha'; }
+						if ( $id_actividad == -3 ) { $data['xactiv'] = 'Cuota Social'; }
+					}
+                			$data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+					$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad,$id_actividad);
+					$data['section'] = 'estadisticas-cobranza';
+					$data['id_actividad'] = $id_actividad;
+					$this->load->view('admin',$data);
+				} else {
+                			$this->load->model('actividades_model');
+					$data = $this->carga_data();
+                			$data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+					$data['cobranza_tabla'] = $this->estadisticas_model->cobranza_tabla($id_entidad);
+					$data['id_actividad'] = -1;
+					$data['xactiv'] = 'Todas';
+					$data['section'] = 'estadisticas-cobranza';
+					$this->load->view('admin',$data);
+				}
 			}
+			break;
                 case 'ingresos':
-                        $this->load->model('pagos_model');
-			$meses = $this->pagos_model->get_meses_ingresos($id_entidad);
-                        if ( $this->uri->segment(4) ) {
-                                $mes = $this->uri->segment(4);
-                                $data = $this->carga_data();
-                                $data['ingresos_tabla'] = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
-                                $data['section'] = 'estadisticas-ingresos';
-                                $data['meses'] = $meses;
-                                $data['mes'] = $mes;
-                                $this->load->view('admin',$data);
-                                break;
-                        } else {
-                                $mes = date('Ym');
-                                $data = $this->carga_data();
-                                $data['meses'] = $meses;
-                                $data['mes'] = $mes;
-                                $data['ingresos_tabla'] = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
-                                $data['section'] = 'estadisticas-ingresos';
-                                $this->load->view('admin',$data);
-                                break;
-                        }
+        		$mes = $this->input->post('meses');
+        		$excel = $this->input->post('arma_excel');
+			if ( $excel == '1' ) {
+				$this->exportar_estad_ingresos($id_entidad, $mes);
+			} else {
+                        	$this->load->model('pagos_model');
+				$meses = $this->pagos_model->get_meses_ingresos($id_entidad);
+                        	if ( $mes ) {
+					$data = $this->carga_data();
+                                	$data['ingresos_tabla'] = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
+                                	$data['section'] = 'estadisticas-ingresos';
+                                	$data['meses'] = $meses;
+                                	$data['mes'] = $mes;
+                                	$this->load->view('admin',$data);
+                        	} else {
+                                	$mes = date('Ym');
+                                	$data = $this->carga_data();
+                                	$data['meses'] = $meses;
+                                	$data['mes'] = $mes;
+                                	$data['ingresos_tabla'] = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
+                                	$data['section'] = 'estadisticas-ingresos';
+                                	$this->load->view('admin',$data);
+                        	}
+			}
+			break;
 
         }
+    }
+
+    public function exportar_estad_ingresos($id_entidad, $mes) {
+	$archivo="Estadistica_Ingresos_".$mes;
+	$fila1=false;
+	$titulo="Ingesos_".$mes;
+	$headers=array();
+	$headers[]="Dia";
+	$headers[]="Ingesos Cooperativa";
+	$headers[]="Ingresos Cta Digital";
+	$headers[]="Ingresos Manual";
+	$headers[]="Ajustes";
+
+	$ingresos = $this->estadisticas_model->ingresos_tabla($id_entidad,$mes);
+	$datos= array();
+
+	foreach ( $ingresos as $ingreso ) {
+
+		$dato = array (
+			'dia' => $ingreso->dia,
+			'ing_col' => $ingreso->ing_col,
+			'ing_cd' => $ingreso->ing_cd,
+			'ing_manual' => $ingreso->ing_manual,
+			'ajustes' => $ingreso->ajustes
+		);
+		$datos[] = $dato;
+	}
+
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+
+    }
+
+    public function exportar_estad_cobranza($id_entidad, $id_actividad) {
+
+	if ( $id_actividad > 0 ) {
+		$this->load->model('actividades_model');
+		$actividad = $this->actividades_model->get_actividad($id_actividad);
+		$xactiv = $id_actividad.'-'.$actividad->nombre;
+	} else {
+		if ( $id_actividad == -1 ) { $xactiv = 'Todas'; }
+		if ( $id_actividad == -2 ) { $xactiv = 'Socio Hincha'; }
+		if ( $id_actividad == -3 ) { $xactiv = 'Cuota Social'; }
+	}
+
+        $archivo="Estadistica_Cobranza".$xactiv;
+        $fila1=false;
+        $titulo="Cobranza_".$xactiv;
+
+        $headers=array();
+        $headers[]="Periodo";
+        $headers[]="Actividad";
+        $headers[]="Socios";
+        $headers[]="Cuotas";
+        $headers[]="Facturado";
+        $headers[]="Pagado Mes";
+        $headers[]="Efectividad";
+        $headers[]="% Mora";
+        $headers[]="Pago Parcial";
+        $headers[]="Impago";
+        $headers[]="% Impago";
+
+	$cobranzas = $this->estadisticas_model->cobranza_tabla($id_entidad,$id_actividad);
+        $datos= array();
+	foreach ( $cobranzas as $mes ) {
+
+		$dato = array (
+			'periodo' => $mes->periodo,
+			'actividad' => $xactiv,
+			'socios' => $mes->socios,
+			'cuotas' => $mes->cuotas,
+			'facturado' => $mes->facturado,
+			'pagado' => $mes->pagado_mes,
+			'efectividad' => $mes->porc_cobranza,
+			'pago_mora' => $mes->pagado_mora,
+			'porc_mora' => $mes->porc_mora,
+			'pago_parcial' => $mes->pago_parcial,
+			'impago' => $mes->impago,
+			'porc_impago' => $mes->porc_impago
+		);
+		$datos[] = $dato;
+	}
+
+        $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+
     }
 
     function mostrar_fecha($fecha)
@@ -3146,8 +3333,12 @@ class Admin extends CI_Controller {
                 $envio_info = $this->general_model->get_envio($id);
                 $envio = $this->general_model->get_envio_data($id);
                 if($envio){
+        	    $reply = $this->session->userdata('email_reply');
+        	    $ent_nombre = $this->session->userdata('ent_nombre');
                     $this->load->library('email');
-                    $this->email->from('avisos@clubvillamitre.com', 'Club Villa Mitre');
+                    $this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
+                    $this->email->reply_to($reply);
+
                     $this->email->to($envio->email);
                     $this->email->subject($envio_info->titulo);
                     $this->email->message($envio_info->body);
@@ -3182,14 +3373,6 @@ class Admin extends CI_Controller {
 // AHG  mover imagen de temp a directorio attach
                 $envio = array('id_entidad' => $id_entidad, 'body' => $this->input->post('text') );
                 $this->general_model->update_envio($id,$envio);
-                if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){
-                        rename("images/temp/".$this->session->userdata('img_token').".jpg","entidades/".$dir_ent."/emails/".$id.".jpg");
-                        unlink("images/temp/".$this->session->userdata('img_token').".jpg");
-                }
-                break;
-
-
-                $this->general_model->update_envio($id,$envio);
                 break;
 
             case 'agregar':
@@ -3207,6 +3390,14 @@ class Admin extends CI_Controller {
                     );
                 $this->load->model('general_model');
                 $id = $this->general_model->insert_envio($envio);
+
+                $dir_ent = $this->session->userdata('ent_directorio');
+		$img_attach=false;
+		if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){
+                        rename("images/temp/".$this->session->userdata('img_token').".jpg","entidades/".$dir_ent."/emails/".$id.".jpg");
+			$img_attach = $id.".jpg";
+        	}
+
                 $socios = $this->general_model->get_socios_by($id_entidad,$grupo,$data,$activ);
                 $this->load->helper('email');
                 if($socios){
@@ -3228,9 +3419,10 @@ class Admin extends CI_Controller {
                         echo 'no_mails';
                     }else{
 			$data = $this->carga_data();
+                    	$data['titulo'] = $titulo;
                         $data['id'] = $id;
                         $data['body'] = false;
-                        $data['titulo'] = $titulo;
+                        $data['img_attach'] = $img_attach;
                         $data['total'] = count($emails);
                         $this->load->view("envios-text",$data);
                     }
@@ -3278,6 +3470,16 @@ class Admin extends CI_Controller {
                 $this->load->model('general_model');
                 $old_envio = $this->general_model->get_envio($id);
                 $this->general_model->update_envio($id,$envio);
+
+                $dir_ent = $this->session->userdata('ent_directorio');
+                if(file_exists("images/temp/".$this->session->userdata('img_token').".jpg")){
+                        rename("images/temp/".$this->session->userdata('img_token').".jpg","entidades/".$dir_ent."/emails/".$id.".jpg");
+                }
+
+		$img_attach = false;
+                if(file_exists("entidades/".$dir_ent."/emails/".$id.".jpg")) {
+			$img_attach = $id.".jpg";
+		}
                 if($old_envio->grupo != $grupo){
                     $this->general_model->clear_envio_data($id);
                     $socios = $this->general_model->get_socios_by($id_entidad,$grupo,$data);
@@ -3304,6 +3506,7 @@ class Admin extends CI_Controller {
                             $data['id'] = $id;
                             $data['titulo'] = $titulo;
                             $data['body'] = $old_envio->body;
+                            $data['img_attach'] = $img_attach;
                             $data['total'] = count($emails);
                             $this->load->view("envios-text",$data);
                         }
@@ -3315,6 +3518,7 @@ class Admin extends CI_Controller {
 		    $data = $this->carga_data();
                     $data['id'] = $id;
                     $data['titulo'] = $titulo;
+                    $data['img_attach'] = $img_attach;
                     $data['body'] = $old_envio->body;
                     $data['total'] = count($envios_data);
                     $this->load->view("envios-text",$data);
