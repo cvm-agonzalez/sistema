@@ -80,7 +80,6 @@ function is_active($uri,$actual){
         			<ul class="sub-nav" <? is_active($_GET['section'],'pagos') ?>>
             			<!--                <li><a href="<?=$_GET['baseurl']?>admin/pagos"><i class="fa fa-caret-right"></i><span data-i18n="Impresión de Listados"></span></a></li>-->
             			<li><a href="<?=$_GET['baseurl']?>admin/pagos/registrar"><i class="fa fa-caret-right"></i><span data-i18n="Registrar Pago"></span></a></li>            
-            			<li><a href="<?=$_GET['baseurl']?>admin/pagos/cupon"><i class="fa fa-caret-right"></i><span data-i18n="Generar Cupón"></span></a></li>
             			<li><a href="<?=$_GET['baseurl']?>admin/pagos/editar"><i class="fa fa-caret-right"></i><span data-i18n="Editar Pagos"></span></a></li>
         			</ul>
     			</li>        

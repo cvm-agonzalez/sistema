@@ -451,7 +451,7 @@ class Cron extends CI_Controller {
 		}
 	
 		// Me mando email de aviso que el proceso termino OK
-        	mail('cvm.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
+        	mail('gsoc.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
 	}
 
 
@@ -699,15 +699,16 @@ class Cron extends CI_Controller {
                 // Ciclo las entidades para hacer la facturacion de cada una
                 $entidades = $this->general_model->get_ents();
                 foreach ($entidades as $entidad) {
+			echo "Controlando Entidad ".$entidad->descripcion."\n";
                         $this->control_entidad($entidad);
                 }
 	}
 
 	function control_entidad($entidad) {
         
+		$id_entidad = $entidad->id;
 		$this->load->database('default');
 
-		$id_entidad = $entidad->id;
 		$txt_ctrl=$entidad->descripcion." - CONTROLES CORRIDOS EL ".date('Y-m-d H:i:s')."\n";
 
 /* Control de que el saldo de facturacion sea igual al de pagos */
@@ -901,10 +902,9 @@ class Cron extends CI_Controller {
 			$txt_ctrl=$txt_ctrl."\n";
 		}
 
-		echo $txt_ctrl;
-
-		// Me mando email de aviso que el proceso termino OK
-        	mail('cvm.agonzalez@gmail.com', "El proceso de Controles Diario finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".date('Y-m-d H:i:s')."\n".$txt_ctrl);
+		//echo $txt_ctrl;
+		$xahora=date('Y-m-d G:i:s');
+		mail('gsoc.agonzalez@gmail.com', "El proceso de Controles Diarios finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".$xahora."\n".$txt_ctrl);
 
 	}
        
@@ -1073,7 +1073,7 @@ class Cron extends CI_Controller {
 		$info_total.=$r."\n";
 	}
 	$xahora=date('Y-m-d G:i:s');
-        mail('cvm.agonzalez@gmail.com', "El proceso de Imputación de Pagos finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".$xahora."\n".$info_total);
+        mail('gsoc.agonzalez@gmail.com', "El proceso de Imputación de Pagos finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de imputacion de pagos finalizó correctamente ".$xahora."\n".$info_total);
 
 	}
 
@@ -1117,7 +1117,7 @@ class Cron extends CI_Controller {
 			return $pago;
 		} else {
 			if($a === FALSE) {
-                		mail("cvm.agonzalez@gmail.com","Fallo en Cron Pagos ".$id_entidad,date('Y-m-d H:i:s'));
+                		mail("gsoc.agonzalez@gmail.com","Fallo en Cron Pagos ".$id_entidad,date('Y-m-d H:i:s'));
                 		exit();
 			}
 			return false;
@@ -1445,7 +1445,7 @@ class Cron extends CI_Controller {
                 	fwrite($log, $txt);
 
             		// Me mando email de aviso que el proceso termino OK
-            		mail('cvm.agonzalez@gmail.com', "El proceso de Envio de Emails de $entidad->descripcion finalizo correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de envios de email finalizó correctamente y se enviaron $enviados emails.....".date('d/m/Y G:i:s')."\n");
+            		mail('gsoc.agonzalez@gmail.com', "El proceso de Envio de Emails de $entidad->descripcion finalizo correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de envios de email finalizó correctamente y se enviaron $enviados emails.....".date('d/m/Y G:i:s')."\n");
 
             
         	}

@@ -25,9 +25,10 @@ class Autocomplete extends CI_Controller {
     	$gets = explode('-',$this->uri->segment(3)); // <-- parametro a buscar
     	$this->load->model("autocomplete_model");
         $params = explode('|',$gets[1]);
+	$id_entidad = $this->session->userdata('id_entidad');
 
         foreach ($params as $p) {
-            if($ret=$this->autocomplete_model->get($gets[0],$p,$query)){                
+            if($ret=$this->autocomplete_model->get($gets[0],$p,$query,$id_entidad)){                
                 $suggestions = $ret;
             }else{
 
@@ -42,9 +43,10 @@ class Autocomplete extends CI_Controller {
         $query = $this->input->get('query'); // para generar sugerencias en el momento de completar un input
         $gets = explode('-',$this->uri->segment(3)); // <-- parametro a buscar
         $this->load->model("autocomplete_model");
+	$id_entidad = $this->session->userdata('id_entidad');
         $params = explode('|',$gets[1]);
         foreach ($params as $p) {
-            if($ret=$this->autocomplete_model->search($gets[0],$p,$query)){                
+            if($ret=$this->autocomplete_model->search($gets[0],$p,$query,$id_entidad)){                
                 $suggestions = $ret;
             }else{
 

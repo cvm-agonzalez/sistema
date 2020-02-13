@@ -35,4 +35,5 @@
 		<button class="btn btn-success btn-block"><i class="fa fa-envelope"></i> Guardar y Comenzar Envío</button>
 	</fieldset>
 </form>
-<script>tinymce.init({selector:'textarea',language : 'es_MX',height: 400});</script>
+<script>tinymce.init({selector:'textarea',language : 'es_MX',height: 400, relative_urls: false, remove_script_host : false, force_br_newlines : false,
+      force_p_newlines : false, forced_root_block : ''});</script>

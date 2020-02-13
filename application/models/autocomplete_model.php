@@ -11,11 +11,12 @@ class Autocomplete_model extends CI_Model {
         $this->load->database('default');
     }
     
-    public function get($table,$field,$query){ 
+    public function get($table,$field,$query,$id_entidad){ 
         $this->db->like($field, $query, 'after');
     	$this->db->distinct();
         if($table == 'socios'){
             $query = $this->db->where("estado",'1');
+            $query = $this->db->where("id_entidad",$id_entidad);
         }
     	$query = $this->db->get($table); 
            	
@@ -32,9 +33,13 @@ class Autocomplete_model extends CI_Model {
 		}
 		
     }
-    public function search($table,$field,$query){ 
+    public function search($table,$field,$query,$id_entidad){ 
         $this->db->like($field, $query);
         $this->db->distinct();
+        if($table == 'socios'){
+            $query = $this->db->where("estado",'1');
+            $query = $this->db->where("id_entidad",$id_entidad);
+        }
         $query = $this->db->get($table);        
         if ($query->num_rows() > 0) {
             $data = array();

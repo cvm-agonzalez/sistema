@@ -79,14 +79,14 @@
                     <div class="col-sm-6">                    
                             <h3><strong>Titular:</strong> <?=$cuota['titular']?> 
                                 <?
-                                if($cuota['categoria'] == 'Grupo Familiar'){
+                                if($cuota['categ_tipo'] == 'F'){
                                 ?>
                                 <a target="_self" href="<?=base_url()?>admin/socios/resumen/<?=$cuota['tid']?>" class="btn btn-success"> Ver Resumen </a>
                                 <? } ?>
                             </h3>
                             <h5><strong>Categoría:</strong> <?=$cuota['categoria']?></h5>
                             <?
-                            if($cuota['categoria'] == 'Grupo Familiar'){
+                            if($cuota['categ_tipo'] == 'F'){
                             ?>                        
                             <h5><strong>Integrantes</strong></h5>
                             <ul>

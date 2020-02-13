@@ -20,3 +20,71 @@
 10:36:30: Socio #10 DNI=34444-,  facturado 
 10:36:30: Socio #11 DNI=34444333-,  facturado 
 10:36:30: Cron Finalizado 
+09:04:46 - Procesando 1-Club San Francisco\n09:04:46: Inicio de Cron... 
+09:04:46 - Truncate mails\n09:04:46 - Indicador facturado en 0 \n09:04:46 - ERROR NO EXISTE CATEGORIA m para menores \n09:04:46 - Cambio de categoria mayor \n09:04:46: Se encontraron 8 socios a facturar 
+09:06:13 - Procesando 1-Club San Francisco\n09:06:13: Reanudando Cron... 
+09:06:13: Se encontraron 8 socios a facturar 
+09:06:13: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:06:13: Socio #3 DNI=333333-s, s facturado 
+09:06:13: Socio #5 DNI=22222-, we facturado 
+09:06:13: Socio #7 DNI=222222222-,  facturado 
+09:06:13: Socio #8 DNI=949494949-otra vez, probando carga de nuevo facturado 
+09:06:13: Socio #9 DNI=949494-,  facturado 
+09:06:13: Socio #10 DNI=34444-,  facturado 
+09:06:13: Socio #11 DNI=34444333-,  facturado 
+09:06:13: Cron Finalizado 
+09:06:40 - Procesando 1-Club San Francisco\n09:06:40: Inicio de Cron... 
+09:06:40 - Truncate mails\n09:06:40 - Indicador facturado en 0 \n09:06:40 - ERROR NO EXISTE CATEGORIA m para menores \n09:06:40 - Cambio de categoria mayor \n09:06:40: Se encontraron 8 socios a facturar 
+09:06:40: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:06:40: Socio #3 DNI=333333-s, s facturado 
+09:06:40: Socio #5 DNI=22222-, we facturado 
+09:06:40: Socio #7 DNI=222222222-,  facturado 
+09:06:40: Socio #8 DNI=949494949-otra vez, probando carga de nuevo facturado 
+09:06:40: Socio #9 DNI=949494-,  facturado 
+09:06:40: Socio #10 DNI=34444-,  facturado 
+09:06:40: Socio #11 DNI=34444333-,  facturado 
+09:06:40: Cron Finalizado 
+09:07:32 - Procesando 1-Club San Francisco\n09:07:32: Inicio de Cron... 
+09:07:32: Socio Suspendido #5 , we DNI= 22222 atraso de 5 ultimo pago -6 
+09:07:32 - Truncate mails\n09:07:32 - Indicador facturado en 0 \n09:07:32 - ERROR NO EXISTE CATEGORIA m para menores \n09:07:32 - Cambio de categoria mayor \n09:07:32: Se encontraron 7 socios a facturar 
+09:07:32: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:07:32: Socio #3 DNI=333333-s, s facturado 
+09:07:32: Socio #7 DNI=222222222-,  facturado 
+09:07:32: Socio #8 DNI=949494949-otra vez, probando carga de nuevo facturado 
+09:07:32: Socio #9 DNI=949494-,  facturado 
+09:07:32: Socio #10 DNI=34444-,  facturado 
+09:07:32: Socio #11 DNI=34444333-,  facturado 
+09:07:32: Cron Finalizado 
+09:10:04 - Procesando 1-Club San Francisco\n09:10:04: Inicio de Cron... 
+09:10:04: Socio Suspendido #3 s, s DNI= 333333 atraso de 5 ultimo pago -6 
+09:10:04: Socio Suspendido #7 ,  DNI= 222222222 atraso de 5 ultimo pago -6 
+09:10:04: Socio Suspendido #8 otra vez, probando carga de nuevo DNI= 949494949 atraso de 5 ultimo pago -6 
+09:10:04: Socio Suspendido #9 ,  DNI= 949494 atraso de 5 ultimo pago -6 
+09:10:04: Socio Suspendido #10 ,  DNI= 34444 atraso de 5 ultimo pago -6 
+09:10:04: Socio Suspendido #11 ,  DNI= 34444333 atraso de 5 ultimo pago -6 
+09:10:04 - Truncate mails\n09:10:04 - Indicador facturado en 0 \n09:10:04 - ERROR NO EXISTE CATEGORIA m para menores \n09:10:04 - Cambio de categoria mayor \n09:10:04: Se encontraron 1 socios a facturar 
+09:10:04: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:10:04: Cron Finalizado 
+09:10:54 - Procesando 1-Club San Francisco\n09:10:54: Intento de ejecución de Cron Finalizado! 
+09:11:23 - Procesando 1-Club San Francisco\n09:11:23: Inicio de Cron... 
+09:11:23 - Truncate mails\n09:11:23 - Indicador facturado en 0 \n09:11:23 - ERROR NO EXISTE CATEGORIA m para menores \n09:11:23 - Cambio de categoria mayor \n09:11:23: Se encontraron 1 socios a facturar 
+09:11:23: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:11:23: Cron Finalizado 
+09:11:45 - Procesando 1-Club San Francisco\n09:11:45: Intento de ejecución de Cron Finalizado! 
+09:11:55 - Procesando 1-Club San Francisco\n09:11:55: Inicio de Cron... 
+09:11:55 - Truncate mails\n09:11:55 - Indicador facturado en 0 \n09:11:55 - ERROR NO EXISTE CATEGORIA m para menores \n09:11:55 - Cambio de categoria mayor \n09:11:55: Se encontraron 1 socios a facturar 
+09:11:55: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:11:55: Cron Finalizado 
+09:13:46 - Procesando 1-Club San Francisco\n09:13:46: Inicio de Cron... 
+09:13:46 - Truncate mails\n09:13:46 - Indicador facturado en 0 \n09:13:46 - ERROR NO EXISTE CATEGORIA m para menores \n09:13:46 - Cambio de categoria mayor \n09:13:46: Se encontraron 1 socios a facturar 
+09:13:46: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:13:46: Cron Finalizado 
+09:19:14 - Procesando 1-Club San Francisco\n09:19:14: Inicio de Cron... 
+09:19:14 - Truncate mails\n09:19:14 - Indicador facturado en 0 \n09:19:14 - ERROR NO EXISTE CATEGORIA m para menores \n09:19:14 - Cambio de categoria mayor \n09:19:14: Se encontraron 1 socios a facturar 
+09:19:14: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:19:14: Cron Finalizado 
+09:56:11 - Procesando 1-Club San Francisco\n2020-01-22 09:56:11: Inicio de Cron... 
+09:56:11 - Truncate mails\n09:57:26 - Procesando 1-Club San Francisco\n09:57:26: Reanudando Cron... 
+09:57:26: Se encontraron 1 socios a facturar 
+09:57:26: Socio #1 DNI=20562964-gonzalez, adrian facturado 
+09:57:26: Cron Finalizado 

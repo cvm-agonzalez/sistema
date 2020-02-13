@@ -1,0 +1,173 @@
+El cuerpo original es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+El cuerpo despues de rtrim es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+antes de if batch 
+_build_message -> <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41d76bd1fcd
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+texto agregado al medio
+
+
+--B_ALT_5e41d76bd1fcd
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<img src=3D"http://localhost/gestion_socios/entidades/0001_CSF/email_head.p=
+ng" alt=3D"" /><br /><br /><br />texto agregado al medio<br /><br /> <img s=
+rc=3D"http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt=
+=3D"" />
+
+
+------------------------------------------------------------------------------------------------------
+El cuerpo original es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+El cuerpo despues de rtrim es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+antes de if batch 
+_build_message -> <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41d7e267baf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+texto agregado al medio
+
+
+--B_ALT_5e41d7e267baf
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<img src=3D"http://localhost/gestion_socios/entidades/0001_CSF/email_head.p=
+ng" alt=3D"" /><br /><br /><br />texto agregado al medio<br /><br /> <img s=
+rc=3D"http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt=
+=3D"" />
+
+
+------------------------------------------------------------------------------------------------------
+El cuerpo original es : 
+El cuerpo despues de rtrim es : 
+antes de if batch 
+_build_message -> 
+_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41d80f2a903
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+
+
+
+--B_ALT_5e41d80f2a903
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+
+
+
+------------------------------------------------------------------------------------------------------
+El cuerpo original es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+El cuerpo despues de rtrim es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+antes de if batch 
+_build_message -> <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41d838e8b94
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+texto agregado al medio
+
+
+--B_ALT_5e41d838e8b94
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<img src=3D"http://localhost/gestion_socios/entidades/0001_CSF/email_head.p=
+ng" alt=3D"" /><br /><br /><br />texto agregado al medio<br /><br /> <img s=
+rc=3D"http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt=
+=3D"" />
+
+
+------------------------------------------------------------------------------------------------------
+El cuerpo original es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+El cuerpo despues de rtrim es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+antes de if batch 
+_build_message -> <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41d87bf1359
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+texto agregado al medio
+
+
+--B_ALT_5e41d87bf1359
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<img src=3D"http://localhost/gestion_socios/entidades/0001_CSF/email_head.p=
+ng" alt=3D"" /><br /><br /><br />texto agregado al medio<br /><br /> <img s=
+rc=3D"http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt=
+=3D"" />
+
+
+------------------------------------------------------------------------------------------------------
+El cuerpo original es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+El cuerpo despues de rtrim es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+antes de if batch 
+_build_message -> <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41d89780769
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+texto agregado al medio
+
+
+--B_ALT_5e41d89780769
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<img src=3D"http://localhost/gestion_socios/entidades/0001_CSF/email_head.p=
+ng" alt=3D"" /><br /><br /><br />texto agregado al medio<br /><br /> <img s=
+rc=3D"http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt=
+=3D"" />
+
+
+------------------------------------------------------------------------------------------------------
+El cuerpo original es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+El cuerpo despues de rtrim es : <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+antes de if batch 
+_build_message -> <img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />
+_build_message _finalbody -> 
+_prep_quoted_prep_quoted antes foreach<img src="http://localhost/gestion_socios/entidades/0001_CSF/email_head.png" alt="" /><br /><br /><br />texto agregado al medio<br /><br /> <img src="http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt="" />_build_message _finalbody -> This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_5e41e0a0905c9
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+texto agregado al medio
+
+
+--B_ALT_5e41e0a0905c9
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<img src=3D"http://localhost/gestion_socios/entidades/0001_CSF/email_head.p=
+ng" alt=3D"" /><br /><br /><br />texto agregado al medio<br /><br /> <img s=
+rc=3D"http://localhost/gestion_socios/entidades/0001_CSF/emails/16.jpg" alt=
+=3D"" />
+
+
+------------------------------------------------------------------------------------------------------

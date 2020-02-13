@@ -193,7 +193,16 @@ class Socios_model extends CI_Model {
 	$categ = $this->get_cat($id_entidad, $id, $data);
 	if ( $categ['cambio'] == 1 ) {
         	$this->load->model('pagos_model');
-		$this->pagos_model->registrar_pago($id_entidad, 'debe',$id,0.00,'Cambio de Categoria de '.$categ['descr_ant'].' a '.$categ['descr_new'],0,0);
+		if ( $categ['precio_ant'] != $categ['precio_new'] ) {
+			$diferencia = $categ['precio_new'] - $categ['precio_ant'];
+			if ( $diferencia > 0 ) {
+				$this->pagos_model->registrar_pago($id_entidad, 'debe',$id,$diferencia,'Cambio de Categoria de '.$categ['descr_ant'].' a '.$categ['descr_new'],0,0);
+			} else {
+				$this->pagos_model->registrar_pago($id_entidad, 'haber',$id,-$diferencia,'Cambio de Categoria de '.$categ['descr_ant'].' a '.$categ['descr_new'],0,0);
+			}
+		} else {
+			$this->pagos_model->registrar_pago($id_entidad, 'debe',$id,0.00,'Cambio de Categoria de '.$categ['descr_ant'].' a '.$categ['descr_new'],0,0);
+		}
 	}
         $this->db->where('id', $id);
         $this->db->update('socios', $data); 
@@ -201,7 +210,8 @@ class Socios_model extends CI_Model {
 
     public function get_cat($id_entidad, $id, $data){
 	$cat_new=$data['categoria'];
-	$query="SELECT s.categoria id_ant, c1.nombre descr_ant, $cat_new id_new, c2.nombre descr_new, IF ( $cat_new != s.categoria , 1, 0) cambio
+	$query="SELECT s.categoria id_ant, c1.nombre descr_ant, c1.precio precio_ant, $cat_new id_new, c2.nombre descr_new, c2.precio precio_new,
+			IF ( $cat_new != s.categoria , 1, 0) cambio
 		FROM socios s
 			LEFT JOIN categorias c1 ON ( s.categoria = c1.id )
 			LEFT JOIN categorias c2 ON ( $cat_new = c2.id )
@@ -210,8 +220,10 @@ class Socios_model extends CI_Model {
         if ( $result ) {
 	    $cat = array( 'id_ant' => $result->id_ant,
 			'descr_ant' => $result->descr_ant,
+			'precio_ant' => $result->precio_ant,
 			'id_new' => $result->id_new,
 			'descr_new' => $result->descr_new,
+			'precio_new' => $result->precio_new,
 			'cambio' => $result->cambio
 		);
             return $cat;

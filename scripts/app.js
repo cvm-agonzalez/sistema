@@ -927,7 +927,7 @@ function () {
             });
             $scope.showInfo = function(obj, id, baseurl){
 
-                var newTr = '<tr dynarow="1" id="mas_info_'+id+'"><td></td><td colspan="4"><a href="'+baseurl+'admin/pagos/cupon/'+id+'" class="btn btn-primary">Generar Cupón</a>&nbsp;<a id="imprimir_carnet" data-id="'+id+'" href="#" class="btn btn-primary">Imprimir Carnet</a>&nbsp;<a href="'+baseurl+'admin/socios/enviar_resumen/'+id+'" class="btn btn-primary">Enviar Resumen</a>&nbsp;<a href="'+baseurl+'admin/actividades/asociar/'+id+'" class="btn btn-primary">Asociar Actividad</a>&nbsp;<a href="'+baseurl+'admin/pagos/deuda/'+id+'" class="btn btn-primary">Financiar Deuda</a>&nbsp;<a href="'+baseurl+'admin/pagos/registrar/'+id+'" class="btn btn-primary">Registrar Pago</a>&nbsp;<a href="'+baseurl+'admin/socios/suspender/'+id+'" class="btn btn-primary">Suspender</a>;<a href="'+baseurl+'admin/socios/reinscribir/'+id+'" class="btn btn-primary">Reinscribir</a></td></tr>'
+                var newTr = '<tr dynarow="1" id="mas_info_'+id+'"><td></td><td colspan="5"><a id="imprimir_carnet" data-id="'+id+'" href="#" class="btn btn-primary">Imprimir Carnet</a>&nbsp;<a href="'+baseurl+'admin/socios/enviar_resumen/'+id+'" class="btn btn-primary">Enviar Resumen</a>&nbsp;<a href="'+baseurl+'admin/actividades/asociar/'+id+'" class="btn btn-primary">Asociar Actividad</a>;<a href="'+baseurl+'admin/pagos/registrar/'+id+'" class="btn btn-primary">Registrar Pago</a>;<a href="'+baseurl+'admin/socios/suspender/'+id+'" class="btn btn-primary">Suspender</a></td></tr>'
                 var elem = $("#td_socio_"+id);
                 
                 console.log(elem);
@@ -1040,7 +1040,8 @@ function () {
                 })()
            });
             $scope.showInfo = function(obj, id, baseurl){
-                var newTr = '<tr dynarow="1" id="mas_info_'+id+'"><td></td><td colspan="4"><a href="'+baseurl+'admin/pagos/cupon/'+id+'" class="btn btn-primary">Generar Cupón</a>&nbsp;<a id="imprimir_carnet" data-id="'+id+'" href="#" class="btn btn-primary">Imprimir Carnet</a>&nbsp;<a href="'+baseurl+'admin/socios/enviar_resumen/'+id+'" class="btn btn-primary">Enviar Resumen</a>&nbsp;<a href="'+baseurl+'admin/actividades/asociar/'+id+'" class="btn btn-primary">Asociar Actividad</a>&nbsp;<a href="'+baseurl+'admin/pagos/deuda/'+id+'" class="btn btn-primary">Financiar Deuda</a>&nbsp;<a href="'+baseurl+'admin/pagos/registrar/'+id+'" class="btn btn-primary">Registrar Pago</a>&nbsp;<a href="'+baseurl+'admin/socios/suspender/'+id+'" class="btn btn-primary">Suspender</a></td></tr>'
+                var newTr = '<tr dynarow="1" id="mas_info_'+id+'"><td></td><td colspan="5"><a id="imprimir_carnet" data-id="'+id+'" href="#" class="btn btn-primary">Imprimir Carnet</a>&nbsp;<a href="'+baseurl+'admin/socios/enviar_resumen/'+id+'" class="btn btn-primary">Enviar Resumen</a>&nbsp;<a href="'+baseurl+'admin/actividades/asociar/'+id+'" class="btn btn-primary">Asociar Actividad</a>;<a href="'+baseurl+'admin/pagos/registrar/'+id+'" class="btn btn-primary">Registrar Pago</a>;<a href="'+baseurl+'admin/socios/suspender/'+id+'" class="btn btn-primary">Suspender</a></td></tr>'
+
                 var elem = $("#td_socio_"+id);
                 
                 console.log(elem);
@@ -1137,7 +1138,7 @@ function () {
                            
             });
             $scope.showInfo = function(obj, id, baseurl){
-                var newTr = '<tr dynarow="1" id="mas_info_'+id+'"><td></td><td colspan="4"><a href="'+baseurl+'admin/pagos/cupon/'+id+'" class="btn btn-primary">Generar Cupón</a>&nbsp;<a id="imprimir_carnet" data-id="'+id+'" href="#" class="btn btn-primary">Imprimir Carnet</a>&nbsp;<a href="'+baseurl+'admin/socios/enviar_resumen/'+id+'" class="btn btn-primary">Enviar Resumen</a>&nbsp;<a href="'+baseurl+'admin/actividades/asociar/'+id+'" class="btn btn-primary">Asociar Actividad</a>&nbsp;<a href="'+baseurl+'admin/pagos/deuda/'+id+'" class="btn btn-primary">Financiar Deuda</a>&nbsp;<a href="'+baseurl+'admin/pagos/registrar/'+id+'" class="btn btn-primary">Registrar Pago</a>&nbsp;<a href="'+baseurl+'admin/socios/suspender/'+id+'" class="btn btn-primary">Suspender</a></td></tr>'
+                var newTr = '<tr dynarow="1" id="mas_info_'+id+'"><td></td><td colspan="4"><a id="imprimir_carnet" data-id="'+id+'" href="#" class="btn btn-primary">Imprimir Carnet</a>&nbsp;<a href="'+baseurl+'admin/socios/enviar_resumen/'+id+'" class="btn btn-primary">Enviar Resumen</a>&nbsp;<a href="'+baseurl+'admin/actividades/asociar/'+id+'" class="btn btn-primary">Asociar Actividad</a>&nbsp;<a href="'+baseurl+'admin/pagos/registrar/'+id+'" class="btn btn-primary">Registrar Pago</a>&nbsp;<a href="'+baseurl+'admin/socios/suspender/'+id+'" class="btn btn-primary">Suspender</a></td></tr>'
                 var elem = $("#td_socio_"+id);
                 
                 console.log(elem);

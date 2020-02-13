@@ -1045,30 +1045,98 @@ class Admin extends CI_Controller {
                 break;
 
             case 'enviar_resumen':
-//TODO llamar a rutina del CRON
                 if(!$this->uri->segment(4)) {
 			return false;	
 		} else {
 			$id_socio = $this->uri->segment(4);
 		}
 		$id_entidad = $this->session->userdata('id_entidad');
+		$reply_to = $this->session->userdata('email_sistema');
+                $this->load->model('socios_model');
+                $socio = $this->socios_model->get_socio($id_socio);
 
                 $this->load->model('pagos_model');
                 $deuda = $this->pagos_model->get_deuda($id_socio);
+                $facturacion = $this->pagos_model->get_facturacion($id_entidad,$id_socio);
+                $cuota = $this->pagos_model->get_monto_socio($id_socio);
 
-                $this->load->model('cron');
-                $cuerpo = $this->cron->armo_emails($id_socio, $deuda);
+		$this->load->library('email');
+
+		// Comienzo de armado del cuerpo del email para el resumen
+		// Datos del socio 
+		$cuerpo = "<h1>Socio : ".$socio->nro_socio."-".$socio->nombre.", ".$socio->apellido."</h1><br>";
+		// Categoria
+		$cuerpo .= "<h2>Categoria : ".$cuota['categoria']."</h2><br>";
+		$cuerpo .= "Falta agregar info del grupo familiar<br>";
+		// Actividades
+		$nact=0;
+		$cuerpo1 = "";
+		foreach ( $cuota['actividades']['actividad'] as $act ) {
+			$cuerpo1 .= "<h3>".$act->nombre." - ".$act->precio . "</h3>";
+			$nact++;
+		}
+		if ( $nact > 0 ) {
+			$cuerpo .= "<h2>Actividades : </h2><br>";
+			$cuerpo .= $cuerpo1;
+		}
+		$cuerpo .= "<br><br>";
+
+		// Situacion ACTUAL
+		if ( $deuda < 0 ) {
+			$cuerpo .= "<h1>Al dia ud. tiene una deuda de $ ".$deuda."</h1><br>";
+		} else {
+			if ( $deuda > 0 ) {
+				$cuerpo .= "<h1>Al dia ud. tiene un saldo a favor de $ ".$deuda."</h1><br>";
+			} else {
+				$cuerpo .= "<h1>Ud esta al dia con sus pagos </h1><br>";
+			}
+		}
+		$cuerpo .= "<br><br>";
+
+		// Movimientos
+		$lineas=0;
+		$cuerpo .= "<table class='table table-bordered table-striped table-responsive table-resumen'>
+				<thead>
+					<tr>
+						<th># ID</th>
+						<th>Fecha</th>
+						<th>Descripción</th>
+						<th>Debe</th>
+						<th>Haber</th>
+						<th>Total</th>
+					</tr>
+				</thead>
+				<tbody> ";
+		foreach ( $facturacion as $fact ) {
+			$lineas++;
+			if ( $lineas > 20 ) {
+				break;
+			}
+                        $fecha =  date('d/m/Y',strtotime($fact->date));
+			$cuerpo .= "<tr>
+						<td>$fact->id</td>
+
+						<td>$fecha</td>
+						<td>$fact->descripcion</td>
+						<td align='right'>$ $fact->debe</td>
+						<td align='right'>$ $fact->haber</td> 
+						<td align='right'>$ $fact->total</td> ";
+			$cuerpo .= "</tr>";
+		}
+		$cuerpo .= " </tbody> </table> ";
+		// Fin de armado del cuerpo
 
                 $ent_nombre = $this->session->userdata('ent_nombre');
                 $this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
-                $this->email->to($mail['mail']);
+                $this->email->reply_to($reply_to);
+                $this->email->to($socio->mail);
 
                 $this->email->subject('Resumen de Cuenta');
                 $this->email->message($cuerpo);
 
                 $regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
 
-                if(preg_match($regex, $mail['mail'])){
+                if(preg_match($regex, $socio->mail)){
                     $this->email->send();
                     $data['enviado'] = 'ok';
                 }else{
@@ -1083,7 +1151,7 @@ class Admin extends CI_Controller {
             **/
             case 'buscar':
                 if($_GET['dni']){
-                    $id_entidad = $this->session->userdata('username');
+                    $id_entidad = $this->session->userdata('id_entidad');
                     $data['id_entidad'] = $id_entidad;
                     $data['username'] = $this->session->userdata('username');
                     $data['rango'] = $this->session->userdata('rango');
@@ -1326,8 +1394,9 @@ class Admin extends CI_Controller {
                     $datos[$key] = $this->input->post($key);
                 }
 
-
                 $id_entidad = $this->session->userdata('id_entidad');
+		$this->load->model("socios_model");
+
                 $datos['id_entidad'] = $id_entidad;
 		$data = $this->carga_data();
 		if ( $datos['tutor_sid'] == $id ) {
@@ -1336,7 +1405,6 @@ class Admin extends CI_Controller {
                     	$this->load->view('admin',$data);
 			break;
 		} else {
-                	$this->load->model("socios_model");
 
                 	if( $datos['tutor_sid'] > 0 ) {
 				$soctut = $this->socios_model->get_socio($datos['tutor_sid']);
@@ -3333,7 +3401,7 @@ class Admin extends CI_Controller {
                 $envio_info = $this->general_model->get_envio($id);
                 $envio = $this->general_model->get_envio_data($id);
                 if($envio){
-        	    $reply = $this->session->userdata('email_reply');
+        	    $reply = $this->session->userdata('email_sistema');
         	    $ent_nombre = $this->session->userdata('ent_nombre');
                     $this->load->library('email');
                     $this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
