@@ -82,7 +82,7 @@
 
 <div id="rp-detalles">
 	<div class="panel panel-default table-dynamic">
-    	<div class="panel-heading"><strong><span class="fa fa-user"></span> Detalles del Socio: <?=$socio->nombre?> <?=$socio->apellido?></strong></div>
+    	<div class="panel-heading"><strong><span class="fa fa-user"></span> Detalles del Socio: <?=$socio->nro_socio?> - <?=$socio->nombre?> <?=$socio->apellido?></strong></div>
 		<table class="table table-bordered table-striped table-responsive table-resumen">
 			<thead>
 				<tr>

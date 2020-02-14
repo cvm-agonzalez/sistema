@@ -24,7 +24,7 @@ class Autocomplete_model extends CI_Model {
     		$data = array();
     		$suggestions = array();
 			foreach($query->result() as $row) {
-                $ret[] = array("value" =>$row->nombre.' '.$row->apellido.' ('.$row->dni.')', "data" =>$row->dni);
+                $ret[] = array("value" =>$row->nro_socio.'-'.$row->nombre.' '.$row->apellido.' ('.$row->dni.')', "data" =>$row->dni);
 		    }		
             
     		return $ret;

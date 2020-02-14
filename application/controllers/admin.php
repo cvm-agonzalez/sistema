@@ -1128,7 +1128,8 @@ class Admin extends CI_Controller {
 
                 $ent_nombre = $this->session->userdata('ent_nombre');
                 $this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
-                $this->email->reply_to($reply_to);
+                //$this->email->reply_to($reply_to);
+                $this->email->reply_to('secretaria@villamitre.com.ar');
                 $this->email->to($socio->mail);
 
                 $this->email->subject('Resumen de Cuenta');
@@ -3348,40 +3349,46 @@ class Admin extends CI_Controller {
     {
         $this->config->load("cuentadigital");
         $cuenta_id = $this->config->item('cd_id');
-        $nombre = substr($nombre,0,40);
-        $concepto  = $nombre.' ('.$sid.')';
-        $repetir = true;
-        $count = 0;
-        $result = false;
-        if(!$venc){
-            $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
-        }else{
-            $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&venc='.$venc.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
-        }
+	if ( $cuenta_id > 0 ) {
+        	$nombre = substr($nombre,0,40);
+        	$concepto  = $nombre.' ('.$sid.')';
+        	$repetir = true;
+        	$count = 0;
+        	$result = false;
+        	if(!$venc){
+            		$url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
+        	}else{
+            		$url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&venc='.$venc.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
+        	}
 
-        do{
-            $count++;
-            $a = file_get_contents($url);
-            $a = trim($a);
-            $xml = simplexml_load_string($a);
-            // $xml = simplexml_import_dom($xml->REQUEST);
-            if (($xml->ACTION) != 'INVOICE_GENERATED') {
-                $repetir = true;
-                echo('Error al generarlo: ');
-                sleep(1);
-                //echo '<a href="'.$url.'" target="_blank"><strong>Reenviar</strong></a>';
-            } else {
-                $repetir = false;
-                //echo('<p>El cupon de aviso se ha enviado correctamente</p>');
-                $result = array();
-                $result['image'] = $xml->INVOICE->BARCODEBASE64;
-                $result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
-                //$result = $xml->INVOICE->INVOICEURL;
+        	do{
+            		$count++;
+            		$a = file_get_contents($url);
+            		$a = trim($a);
+            		$xml = simplexml_load_string($a);
+            		// $xml = simplexml_import_dom($xml->REQUEST);
+            		if (($xml->ACTION) != 'INVOICE_GENERATED') {
+                		$repetir = true;
+                		echo('Error al generarlo: ');
+                		sleep(1);
+                		//echo '<a href="'.$url.'" target="_blank"><strong>Reenviar</strong></a>';
+            		} else {
+                		$repetir = false;
+                		//echo('<p>El cupon de aviso se ha enviado correctamente</p>');
+                		$result = array();
+                		$result['image'] = $xml->INVOICE->BARCODEBASE64;
+                		$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
+                		//$result = $xml->INVOICE->INVOICEURL;
+		
+            		}
+            		if ($count > 5) { $repetir = false; };
 
-            }
-            if ($count > 5) { $repetir = false; };
+         	} while ( $repetir );
+	} else {
+			echo "Sin CD";
+			die;
+	}
 
-        } while ( $repetir );
             return $result;
     }
 

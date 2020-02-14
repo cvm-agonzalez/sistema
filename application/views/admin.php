@@ -456,7 +456,7 @@
                 if(data){
                     var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
                     $("#tutor_sid").val(socio[0].id);
@@ -480,7 +480,7 @@
                     var socio = $.parseJSON(data);
                     var id = $("#form-tutor").data('id');
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio.nombre+' '+socio.apellido+' ('+socio.dni+') '+close_link);
+                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio.nro_socio+'-'+socio.nombre+' '+socio.apellido+' ('+socio.dni+') '+close_link);
                     $("#"+id+"-data").addClass("hidden");
                     $("#"+id+"-result").removeClass("hidden");
                     $("#"+id+"-id").val(socio.id);
@@ -517,7 +517,7 @@
                 if(data){
                     var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
 
@@ -578,7 +578,7 @@
                 if(data){
                     var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
                     $("#"+id+"-id").val(socio[0].id);
@@ -637,7 +637,7 @@
                     if(data){
                         var socio = $.parseJSON(data);
                         var close_link = '<a href="#" onclick="cliar(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
                         $("#"+id+"-result").removeClass('hidden');
                         $("#"+id+"-id").val(socio[0].id);
@@ -719,7 +719,7 @@
                     if(data){
                         var socio = $.parseJSON(data);
                         var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
                         $("#"+id+"-result").removeClass('hidden');
                         $("#"+id+"-id").val(socio[0].id);
@@ -803,7 +803,7 @@
                 if(data){
                     var socio = $.parseJSON(data);
                     var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                    $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                     $("#"+id+"-data").addClass('hidden');
                     $("#"+id+"-result").removeClass('hidden');
 
@@ -871,7 +871,7 @@
                     if(data){
                         var socio = $.parseJSON(data);
                         var close_link = '<a href="#" onclick="cleear(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
-                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
                         $("#"+id+"-data").addClass('hidden');
                         $("#"+id+"-result").removeClass('hidden');
                         $("#"+id+"-id").val(socio[0].id);

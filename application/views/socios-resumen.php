@@ -22,14 +22,13 @@
                         </div>
                         <div id="r2-result" <? if($socio->id == 0){ echo 'class="hidden size-h3"'; }else{ echo 'class="size-h3"'; }?>>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <? echo $socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
+                        <? echo $socio->nro_socio.'-'.$socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
                         </div>
                         <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->id?>">
                     </div> 
 		<? if ( $rango < 2 ) { ?>
                     <div class="form-group col-lg-6 <? if(!$socio->id){ echo 'hidden'; } ?>" style="padding-top:20px;" id="accesos_directos">
                         <a id="acceso_editar" class="btn btn-success" href="<?=$baseurl?>admin/socios/editar/<?=$socio->id?>"><i class="fa fa-user"></i> Editar este socio</a>                        
-                        <a id="acceso_cupon" class="btn btn-info" href="<?=$baseurl?>admin/pagos/cupon/<?=$socio->id?>"><i class="fa fa-dollar"></i> Generar Cupón</a>
                         <div class="btn-group">
                             <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-plus"></i> Más Acciones...
@@ -46,7 +45,6 @@
 		        <div>
                 		<a href="<?=base_url()?>admin/socios/resumen/<?=$this->uri->segment(4)?>/excel" class="btn btn-primary">Bajar a Excel</a>
 			</div>
-                        	<!--<a id="acceso_cupon" class="btn btn-warning" href="<?=$baseurl?>admin/actividades/asociar/<?=$socio->id?>"><i class="fa fa-dollar"></i> Asociar Actividad</a>-->
                         	<br><br>
                     </div>                   
 		<? } else { ?>

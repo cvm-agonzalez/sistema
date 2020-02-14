@@ -3,7 +3,7 @@
 	<div class="panel panel-default table-dynamic">
     	<div class="panel-heading">
     		<div class="pull-left">
-    			<strong><span class="fa fa-user"></span> Detalles del Socio: <?=$socio->nombre?> <?=$socio->apellido?></strong>
+    			<strong><span class="fa fa-user"></span> Detalles del Socio: <?=$socio->nro_socio?> - <?=$socio->nombre?> <?=$socio->apellido?></strong>
     		</div>
     		<div class="pull-right">
     			<button id="valor_cuota" class="btn btn-danger" ng-click="open()">Cuota Mensual <strong>$ <?=$cuota?></strong></button>

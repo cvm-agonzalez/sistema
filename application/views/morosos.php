@@ -75,7 +75,6 @@
                 <tr dynarow="1" class="cliente_info">
                     <td></td>
                     <td colspan="4">
-                        <button class="btn-primary">Generar Cupón</button> | 
                         <button class="btn-primary">Enviar Resumen</button> | 
                         <button class="btn-primary">Asociar Actividad</button> | 
                         <button class="btn-primary">Suspender</button> | 

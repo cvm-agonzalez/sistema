@@ -18,7 +18,7 @@
 	                    </div>
 	                    <div id="r2-result" <? if($socio->id == 0){ echo 'class="hidden size-h3"'; }else{ echo 'class="size-h3"'; }?>>
 	                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	                        <? echo $socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
+	                        <? echo $socio->nro_socio.'-'.$socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
 	                        </div>
 	                        <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->id?>">
 	                    </div>

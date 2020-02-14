@@ -26,7 +26,7 @@
                             </div>
                             <div id="r2-result" <? if($socio->id == 0){ echo 'class="hidden size-h3"'; }else{ echo 'class="size-h3"'; }?>>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <? echo $socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
+                            <? echo $socio->nro_socio.'-'.$socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
                             </div>
                             <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->id?>">
                         </div> 
@@ -40,7 +40,6 @@
                             <span class="caret"></span>
                             </button><ul class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop1">
                                 <li><a id="acceso_ver_resumen" href="<?=$baseurl?>admin/socios/resumen/<?=$socio->id?>">Ver Resumen</a></li>
-                                <li><a id="acceso_cupon" href="<?=$baseurl?>admin/pagos/cupon/<?=$socio->id?>">Generar Cupón</a></li>
                                 <li><a id="acceso_actividad" href="<?=$baseurl?>admin/actividades/asociar/<?=$socio->id?>">Asociar Actividad</a> </li>
                                 <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->id?>">Enviar Resumen</a></li>
                                 <li><a id="imprimir_carnet" data-id="<?=$socio->id?>" href="#">Imprimir Carnet</a></li>

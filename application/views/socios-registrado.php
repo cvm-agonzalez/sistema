@@ -18,7 +18,6 @@
                     <a class="btn btn-danger" href="<?=$baseurl?>admin/socios/agregar"><i class="fa fa-plus"></i> Nuevo socio</a><br><br>
                     <a class="btn btn-success" href="<?=$baseurl?>admin/socios/editar/<?=$uid?>"><i class="fa fa-user"></i> Editar este socio</a>
                     <a class="btn btn-warning" href="<?=$baseurl?>admin/actividades/asociar/<?=$uid?>"><i class="fa fa-calendar"></i> Asociar Actividades a este socio</a>
-                    <a class="btn btn-info" href="<?=$baseurl?>admin/pagos/cupon/<?=$uid?>"><i class="fa fa-dollar"></i> Generar Cupón</a>
                     
                     
                 </div>
