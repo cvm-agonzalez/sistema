@@ -34,6 +34,20 @@ class General_model extends CI_Model {
         $query = $this->db->get("categorias");
         return $query->row();
     }
+	
+    public function copia_cats($id_entidad) {
+	$qry = "CREATE TEMPORARY TABLE t1
+		SELECT * FROM categorias 
+		WHERE id_entidad = 1 AND cid < 10 ORDER BY cid; ";
+	$this->db->query($qry);
+	
+	$qry="UPDATE t1 SET id=0, precio = 10, id_entidad = $id_entidad;";
+	$this->db->query($qry);
+
+	$qry="INSERT INTO categorias SELECT * FROM t1; ";
+	$this->db->query($qry);
+
+    }
 
     public function update_cat($idcateg,$categ='')
     {
@@ -84,6 +98,9 @@ class General_model extends CI_Model {
 
     public function insert_ent($entidad='')
     {
+	$entidad['estado'] = 1;
+	$entidad['alta_sistema'] = date('Y-m-d G:i:s');
+	$entidad['data'] = '';
         $this->db->insert('entidades',$entidad);
         return $this->db->insert_id();
     }

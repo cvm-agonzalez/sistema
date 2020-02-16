@@ -226,6 +226,9 @@ class Pagos_model extends CI_Model {
 
     function generar_cupon($id_entidad, $sid, $monto,$cupon)
     {
+var_dump($sid);
+var_dump($monto);
+var_dump($cupon);
         $this->db->where('id_entidad',$id_entidad);
         $this->db->where('sid',$sid); 
 	// ponemos en 0 todos los cupones de este socio

@@ -758,7 +758,24 @@ class Admin extends CI_Controller {
                 $entidad = $this->input->post(null, true);
                 $id = $this->general_model->insert_ent($entidad);
 
-		// TODO agregar todas las configuraciones default y creacion de directorios
+		// agregar todas las configuraciones default y creacion de directorios
+		$ent_grabada = $this->general_model->get_ent_dir($id);
+		$ent_dir=$ent_grabada->dir_name;
+                $x = BASEPATH."../entidades/".$ent_dir;
+                $y = BASEPATH."../entidades/";
+                mkdir($x);
+                mkdir($x."/cupones");
+                mkdir($x."/logs");
+                mkdir($x."/emails");
+                mkdir($x."/socios");
+                copy($y."carnet-dorso.png", $x."/carnet-dorso.png");
+                copy($y."carnet-frente.png", $x."/carnet-frente.png");
+                copy($y."email_head.png", $x."/email_head.png");
+                copy($y."g1.jpg", $x."/g1.jpg");
+                copy($y."noPic.jpg", $x."/noPic.jpg");
+
+		// copio categorias base de los clubes
+		$this->general_model->copia_cats($id);
 
                 // Grabo log de cambios
                 $id_entidad = $this->session->userdata('id_entidad');

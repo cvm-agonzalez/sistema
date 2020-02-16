@@ -13,7 +13,14 @@ class Socios_model extends CI_Model {
     public function register($datos)
     {
         $this->db->insert('socios', $datos);
-        return $this->db->insert_id();   
+        $sid = $this->db->insert_id();   
+
+        // Verifico si tiene cupon y si no lo genero
+	$datos['id'] = $sid;
+        $this->cupon_cobro($datos);
+
+	// Retorno el ID insertado
+        return $sid;
     }
 
     public function checkDNI($id_entidad, $dni,$id=null)
@@ -189,7 +196,8 @@ class Socios_model extends CI_Model {
         $this->db->update('socios',array("estado"=>'0'));
     }
 
-    public function update_socio($id_entidad, $id,$data){
+    public function update_socio($id_entidad, $id, $data){
+	// Verifico si cambio la categoria para registrar ese ecambio
 	$categ = $this->get_cat($id_entidad, $id, $data);
 	if ( $categ['cambio'] == 1 ) {
         	$this->load->model('pagos_model');
@@ -204,8 +212,65 @@ class Socios_model extends CI_Model {
 			$this->pagos_model->registrar_pago($id_entidad, 'debe',$id,0.00,'Cambio de Categoria de '.$categ['descr_ant'].' a '.$categ['descr_new'],0,0);
 		}
 	}
+	// Actualizo los cambio del socio
         $this->db->where('id', $id);
         $this->db->update('socios', $data); 
+	
+	// Verifico si tiene cupon y si no lo genero
+	$data['id'] = $id;
+        $this->cupon_cobro($data);
+    }
+
+
+    public function cupon_cobro( $datos ) {
+	// Asigno variables
+	$sid = $datos['id'];
+	$id_entidad = $datos['id_entidad'];
+	// Busco cupon
+        $this->load->model('pagos_model');
+        $cupon = $this->pagos_model->get_cupon($sid, $id_entidad );
+        if ( $cupon->monto == 0 ) {
+                // Si no tiene lo genero
+        	$this->load->model('general_model');
+		$entidad = $this->general_model->get_ent($id_entidad);
+        	if ( $entidad->cd_id > 0 ) {
+			$cuenta_id = $entidad->cd_id;
+                	$nombre = substr($datos['nombre'],0,40);
+                	$concepto  = $nombre.' ('.$sid.')';
+                	$repetir = true;
+                	$count = 0;
+			$precio = 100;
+                	$result = false;
+                        $url = 'https://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
+                	do{
+                        	$count++;
+                        	$a = file_get_contents($url);
+                        	$a = trim($a);
+                        	$xml = simplexml_load_string($a);
+                        	if (($xml->ACTION) != 'INVOICE_GENERATED') {
+                                	$repetir = true;
+                                	sleep(1);
+                        	} else {
+                                	$repetir = false;
+                                	$result = array(); 
+                                	$result['image'] = $xml->INVOICE->BARCODEBASE64;
+                                	$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
+					// Insertar cupon en la BD
+					$this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
+					// Poner imagen en directorio cupones
+                        	}
+                        	if ($count > 5) { $repetir = false; };
+                	} while ( $repetir );
+        	} else {
+			$result = array(); 
+			$result['image'] = TODO;
+			$result['barcode'] = $datos['dni'];
+			$precio = 100;
+			// Insertar cupon en la BD
+			$this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
+			// Poner imagen en directorio cupones
+		}
+        }
     }
 
     public function get_cat($id_entidad, $id, $data){
