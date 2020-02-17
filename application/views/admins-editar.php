@@ -22,8 +22,7 @@
 						<select style="padding:5px;" id="rango" name="rango" class="form-control" <?if ($action == "chgpwd") { echo ' disabled> '; } else { echo ' >'; }?>
 							<option value="0" <? if($admin->rango == 0){ echo 'selected'; } ?>>ROOT</option>
 							<option value="1" <? if($admin->rango == 1){ echo 'selected'; } ?>>Administrador Principal</option>
-							<option value="2" <? if($admin->rango == 2){ echo 'selected'; } ?>>Consultad</option>
-							<option value="3" <? if($admin->rango == 3){ echo 'selected'; } ?>>Comisiones</option>
+							<option value="2" <? if($admin->rango == 2){ echo 'selected'; } ?>>Consultas/Pagos</option>
 						</select>
 					</div>
 				</div>

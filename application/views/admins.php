@@ -56,9 +56,9 @@
 					<label for="rango" class="col-sm-2">Tipo</label>
 					<div class="col-sm-10">
 						<select style="padding:5px;" id="rango" name="rango" class="form-control">							
-							<option value="0">General</option>
-							<option value="1">Consultas</option>
-							<option value="2">Pagos</option>
+							<option value="0">ROOT</option>
+							<option value="1">Administrador Principal</option>
+							<option value="2">Consultas/Pagos</option>
 						</select>
 					</div>
 				</div>

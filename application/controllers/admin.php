@@ -611,12 +611,13 @@ class Admin extends CI_Controller {
         $data['baseurl'] = base_url();
         switch ($action) {
             case 'agregar':
+                $id_entidad = $this->session->userdata('id_entidad');
                 $admin = $this->input->post(null, true);
-                $admin['pass'] == sha1($admin['pass']);
+                $admin['pass'] = sha1($admin['pass']);
+		$admin['id_entidad']=$id_entidad;
                 $id = $this->admins_model->insert_admin($admin);
 
                 // Grabo log de cambios
-                $id_entidad = $this->session->userdata('id_entidad');
                 $login = $this->session->userdata('username');
                 $nivel_acceso = $this->session->userdata('rango');
                 $tabla = "admin";

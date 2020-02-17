@@ -43,7 +43,7 @@
                         <!-- Logo -->
                         <div class="logo">
                             <a href="<?=$baseurl?>admin">
-                                <span><?=$ent_nombre?></span>
+                                <img src="<?=$baseurl?>entidades/<?=$ent_directorio?>/g1.jpg" alt="" class="img-circle img30_30">
                             </a>
                         </div>
 
@@ -56,6 +56,11 @@
 
 
                         <div class="top-nav">
+			<div>
+                    	  <ul class="nav-left pull-left">
+				<?=$ent_nombre?>
+			  </ul>
+			</div>
 			<div>
                     	  <ul class="nav-right pull-right">
 				login: <?=$username?>
