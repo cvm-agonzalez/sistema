@@ -26,6 +26,8 @@
 	    <thead>
 	        <tr>	            
 	            <th>Fecha</th>
+	            <th>#ID</th>
+	            <th>Nro Socio</th>
 	            <th>Socio</th>
 	            <th>Monto</th>	            
 	            <th class="hidden-print">Operaciones</th>	           
@@ -39,9 +41,10 @@
 	    		$total = $total + $ingreso->importe;
 	    	?>
 	        <tr>
-	        	<td><?=$ingreso->fecha_pago?></td>	        	
+                        <td align="right"><?=date('d-m-Y',strtotime($ingreso->fecha_pago))?></td>
+                        <td align="right"> # <?=$ingreso->sid?> </td>
+                        <td align="right"><?=$ingreso->socio->nro_socio?> </td>
 	        	<td>
-	        		#<?=$ingreso->sid?> - 
 	        		<? 
 	        		if(!$ingreso->socio){
 	        		?>
@@ -54,7 +57,7 @@
 	        		}
 	        		?>
 	        	</td>
-	        	<td>$ <?=$ingreso->importe?></td>	        	
+	        	<td align="right">$ <?=$ingreso->importe?></td>	        	
 	        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->sid?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        
 	        </tr>
 	        <?

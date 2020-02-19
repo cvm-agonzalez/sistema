@@ -352,7 +352,7 @@ class Actividades_model extends CI_Model {
 
     public function get_act_asoc_all($id_entidad)
     {
-        $this->db->select('aa.*, socios.nombre as socio_nombre, socios.apellido as socio_apellido, actividades.nombre as actividad_nombre');
+        $this->db->select('aa.*, socios.nombre as socio_nombre, socios.apellido as socio_apellido, actividades.nombre as actividad_nombre, actividades.precio as precio');
         $this->db->where('aa.estado', 1);
         $this->db->where('aa.id_entidad', $id_entidad);
         $this->db->join('socios', 'socios.id = aa.sid', 'left');

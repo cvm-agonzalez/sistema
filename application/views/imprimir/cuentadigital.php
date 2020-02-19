@@ -26,6 +26,8 @@
 	    <thead>
 	        <tr>	            
 	            <th>Fecha</th>
+	            <th>#ID</th>
+	            <th>Nro Socio</th>
 	            <th>Socio</th>
 	            <th>Monto</th>	            
 	            <th class="hidden-print">Operaciones</th>	           
@@ -39,9 +41,10 @@
 	    		$total = $total + $ingreso->monto;
 	    	?>
 	        <tr>
-	        	<td><?=$ingreso->fecha?> <?=$ingreso->hora?></td>	        	
-	        	<td>
-	        		#<?=$ingreso->sid?> - 
+                        <td align="right"><?=date('d-m-Y',strtotime($ingreso->fecha))?></td>
+	        	<td align="right"> # <?=$ingreso->sid?> </td> 
+	        	<td align="right"><?=$ingreso->socio->nro_socio?> </td> 
+			<td>
 	        		<? 
 	        		if(!$ingreso->socio){
 	        		?>
@@ -54,7 +57,7 @@
 	        		}
 	        		?>
 	        	</td>
-	        	<td>$ <?=$ingreso->monto?></td>	        	
+	        	<td align="right">$ <?=$ingreso->monto?></td>	        	
 	        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->sid?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        
 	        </tr>
 	        <?

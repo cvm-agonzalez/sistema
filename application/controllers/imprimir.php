@@ -443,6 +443,8 @@ class Imprimir extends CI_Controller {
 
                 $headers=array();
                 $headers[]='Fecha';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Socio';
                 $headers[]='Importe';
 
@@ -450,7 +452,9 @@ class Imprimir extends CI_Controller {
         	foreach ($cobros as $cobro) {
                 	$dato = array (
                         	'fecha' =>  date('d/m/Y',strtotime($cobro->fecha)),                     
-                        	'socio' => "#".$cobro->sid."-".$cobro->socio->nombre.", ".$cobro->socio->apellido,
+                        	'id' => "# ".$cobro->sid,
+                        	'nro_socio' => $cobro->socio->nro_socio,
+                        	'socio' => $cobro->socio->nombre.", ".$cobro->socio->apellido,
                         	'monto' => $cobro->monto
                 	);
                 	$datos[]=$dato;
@@ -474,6 +478,8 @@ class Imprimir extends CI_Controller {
 
                 $headers=array();
                 $headers[]='Fecha';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Socio';
                 $headers[]='Importe';
 
@@ -481,7 +487,9 @@ class Imprimir extends CI_Controller {
         	foreach ($cobros as $cobro) {
                 	$dato = array (
                         	'fecha' =>  date('d/m/Y',strtotime($cobro->fecha_pago)),                     
-                        	'socio' => "#".$cobro->sid."-".$cobro->socio->nombre.", ".$cobro->socio->apellido,
+                        	'id' => "# ".$cobro->sid,
+                        	'nro_socio' => $cobro->socio->nro_socio,
+                        	'socio' => $cobro->socio->nombre.", ".$cobro->socio->apellido,
                         	'monto' => $cobro->importe
                 	);
                 	$datos[]=$dato;
@@ -513,8 +521,9 @@ class Imprimir extends CI_Controller {
 
                 $archivo="Listado_Cuenta_Corriente"."_".date('Ymd');
                 $headers=array();
-                $headers[]='Socio #';
-                $headers[]='Facturacion #';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
+                $headers[]='ID Facturacion #';
                 $headers[]='Fecha';
                 $headers[]='Descripcion';
                 $headers[]='Tipo (D/H)';
@@ -525,6 +534,7 @@ class Imprimir extends CI_Controller {
                 foreach ( $facturaciones as $fact ) {
                         $dato = array (
 				'sid' => $fact->sid,
+				'nro_socio' => $fact->nro_socio,
 				'id' => $fact->id,
                         	'fecha' =>  date('d/m/Y',strtotime($fact->date)),                     
 				'descripcion' => $fact->descripcion,
@@ -553,22 +563,26 @@ class Imprimir extends CI_Controller {
 
                 $archivo="Listado_Actividades"."_".date('Ymd');
                 $headers=array();
-                $headers[]='Socio #';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Apellido';
                 $headers[]='Nombre';
                 $headers[]='Actividad #';
                 $headers[]='Descripcion Actividad';
                 $headers[]='Descuento';
+                $headers[]='Precio';
 
                 $datos=array();
                 foreach ( $actividades as $actividad ) {
                         $dato = array (
 				'sid' => $actividad->sid,
+				'nro_socio' => $actividad->nro_socio,
 				'apellido' => $actividad->socio_apellido,
 				'nombre' => $actividad->socio_nombre,
 				'act_n' => $actividad->aid,
 				'act_x' => $actividad->actividad_nombre,
-				'descuento' => $actividad->descuento
+				'descuento' => $actividad->descuento,
+				'precio' => $actividad->precio
 			);
                 	$datos[] = $dato;
 		}
@@ -589,6 +603,7 @@ class Imprimir extends CI_Controller {
 
 		$headers=array();
 		$headers[]='SID';
+		$headers[]='Nro Socio';
 		$headers[]='Apellido';
 		$headers[]='Nombre';
 		$headers[]='DNI';
@@ -611,6 +626,7 @@ class Imprimir extends CI_Controller {
                 foreach ( $clientes as $cliente ) {
                         $dato = array (
                                 "id"=> $cliente->id,
+                                "nro_socio"=> $cliente->nro_socio,
                                 "apellido"=> $cliente->apellido,
                                 "nombre"=> $cliente->nombre,
                                 "dni"=> $cliente->dni,
@@ -850,6 +866,8 @@ class Imprimir extends CI_Controller {
                 $headers[]='Descripcion';
                 $headers[]='Monto';
                 $headers[]='Pagado';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Socio/Tutor';
                 $headers[]='Observaciones';
          
@@ -862,7 +880,9 @@ class Imprimir extends CI_Controller {
                         'descripcion' => strip_tags($cliente->descripcion),
                         'monto' => $cliente->monto,
                         'pagado' => $cliente->pagado,
-                        'apynom' => '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido,
+                        'id' => '#'.$cliente->sid,
+                        'nro_socio' => $cliente->socio->nro_socio,
+                        'apynom' => $cliente->socio->nombre.' '.$cliente->socio->apellido,
                         'observaciones' => $cliente->socio->observaciones
 		);
 		$datos[]=$dato;
@@ -901,6 +921,8 @@ class Imprimir extends CI_Controller {
                 $headers[]='Pagado El';
                 $headers[]='Monto';
                 $headers[]='Activ/Seguro';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Socio';
                 $headers[]='Fecha de Nacimiento';
                 $headers[]='Observaciones';
@@ -943,7 +965,9 @@ class Imprimir extends CI_Controller {
                         'pagadoel' => date('d/m/Y',strtotime($cliente->pagadoel)),
                         'pagado' => $cliente->pagado,
                         'concepto' => $concepto,
-                        'apynom' => '#'.$cliente->sid.' '.$cliente->socio->nombre.' '.$cliente->socio->apellido,
+                        'id' => '# '.$cliente->sid,
+                        'nro_socio' => $cliente->socio->nro_socio,
+                        'apynom' => $cliente->socio->nombre.' '.$cliente->socio->apellido,
                         'nacimiento' => date('d/m/Y',strtotime($cliente->socio->nacimiento)),
                         'observaciones' => $cliente->socio->observaciones,
                         'deuda' => $deuda

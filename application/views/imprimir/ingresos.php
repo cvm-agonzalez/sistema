@@ -51,7 +51,7 @@
 	        			<td align="right">$ <?=$ingreso->monto?></td>
 	        			<td align="right">$ <?=$ingreso->pagado?></td>
 	        			<td align="right"># <?=$ingreso->sid?></td>	        
-	        			<td align="right"><?=$ingreso->nro_socio?></td>	        
+	        			<td align="right"><?=$ingreso->socio->nro_socio?></td>	        
 	        			<td><?=$ingreso->socio->nombre?> <?=$ingreso->socio->apellido?></td>	        
 	        			<td><?if($ingreso->ajuste==1){echo 'Ajuste Contable de Sistema'.$ingreso->socio->observaciones;} else { echo $ingreso->socio->observaciones;}?></td>	        
 	        			

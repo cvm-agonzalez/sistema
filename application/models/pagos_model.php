@@ -1467,7 +1467,7 @@ var_dump($cupon);
 
     public function get_facturacion_all($id_entidad)
     {
-        $qry="SELECT f.sid, f.id, f.date, f.descripcion, IF(f.debe = 0, 'H', 'D') tipo, debe, haber FROM facturacion f WHERE id_entidad = $id_entidad ORDER BY f.id; ";
+        $qry="SELECT f.sid, s.nro_socio, f.id, f.date, f.descripcion, IF(f.debe = 0, 'H', 'D') tipo, f.debe, f.haber FROM facturacion f JOIN socios s ON f.sid = s.id WHERE f.id_entidad = $id_entidad ORDER BY f.id; ";
         $facturacion = $this->db->query($qry)->result();
 
         return $facturacion;

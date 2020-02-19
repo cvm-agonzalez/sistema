@@ -71,6 +71,8 @@ var_dump($actividad_info);
 	            <th width="80">Pagado El</th>	            
 	            <th>Monto</th>
 	            <th>Act/Seguro</th>
+	            <th>#ID</th>	            
+	            <th>Nro Socio</th>	            
 	            <th>Socio</th>	            
 	            <th>Fecha de Nacimiento</th>
 	            <th>Observaciones</th>
@@ -86,12 +88,14 @@ var_dump($actividad_info);
 	    	$total = $total + $ingreso->pagado;
 	    	?>
 	        <tr>
-	        	<td><?=date('Y-m-d',strtotime($ingreso->generadoel))?></td>
-	        	<td><?=date('Y-m-d',strtotime($ingreso->pagadoel))?></td>
-	        	<td>$ <?=$ingreso->pagado?></td>
+	        	<td><?=date('d-m-Y',strtotime($ingreso->generadoel))?></td>
+	        	<td><?=date('d-m-Y',strtotime($ingreso->pagadoel))?></td>
+	        	<td align="right">$ <?=$ingreso->pagado?></td>
 	        	<td><? if ($ingreso->tipo == 6) { echo "Seguro"; } else { echo "Actividad"; } ?> </td>	        		       
-	        	<td>#<?=$ingreso->sid?> - <?=$ingreso->socio->nombre?> <?=$ingreso->socio->apellido?></td>	        		       
-	        	<td><?=date('Y/m/d',strtotime($ingreso->socio->nacimiento))?></td>
+	        	<td align="right"># <?=$ingreso->sid?></td>	        		       
+	        	<td align="right"><?=$ingreso->socio->nro_socio?></td>	        		       
+	        	<td><?=$ingreso->socio->nombre?> <?=$ingreso->socio->apellido?></td>	        		       
+	        	<td><?=date('d/m/Y',strtotime($ingreso->socio->nacimiento))?></td>
 	        	<td><?=$ingreso->socio->observaciones?></td>
 	        	<td>
 					<?
