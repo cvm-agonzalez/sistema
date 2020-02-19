@@ -773,6 +773,7 @@ var_dump($cupon);
             $result=array (
 				'dni' => $socio->dni,
 				'sid' => $sid,
+				'nro_socio' => $socio->nro_socio,
 				'apynom' => $socio->nombre.", ".$socio->apellido,
 				'telefono' => "F: ".$socio->telefono." C: ".$socio->celular,
 				'domicilio' => $socio->domicilio,
@@ -843,6 +844,7 @@ var_dump($cupon);
         foreach ($asoc as $a) {
             $socio = $this->socios_model->get_socio($a->sid);
             $a->id = $socio->id;
+            $a->nro_socio = $socio->nro_socio;
             $a->socio = @$socio->nombre.' '.@$socio->apellido;
             $a->telefono = @$socio->telefono;
             $a->nacimiento = @$socio->nacimiento;

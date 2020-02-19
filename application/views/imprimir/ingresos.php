@@ -30,6 +30,8 @@
 	            		<th>Descripción</th>
 	            		<th>Monto</th>
 	            		<th>Pagado</th>
+	            		<th>#ID</th>	           	            
+	            		<th>Nro Socio</th>	           	            
 	            		<th>Socio/Tutor</th>	           	            
 	            		<th>Observaciones</th>	           	            
 	            		<th class="hidden-print">Operaciones</th>	           
@@ -44,11 +46,13 @@
 	    			?>
 	        		<tr>
 	        			<td><?=date('Y-m-d',strtotime($ingreso->generadoel))?></td>
-	        			<td><?=date('Y-m-d H',strtotime($ingreso->pagadoel))?></td>
+	        			<td><?=date('Y-m-d',strtotime($ingreso->pagadoel))?></td>
 	        			<td><?=$ingreso->descripcion?></td>
-	        			<td>$ <?=$ingreso->monto?></td>
-	        			<td>$ <?=$ingreso->pagado?></td>
-	        			<td>#<?=$ingreso->sid?> - <?=$ingreso->socio->nombre?> <?=$ingreso->socio->apellido?></td>	        
+	        			<td align="right">$ <?=$ingreso->monto?></td>
+	        			<td align="right">$ <?=$ingreso->pagado?></td>
+	        			<td align="right"># <?=$ingreso->sid?></td>	        
+	        			<td align="right"><?=$ingreso->nro_socio?></td>	        
+	        			<td><?=$ingreso->socio->nombre?> <?=$ingreso->socio->apellido?></td>	        
 	        			<td><?if($ingreso->ajuste==1){echo 'Ajuste Contable de Sistema'.$ingreso->socio->observaciones;} else { echo $ingreso->socio->observaciones;}?></td>	        
 	        			
 	        			<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso->socio->id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        

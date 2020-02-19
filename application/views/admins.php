@@ -34,6 +34,35 @@
 		<div class="panel-body">
 			<form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/admins/agregar" method="post">
 
+                     <div class="form-group" id="grupo-categorias" <? if($envio->grupo != 'categorias'){ echo 'style="display:none;"'; } ?>>
+                        <label>Categorías</label>
+                        <select class="form-control" id="categorias-select" multiple>
+                           <?
+                           foreach ($categorias as $cat) {
+                           ?>
+                           <option value="<?=$cat->id?>" <? if($envio->grupo == 'categorias' && in_array($cat->id, $grupo_data)){ echo 'selected'; } ?>><?=$cat->nombre?></option>
+                           <?
+                           }
+                           ?>
+                        </select>
+                     </div>
+
+
+				<div class="form-group">
+					<label for="entidad" class="col-sm-2">Entidad</label>
+					<div class="col-sm-10">
+					<select style="padding:5px;" id="select_ent" name="select_ent" class="form-control">							
+                                                        <option value="0">Todas las Entidades</option>
+						<?
+                           				foreach ($entidades as $entidad) {
+                           			?>
+                           				<option value="<?=$entidad->id?>"><?=$entidad->descripcion?></option>
+                           			<?
+                           				}
+                           			?>
+					</select>
+					</div>
+				</div>
 				<div class="form-group">
 					<label for="user" class="col-sm-2">Nombre de usuario</label>
 					<div class="col-sm-10">

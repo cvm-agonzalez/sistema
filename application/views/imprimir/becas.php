@@ -32,7 +32,8 @@
     <thead>
         <tr>
             <th>Nombre y Apellido</th>
-            <th>Socio</th>
+            <th>#ID</th>
+            <th>Nro Socio</th>
             <th>Teléfono</th>
             <th>DNI</th>
             <th>Fecha de Nacimiento</th>
@@ -49,9 +50,10 @@
     		?>
         	<tr>
             		<td><?=$socio->nombre?> <?=$socio->apellido?></td>
-            		<td><?=$socio->id?></td>
-            		<td><?=$socio->telefono?></td>
-            		<td><?=$socio->dni?></td>
+            		<td align?"right"># <?=$socio->id?></td>
+            		<td align?"right"><?=$socio->nro_socio?></td>
+            		<td align?"right"><?=$socio->telefono?></td>
+            		<td align?"right"><?=$socio->dni?></td>
             		<td><?=$socio->nacimiento?></td>
             		<td><?=$socio->alta?></td>
             		<td><?=$socio->descuento?><? if ( $socio->monto_porcentaje == 0 ) { echo '$'; } else { echo '%'; } ?></td>

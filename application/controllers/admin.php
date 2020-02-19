@@ -613,8 +613,14 @@ class Admin extends CI_Controller {
             case 'agregar':
                 $id_entidad = $this->session->userdata('id_entidad');
                 $admin = $this->input->post(null, true);
+		$user=$admin['user'];
+		$entidad=$admin['select_ent'];
+		unset($admin['select_ent']);
+		$pass_plano=$admin['pass'];
                 $admin['pass'] = sha1($admin['pass']);
-		$admin['id_entidad']=$id_entidad;
+		$admin['id_entidad']=$entidad;
+		$admin['id']=0;
+		$admin['last_chgpwd']='2010-01-01 01:01:01';
                 $id = $this->admins_model->insert_admin($admin);
 
                 // Grabo log de cambios
@@ -625,6 +631,28 @@ class Admin extends CI_Controller {
                 $llave = $id;
                 $observ = substr(json_encode($admin),0,255);
                 $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+	
+		//Mando email de aviso al operador
+                $this->load->library('email');
+		$reply = $this->session->userdata('email_sistema');
+		$ent_nombre = $this->session->userdata('ent_nombre');
+
+                $cuerpo = "<h1>Alta de Operador para la entidad $ent_nombre </h1><br>";
+		$cuerpo .= "<br><br>";
+                $cuerpo .= "Recien se agrego el operador $user con password = $pass_plano <br>";
+                $cuerpo .= "Al ingresar al sistema debe cambiar el password y poner uno de su manejo <br>";
+                $cuerpo .= "El link de acceso es https://gestionsocios.com.ar/ligadelsur/$ent_nombre <br>";
+		$cuerpo .= "<br><br>";
+                $cuerpo .= "Este mensaje se genero automaticamente desde el sistema de gestion de socios<br>";
+
+		
+		$this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
+		$this->email->reply_to($reply);
+
+		$this->email->to($admin['mail']);
+		$this->email->subject("Alta de Operador ".$ent_nombre);
+		$this->email->message($cuerpo);
+		$this->email->send();
 
                 redirect(base_url().'admin/admins','refresh');
                 break;
@@ -642,6 +670,8 @@ class Admin extends CI_Controller {
 		$data = $this->carga_data();
                 $data['admin'] = $this->admins_model->get_admin($id);
                 $data['action'] = "edit";
+        	$this->load->model('general_model');
+                $data['entidades'] = $this->general_model->get_ents();
                 $data['section'] = 'admins-editar';
                 $this->load->view('admin',$data);
                 break;
@@ -678,6 +708,28 @@ class Admin extends CI_Controller {
                 			unset($admin['pass_old']);
                 			$this->admins_model->update_pwd($id,$new_pwd);
 
+                			//Mando email de aviso al operador
+                			$this->load->library('email');
+                			$reply = $this->session->userdata('email_sistema');
+                			$ent_nombre = $this->session->userdata('ent_nombre');
+					$user=$admin['user'];
+
+                			$cuerpo = "<h1>Cambio de password del Operador $user</h1><br>";
+                			$cuerpo .= "<br><br>";
+                			$cuerpo .= "Recien se cambio la contraseña para el operador $user  <br>";
+                			$cuerpo .= "El link de acceso es https://gestionsocios.com.ar/ligadelsur/$ent_nombre <br>";
+                			$cuerpo .= "<br><br>";
+                			$cuerpo .= "Este mensaje se genero automaticamente desde el sistema de gestion de socios<br>";
+
+
+                			$this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
+					$this->email->reply_to($reply);
+
+                			$this->email->to($admin['mail']);
+                			$this->email->subject("Cambio Password ".$user);
+                			$this->email->message($cuerpo);
+                			$this->email->send();
+
 					$data = $this->carga_data();
 					$data['mensaje1'] = "La nueva contraseña fue correctamente actualizada. Cierre sesion y vuelva a ingresar.";
 					$data['section'] = 'ppal-mensaje';
@@ -707,6 +759,9 @@ class Admin extends CI_Controller {
                 	unset($admin['pass2']);
 		}
 
+		$entidad=$admin['select_ent'];
+		$admin['id_entidad']=$entidad;
+		unset($admin['select_ent']);
                 $this->admins_model->update_admin($id,$admin);
 
                 // Grabo log de cambios
@@ -743,6 +798,8 @@ class Admin extends CI_Controller {
             default:
 		$data = $this->carga_data();
 		$id_entidad  = $this->session->userdata('id_entidad');
+        	$this->load->model('general_model');
+                $data['entidades'] = $this->general_model->get_ents();
                 $data['listaAdmin'] = $this->admins_model->get_admins($id_entidad);
                 $data['section'] = 'admins';
                 $this->load->view('admin',$data);

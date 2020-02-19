@@ -4,6 +4,21 @@
 		<div class="panel-body">
 			<form autocomplete="off" class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/admins/guardar/<?=$admin->id?>" method="post">
 
+                                <div class="form-group">
+                                        <label for="entidad" class="col-sm-2">Entidad</label>
+                                        <div class="col-sm-10">
+                                        <select style="padding:5px;" id="select_ent" name="select_ent" class="form-control">
+                                                        <option value="0"<?if ($admin->id_entidad == 0) { echo 'selected'; }?>">Todas las Entidades</option>
+                                                <?
+                                                        foreach ($entidades as $entidad) {
+                                                ?>
+                                                        <option value="<?=$entidad->id?><?if ($admin->id_entidad == $entidad->id) { echo 'selected'; }?>"><?=$entidad->descripcion?></option>
+                                                <?
+                                                        }
+                                                ?>
+                                        </select>
+                                        </div>
+                                </div>
 				<div class="form-group">
 					<label for="user" class="col-sm-2">Nombre de usuario</label>
 					<div class="col-sm-10">

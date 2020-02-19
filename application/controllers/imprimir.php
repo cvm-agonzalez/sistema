@@ -653,6 +653,8 @@ class Imprimir extends CI_Controller {
                 $archivo="Listado de Socios"."_".date('Ymd');
 
                 $headers=array();
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Nombre y Apellido';
                 $headers[]='Telefono';
                 $headers[]='Domicilio';
@@ -687,7 +689,9 @@ class Imprimir extends CI_Controller {
                 	}
 
                         $dato = array (
-                                "apynom"=> $cliente->id."-".$cliente->nombre.", ".$cliente->apellido,
+                                "id"=> $cliente->id,
+                                "nro_socio"=> $cliente->nro_socio,
+                                "apynom"=> $cliente->nombre.", ".$cliente->apellido,
                                 "telefono"=> $cliente->telefono,
                                 "domicilio"=> $cliente->domicilio,
                                 "dni"=> $cliente->dni,
@@ -722,13 +726,13 @@ class Imprimir extends CI_Controller {
 
         $headers=array();
         $headers[]='Nombre y Apellido';
-        $headers[]='Telefono';
+        $headers[]='#ID';
+        $headers[]='Nro Socio';
         $headers[]='DNI';
         $headers[]='Fecha Nacimiento';
-        $headers[]='Fecha de Alta';
         $headers[]='Observaciones';
-        $headers[]='Monto Adeudado';
         $headers[]='Meses Adeudados';
+        $headers[]='Monto Adeudado';
         $headers[]='Estado';
 
 	$datos=array();
@@ -765,13 +769,13 @@ class Imprimir extends CI_Controller {
 
 		$dato = array (
                         'socio' => $cliente->socio,
-                        'telefono' => $cliente->telefono,
+                        'id' => $cliente->id,
+                        'nro_socio' => $cliente->nro_socio,
                         'dni' => $cliente->dni,
                         'nacimiento' => $cliente->nacimiento,
-                        'alta' => date('d/m/Y',strtotime($cliente->date)),                     
                         'observaciones' => $cliente->observaciones,
-                        'deuda' => $cliente->monto_adeudado*-1,
                         'meses' => $adeudados,
+                        'deuda' => $cliente->monto_adeudado*-1,
                         'estado' => $estado
 		);
 		$datos[] = $dato;
@@ -797,7 +801,8 @@ class Imprimir extends CI_Controller {
         // agregamos información a las celdas
                 $headers=array();
                 $headers[]='Nombre y Apellido';
-                $headers[]='Socio';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Telefono';
                 $headers[]='DNI';
                 $headers[]='Fecha de Ingreso';
@@ -809,7 +814,8 @@ class Imprimir extends CI_Controller {
 
 		$dato = array (
                         'apynom' => $cliente->nombre.' '.$cliente->apellido,
-                        'sid' => '# '.$cliente->id,
+                        'sid' => '#'.$cliente->id,
+                        'nro_socio' => $cliente->nro_socio,
                         'telefono' => $cliente->telefono,
                         'dni' => $cliente->dni,
                         'alta' => $cliente->alta,
@@ -969,7 +975,8 @@ class Imprimir extends CI_Controller {
         // agregamos información a las celdas
                 $headers=array();
                 $headers[]='DNI';
-                $headers[]='SID';
+                $headers[]='#ID';
+                $headers[]='Nro Socio';
                 $headers[]='Nombre';
                 $headers[]='Telefonos';
                 $headers[]='Domicilio';
@@ -991,6 +998,7 @@ class Imprimir extends CI_Controller {
 		$dato = array (
                         'dni' => $cliente['dni'],
                         'sid' => $cliente['sid'],
+                        'nro_socio' => $cliente['nro_socio'],
                         'apynom' => $cliente['apynom'],
                         'telefono' => $cliente['telefono'],
                         'domicilio' => $cliente['domicilio'],
@@ -1034,6 +1042,7 @@ class Imprimir extends CI_Controller {
         $headers=array();
         $headers[]='Nombre y Apellido';
         $headers[]='SID';
+        $headers[]='Nro Socio';
         $headers[]='Telefono';
         $headers[]='DNI';
         $headers[]='Fecha de Nacimiento';
@@ -1045,6 +1054,7 @@ class Imprimir extends CI_Controller {
                 $dato = array (
                         'apynom' => $cliente->nombre.", ".$cliente->apellido,
                         'sid' => $cliente->id,
+                        'nro_socio' => $cliente->nro_socio,
                         'telefono' => $cliente->telefono,
                         'dni' => $cliente->dni,
                         'nacimiento' => date('d/m/Y',strtotime($cliente->nacimiento)),
@@ -1074,6 +1084,7 @@ class Imprimir extends CI_Controller {
         $headers=array();
         $headers[]='Nombre y Apellido';
         $headers[]='SID';
+        $headers[]='Nro Socio';
         $headers[]='Telefono';
         $headers[]='DNI';
         $headers[]='Fecha de Nacimiento';
@@ -1085,6 +1096,7 @@ class Imprimir extends CI_Controller {
                 $dato = array (
                         'apynom' => $cliente->nombre.", ".$cliente->apellido,
                         'sid' => $cliente->id,
+                        'nro_socio' => $cliente->nro_socio,
                         'telefono' => $cliente->telefono,
                         'dni' => $cliente->dni,
                         'nacimiento' => date('d/m/Y',strtotime($cliente->nacimiento)),

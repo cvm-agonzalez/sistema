@@ -16,7 +16,8 @@
     <thead>
         <tr>
             <th>Nombre y Apellido</th>
-            <th>Socio</th>
+            <th>#ID</th>
+            <th>Nro Socio</th>
             <th>Teléfono</th>
             <th>DNI</th>
             <th>Fecha de Alta</th>
@@ -31,11 +32,12 @@
     	?>
         <tr>
             <td><?=@$socio->apellido?> <?=@$socio->nombre?> </td>
-            <td># <?=@$socio->id?></td>
+            <td align="right"># <?=@$socio->id?></td>
+            <td align="right"><?=@$socio->nro_socio?></td>
             <td><?=@$socio->telefono?></td>
-            <td><?=@$socio->dni?></td>
+            <td align="right"><?=@$socio->dni?></td>
             <td><?=$socio->alta?></td>    
-            <td>
+            <td align="right">
                 <? if($socio->deuda_monto < 0){ ?>
                     $ <?=$socio->deuda_monto*-1?>                
                 <?

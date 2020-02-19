@@ -15,6 +15,8 @@
 <table class="table table-striped table-bordered" cellspacing="0" width="100%" id="socios_table">
     <thead>
         <tr>
+            <th>#ID</th>
+            <th>Nro Socio</th>
             <th>Nombre y Apellido</th>
             <th>Teléfono</th>
             <th>DNI</th>
@@ -30,11 +32,13 @@
     		foreach ($socios as $socio) {    	
     		?>
         	<tr>
+            	<td align="right"><?=@$socio->id?> </td>
+            	<td align="right"><?=@$socio->nro_socio?> </td>
             	<td><?=@$socio->apellido?> <?=@$socio->nombre?> </td>
-            	<td><?=@$socio->telefono?></td>
-            	<td><?=@$socio->dni?></td>
+            	<td align="right"><?=@$socio->telefono?></td>
+            	<td align="right"><?=@$socio->dni?></td>
             	<td><?=@$socio->alta?></td>
-            	<td>
+            	<td align="right">
                 	<? if($socio->deuda_monto < 0){ ?>
                     	$ <?=$socio->deuda_monto*-1?>                
                 	<?

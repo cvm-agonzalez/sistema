@@ -34,7 +34,8 @@
 		    <thead>
 		        <tr>
 		            <th>DNI</th>
-		            <th>ID</th>
+		            <th>#ID</th>
+		            <th>Nro Socio</th>
 		            <th>Nombre</th>
 		            <th>Teléfonos</th>
 		            <th>Domicilio</th>
@@ -59,16 +60,17 @@
 					}
 		    	?>
 		        	<tr>			        	
-		        	<td><?=$ingreso['dni']?></td>
-		        	<td><?=$ingreso['sid']?></td>
+		        	<td align="right"><?=$ingreso['dni']?></td>
+		        	<td align="right"># <?=$ingreso['sid']?></td>
+		        	<td align="right"><?=$ingreso['nro_socio']?></td>
 		        	<td><?=$ingreso['apynom']?></td>
-		        	<td><?=$ingreso['telefono']?></td>
+		        	<td align="right"><?=$ingreso['telefono']?></td>
 		        	<td><?=$ingreso['domicilio']?></td>
 		        	<td><?=$ingreso['actividad']?></td>
 		        	<td><?=$xestado?></td>
-		        	<td>$ <?=$ingreso['deuda_cuota']*-1?></td>			        	
+		        	<td align="right">$ <?=$ingreso['deuda_cuota']*-1?></td>			        	
 		        	<td><?=$ingreso['gen_cuota']?></td>			        	
-		        	<td>$ <?=$ingreso['deuda_activ']*-1?></td>			        	
+		        	<td align="right">$ <?=$ingreso['deuda_activ']*-1?></td>			        	
 		        	<td><?=$ingreso['gen_activ']?></td>			        	
 		        	<td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$ingreso['sid']?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>	        
 		        </tr>

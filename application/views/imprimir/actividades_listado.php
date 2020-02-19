@@ -16,7 +16,8 @@
     <thead>
         <tr>
             <th>Nombre y Apellido</th>
-            <th>Socio</th>
+            <th>#ID</th>
+            <th>Nro Socio</th>
             <th>DNI</th>
             <th>Fecha de Nacimiento</th>            
             <th>Observaciones</th>
@@ -32,11 +33,12 @@
     	?>
         <tr>
             <td><?=@$socio->socio?></td>
-            <td># <?=@$socio->id?></td>
-            <td><?=@$socio->dni?></td>
+            <td align="right"># <?=@$socio->id?></td>
+            <td align="right"> <?=@$socio->nro_socio?></td>
+            <td align="right"><?=@$socio->dni?></td>
             <td><?=@$socio->nacimiento?></td>
             <td><?=$socio->observaciones?></td>
-            <td>
+            <td align="right">
                 <?
                 if($socio->deuda){                      
                     $hoy = new DateTime();
@@ -65,7 +67,7 @@
                 }                
                 ?>
             </td>
-            <td>$ <?=number_format($socio->monto_adeudado*-1,2)?></td>
+            <td align="right">$ <?=number_format($socio->monto_adeudado*-1,2)?></td>
             <td><? if($socio->suspendido == 1){ echo '<label class="label label-danger"><i class="fa fa-warning"></i> SUSPENDIDO</label>'; }else{ echo '<label class="label label-success"><i class="fa fa-check"></i> ACTIVO</label>'; } ?></td>
             <td class="hidden-print"><a href="<?=base_url()?>admin/socios/resumen/<?=$socio->id?>" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-external-link"></i> Ver Resumen</a></td>
         </tr> 

@@ -20,10 +20,18 @@ class Admins_model extends CI_Model {
 		$this->db->where('id_entidad', $id_entidad);
 		$this->db->where('estado', 1);
 		$query = $this->db->get('admin');
-		if( $query->num_rows() == 0 ){ return false; }
 		$admins = $query->result();
 		$query->free_result();
-		return $admins;
+
+		$this->db->where('id_entidad', 0);
+		$this->db->where('estado', 1);
+		$query = $this->db->get('admin');
+		$admins0 = $query->result();
+		$query->free_result();
+
+		$ret_admins = array_merge($admins,$admins0);
+		return $ret_admins;
+
 	}
 
 	public function get_admin($id)
