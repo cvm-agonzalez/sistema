@@ -204,6 +204,75 @@
 
         <script type="text/javascript">
 
+            <? if ( $section == 'socios-editar' || $section == 'socios-nuevo' ) { ?>
+        	$("#valid_dni").click(function(){
+            	var nsocio = $("#nro_socio").val();
+            	var ndni = $("#dni").val();
+            	var sid = $("#sid").val();
+            	$.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+ndni,function(data){
+			if(data){
+				var socio = $.parseJSON(data);
+				if ( sid == socio[0].id ) {
+                    			$("#result_dni").addClass('hidden');
+                
+					$.get("<?=$baseurl?>autocomplete/buscar_socio/nro_socio/"+nsocio,function(data){
+                        		if(data){
+                                		var socio = $.parseJSON(data);
+                                		if ( sid == socio[0].id ) {
+                                                        $("#result_dni").addClass('hidden');
+                                        		$("#result_nsoc").addClass('hidden');
+							$("#result_OK").removeClass('hidden');
+							$("#resto_datos").removeClass('hidden');
+							$("#nro_socio").addClass('disabled');
+							$("#dni").addClass('disabled');
+                                		} else {
+                                        		$("#result_nsoc").removeClass('hidden');
+							$("#nro_socio").addClass('disabled');
+							$("#dni").addClass('disabled');
+							$("#result_OK").addClass('hidden');
+                                        		$("#dni").focus();
+                                		}
+                        		}
+                			})
+
+				} else {
+                    			$("#result_dni").removeClass('hidden');
+					$("#result_OK").addClass('hidden');
+                   			$("#dni").focus();
+				}
+			} else {
+                                        $.get("<?=$baseurl?>autocomplete/buscar_socio/nro_socio/"+nsocio,function(data){
+                                        if(data){
+                                                var socio = $.parseJSON(data);
+                                                if ( sid == socio[0].id ) {
+                                                        $("#result_dni").addClass('hidden');
+                                                        $("#result_nsoc").addClass('hidden');
+                                                        $("#result_OK").removeClass('hidden');
+                                                        $("#resto_datos").removeClass('hidden');
+							$("#nro_socio").addClass('disabled');
+							$("#dni").addClass('disabled');
+                                                } else {
+                                                        $("#result_nsoc").removeClass('hidden');
+                                                        $("#result_OK").addClass('hidden');
+                                                        $("#nro_socio").focus();
+                                                }
+                                        } else {
+                                        		$("#result_dni").addClass('hidden');
+                                        		$("#result_ndoc").addClass('hidden');
+							$("#result_OK").removeClass('hidden');
+							$("#resto_datos").removeClass('hidden');
+							$("#nro_socio").addClass('disabled');
+							$("#dni").addClass('disabled');
+					}
+                                        })
+
+			}
+            	})
+
+        	});
+
+	   <? } ?>
+
 
             <? if($section=='estadisticas-facturacion'){ ?>
 

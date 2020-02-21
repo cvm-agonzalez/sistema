@@ -1449,7 +1449,7 @@ class Admin extends CI_Controller {
 
             case 'editar':
                 $id_entidad = $this->session->userdata('id_entidad');
-		$data = $this->carga_data();
+                $data = $this->carga_data();
                 $data['section'] = 'socios-editar';
                 $this->load->model("general_model");
                 $data['categorias'] = $this->general_model->get_cats($id_entidad);
