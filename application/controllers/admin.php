@@ -1507,6 +1507,7 @@ class Admin extends CI_Controller {
 			$new_name = BASEPATH."../entidades/".$ent_dir."/socios/".$id.".jpg";
 			rename($old_name,$new_name);
 		}
+		unset($datos['sid']);
 		unset($datos['files']);
 		unset($datos['tutor_dni']);
 		$tutor = $datos['tutor_sid'];
@@ -1559,7 +1560,7 @@ class Admin extends CI_Controller {
                 $data['cuota'] = $this->pagos_model->get_monto_socio($this->uri->segment(4));
 		if ( $this->uri->segment(5) ) {
 			if ( $this->uri->segment(5) == "excel" ) {
-				$archivo="Resument_Cuenta_Asoc_".$this->uri->segment(4)."_".date('Ymd');
+				$archivo="Resumen_".$data['socio']->nro_socio;
 				$fila1="ID#".$this->uri->segment(4)."-".trim($data['socio']->apellido).", ".trim($data['socio']->nombre);
 				$titulo="ID#".$this->uri->segment(4);
 				$headers=array();
@@ -1570,7 +1571,20 @@ class Admin extends CI_Controller {
 				$headers[]="Debe";
 				$headers[]="Haber";
 				$headers[]="Saldo";
-				$datos=$data['facturacion'];
+				$datos= array();
+        			foreach ( $data['facturacion'] as $ingreso ) {
+                			$dato = array (
+                        			'id' => $ingreso->id,
+						'sid' => $ingreso->sid,
+                        			'fecha' => $ingreso->date,
+                        			'observacion' => $ingreso->observacion,
+                        			'debe' => $ingreso->debe,
+						'haber' => $ingreso->haber,
+						'saldo' => $ingreso->saldo
+                			);
+                			$datos[] = $dato;
+        			}
+
 				$this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
 				break;
 			}
