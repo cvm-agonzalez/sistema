@@ -26,7 +26,6 @@
                     <label for="" class="col-sm-3">Socio #</label>
                     <div class="col-sm-9">
                         <input type="number" name="nro_socio" id="nro_socio" class="form-control" value="<?=$socio->nro_socio?>">
-			<input type="hidden" name="sid" id="sid" value="<?=$socio->id?>">
                     </div>
                 </div>
                 <div class="form-group col-lg-6">
@@ -35,28 +34,6 @@
                         <input type="number" value="<?=$socio->dni?>" id="dni" class="form-control" name="dni" required>
                     </div>
                 </div>                
-                <div class="form-group col-lg-12">
-			<div class="col-sm-3">
-                                <a href="#" id="valid_dni" class="btn btn-primary">Validar</a> 
-			</div>
-			<div class="col-sm-3">
-				<div id="result_dni" class="hidden">
-					<label for="" >DNI existente en otro socio</label>
-				</div>
-				<div id="result_nsoc" class="hidden">
-					<label for="" > Numero de socio existente en otro socio</label>
-				</div>
-				<div id="result_OK" class="hidden">
-					<label for="" > <b>Datos de DNI y nro socio OK</b></label>
-				</div>
-			</div>
-			<div class="col-sm-6">
-				<label for="" > El número de socio personalizado respeta numeracion anterior al sistema y NO PUEDE REPETIRSE</label>
-				<label for="" > El sistema sugiere un numero consecutivo en base al ultimo usado</label>
-			</div>
-                </div>
-
-		<div id="resto_datos" class="hidden">
 
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">Nombre</label>
@@ -238,7 +215,6 @@
                 	<button type="submit" id="save_btn" class="btn btn-success">Guardar</button>
                 <? } ?>
 
-		</div>
 
             </form>
             <?
