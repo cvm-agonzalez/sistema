@@ -186,7 +186,7 @@
                             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                             <input type="date"
                                    class="form-control"                                   
-                                   close-text="Cerrar" name="alta" value="<?=$alta[0]?>">
+                                   close-text="Cerrar" name="alta" value="<?=$alta[0]?>" required>
                         </div>  
                     </div>
                 </div>
