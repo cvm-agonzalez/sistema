@@ -29,19 +29,19 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2">Precio</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" value="<?=$actividad->precio?>" name="precio">
+                        <input type="number" class="form-control" value="<?=$actividad->precio?>" name="precio">
                     </div>
                 </div>                                 
                 <div class="form-group">
                     <label for="" class="col-sm-2">Cuota Inicial</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" value="<?=$actividad->cuota_inicial?>" name="cuota_inicial">
+                        <input type="number" class="form-control" value="<?=$actividad->cuota_inicial?>" name="cuota_inicial">
                     </div>
                 </div>                                 
                 <div class="form-group">
                     <label for="" class="col-sm-2">Seguro</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" value="<?=$actividad->seguro?>" name="seguro">
+                        <input type="number" class="form-control" value="<?=$actividad->seguro?>" name="seguro">
                     </div>
                 </div>                                 
                 <div class="form-group">

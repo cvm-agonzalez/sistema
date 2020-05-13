@@ -13,8 +13,8 @@
                     <label for="" class="col-sm-2">Comisión</label>
                     <div class="col-sm-10">
                        
-                        <select name="comision" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
-                             <option value="">---------</option>
+                        <select name="comision" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;" required>
+                             <option value="">Elige una comision</option>
                         <?
                         foreach ($comisiones as $comision) {
                         ?>
@@ -29,19 +29,19 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2">Precio</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="precio">
+                        <input type="number" class="form-control" name="precio">
                     </div>
                 </div>                               
                 <div class="form-group">
                     <label for="" class="col-sm-2">Cuota Inicial</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="cuota_inicial">
+                        <input type="number" class="form-control" name="cuota_inicial">
                     </div>
                 </div>                               
                 <div class="form-group">
                     <label for="" class="col-sm-2">Seguro</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="seguro">
+                        <input type="number" class="form-control" name="seguro">
                     </div>
                 </div>                               
                 <div class="form-group">
