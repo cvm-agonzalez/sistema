@@ -105,7 +105,7 @@
                     <td>
                         <a href="#" id="imprimir_listado_actividades" data-act="{{store.id}}">Imprimir Listado</a>  
 			<? if ( $rango < 2 ) { ?>
-                        	<a href="<?=base_url()?>admin/actividades/editar/{{store.id}}">| Editar</a>  
+                        	<a href="<?=base_url()?>admin/actividades/editar/{{store.id}}" >| Editar</a>  
                         	<a href="<?=base_url()?>admin/actividades/eliminar/{{store.id}}" onclick="return check_eliminar_act()">| Eliminar</a>
 			<? } ?>
                     </td>
@@ -119,7 +119,7 @@
                     
                     <td align="right"><?=$actividad->precio?></td>
                     <td><a href="<?=base_url()?>admin/actividades/editar/<?=$actividad->id?>">Editar</a> | 
-                      <a id="btn-eliminar-actividad" href="<?=base_url()?>admin/actividades/eliminar/<?=$actividad->id?>">Eliminiar</a></td>
+                      <a id="btn-eliminar-actividad" href="<?=base_url()?>admin/actividades/eliminar/<?=$actividad->id?>">Eliminar</a></td>
                 </tr>-->
                 <?
                 }

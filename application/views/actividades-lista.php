@@ -84,11 +84,11 @@
             	Buscar Actividad: <input class="form-control" type="text" id="activ"><br>            	
                 <ul class="sortable-list" id="actividades_no">
                 <? foreach ($actividades as $actividad){ 
-                	if(!in_array($actividad->aid, $actividades_asociadas)){
+                	if(!in_array($actividad->id, $actividades_asociadas)){
                 	?>
-					<li class="sortable-item" id="no_asoc_<?=$actividad->aid?>">
+					<li class="sortable-item" id="no_asoc_<?=$actividad->id?>">
 						<div class="pull-left " style="margin-top:-5px; margin-left:5px;">
-							<a class="btn btn-success" href="#" id="asociar_actividad" data-id="<?=$actividad->aid?>">
+							<a class="btn btn-success" href="#" id="asociar_actividad" data-id="<?=$actividad->id?>">
 								<i class="fa fa-arrow-left"></i>
 							</a>
        					                 <input type="hidden" name="solosoc" id="solosoc" class="form-control" data-id="<?=$actividad->solo_socios?>">
@@ -153,13 +153,13 @@
 	        	var facturar = 'false';
 	        	var fecha = new Date();
 	        	fecha = fecha.getDate();	        	
-	        	var sifed = confirm("Es federado de la actividad p no cobrar el SEGURO?");
+	        	var sifed = confirm("Es federado "+id+" de la actividad p no cobrar el SEGURO?");
 			if ( sifed ) {
 				var federado = 1;
 			} else {
 				var federado = 0;
 			}
-        		if(fecha < 35){
+        		if(fecha < 25){
 	        		var agree= confirm("Desea que esta actividad sea facturada?");
 	        		if(agree){
 	        			facturar = 'true';
@@ -167,7 +167,7 @@
         		}
 	        	$.get("<?=$baseurl?>admin/actividades/alta/<?=$sid?>/"+id+"/"+facturar+"/"+federado,function(data){
 	        		var actividad = $.parseJSON(data);
-	        		var newLi = '<li class="sortable-item" id="asoc_'+actividad.asoc_id+'"><div class="pull-right cruz" id="cruz_'+actividad.asoc_id+'" style="margin-top:-20px;">Fecha de Alta: '+actividad.alta+'<br> <a href="#" style="color:green" class="actividad_beca" id="actividad_beca_'+actividad.asoc_id+'" data-id="'+actividad.asoc_id+'" data-beca="0">Configurar Beca</a><br><a href="#" onclick="quitar_act('+actividad.asoc_id+','+actividad.id+')" id="quitar_actividad" data-id="'+actividad.asoc_id+'">Dar de Baja <i class="fa fa-times"></i></a></div>#<span>'+actividad.id+' '+actividad.nombre+'</span></li>';
+	        		var newLi = '<li class="sortable-item" id="asoc_'+actividad.asoc_id+'"><div class="pull-right cruz" id="cruz_'+actividad.asoc_id+'" style="margin-top:-20px;">Fecha de Alta: '+actividad.alta+'<br> <a href="#" style="color:green" class="actividad_beca" id="actividad_beca_'+actividad.asoc_id+'" data-id="'+actividad.asoc_id+'" data-beca="0">Configurar Beca</a><br><a href="#" onclick="quitar_act('+actividad.asoc_id+','+actividad.id+')" id="quitar_actividad" data-id="'+actividad.asoc_id+'">Dar de Baja <i class="fa fa-times"></i></a></div>#<span>'+actividad.aid+' '+actividad.nombre+'</span></li>';
 	        	$( newLi ).prependTo( $("#actividades_si") ); 
 	        	});
         	}else{

@@ -309,17 +309,6 @@ class Actividades_model extends CI_Model {
 
     }
 
-    public function get_socios_actividad($id){
-        $this->load->model('socios_model');
-        $this->db->where('aid',$id);
-        $this->db->where('estado',1);
-        $query = $this->db->get('actividades_asociadas');
-        $socios = $query->result();
-        foreach ($socios as $socio) {
-            $socio->info = $this->socios_model->get_socio($socio->sid);
-        }
-        return $socios;
-    } 
 
     public function get_socios_act($id){
         $this->load->model('socios_model');
@@ -348,6 +337,17 @@ class Actividades_model extends CI_Model {
 	    } else {
         	$this->db->update('actividades_asociadas',array("descuento"=>$beca, "monto_porcentaje"=>1 ));
 	    }
+    }
+
+    public function tiene_asocrel($id_entidad, $aid)
+    {
+        $qry = "SELECT COUNT(*) asoc_rel FROM actividades_asociadas WHERE  id_entidad = $id_entidad AND aid = $aid AND estado = 1; ";
+        $resultado = $this->db->query($qry)->row();
+	if ( $resultado->asoc_rel > 0 ) {
+		return true;
+	} else {
+		return false;
+	}
     }
 
     public function get_act_asoc_all($id_entidad)

@@ -2862,18 +2862,26 @@ class Admin extends CI_Controller {
                 break;
 
             case 'eliminar':
-                $this->load->model("actividades_model");
-                $this->actividades_model->del_actividad($this->uri->segment(4));
-                // Grabo log de cambios
                 $id_entidad = $this->session->userdata('id_entidad');
-                $login = $this->session->userdata('username');
-                $nivel_acceso = $this->session->userdata('rango');
-                $tabla = "actividades";
-                $operacion = 3;
-                $llave = $this->uri->segment(4);
-		$observ = "Borro actividad". $this->uri->segment(4);
-                $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                redirect(base_url()."admin/actividades");
+                $this->load->model("actividades_model");
+                $aid=$this->uri->segment(4);
+		if ( $this->actividades_model->tiene_asocrel($id_entidad, $aid) ) {
+			$data = $this->carga_data();
+			$data['mensaje1'] = "Esta actividad tiene socios relacionados. NO SE PUEDE ELIMINAR!!!";
+			$data['section'] = 'ppal-mensaje';
+			$this->load->view('admin',$data);
+		} else {
+                	$this->actividades_model->del_actividad($this->uri->segment(4));
+                	// Grabo log de cambios
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+                	$tabla = "actividades";
+                	$operacion = 3;
+                	$llave = $this->uri->segment(4);
+			$observ = "Borro actividad". $this->uri->segment(4);
+                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+                	redirect(base_url()."admin/actividades");
+		}
                 break;
 
             case 'comisiones':
