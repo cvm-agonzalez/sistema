@@ -10,16 +10,22 @@ class Comisiones_model extends CI_Model {
         $this->load->database('default');
     }
     
-    public function get_comision() {
-        $this->db->where('id',$this->session->userdata('id'));
-        $query = $this->db->get('profesores');
-        if($query->num_rows() == 0){return false;}
-        $profesor = $query->row();
-
-        $this->db->where('id',$profesor->comision);
+    public function get_comisiones($id_entidad) {
+        $query = $this->db->where('id_entidad',$id_entidad);
+        $query = $this->db->where('estado','1');
         $query = $this->db->get('comisiones');
         if($query->num_rows() == 0){return false;}
-        return $query->row();
+        $comisiones = $query->result();
+        return $comisiones;
+    }
+
+    public function get_comision($id_entidad, $id_comision) {
+        $query = $this->db->where('id_entidad',$id_entidad);
+        $query = $this->db->where('id',$id_comision);
+        $query = $this->db->get('comisiones');
+        if($query->num_rows() == 0){return false;}
+        $comision = $query->row();
+        return $comision;
     }
 
     public function resumen($id_entidad, $comision, $periodo, $anio_corte,$suspendido) {

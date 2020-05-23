@@ -96,7 +96,8 @@ function is_active($uri,$actual){
         <a href="<?=$_GET['baseurl']?>admin/estadisticas/facturacion"><i class="fa fa-bar-chart-o"><span class="icon-bg bg-primary-light"></span></i><span data-i18n="Estadisticas"></span></a>
         <ul <? is_active($_GET['section'],'estadisticas') ?>>
             <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/facturacion"><i class="fa fa-caret-right"></i><span data-i18n="Facturación"></span></a></li>
-            <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/cobranza"><i class="fa fa-caret-right"></i><span data-i18n="Cobranza"></span></a></li>            
+            <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/cobranza_act"><i class="fa fa-caret-right"></i><span data-i18n="Cobranza x Actividad"></span></a></li>            
+            <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/cobranza_comi"><i class="fa fa-caret-right"></i><span data-i18n="Cobranza x Comisión"></span></a></li>            
             <li><a href="<?=$_GET['baseurl']?>admin/estadisticas/ingresos"><i class="fa fa-caret-right"></i><span data-i18n="Ingresos"></span></a></li>            
         </ul>
     </li>

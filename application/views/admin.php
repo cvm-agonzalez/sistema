@@ -1053,8 +1053,42 @@ $("#load-asoc-activ-form").submit(function(){
 
 })
 
-$("button#estad_excel").click(function(){
+$("#estad-activ-form").submit(function(){
+        var actividad = $("#actividad").val();
+        var url = "<?=$baseurl?>admin/estadisticas/cobranza_act" + "/" + actividad;
+
+        $("#estad-activ-form").attr("action",url);
+        $("#estad-activ-form").submit();
+
+        return true;
+})
+$("#estad-comi-form").submit(function(){
+        var comision = $("#comision").val();
+        var url = "<?=$baseurl?>admin/estadisticas/cobranza_comi" + "/" + comision;
+
+        $("#estad-comi-form").attr("action",url);
+        $("#estad-comi-form").submit();
+
+        return true;
+})
+
+$("button#estad_act_excel").click(function(){
 	$("#arma_excel").val('1');
+        var actividad = $("#actividad").val();
+        var url = "<?=$baseurl?>admin/estadisticas/cobranza_act" + "/" + actividad;
+
+        $("#estad-activ-form").attr("action",url);
+        $("#estad-activ-form").submit();
+	return true;
+})
+
+$("button#estad_comi_excel").click(function(){
+	$("#arma_excel").val('1');
+        var comision = $("#comision").val();
+        var url = "<?=$baseurl?>admin/estadisticas/cobranza_comi" + "/" + comision;
+
+        $("#estad-comi-form").attr("action",url);
+        $("#estad-comi-form").submit();
 	return true;
 })
 
