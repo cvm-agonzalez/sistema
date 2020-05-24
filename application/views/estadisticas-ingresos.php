@@ -37,6 +37,7 @@
 	            		<th>Dia</th>
 	            		<th>Ingresos Cooperativa</th>
 	            		<th>Ingresos Cuenta Digital</th>
+	            		<th>Ingresos Debito Tarjeta</th>	                      
 	            		<th>Ingresos Manuales</th>	                      
 	            		<th>Ajustes</th>
 	        	   </tr>
@@ -50,6 +51,7 @@
 					<td><?=$mes->dia?></td>
 					<td align="right"><?=$mes->ing_col?></td>
 					<td align="right"><?=$mes->ing_cd?></td>
+					<td align="right"><?=$mes->ing_debito?></td>
 					<td align="right"><?=$mes->ing_manual?></td>
 					<td align="right"><?=$mes->ajustes?></td>
 				</tr>
