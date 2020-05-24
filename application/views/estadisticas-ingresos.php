@@ -5,7 +5,7 @@
     	<div class="panel panel-default">
         	<div class="panel-body">
 
-		<form class="form-horizontal ng-pristine ng-valid" action="#" method="post" id="estad-ingreso-form" enctype="multipart/form-data">
+		<form class="form-horizontal ng-pristine ng-valid" action="#" method="post" id="estad-ing-form" enctype="multipart/form-data">
 
                 	<div class="form-group col-lg-18">
                      		<label for="" class="col-sm-9">Meses</label>
@@ -23,7 +23,7 @@
                 	<div class="form-group col-lg-18">
                      		<div class="col-sm-5">
                                                 <button id="btn_procesar" class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
-                                                <button id="estad_excel" value="" class="btn btn-success">EXCEL</button>
+                                                <button id="estad_ing_excel" value="" class="btn btn-success">EXCEL</button>
                                                 <input type="hidden" name="arma_excel" id="arma_excel" value='0' class="form-control">
                      		</div>
                 	</div>

@@ -1072,6 +1072,16 @@ $("#estad-comi-form").submit(function(){
         return true;
 })
 
+$("button#estad_ing_excel").click(function(){
+	$("#arma_excel").val('1');
+        var mes = $("#meses").val();
+        var url = "<?=$baseurl?>admin/estadisticas/ingresos" + "/" + mes;
+
+        $("#estad-ing-form").attr("action",url);
+        $("#estad-ing-form").submit();
+	return true;
+})
+
 $("button#estad_act_excel").click(function(){
 	$("#arma_excel").val('1');
         var actividad = $("#actividad").val();
