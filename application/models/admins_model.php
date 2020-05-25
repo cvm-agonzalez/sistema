@@ -50,21 +50,14 @@ class Admins_model extends CI_Model {
 		$query = $this->db->get('admin');
 		if( $query->num_rows() == 0 ){ return false; }
 		$user = $query->row();
-		var_dump($user);
 		if ( $user ) {
-			var_dump($user->pass);
-			var_dump($old_pwd);
-			var_dump("hola");
 
 			if ( $user->pass == $old_pwd ) {
-				var_dump("true");
 				return true;
 			} else {
-				var_dump("false");
 				return false;
 			}
 		} else {
-			var_dump("false");
 			return false;
 		}
 	}
