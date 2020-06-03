@@ -68,8 +68,15 @@ class Cron extends CI_Controller {
 
         	//log
 
+        	$base_ent = './entidades/'.$ent_dir;        
         	$file = './entidades/'.$ent_dir.'/logs/facturacion-'.$xanio.'-'.$xmes.'.log';        
         	$file_col = './entidades/'.$ent_dir.'/logs/cobranza_col-'.$xanio.'-'.$xmes.'.csv';        
+
+        	if( !file_exists($base_ent) ){
+            		// No existe el directorio base de la entidad a facturar
+            		echo  date('H:i:s').": El directorio base de la entidad no EXISTE! $base_ent \n";
+			exit();
+		}
 
         	if( !file_exists($file) ){
             		echo "creo";
@@ -108,23 +115,28 @@ class Cron extends CI_Controller {
             		$this->db->update('socios',array('facturado'=>0)); //establecemos todos los socios como no facturados
             		fwrite($log, date('H:i:s').' - Indicador facturado en 0 \n');                        
 
-    			$cumpleanios = $this->socios_model->get_cumpleanios($id_entidad); //buscamos los que cumplen 18 años
-			$cump=0;
-			if ( $cumpleanios ) {
-    				foreach ($cumpleanios as $menor) {
-    					if ( $this->socios_model->actualizar_menor($menor->id) ) {
-						//los quitamos del grupo familiar y cambiamos la categoria a mayor
-                				$txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->id.'-'.$menor->apellido.', '.$menor->nombre." \n";
-                				fwrite($log, $txt);   
-						$cump++;
-					} else {
-                				$txt = date('H:i:s').": ERROR NO EXISTE CATEGORIA M para mayores";
-					}
-    				}
+			$this->load->model('general_model');
+        		$cat_menor = $this->general_model->get_cat_tipo($id_entidad, "m");
+
+			if ( $cat_menor ) {
+    				$cumpleanios = $this->socios_model->get_cumpleanios($id_entidad); //buscamos los que cumplen 18 años
+				$cump=0;
+				if ( $cumpleanios ) {
+    					foreach ($cumpleanios as $menor) {
+    						if ( $this->socios_model->actualizar_menor($id_entidad, $menor->id) ) {
+							//los quitamos del grupo familiar y cambiamos la categoria a mayor
+                					$txt = date('H:i:s').": Actualización de categoría socio a mayor #".$menor->id.'-'.$menor->apellido.', '.$menor->nombre." \n";
+                					fwrite($log, $txt);   
+							$cump++;
+						} else {
+                					$txt = date('H:i:s').": ERROR NO EXISTE CATEGORIA M para mayores";
+						}
+    					}
+				}
+            			fwrite($log, date('H:i:s').' - Cambio de categoria mayor \n');                        
 			} else {
             			fwrite($log, date('H:i:s').' - ERROR NO EXISTE CATEGORIA m para menores \n');
 			}
-            		fwrite($log, date('H:i:s').' - Cambio de categoria mayor \n');                        
 
 	    		// Actualizo el registro de facturacion_cron con los socios que cambiaron de categoria por mayoria de edad
 	    		$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,2,$cump,0);
@@ -157,7 +169,7 @@ class Cron extends CI_Controller {
 			$descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
 			if ( $cuota['categ_tipo'] != 'N' ) {
 				// Si es un grupo familiar detallo los integrantes
-				if($cuota['categoria'] == 'Grupo Familiar'){
+				if($cuota['categoria'] == 'Grupo Familiar' || $cuota['categoria'] == 'Tutor'){
 					$descripcion .= '<br><strong>Integrantes:</strong> ';
 					foreach ($cuota['familiares'] as $familiar) {
 		    				$descripcion .= "<li>".$familiar['datos']->nombre." ".$familiar['datos']->apellido."</li>";
@@ -423,7 +435,7 @@ class Cron extends CI_Controller {
 
 		 
 			// Registro pago2 verificar.....
-            		$this->pagos_model->registrar_pago2($socio->id,0);
+            		$this->pagos_model->registrar_pago2($id_entidad, $socio->id,0);
 	
 			// Actualizado el estado de socios como facturado (facturado=1)
             		$this->db->where('id', $socio->id);
@@ -435,7 +447,8 @@ class Cron extends CI_Controller {
 	
 		}
 		// Actualizo en la tabla facturacion_cron que termino el proceso de facturacion
-        	$this->db->like('date',$xhoy,'after');
+        	$this->db->where('DATE(date) =',$xhoy);
+        	$this->db->where('id_entidad',$id_entidad);
         	$this->db->update('facturacion_cron', array('id_entidad'=>$id_entidad,'en_curso'=>0));
 		// Registro en el log que el proceso de facturacion termino
         	$txt = date('H:i:s').": Cron Finalizado \n";
@@ -501,7 +514,7 @@ class Cron extends CI_Controller {
 
 
                         $this->pagos_model->insert_facturacion($data);
-                        $this->pagos_model->registrar_pago2($id_socio, $importe);
+                        $this->pagos_model->registrar_pago2($id_entidad, $id_socio, $importe);
 
 			$cant=$cant+1;
 			$totdeb=$totdeb+$importe;
@@ -569,7 +582,7 @@ class Cron extends CI_Controller {
                 		$txt = date('H:i:s').": Socio Suspendido #".$socio->id." ".TRIM($socio->apellido).", ".TRIM($socio->nombre)." DNI= ".$socio->dni." atraso de ".$meses_atraso." ultimo pago ".$ds_ult. " \n";
                 		fwrite($log, $txt);   
 	
-        			$this->pagos_model->registrar_pago('debe',$socio->id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0,0);
+        			$this->pagos_model->registrar_pago($id_entidad, 'debe',$socio->id,0.00,'Suspension Proceso Facturacion por atraso de'.$meses_atraso.' con ultimo pago hace '.$ds_ult.' dias',0,0,0);
 	
 				$cant++;
 			}

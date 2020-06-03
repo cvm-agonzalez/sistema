@@ -70,10 +70,10 @@ class Pagos_model extends CI_Model {
 
         //obtenemos el precio de su categoria
         $this->load->model("general_model");
-        $cat = $this->general_model->get_cat($socio->categoria);
+        $cat_socio = $this->general_model->get_cat($socio->categoria);
+	$precio_socio = $cat_socio->precio;
 
         if($socio->tutor != 0){
-            $grupo_familiar = true;
             //si el usuario pertenece a un grupo familiar buscamos el monto del tutor
             return $this->get_monto_socio($socio->tutor);
         }
@@ -88,7 +88,8 @@ class Pagos_model extends CI_Model {
             $familiares = array();
             foreach ($familiares_a_cargo as $familiar) { // buscamos las actividades de cada familiar
                 $fam_actividades = $this->get_actividades_socio($id_entidad, $familiar->id);
-                $familiares[] = array('datos' => $familiar, 'actividades' => $fam_actividades);
+                $cat_fam = $this->general_model->get_cat($familiar->categoria);
+                $familiares[] = array('datos' => $familiar, 'actividades' => $fam_actividades, 'valor_cat' => $cat_fam->precio);
             }
 
             //buscamos las actividades del socio titular
@@ -100,9 +101,20 @@ class Pagos_model extends CI_Model {
                 $monto_excedente = $monto_excedente + $precio_excedente;
             }
 
-            //$monto = $cats['3']->precio - ($cats['3']->precio * $socio->descuento / 100); //valor de la cuota de grupo familiar
-            $monto = $precio_grupo - ( $precio_grupo * $socio->descuento / 100); //valor de la cuota de grupo familiar
-            $total = $monto + ( $monto_excedente - ($monto_excedente * $socio->descuento / 100) ); //cuota mensual mas el excedente en caso de ser mas socios de lo permitido en el girpo fliar
+	    // Si tiene hasta 2 tutoreados se toman categorias de cada uno, sino grupo familiar
+	    if ( $total_familiares > 3 ) {
+            	$monto = $precio_grupo - ( $precio_grupo * $socio->descuento / 100); //valor de la cuota de grupo familiar
+            	$total = $monto + ( $monto_excedente - ($monto_excedente * $socio->descuento / 100) ); //cuota mensual mas el excedente en caso de ser mas socios de lo permitido en el girpo fliar
+		$grupo_familiar = true;
+	    } else {
+		$monto = $total = 0;
+		// Ciclo por los familiares y agrego lo propio del socio
+		foreach ($familiares as $fam ) {
+			$monto = $monto + $fam['valor_cat'];
+		}
+		$monto = $monto + $precio_socio;
+		$total = $monto;
+	    }
 
             foreach ($socio_actividades['actividad'] as $actividad) {
 		// actividades del titular del grupo familiar
@@ -142,13 +154,20 @@ class Pagos_model extends CI_Model {
             }
 
             $total = $total + $f_total;
+	    if ( $grupo_familiar ) {
+		$xcateg = "Grupo Familiar";
+		$tcateg = $cat_flia->tipo;
+	    } else {
+		$xcateg = "Tutor";
+		$tcateg = $cat_socio->tipo;
+	    }
             $cuota = array(
                 "tid" => $sid,
                 "id_entidad" => $id_entidad,
                 "titular" => $socio->apellido.' '.$socio->nombre,
                 "total" => $total,
-                "categoria" => 'Grupo Familiar',
-                "categ_tipo" => $cat_flia->tipo,
+                "categoria" => $xcateg,
+                "categ_tipo" => $tcateg,
                 "cuota" => $monto,
                 "familiares" => $familiares,
                 "actividades" => $socio_actividades,

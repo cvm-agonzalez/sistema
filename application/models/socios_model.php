@@ -37,6 +37,30 @@ class Socios_model extends CI_Model {
         }
     }
 
+    public function get_tutores($id_entidad) {
+	$qry="SELECT DISTINCT t.id id_tutor, t.dni dni_tutor, CONCAT(TRIM(t.nombre),', ',TRIM(t.apellido)) tutor,
+			s.id, s.dni, s.nro_socio, CONCAT(TRIM(s.nombre),', ',TRIM(s.apellido)) socio,
+			s.nacimiento, s.observaciones
+		FROM socios s
+			JOIN socios t ON s.tutor = t.id
+		WHERE s.id_entidad = $id_entidad AND 
+			s.tutor > 0
+		ORDER BY t.id, s.id; ";
+        $socios = $this->db->query($qry)->result();
+
+        $this->load->model('pagos_model');
+        foreach ($socios as $socio) {
+            $socio->deuda_monto = $this->pagos_model->get_deuda($socio->id);
+
+            $socio->deuda = $this->pagos_model->get_ultimo_pago_socio($id_entidad,$socio->id);
+            $array_ahg = $this->pagos_model->get_monto_socio($socio->id);
+            $socio->cuota = $array_ahg['total'];
+
+        }
+
+        return $socios;
+    }
+
     public function get_prox_nsocio($id_entidad) {
 	$qry="SELECT MAX(nro_socio) max_nsocio FROM socios WHERE id_entidad = $id_entidad; ";
         $resultado = $this->db->query($qry)->result();
@@ -360,7 +384,7 @@ class Socios_model extends CI_Model {
 
     }
 
-    public function actualizar_menor($id_menor){
+    public function actualizar_menor($id_entidad, $id_menor){
 	$this->load->model('general_model');
         $cat_mayor = $this->general_model->get_cat_tipo($id_entidad, "M");
 
@@ -368,7 +392,7 @@ class Socios_model extends CI_Model {
         	$this->db->where('id',$id_menor);
         	$this->db->update('socios',array('tutor'=>'0','categoria'=>$cat_mayor->id));
 		$this->load->model('pagos_model');
-		$this->pagos_model->registrar_pago('debe',$id_menor,0.00,'Cambio de Categoria de Menor a Mayor - Proceso Facturacion',0,0);
+		$this->pagos_model->registrar_pago($id_entidad, 'debe',$id_menor,0.00,'Cambio de Categoria de Menor a Mayor - Proceso Facturacion',0,0);
 		return true;
 	} else {
 		return false;

@@ -48,6 +48,7 @@ function is_active($seccion1,$seccion2)
                 <li class=""><a href="<?=base_url()?>imprimir/listado/categorias">Categorías</a></li>              
                 <li class=""><a href="<?=base_url()?>imprimir/listado/becas">Becas</a></li>              
                 <li class=""><a href="<?=base_url()?>imprimir/listado/sin_actividades">Sin Actividades</a></li>              
+                <li class=""><a href="<?=base_url()?>imprimir/listado/tutores">Tutores</a></li>              
               </ul>
             </li>
           </ul>
