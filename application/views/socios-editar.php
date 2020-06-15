@@ -51,7 +51,11 @@
                 <div class="form-group col-lg-6">
                     <label for="" class="col-sm-3">E-Mail</label>
                     <div class="col-sm-9">
-                        <input type="mail"  value="<?=$socio->mail?>" class="form-control" name="mail">
+                        <input type="mail"  value="<?=$socio->mail?>" class="form-control" id="mail" name="mail">
+			<input type="hidden" name="mail_orig" id="mail_orig" value='<?=$socio->mail?>' class="form-control">
+                        <input type="hidden" name="validmail_ts" id="validmail_ts" value='<?=$socio->validmail_ts?>' class="form-control">
+                        <input type="hidden" name="validmail_st" id="validmail_st" value='<?=$socio->validmail_st?>' class="form-control">
+
                     </div>
                 </div>    
 
@@ -212,7 +216,7 @@
                 </div>  
                 <div class="clearfix"></div>
                 <? if ( $rango < 2 ) { ?>
-                	<button type="submit" id="save_btn" class="btn btn-success">Guardar</button>
+                	<button type="button" id="save_btn" class="btn btn-success">Guardar</button>
                 <? } ?>
 
 

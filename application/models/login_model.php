@@ -39,9 +39,10 @@ class Login_model extends CI_Model {
 
     public function log_comision($id_entidad,$email,$pass)
     {
+        $pass_sha1 = sha1($pass);
         $this->db->where('id_entidad',$id_entidad);
         $this->db->where('mail',$email);
-        $this->db->where('pass',$pass);
+        $this->db->where('pass',$pass_sha1);
         $this->db->where('estado',1);
         $query = $this->db->get('profesores');
         if($query->num_rows() == 0){return false;}
@@ -51,14 +52,15 @@ class Login_model extends CI_Model {
     }    
     public function upd_pwd_comision($id_entidad, $email,$old_pass,$new_pass)
     {
+        $pass_sha1 = sha1($old_pass);
         $this->db->where('id_entidad',$id_entidad);
         $this->db->where('mail',$email);
-        $this->db->where('pass',$old_pass);
+        $this->db->where('pass',$pass_sha1);
         $this->db->where('estado',1);
         $query = $this->db->get('profesores');
         if($query->num_rows() == 0){return false;}
 
-        $qry="UPDATE profesores SET pass='$new_pass' WHERE mail='$email';";
+        $qry="UPDATE profesores SET pass='$new_pass' WHERE id_entidad = $id_entidad AND mail='$email';";
         $this->db->query($qry);
         return true;
     }

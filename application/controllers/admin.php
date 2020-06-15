@@ -28,6 +28,28 @@ class Admin extends CI_Controller {
 		return $data;
 	}
  
+	public function valid_mail($dirmail) {
+		$dm = urldecode($dirmail);
+		$arr_ret = array();
+		$valid = true;
+                if ( $dm != '' ) {
+                        $this->load->library('VerifyEmail');
+                        $vmail = new verifyEmail();
+                        $vmail->setStreamTimeoutWait(5);
+                        $vmail->Debug= FALSE;
+
+                        $vmail->setEmailFrom('avisos@gestionsocios.com.ar');
+                        if (!$vmail->check($dm)) {
+                                $valid = false;
+                        }
+                } else {
+			$valid = true;
+		}
+		$arr_ret['mail'] = $dm;
+		$arr_ret['valid'] = $valid;
+		return $arr_ret;
+ 	}
+
     public function no_facturado($value='')
     {
 	$id_entidad = $this->session->userdata('id_entidad');
@@ -906,6 +928,12 @@ class Admin extends CI_Controller {
             /**
 
             **/
+            case 'valid_mail':
+		$mail = $this->uri->segment(4);
+		$rta = $this->valid_mail($mail);
+		$rta2 = json_encode($rta);
+		echo $rta2;
+		break;
             case 'categorias':
 		if ( $this->uri->segment(4) ) {
 			switch ( $this->uri->segment(4) ) {
@@ -1255,6 +1283,7 @@ class Admin extends CI_Controller {
                 //$data['socios'] = $this->socios_model->get_socios($id_entidad);
 		$prox_nsocio = $this->socios_model->get_prox_nsocio($id_entidad);
                 $data['prox_nsocio'] = (int)$prox_nsocio;
+                $data['sinvalidar'] = 1;
 
                 $this->load->view('admin',$data);
                 break;
@@ -1280,7 +1309,6 @@ class Admin extends CI_Controller {
 
                 if($prev_user = $this->socios_model->checkDNI($id_entidad, $datos['dni'])){
                     //el dni esta repetido, incluimos la vista de listado con el usuario coincidente
-		    $data = $this->carga_data();
                     $data['prev_user'] = $prev_user;
                     $data['section'] = 'socio-dni-repetido';
                     $this->load->view('admin',$data);
@@ -1294,6 +1322,15 @@ class Admin extends CI_Controller {
                     unset($datos['tutor_sid']);
                     $datos['tutor']=$tutor;
                     if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
+
+                    if ( $dirmail == '' ) {
+                        $datos['validmail_st']=9;
+                        $datos['validmail_ts']=date('Y-m-d H:i:s');
+                    } else {
+                        $datos['validmail_st']=1;
+                        $datos['validmail_ts']=date('Y-m-d H:i:s');
+                    }
+
                     $uid = $this->socios_model->register($datos);
 
                 	// Grabo log de cambios
@@ -1514,6 +1551,7 @@ class Admin extends CI_Controller {
 		unset($datos['tutor_sid']);
 		$datos['tutor']=$tutor;
 		if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
+
 		$this->socios_model->update_socio($id_entidad,$id,$datos);
 		
 		// Grabo log de cambios

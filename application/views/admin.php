@@ -219,6 +219,7 @@
                         		if(data){
                                 		var socio = $.parseJSON(data);
                                 		if ( sid == socio[0].id ) {
+                                                        $("#valid_dni").addClass('hidden');
                                                         $("#result_dni").addClass('hidden');
                                         		$("#result_nsoc").addClass('hidden');
 							$("#result_OK").removeClass('hidden');
@@ -245,6 +246,7 @@
                                         if(data){
                                                 var socio = $.parseJSON(data);
                                                 if ( sid == socio[0].id ) {
+                                                        $("#valid_dni").addClass('hidden');
                                                         $("#result_dni").addClass('hidden');
                                                         $("#result_nsoc").addClass('hidden');
                                                         $("#result_OK").removeClass('hidden');
@@ -257,6 +259,7 @@
                                                         $("#nro_socio").focus();
                                                 }
                                         } else {
+                                                        $("#valid_dni").addClass('hidden');
                                         		$("#result_dni").addClass('hidden');
                                         		$("#result_ndoc").addClass('hidden');
 							$("#result_OK").removeClass('hidden');
@@ -429,16 +432,49 @@
 
 		$("#save_btn").click(function() {
                     var fecha = $("#fechan").val();
+                    var nacimiento = new Date(fecha);
+                    var hoy = new Date();
 			<?  $hoy=date('Y-m-d'); ?>
+		    var edad = ( hoy - nacimiento ) / ( 365 * 24 * 60 * 60 * 1000 );
+
 		    if ( fecha == 0 || fecha == "0000-00-00" ) {
 			alert ("Error en la fecha de nacimiento, no puede ser 0");
 			return false;
-		   }
+		   };
                     if ( fecha > '<?=$hoy?>' ) {
                         alert ("Error en la fecha de nacimiento, no puede ser mayor a hoy");
                         return false;
                    };
-		})
+	           var tipo_cat = $("#s_cate").find(':selected').attr('data-tipo');
+		   if ( tipo_cat == "m" && edad > 18 ) {
+                        alert ("Error no puede ser categoria menor, tiene mas de 18 años");
+                        return false;
+		   };
+		   if ( tipo_cat == "M" && edad < 18 ) {
+                        alert ("Error no puede ser categoria mayor, tiene menos de 18 años");
+                        return false;
+		   };
+                    var mail = $("#mail").val();
+			var param = encodeURIComponent(mail);
+            	   $.get("<?=$baseurl?>admin/socios/valid_mail/"+param,function(data){
+			if ( data ) {
+				var validmail = $.parseJSON(data);
+				var vm = Object.values(validmail);
+				if ( !vm || vm[1] == false ) {
+                        		alert ("Direccion de correo no valida");
+                        		return false;
+				};
+				if ( vm[1] == true ) {
+        	   			$("#form_alta").submit();
+				}
+			} else {
+                        	alert ("Direccion de correo no valida");
+				return false;
+			};
+		   })
+
+
+		});
 
                 <?
                 if($section == 'socios-editar'){
