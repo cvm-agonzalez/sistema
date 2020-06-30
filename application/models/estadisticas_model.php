@@ -88,7 +88,8 @@ class Estadisticas_model extends CI_Model {
                         SUM(IF(f.origen=5 , f.haber, 0 )) ing_debito,
                         SUM(IF(f.origen IN (0,4) , f.haber, 0 )) ajustes
                 FROM facturacion f 
-		WHERE DATE_FORMAT(f.date,'%Y%m') = $mes AND
+		WHERE id_entidad = $id_entidad AND
+			DATE_FORMAT(f.date,'%Y%m') = $mes AND
 			haber > 0 
 		GROUP BY 1
 		ORDER BY 1; ";
