@@ -78,7 +78,7 @@ class Cron extends CI_Controller {
 						'validmail_st' => '1',
 						'validmail_ts' => date('Y-m-d G:i:s')
 					);
-				$this->socios_model->update_socio($socio->sid, $arrsoc);
+				$this->socios_model->update_socio($socio->id_entidad, $socio->sid, $arrsoc);
         			fwrite($log, "Chequeo OK actualizado \n");            
                 	} else {
 				$arrsoc=array( 'id' => $socio->sid,
@@ -86,7 +86,7 @@ class Cron extends CI_Controller {
 						'validmail_st' => '2',
 						'validmail_ts' => date('Y-m-d G:i:s')
 					);
-				$this->socios_model->update_socio($socio->sid, $arrsoc);
+				$this->socios_model->update_socio($socio->id_entidad, $socio->sid, $arrsoc);
         			fwrite($log, "Chequeo fallido \n");            
 			}
 		}
