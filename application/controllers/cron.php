@@ -46,6 +46,54 @@ class Cron extends CI_Controller {
 		}
 	}
 	
+    public function check_mails() {
+	//log
+	$file = './application/logs/checkmails.log';
+	if( !file_exists($file) ){
+		echo "creo";
+		$log = fopen($file,'w');
+	} else {
+		echo "existe";
+		$log = fopen($file,'a');
+	}
+	// Tomo cien direcciones de correo y las verifico con la rutina
+        $this->load->model('socios_model');
+	$grupo_check = $this->socios_model->getmails_check();
+	if ( $grupo_check ) {
+        	fwrite($log, "Comienzo de proceso de chequeo de direcciones de email".date('Y-m-d G:i:s'));            
+		//ciclo los 100 socios a verificar
+		foreach ( $grupo_check as $socio ) {
+        		fwrite($log, "Chequeando socio $socio->sid - $socio->apynom con correo $socio->mail ----->");            
+                	// Controlo validez del email
+                	$dirmail=$socio->mail;
+                        $this->load->library('VerifyEmail');
+                        $vmail = new verifyEmail();
+                        $vmail->setStreamTimeoutWait(30);
+                        $vmail->Debug= FALSE;
+	
+                        $vmail->setEmailFrom('avisos@clubvillamitre.com');
+                        if ($vmail->check($dirmail)) {
+				$arrsoc=array( 'Id' => $socio->sid,
+						'categoria' => $socio->categoria,
+						'validmail_st' => '1',
+						'validmail_ts' => date('Y-m-d G:i:s')
+					);
+				$this->socios_model->update_socio($socio->sid, $arrsoc);
+        			fwrite($log, "Chequeo OK actualizado \n");            
+                	} else {
+				$arrsoc=array( 'id' => $socio->sid,
+						'categoria' => $socio->categoria,
+						'validmail_st' => '2',
+						'validmail_ts' => date('Y-m-d G:i:s')
+					);
+				$this->socios_model->update_socio($socio->sid, $arrsoc);
+        			fwrite($log, "Chequeo fallido \n");            
+			}
+		}
+	}
+        fwrite($log, "FIN de proceso de check de direcciones de email".date('Y-m-d G:i:s'));            
+
+    }
 
 	function factura_entidad($xhoy, $entidad) { // esta funcion factura una entidad
 

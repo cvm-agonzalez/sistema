@@ -37,6 +37,17 @@ class Socios_model extends CI_Model {
         }
     }
 
+    public function getmails_check() {
+        $qry="SELECT id sid, categoria, CONCAT(nombre,', ',apellido) apynom, mail FROM socios WHERE suspendido = 0 AND validmail_st IN (0, 2) AND mail != '' LIMIT 100";
+        $resultado = $this->db->query($qry)->result();
+        if ( $resultado ) {
+                return $resultado;
+        } else {
+                return false;
+        }
+    }
+
+
     public function get_tutores($id_entidad) {
 	$qry="SELECT DISTINCT t.id id_tutor, t.dni dni_tutor, CONCAT(TRIM(t.nombre),', ',TRIM(t.apellido)) tutor,
 			s.id, s.dni, s.nro_socio, CONCAT(TRIM(s.nombre),', ',TRIM(s.apellido)) socio,
