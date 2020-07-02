@@ -181,7 +181,7 @@ class Pagos_model extends CI_Model {
 
         }else{ //si no esta en un grupo familiar
             $socio_actividades =  $this->get_actividades_socio($id_entidad, $sid); //buscamos las actividades del socio
-            $socio_cuota = $cat->precio - ($cat->precio * $socio->descuento / 100); //precio de la cuota
+            $socio_cuota = $cat_socio->precio - ($cat_socio->precio * $socio->descuento / 100); //precio de la cuota
             $total = $socio_cuota; //cuota mensual
             foreach ($socio_actividades['actividad'] as $actividad) {
 		//actividades del socio
@@ -212,8 +212,8 @@ class Pagos_model extends CI_Model {
                 "id_entidad" => $id_entidad,
                 "titular" => $socio->apellido.' '.$socio->nombre,
                 "total" => $total,
-                "categoria" => $cat->nombre,
-                "categ_tipo" => $cat->tipo,
+                "categoria" => $cat_socio->nombre,
+                "categ_tipo" => $cat_socio->tipo,
                 "cuota" => $socio_cuota,
                 "familiares" => '0',
                 "actividades" => $socio_actividades,
@@ -221,7 +221,7 @@ class Pagos_model extends CI_Model {
                 "monto_excedente" => '0',
                 "financiacion" => $financiacion,
                 "descuento" => $socio->descuento,
-                "cuota_neta"=>$cat->precio
+                "cuota_neta"=>$cat_socio->precio
             );
         return $cuota;
         }

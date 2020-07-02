@@ -361,13 +361,21 @@ COMISIONES
 	$deuda = $this->pagos_model->get_deuda($id_socio);
 	
 	$cuota3 = $mail['resumen'];            
+
+                $this->load->model("general_model");
+                $ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
+                $head_mail = './entidades/'.$ent_dir.'/email_head.jpg';
+
 	
+	// TODO AHG - Buscar la imagen de encabezado de la entidad, si no tiene vacio
+//                                        $img_path=$baseurl."entidades/".$ent_directorio;
+//                                        $imagen_default=$img_path."/email_head.png";
+
 	// Armo encabezado con escudo y datos de cabecera
 	$cuerpo  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
         $cuerpo .= "<thead>";
 	$cuerpo .= "<tr style='background-color: #105401 ;'>";
-	$cuerpo .= "<th> IMAGEN DEL A ENTIDAD ></th>";
-        $cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>ENTIDAD ABC</th>";
+	$cuerpo .= "<th> <img src='$head_mail' alt='' ></th>";
 	//$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
         //$cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
         $cuerpo .= "</tr>";

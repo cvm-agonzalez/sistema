@@ -297,6 +297,17 @@ class Socios_model extends CI_Model {
         }
     }
 
+    public function get_categoria($id_entidad, $id){
+	$this->db->where('id_entidad', $id_entidad);
+	$this->db->where('id', $id);
+        $query = $this->db->get('categorias');
+        if($query->num_rows() == 0){
+            return false;
+        }else{
+            return $query->result();
+        }
+    }
+
     public function get_cat($id_entidad, $id, $data){
 	$cat_new=$data['categoria'];
 	$query="SELECT s.categoria id_ant, c1.nombre descr_ant, c1.precio precio_ant, $cat_new id_new, c2.nombre descr_new, c2.precio precio_new,

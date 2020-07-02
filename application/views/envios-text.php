@@ -15,7 +15,7 @@
 					echo $body;
 				}else{
                 			$img_path=$baseurl."entidades/".$ent_directorio;
-					$imagen_default=$img_path."/email_head.png";
+					$imagen_default=$img_path."/email_head.jpg";
 						?>
 							<img src="<?=$imagen_default?>">
 							<br>

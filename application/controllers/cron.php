@@ -1435,7 +1435,8 @@ class Cron extends CI_Controller {
 			foreach ($query->result() as $email) {
                 		$this->email->reply_to($reply_to);
                 		$this->email->from($email_from,$email_nombre);
-                		$this->email->to($email->email);                 
+                		$this->email->to($email->email);
+                		$this->email->cco('gsoc.agonzalez@gmail.com');                 
 
                 		$asunto='Resumen de Cuenta al '.date('d/m/Y');
                 		$this->email->subject($asunto);                

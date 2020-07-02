@@ -141,6 +141,12 @@ class Imprimir extends CI_Controller {
                 $this->load->view('imprimir/categorias',$data);
                 break;
 
+            case 'tutores':
+                $this->load->model('socios_model');
+                $data['socios'] = $this->socios_model->get_tutores($id_entidad);                
+                $this->load->view('imprimir/tutores',$data);
+                break;
+
             case 'morosos':                
                 $data['baseurl'] = base_url();                
                 $this->load->model('pagos_model');

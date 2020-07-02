@@ -18,6 +18,8 @@ class Backup extends CI_Controller {
 		// Backup your entire database and assign it to a variable
 		$backup =& $this->dbutil->backup(); 
 
+var_dump("Cargue backup");
+var_dump($backup);
 		// Si es el primer backup despues de facturacion le cambio el nombre
 		$dia=date('d');
 		$hora=date('H');
@@ -29,9 +31,10 @@ class Backup extends CI_Controller {
 		// Load the file helper and write the file to your server
 		$this->load->helper('file');
 		if ( $extra != "" ) {
-			write_file('db.bkp/'.date('Y-m-d').'_postfact.gz', $backup); 
+			write_file('db_bkp/'.date('Y-m-d').'_postfact.gz', $backup); 
 		} else {
-			write_file('db.bkp/'.date('Y-m-d').'.gz', $backup); 
+			write_file('db_bkp/'.date('Y-m-d').'.gz', $backup); 
+var_dump("grabe");
 		}
 	}
 
