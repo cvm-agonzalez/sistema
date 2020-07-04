@@ -89,6 +89,12 @@
                                                 	<span data-i18n="Administradores"></span>
                                             		</a>
                                         	</li>
+                                        	<li>
+                                            		<a href="<?=$baseurl?>admin/profes">
+                                                	<i class="fa fa-user"></i>
+                                                	<span data-i18n="Acceso Comisiones"></span>
+                                            		</a>
+                                        	</li>
 					<? } ?>
                                         <li>
                                             <a href="<?=$baseurl?>admin/admins/chgpwd">
@@ -355,7 +361,7 @@
                     if(agree){return true}else{return false}
                 })
                 $("a#btn-eliminar-profesor").click(function(){
-                    var agree = confirm("Seguro que desea eliminar esta Comisión y desvincular todas sus actividades?");
+                    var agree = confirm("Seguro que desea eliminar este usuario de Comisión?");
                     if(agree){return true}else{return false}
                 })
                 $("a#btn-eliminar-lugar").click(function(){
@@ -409,26 +415,6 @@
                 $("button#morosos-ver").click(function(){
                     $('#table-morosos').show();
                 })
-
-		$("#btn_profesor").click(function() {
-                    var sid = $("#sid-select").val();
-            		$.get("<?=$baseurl?>admin/socios/get/"+sid,function(data){
-                	if(data != 'false' ){
-                    		var socio = $.parseJSON(data);
-				var ok = confirm("El socio "+sid+" se llama "+socio.apellido+", "+socio.nombre+ " Confirma?");
-				if (ok) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				alert("El socio "+sid+" No existe");
-				return false;
-			}
-
-			})
-
-		})
 
 		$("#save_btn").click(function() {
                     var fecha = $("#fechan").val();
@@ -1136,6 +1122,65 @@ $("button#estad_comi_excel").click(function(){
         $("#estad-comi-form").attr("action",url);
         $("#estad-comi-form").submit();
 	return true;
+})
+
+$("button#btn_profesor").click(function(){
+	var mail = $("#mail").val();
+	var param = encodeURIComponent(mail);
+	var accion = $(this).data('accion');
+        $("#reg-cargando").removeClass('hidden');
+	$.get("<?=$baseurl?>admin/socios/valid_mail/"+param,function(data){
+		if ( data ) {
+			var validmail = $.parseJSON(data);
+			var vm = Object.values(validmail);
+			if ( !vm || vm[1] == false ) {
+				alert ("Direccion de correo no valida");
+        			$("#reg-cargando").addClass('hidden');
+				return false;
+			};
+			if ( vm[1] == true ) {
+				if ( accion == "alta_comi" ) {
+					$("#altacomi").submit();
+				} else {
+					$("#edicomi").submit();
+				}
+			}
+		} else {
+			alert ("Direccion de correo no valida");
+        		$("#reg-cargando").addClass('hidden');
+			return false;
+		};
+	})
+})
+
+$("button#btn_admin").click(function(){
+	var mail = $("#mail").val();
+	var param = encodeURIComponent(mail);
+	var accion = $(this).data('accion');
+        $("#reg-cargando").removeClass('hidden');
+	$.get("<?=$baseurl?>admin/socios/valid_mail/"+param,function(data){
+		if ( data ) {
+			var validmail = $.parseJSON(data);
+			var vm = Object.values(validmail);
+			if ( !vm || vm[1] == false ) {
+				alert ("Direccion de correo no valida");
+        			$("#reg-cargando").addClass('hidden');
+				return false;
+			};
+			if ( vm[1] == true ) {
+        			$("#reg-cargando").removeClass('hidden');
+				if ( accion == 'agregar_admin' ) {
+					$("#alta_admin").submit();
+				} else {
+					$("#edi_admin").submit();
+				}
+			}
+		} else {
+			alert ("Direccion de correo no valida");
+        			$("#reg-cargando").addClass('hidden');
+			return false;
+		};
+	})
 })
 
 $("button#btn_procesar").click(function(){

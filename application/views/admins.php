@@ -32,7 +32,7 @@
 	<div class="panel panel-default">
 		<div class="panel-heading"><strong><span class="fa fa-plus"></span> Agregar Administrador</strong></div>
 		<div class="panel-body">
-			<form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/admins/agregar" method="post">
+			<form class="form-horizontal ng-pristine ng-valid" id="alta_admin" action="<?=$baseurl?>admin/admins/agregar" method="post">
 
                      <div class="form-group" id="grupo-categorias" <? if($envio->grupo != 'categorias'){ echo 'style="display:none;"'; } ?>>
                         <label>Categorías</label>
@@ -91,7 +91,7 @@
 						</select>
 					</div>
 				</div>
-				<button type="submit" class="btn btn-success">Agregar</button>
+				<button type="button" data-accion="agregar_admin" id="btn_admin" class="btn btn-success">Agregar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
 			</form>
 		</div>
 	</div>

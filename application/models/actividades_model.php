@@ -23,7 +23,9 @@ class Actividades_model extends CI_Model {
     public function get_profesores($id_entidad){
     	$this->db->order_by("apellido", "asc"); 
     	$this->db->where("estado", "1"); 
-    	$this->db->where("id_entidad", $id_entidad); 
+	if ( $id_entidad > 0 ) {
+    		$this->db->where("id_entidad", $id_entidad); 
+	}
         $query = $this->db->get("profesores");
         return $query->result();
     }    
@@ -408,7 +410,9 @@ class Actividades_model extends CI_Model {
 
     public function get_comisiones($id_entidad)
     {
-        $this->db->where('id_entidad',$id_entidad);
+	if ( $id_entidad > 0 ) {
+    		$this->db->where("id_entidad", $id_entidad); 
+	}
         $this->db->where('estado','1');
         $query = $this->db->get('comisiones');
         return $query->result();

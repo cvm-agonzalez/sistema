@@ -623,6 +623,134 @@ class Admin extends CI_Controller {
 	redirect(base_url().'admin');
     }
 
+    public function profes() {
+		$action = $this->uri->segment(3);
+		$data = $this->carga_data();
+		$id_entidad = $data['id_entidad'];
+		switch ( $action ) {
+			case 'nuevo':
+				foreach($_POST as $key => $val) {
+					if ( $key == 'pass' ) {
+						$pass_plano = $datos[$key];
+						$datos[$key] = sha1($this->input->post($key));
+					} else {
+						$datos[$key] = $this->input->post($key);
+					}
+				}
+                    		if($datos['nombre'] && $datos['apellido']){
+                        		$this->load->model("actividades_model");
+                        		$pid = $this->actividades_model->reg_profesor($datos);
+					$entidad = $datos['id_entidad'];
+					$comision = $this->actividades_model->get_comision($datos['comision']);
+
+                			// Grabo log de cambios
+                			$login = $this->session->userdata('username');
+                			$nivel_acceso = $this->session->userdata('rango');
+                			$tabla = "profesores";
+                			$operacion = 1;
+                			$llave = $pid;
+					$observ = substr(json_encode($datos), 0, 255);
+                			$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+                			//Mando email de aviso al operador
+                			$this->load->library('email');
+                			$reply = $this->session->userdata('email_sistema');
+
+                			// Busco la entidad cargado por si es un superusuario
+                			$this->load->model('general_model');
+                			$ent_cargada = $this->general_model->get_ent($entidad);
+
+                			$cuerpo = "<h1>Alta de Operador de Comision $comision->descripcion para entidad $ent_nombre </h1><br>";
+                			$cuerpo .= "<br><br>";
+                			$cuerpo .= "Recien se agrego el operador $user con password = $pass_plano <br>";
+                			$cuerpo .= "Al ingresar al sistema debe cambiar el password y poner uno de su manejo <br>";
+                			$cuerpo .= "El link de acceso es https://gestionsocios.com.ar/ligadelsur/$ent_cargada->descripcion <br>";
+                			$cuerpo .= "<br><br>";
+                			$cuerpo .= "Este mensaje se genero automaticamente desde el sistema de gestion de socios<br>";
+
+
+                			$this->email->from('avisos@gestionsocios.com.ar', $ent_cargada->descripcion);
+                			$this->email->reply_to($reply);
+
+                			$this->email->to($admin['mail']);
+                			$this->email->subject("Alta de Operador de Comision ".$ent_cargada->descripcion);
+                			$this->email->message($cuerpo);
+                			
+					$this->email->send();
+
+                        		redirect(base_url()."admin/profes/guardado/".$pid);
+                    		} else {
+                        		$data['comisiones'] = $this->actividades_model->get_comisiones(0);
+                        		redirect(base_url()."admin/profes");
+                    		}
+				break;
+
+			case 'guardar':
+				foreach($_POST as $key => $val) {
+					if ( $key == 'pass' ) {
+						$datos[$key] = sha1($this->input->post($key));
+					} else {
+						$datos[$key] = $this->input->post($key);
+					}
+				}
+				if($datos['nombre'] && $datos['apellido']) {
+					$this->load->model("actividades_model");
+					$this->actividades_model->update_profesor($datos,$this->uri->segment(4));
+					// Grabo log de cambios
+					$login = $this->session->userdata('username');
+					$nivel_acceso = $this->session->userdata('rango');
+					$tabla = "profesores";
+					$operacion = 2;
+					$llave = $this->uri->segment(4);
+					$observ = substr(json_encode($datos), 0, 255);
+					$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+					redirect(base_url()."admin/profes/guardado/".$this->uri->segment(4));
+				}
+				break;
+
+			case 'editar':
+				$data['section'] = 'profesores-editar';
+				$this->load->model('actividades_model');
+				$this->load->model('general_model');
+				$data['profesor'] = $this->actividades_model->get_profesor($this->uri->segment(4));
+				$data['comisiones'] = $this->actividades_model->get_comisiones(0);
+				$data['entidades'] = $this->general_model->get_entidades();
+				$this->load->view('admin',$data);
+				break;
+
+			case 'guardado':
+				$data['pid'] = $this->uri->segment(4);
+				$data['section'] = 'profesores-guardado';
+				$this->load->view("admin",$data);
+				break;
+
+			case 'eliminar':
+				$this->load->model("actividades_model");
+				$this->actividades_model->del_profesor($this->uri->segment(4));
+				// Grabo log de cambios
+				$login = $this->session->userdata('username');
+				$nivel_acceso = $this->session->userdata('rango');
+				$tabla = "profesores";
+				$operacion = 3;
+				$llave = $this->uri->segment(4);
+				$observ = "borre profesor ".$this->uri->segment(4);
+				$this->log_cambios($login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+				redirect(base_url()."admin/profes");
+				break;
+
+			default:
+				$data = $this->carga_data();
+				$data['section'] = 'actividades-profesores';
+				$this->load->model('actividades_model');
+				$this->load->model('general_model');
+				$data['entidades'] = $this->general_model->get_entidades();
+				$data['profesores'] = $this->actividades_model->get_profesores(0);
+				$data['comisiones'] = $this->actividades_model->get_comisiones(0);
+				$this->load->view('admin',$data);
+				break;
+		}
+    }
+
     public function admins($action='',$id='')
     {
         $this->load->model('admins_model');
@@ -657,22 +785,25 @@ class Admin extends CI_Controller {
 		//Mando email de aviso al operador
                 $this->load->library('email');
 		$reply = $this->session->userdata('email_sistema');
-		$ent_nombre = $this->session->userdata('ent_nombre');
+
+		// Busco la entidad cargado por si es un superusuario
+        	$this->load->model('general_model');
+		$ent_cargada = $this->general_model->get_ent($entidad);
 
                 $cuerpo = "<h1>Alta de Operador para la entidad $ent_nombre </h1><br>";
 		$cuerpo .= "<br><br>";
                 $cuerpo .= "Recien se agrego el operador $user con password = $pass_plano <br>";
                 $cuerpo .= "Al ingresar al sistema debe cambiar el password y poner uno de su manejo <br>";
-                $cuerpo .= "El link de acceso es https://gestionsocios.com.ar/ligadelsur/$ent_nombre <br>";
+                $cuerpo .= "El link de acceso es https://gestionsocios.com.ar/ligadelsur/$ent_cargada->descripcion <br>";
 		$cuerpo .= "<br><br>";
                 $cuerpo .= "Este mensaje se genero automaticamente desde el sistema de gestion de socios<br>";
 
 		
-		$this->email->from('avisos@gestionsocios.com.ar', $ent_nombre);
+		$this->email->from('avisos@gestionsocios.com.ar', $ent_cargada->descripcion);
 		$this->email->reply_to($reply);
 
 		$this->email->to($admin['mail']);
-		$this->email->subject("Alta de Operador ".$ent_nombre);
+		$this->email->subject("Alta de Operador ".$ent_cargada->descripcion);
 		$this->email->message($cuerpo);
 		$this->email->send();
 

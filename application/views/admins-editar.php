@@ -2,7 +2,7 @@
 	<div class="panel panel-default">
 		<div class="panel-heading"><strong><span class="fa fa-plus"></span> Editar Administrador</strong></div>
 		<div class="panel-body">
-			<form autocomplete="off" class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/admins/guardar/<?=$admin->id?>" method="post">
+			<form autocomplete="off" class="form-horizontal ng-pristine ng-valid" id="edi_admin" action="<?=$baseurl?>admin/admins/guardar/<?=$admin->id?>" method="post">
 
                                 <div class="form-group">
                                         <label for="entidad" class="col-sm-2">Entidad</label>
@@ -66,7 +66,7 @@
 						<input type="password" name="pass2" id="pass2" class="form-control">
 					</div>
 				</div> 
-				<button type="submit" class="btn btn-success">Agregar</button>
+				<button type="button" data-accion="edit_admin" id="btn_admin" class="btn btn-success">Agregar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
 				<a href="<?=base_url()?>admin/admins" type="submit" class="btn btn-warning">Cancelar</a>
 			</form>
 		</div>

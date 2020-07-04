@@ -28,6 +28,11 @@ class General_model extends CI_Model {
         return $query->row();
     }
 
+    public function get_entidades(){
+        $query = $this->db->get("entidades");
+        return $query->result();
+    }
+
     public function get_cat_tipo($id_entidad, $tipo){
         $this->db->where('id_entidad',$id_entidad);
         $this->db->where('tipo  COLLATE latin1_general_cs = ',$tipo);

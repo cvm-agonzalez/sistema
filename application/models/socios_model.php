@@ -38,7 +38,7 @@ class Socios_model extends CI_Model {
     }
 
     public function getmails_check() {
-        $qry="SELECT id sid, categoria, CONCAT(nombre,', ',apellido) apynom, mail FROM socios WHERE suspendido = 0 AND validmail_st IN (0, 2) AND mail != '' LIMIT 100";
+        $qry="SELECT id sid, id_entidad, categoria, CONCAT(nombre,', ',apellido) apynom, mail FROM socios WHERE suspendido = 0 AND validmail_st IN (0, 2) AND mail != '' LIMIT 100";
         $resultado = $this->db->query($qry)->result();
         if ( $resultado ) {
                 return $resultado;
@@ -233,6 +233,7 @@ class Socios_model extends CI_Model {
 
     public function update_socio($id_entidad, $id, $data){
 	// Verifico si cambio la categoria para registrar ese ecambio
+	$data['id_entidad'] = $id_entidad;
 	$categ = $this->get_cat($id_entidad, $id, $data);
 	if ( $categ['cambio'] == 1 ) {
         	$this->load->model('pagos_model');
