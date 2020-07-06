@@ -1,6 +1,6 @@
 <div class="page page-table" >
     <div class="panel panel-default table-dynamic">
-        <div class="panel-heading"><strong><span class="fa fa-user"></span> <? if ($debtarj) { echo "EDITAR DEBITO TARJETA CREDITO"; } else { echo "ADHERIR DEBITO TARJETA CREDITO"; }?> </strong></div>
+        <div class="panel-heading"><strong><span class="fa fa-user"></span> EDITAR DEBITO TARJETA CREDITO </strong></div>
         <div class="panel-body">
             <div class="row">
                 <div class="col-lg-12">
@@ -19,7 +19,7 @@
                             </div>
                             <div id="r2-result" <? if($socio->id == 0){ echo 'class="hidden size-h3"'; }else{ echo 'class="size-h3"'; }?>>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <? echo $socio->nro_socio.'-'.$socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
+                            <? echo $socio->nombre.' '.$socio->apellido.' ('.$socio->dni.')'; ?> <a href="#" onclick="cleear('r2')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>
                             </div>
                             <input type="hidden" name="r2-id" id="r2-id" class="form-control" value="<?=$socio->id?>">
                         </div> 
@@ -33,6 +33,7 @@
                             <span class="caret"></span>
                             </button><ul class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop1">
                                 <li><a id="acceso_ver_resumen" href="<?=$baseurl?>admin/socios/resumen/<?=$socio->id?>">Ver Resumen</a></li>
+                                <li><a id="acceso_cupon" href="<?=$baseurl?>admin/pagos/cupon/<?=$socio->id?>">Generar Cupón</a></li>
                                 <li><a id="acceso_pago" href="<?=$baseurl?>admin/pagos/registrar/<?=$socio->id?>">Registrar Pago</a></li>
                                 <li><a id="acceso_resumen" href="<?=$baseurl?>admin/socios/enviar_resumen/<?=$socio->id?>">Enviar Resumen</a></li>
                             </ul>
@@ -45,7 +46,7 @@
             </div>
 
         	<div class="panel-body">
-				<form class="form-horizontal ng-pristine ng-valid" id="carga_debtarj_form" >
+				<form class="form-horizontal ng-pristine ng-valid" id="edit_debtarj_form" >
 
 		                <div class="form-group col-lg-6">
                     		<label for="" class="col-sm-3">Marca Tarjeta</label>
@@ -63,7 +64,7 @@
 				    <div class="col-sm-12">
 						<div class="form-group">
 				           	<label for="" class="col-sm-3">Nro de Tarjeta</label>
-				            <div class="col-sm-3">
+				    <div class="col-sm-4">
 				               	<input class="form-control" name="nro_tarjeta" id="nro_tarjeta" value="<?if ($debtarj) { echo $debtarj->nro_tarjeta; } else { echo ""; } ?>" required>
 		                                <input type="hidden" id="id_debito" value="<?if ($debtarj) { echo $debtarj->id; } else { echo '0'; }?>">
 				            </div>
@@ -85,7 +86,7 @@
 					<div align="left" style="width:100%">
 				    	<div class="form-group">
 				            <div class="col-sm-6">
-				               	<button class="btn-success" id="boton-deb" <?if ($debtarj) { echo " data-text='btnmodif' > Modificar"; } else { echo " data-text='btnagregar' > Agregar"; } ?> <i id="reg-cargando" class="fa fa-spin fa-spinner hidden"></i></button>
+				               	<button class="btn-success" id="boton-deb" data-text='btnmodif' > Modificar <i id="reg-cargando" class="fa fa-spin fa-spinner hidden"></i></button>
 				            </div>
 				        </div>
 				    </div>

@@ -20,7 +20,7 @@
 		<form id="debtarj_botones_form" method="post">
                         <? if ( $rango < 2 ) { ?>
                 		<div class="col-sm-2 col-xs-3 " id="debtarj_nuevo" align="left">
-                        		<button class="btn-success fa fa-plus" data-text="nuevo" data-action="<?=base_url()?>admin/debtarj/0" >Nuevo Debito <i class="fa fa-spin fa-spinner hidden"></i></button>
+                        		<button class="btn-success fa fa-plus" data-text="nuevo" data-action="<?=base_url()?>admin/debtarj/nuevo" >Nuevo Debito <i class="fa fa-spin fa-spinner hidden"></i></button>
                 		</div>
 			<? } ?>
                 <div class="col-sm-2 col-xs-3" id="debtarj_excel" align="right">
@@ -88,11 +88,11 @@
                     <th><div class="th">
                         Nro Tarjeta
                         <span class="glyphicon glyphicon-chevron-up"
-                              data-ng-click=" order('nro_tarjeta) "
-                              data-ng-class="{active: row == 'nro_tarjeta}"></span>
+                              data-ng-click=" order('nro_tarjeta') "
+                              data-ng-class="{active: row == 'nro_tarjeta'}"></span>
                         <span class="glyphicon glyphicon-chevron-down"
-                              data-ng-click=" order('-nro_tarjeta) "
-                              data-ng-class="{active: row == '-nro_tarjeta}"></span>
+                              data-ng-click=" order('-nro_tarjeta') "
+                              data-ng-class="{active: row == '-nro_tarjeta'}"></span>
                     <th><div class="th">
                         Importe
                         <span class="glyphicon glyphicon-chevron-up"
@@ -129,7 +129,7 @@
                     <td>{{store.estado}}</td>
                     <td>
                         <? if ( $rango < 2 ) { ?>
-                        	<a href="<?=base_url()?>admin/debtarj/{{store.sid}}">Editar</a> | 
+                        	<a href="<?=base_url()?>admin/debtarj/editar/{{store.sid}}">Editar</a> | 
                         	<a href="<?=base_url()?>admin/debtarj/eliminar/{{store.id}}" >Eliminar</a> |
                         	<a href="<?=base_url()?>admin/debtarj/stopdebit/{{store.id}}" >Stop DB</a> |
                         <? } ?>

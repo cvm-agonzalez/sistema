@@ -14,24 +14,22 @@ class Debtarj_model extends CI_Model {
     
     public function grabar($datos)
     {
-	var_dump($datos);
         $this->db->insert('socios_debito_tarj', $datos);
         return $this->db->insert_id();   
     }
 
-    public function stopdebit($id){
+    public function stopdebit($id, $pone){
         $this->db->where('id', $id); 
-	$debtarj=$this->db->get('socios_debito_tarj');
-	if ( $debtarj->estado == 1 ) {
-        	$this->db->update('socios_debito_tarj',array("estado"=>'2'));
+	if ( $pone ) {
+            $this->db->update('socios_debito_tarj',array("estado"=>'2'));
 	} else {
-        	$this->db->update('socios_debito_tarj',array("estado"=>'1'));
+            $this->db->update('socios_debito_tarj',array("estado"=>'1'));
 	}
     }
 
     public function borrar($id){
         $this->db->where('id', $id); 
-        $this->db->update('socios_debito_tarj',array("estado"=>'0'));
+        $this->db->update('socios_debito_tarj',array("estado"=>'0', "nro_tarjeta"=>'0'));
     }
 
     public function actualizar($id, $datos){
@@ -62,7 +60,7 @@ class Debtarj_model extends CI_Model {
 
     public function get_debtarjs($id_entidad)
     {
-        $this->db->where('estado','1');
+        $this->db->where('estado in (1,2)');
         $this->db->where('id_entidad',$id_entidad);
         $query = $this->db->get('socios_debito_tarj');
         return $query->result();
@@ -80,18 +78,12 @@ class Debtarj_model extends CI_Model {
 
     public function inicializa_contra($id_entidad, $periodo, $id_marca)
     {
-	$orig=$this->get_periodo_marca($id_entidad,$periodo,$id_marca);
-        $this->db->where('id_entidad', $id_entidad);
-        $this->db->where('periodo', $periodo);
-        $this->db->where('id_marca', $id_marca);
-        $this->db->where('estado', '1');
-        $this->db->update('socios_debitos_gen', array("cant_acreditada"=>$orig->cant_generada, "total_acreditado"=>$orig->total_generado));
-
         $qry="UPDATE socios_debitos sd 
-				JOIN socios_debitos_gen sdg ON sdg.id_entidad = $id_entidad AND sdg.id_marca = $id_marca AND sdg.periodo = $periodo AND sdg.estado = 1
-                        	JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca 
-			SET sd.estado = 1, sd.fecha_acreditacion=DATE_ADD(sd.fecha_debito, INTERVAL 7 DAY) ; ";
-        $this->db->query($qry)->result();
+                JOIN socios_debitos_gen sdg ON sdg.id_entidad = $id_entidad AND sdg.id_marca = $id_marca AND sdg.periodo = $periodo AND sdg.estado = 1
+                            JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca 
+            SET sd.estado = 1 
+        WHERE sd.estado = 9; ";
+        $this->db->query($qry);
 
     }
 
@@ -105,40 +97,53 @@ class Debtarj_model extends CI_Model {
 	}
     }
 
-
-    public function mete_contracargo($id_entidad, $periodo, $id_marca, $nrotarjeta, $importe)
+    public function cierre_contracargo($id_cabecera)
     {
-        $qry="SELECT sd.id
-		FROM socios_debitos sd 
-                        JOIN socios_debitos_gen sdg ON sdg.id_entidad = $id_entidad AND sdg.id_marca = $id_marca AND sdg.periodo = $periodo AND sdg.estado = 1
-                        JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca AND MOD(sdt.nro_tarjeta,10000) = $nrotarjeta
-                WHERE sd.importe = $importe; ";
-        $contras = $this->db->query($qry)->result();
-        if ($contras) {
-        	$qry="UPDATE socios_debitos sd 
-				JOIN socios_debitos_gen sdg ON sdg.id_marca = $id_marca AND sdg.periodo = $periodo AND sdg.estado = 1
-                        	JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca AND MOD(sdt.nro_tarjeta,10000) = $nrotarjeta
-			SET sd.estado = 2, sd.fecha_acreditacion='0000-00-00'
-                	WHERE sd.importe = $importe; ";
-        	$this->db->query($qry);
-		$qry="UPDATE socios_debitos_gen SET cant_acreditada=cant_acreditada-1, total_acreditado=total_acreditado-$importe WHERE id_marca = $id_marca AND periodo = $periodo AND estado = 1;";
-        	$this->db->query($qry);
-                return TRUE;
-        } else {
-                return FALSE;
-	}
+    $qry="UPDATE socios_debitos_gen sdg 
+                JOIN ( SELECT COUNT(*) cantidad, SUM(d.importe) total FROM socios_debitos d WHERE d.id_cabecera = $id_cabecera AND d.estado = 0 ) sd
+        SET sdg.cant_acreditada=sdg.cant_generada-sd.cantidad, sdg.total_acreditado=total_generado-sd.total
+            WHERE sdg.id = $id_cabecera; ";
+        $this->db->query($qry);
+
+    }
+
+    public function mete_contracargo($id_cabecera, $nrotarjeta, $nrorenglon, $importe)
+    {
+    if ( $id_cabecera && $nrotarjeta && $nrorenglon && $importe ) {
+            $qry="SELECT sd.id
+            FROM socios_debitos sd 
+                            JOIN socios_debitos_gen sdg ON sdg.id = $id_cabecera AND sdg.estado = 1
+                            JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca AND MOD(sdt.nro_tarjeta,10000) = $nrotarjeta 
+                    WHERE sd.importe = $importe AND sd.nro_renglon = $nrorenglon; ";
+            $contras = $this->db->query($qry)->result();
+            if ($contras) {
+                $qry="UPDATE socios_debitos sd 
+                    JOIN socios_debitos_gen sdg ON sdg.id = $id_cabecera AND sdg.estado = 1
+                                JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca AND MOD(sdt.nro_tarjeta,10000) = $nrotarjeta
+                SET sd.estado = 0
+                        WHERE sd.importe = $importe AND
+                    sd.nro_renglon = $nrorenglon ";
+                $this->db->query($qry);
+                    return TRUE;
+            } else {
+                    return FALSE;
+        }
+    } else {
+            return FALSE;
+    }
 
 
     }
 
     public function get_contracargos($id_entidad, $periodo, $id_marca)
     {
-	$qry="SELECT sdt.id_marca, sdt.sid, sdt.nro_tarjeta, CONCAT(s.apellido,', ',s.nombre) apynom, sd.id_debito, sdg.fecha_debito, sd.fecha_acreditacion, sd.nro_renglon, sd.importe 
-		FROM socios_debitos_gen sdg 
-			JOIN socios_debitos sd ON sd.fecha_debito = sdg.fecha_debito AND sd.estado = 2
-			JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca 
-			JOIN socios s ON sdt.sid = s.id 
-		WHERE sdg.id_entidad = $id_entidad AND sdg.periodo = $periodo AND sdg.id_marca = $id_marca AND sdg.estado = 1; ";
+    $qry="SELECT sdt.id_marca, sdt.sid, t.descripcion descr_marca, sdt.nro_tarjeta, CONCAT(s.apellido,', ',s.nombre) apynom, s.mail, sd.id_debito, sdg.fecha_debito, sdg.fecha_acreditacion, sd.nro_renglon, sd.importe 
+        FROM socios_debitos_gen sdg 
+            JOIN socios_debitos sd ON sdg.id = sd.id_cabecera AND sd.estado = 0
+            JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id AND sdt.id_marca = sdg.id_marca 
+            JOIN socios s ON sdt.sid = s.Id 
+            JOIN tarj_marca t ON sdt.id_marca = t.id 
+        WHERE sdg.id_entidad = $id_entidad AND sdg.periodo = $periodo AND sdg.id_marca = $id_marca AND sdg.estado = 1; ";
         $contras = $this->db->query($qry)->result();
         if ($contras) {
                 return $contras;
@@ -158,13 +163,21 @@ class Debtarj_model extends CI_Model {
 	}
     }
 
-    public function upd_gen($id_entidad,$periodo, $id_marca, $cantidad, $total)
+    public function get_debgen($id_entidad, $periodo, $id_marca)
     {
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('periodo', $periodo);
         $this->db->where('id_marca', $id_marca);
-        $this->db->where('estado', '1');
-        $this->db->update('socios_debitos_gen', array("cant_acreditada"=>$cantidad, "total_acreditado"=>$total)); 
+        $this->db->where('estado', 1);
+        $query = $this->db->get('socios_debitos_gen');
+        $cabecera = $query->row();
+    return $cabecera;
+    }
+
+    public function upd_gen($id_entidad,$id_cabecera, $datos) {
+        $this->db->where('id_entidad', $id_entidad);
+        $this->db->where('id', $id_cabecera);
+        $this->db->update('socios_debitos_gen',$datos);
     }
 
     public function insert_periodo_marca($datos)
@@ -178,19 +191,15 @@ class Debtarj_model extends CI_Model {
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('periodo', $periodo);
         $this->db->where('id_marca', $id_marca);
-        $this->db->update('socios_debitos_gen', array("estado"=>0)); 
+        $query = $this->db->get('socios_debitos_gen');
+	$cabecera = $query->row();
 
-	$datos['id_marca']=$id_marca;
-	$datos['estado']=1;
-	$debtarjs = $this->get_debtarj_by($datos);
-	foreach ( $debtarjs as $debtarj ) {
-		if ( $debtarj->ult_periodo_generado == $periodo ) {
-        		$this->db->where('id_debito', $debtarj->id);
-        		$this->db->where('fecha_debito', $debtarj->ult_fecha_generacion);
-        		$this->db->update('socios_debitos',array("fecha_debito"=>null,"estado"=>0));
-		}
+	$this->db->where('id', $cabecera->id);
+        $this->db->delete('socios_debitos_gen');
 
-	}
+	$this->db->where('id_cabecera', $cabecera->id);
+        $this->db->delete('socios_debitos');
+
     }
 
     public function get_debtarjs_anul($id_entidad, $sid)
@@ -202,7 +211,9 @@ class Debtarj_model extends CI_Model {
     public function get_debtarj_by($by)
     {
         $by['estado'] = 1;
-        $query = $this->db->get_where('socios_debito_tarj',$by);
+        $query = $this->db->where($by);
+        $query = $this->db->where('estado in (1,2)');
+        $query = $this->db->get('socios_debito_tarj');
         if($query->num_rows() == 0){
             return false;
         }else{
@@ -223,7 +234,7 @@ class Debtarj_model extends CI_Model {
     public function get_debtarj_by_sid($sid)
     {
         $this->db->where('sid', $sid);
-        $this->db->where('estado', 1);
+        $this->db->where('estado in (1,2)');
         $query = $this->db->get('socios_debito_tarj');
         if( $query->num_rows() == 0 ){ return false; }
         $debtarj = $query->row();
@@ -233,44 +244,27 @@ class Debtarj_model extends CI_Model {
 
 /* Funciones de la tabla socios_debitos */
 
-    public function insert_debito($id_entidad,$id,$fecha,$importe){
+    public function insert_debito($id_entidad,$id,$id_cabecera,$importe, $renglon){
         $insert = array(
             'id_entidad'=> $id_entidad,
             'id_debito'=> $id,
-            'fecha_debito'=>$fecha,
-            'fecha_acreditacion'=> null,
+	    'id_cabecera' => $id_cabecera,
             'importe' => $importe,
-            'estado' => 1,
-	    'nro_renglon' => 0,
+            'estado' => 9,
+	    'nro_renglon' => $renglon,
 	    'id' => 0 
             );
         $this->db->insert('socios_debitos',$insert);
     }
 
-    public function upd_noacred($id_entidad, $id_marca, $periodo) {
-        $this->db->where('id_entidad', $id_entidad);
-        $this->db->where('id_marca', $id_marca);
-        $this->db->where('periodo', $periodo);
-        $this->db->where('estado','1');
-        $query = $this->db->get('socios_debitos_gen',1);
-	$row=$query->row();
-	if ( $row ) {
-		$fecha_deb=$row->fecha_debito;
-/* Armo SQL p buscar con JOIN */
-        	$qry="SELECT sd.id FROM socios_debitos sd JOIN socios_debito_tarj sdt ON ( sd.id_debito = sdt.id AND sdt.id_marca = $id_marca ) WHERE sd.fecha_debito = '$fecha_deb' AND sd.fecha_acreditacion IS NULL; ";
-        	$debitos = $this->db->query($qry)->result();
-		if ( $debitos ) {
-			foreach ( $debitos as $debito ) {
-        			$this->db->where('id', $debito->id);
-				$this->db->update('socios_debitos',array("estado"=>0));
-			}
-		}
-	}
+    public function upd_noacred($id_cabecera) {
+    	$qry="UPDATE socios_debitos SET estado = 0 WHERE id_cabecera = $id_cabecera AND estado = 9; ";
+    	$this->db->query($qry);
     }
 
-    public function upd_acred($id, $fecha_acred){
-        $this->db->where('id', $id);
-        $this->db->update('socios_debitos',array("fecha_acreditacion"=>$fecha_acred));
+    public function upd_acred($id_debito){
+        $this->db->where('Id', $id_debito);
+        $this->db->update('socios_debitos',array("estado"=>"1"));
     }
 
     public function upd_debito_rng($id,$nro_renglon){
@@ -296,7 +290,6 @@ class Debtarj_model extends CI_Model {
     {
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('estado', 1);
-        $this->db->order_by('fecha_debito','desc');
         $query = $this->db->get('socios_debitos',1);
         if( $query->num_rows() == 0 ){ return false; }
         $debitos = $query->row();
@@ -317,36 +310,34 @@ class Debtarj_model extends CI_Model {
         return $debito;
     }
 
+    public function get_debitos_by_cabecera($id_cabecera) {
+        $qry="SELECT sdt.id_marca, sdt.sid, sdt.nro_tarjeta, sd.id_debito, sdt.ult_fecha_generacion, sdt.ult_periodo_generado, sd.nro_renglon, sd.importe 
+                FROM socios_debitos sd 
+                        JOIN socios_debito_tarj sdt ON sd.id_debito = sdt.id 
+                WHERE sd.id_cabecera = $id_cabecera AND sd.estado  = 9; ";
+        $debitos = $this->db->query($qry)->result();
+        if ($debitos) {
+                return $debitos;
+        } else {
+                return FALSE;
+        }
+    }
+
     public function get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo) {
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('id_marca', $id_marca);
-        $this->db->where('ult_periodo_generado', $periodo);
+        $this->db->where('periodo', $periodo);
         $this->db->where('estado', 1);
-        $query = $this->db->get('socios_debito_tarj');
+        $query = $this->db->get('socios_debitos_gen');
         if( $query->num_rows() == 0 ){ return false; }
-	$debtarjs=$query->result();
-	$debitos=array();
-    	$fila=1;
-	foreach ($debtarjs as $debtarj) {
-            $id_debito=$debtarj->id;
-            $ult_fecha=$debtarj->ult_fecha_generacion;
+    	$cabecera = $query->row();
 
-            $this->db->where('id_debito', $id_debito);
-            $this->db->where('fecha_debito', $ult_fecha);
-            $this->db->where('estado', 1);
-            $query1 = $this->db->get('socios_debitos',1);
-	        if ( $query1->num_rows() > 0 ) {
-                	$debito=$query1->row();
-            		$debitos[$fila]['nro_tarjeta']=$debtarj->nro_tarjeta;
-            		$debitos[$fila]['importe']=$debito->importe;
-            		$debitos[$fila]['sid']=$debtarj->sid;
-            		$debitos[$fila]['id_debito']=$debito->id;
-	        }
-	        $query1->free_result();
-            $fila++;
-            
-        }
-        return $debitos;
+    	$debtarjs=$this->get_debitos_by_cabecera($cabecera->id);
+    	if ($debtarjs) {
+        	return $debtarjs;
+    	} else {
+        	return false;
+    	}
     }
 
     public function get_deberr_by_marca_periodo($id_entidad, $id_marca, $periodo) {
@@ -376,7 +367,6 @@ class Debtarj_model extends CI_Model {
     {
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('id_debito', $id_debito);
-        $this->db->where('fecha_debito', $fecha);
 	if ( $estado ) {
         	$this->db->where('estado', $estado);
 	} else {
@@ -394,7 +384,6 @@ class Debtarj_model extends CI_Model {
         $this->db->where('id_entidad', $id_entidad);
         $this->db->where('id_debito', $id_debito);
         $this->db->where('estado >', 0);
-        $this->db->order_by('fecha_debito','desc');
         $query = $this->db->get('socios_debitos',1);
         if( $query->num_rows() == 0 ){ return false; }
         $debitos = $query->row();

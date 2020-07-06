@@ -196,6 +196,14 @@ class Admin extends CI_Controller {
                                         default: $estado = "XYZ"; break;
                                 }
 
+                                $largo = strlen($debtarj->nro_tarjeta);
+                                if ( $largo > 8 ) {
+                                        $nrotarj = substr($debtarj->nro_tarjeta,0,4)."****".substr($debtarj->nro_tarjeta,$largo-4,$largo);
+                                } else {
+                                        $nrotarj = "MAL";
+                                }
+
+
                 		$datos[] = array (
                       			'id' => $debtarj->id,
                       			'sid' => $debtarj->sid,
@@ -204,7 +212,7 @@ class Admin extends CI_Controller {
                       			'name' => $nombre,
                       			'id_marca' => $debtarj->id_marca,
                       			'tarjeta' => $tarjeta->descripcion,
-                      			'nro_tarjeta' => $debtarj->nro_tarjeta,
+                      			'nro_tarjeta' => $nrotarj,
                       			'fecha' => $fecha,
 		      			'price' => $precio,
                                         'estado' => $estado
@@ -1811,401 +1819,479 @@ class Admin extends CI_Controller {
         	$this->general_model->write_log($datos);
     }
 
+
     public function debtarj() {
-        switch ($this->uri->segment(3)) {
-                case 'subearchivo':
+	    switch ($this->uri->segment(3)) {
+		    case 'subearchivo':
+			    $data = $this->carga_data();
+			    $id_entidad = $data['id_entidad'];
 
-                       $this->load->model("debtarj_model");
-                       $id_entidad = $this->session->userdata('id_entidad');
-                       $id_marca = $this->uri->segment(4);
-                       $fecha_debito = $this->uri->segment(5);
-			// Armo el periodo
-			$anio=substr($fecha_debito,0,4);
-			$anio1=$anio+1;
-			$mes=substr($fecha_debito,5,2);
-			$mes1=$mes+1;
-			if ( $mes1 > 12 ) {
-				$periodo=$anio1."01";
-			} else {
-				if ( $mes1 < 10 ) {
-					$periodo=$anio.'0'.$mes1;
-				} else {
-					$periodo=$anio.$mes1;
-				}
-			}
+			    $this->load->model("debtarj_model");
+			    $id_marca = $this->uri->segment(4);
+			    $fecha_debito = $this->uri->segment(5);
+			    // Armo el periodo
+			    $anio=substr($fecha_debito,0,4);
+			    $anio1=$anio+1;
+			    $mes=substr($fecha_debito,5,2);
+			    $mes1=$mes+1;
+			    if ( $mes1 > 12 ) {
+				    $periodo=$anio1."01";
+			    } else {
+				    if ( $mes1 < 10 ) {
+					    $periodo=$anio.'0'.$mes1;
+				    } else {
+					    $periodo=$anio.$mes1;
+				    }
+			    }
 
-                       if ( $this->uri->segment(6) == "excel" ) {
-				$result = $this->debtarj_model->get_deberr_by_marca_periodo($id_entidad,$id_marca, $periodo);
-				$archivo="Errores_Debito_Tarj_".$id_marca."_".date('Ymd');
-                                $fila1=null;
-                                $titulo="Marca#".$id_marca."_".$fecha_debito;
-                                $headers=array();
-                                $headers[]="SID";
-                                $headers[]="Apellido";
-                                $headers[]="Nombre";
-                                $headers[]="Marca";
-                                $headers[]="Renglon";
-                                $headers[]="Nro Tarjeta";
-                                $headers[]="Importe";
-                                $datos=$result;
-                                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
-                                break;
-                        }
+			    if ( $this->uri->segment(6) == "excel" ) {
+				    $result = $this->debtarj_model->get_deberr_by_marca_periodo($id_marca, $periodo);
+				    $archivo="Errores_Debito_Tarj_".$id_marca."_".date('Ymd');
+				    $fila1=null;
+				    $titulo="Marca#".$id_marca."_".$fecha_debito;
+				    $headers=array();
+				    $headers[]="SID";
+				    $headers[]="Apellido";
+				    $headers[]="Nombre";
+				    $headers[]="Marca";
+				    $headers[]="Renglon";
+				    $headers[]="Nro Tarjeta";
+				    $headers[]="Importe";
+				    $datos=$result;
+				    $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+				    break;
+			    }
 
-			$result=false;
-			switch ( $id_marca ) {
-				case 1: $result = $this->sube_visa($id_entidad, $periodo, $fecha_debito); break;
-				case 2: $result = $this->sube_coopeplus($id_entidad, $periodo, $id_marca,$fecha_debito); break;
-				case 3: $result = $this->sube_coopeplus($$id_entidad, periodo, $id_marca,$fecha_debito); break;
-			}
+			    $result=false;
+			    switch ( $id_marca ) {
+				    case 1: $result = $this->sube_visa($periodo, $fecha_debito); break;
+				    case 2: $result = $this->sube_coopeplus($periodo, $id_marca,$fecha_debito); break;
+				    case 3: $result = $this->sube_coopeplus($periodo, $id_marca,$fecha_debito); break;
+			    }
 
-			$data = $this->carga_data();
-			if ( $result ) {
-                                $data['mensaje1'] = "Archivo procesado correctamente";
-				$data['datos_gen'] = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
-				$data['debitos_error'] = $this->debtarj_model->get_deberr_by_marca_periodo($id_marca, $periodo);
-                        	$data['id_marca'] = $id_marca;
-                        	$data['fecha_debito'] = $fecha_debito;
-                        	$data['url_boton'] = base_url()."admin/debtarj";
-                        	$data['msj_boton'] = "Vuelve Listado de Debitos";
-                        	$data['section'] = 'load-debtarj-result';
-                		// Grabo log de cambios
-                		$id_entidad = $this->session->userdata('id_entidad');
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "debtarj";
-                		$operacion = 5;
-                		$llave = $id_marca;
-                		$observ = "subio archivo de $id_marca para el periodo $periodo con fecha debito = $fecha_debito";
-                		$this->log_cambios($id_entidad,$login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+			    $data['baseurl'] = base_url();
+			    $data['username'] = $this->session->userdata('username');
+			    $data['rango'] = $this->session->userdata('rango');
+			    if ( $result ) {
+				    $data['mensaje1'] = "Archivo procesado correctamente";
+				    $data['datos_gen'] = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
+				    $data['debitos_error'] = $this->debtarj_model->get_deberr_by_marca_periodo($id_marca, $periodo);
+				    $data['id_marca'] = $id_marca;
+				    $data['fecha_debito'] = $fecha_debito;
+				    $data['url_boton'] = base_url()."admin/debtarj";
+				    $data['msj_boton'] = "Vuelve Listado de Debitos";
+				    $data['section'] = 'load-debtarj-result';
+				    // Grabo log de cambios
+				    $login = $this->session->userdata('username');
+				    $nivel_acceso = $this->session->userdata('rango');
+				    $tabla = "debtarj";
+				    $operacion = 5;
+				    $llave = $id_marca;
+				    $observ = "subio archivo de $id_marca para el periodo $periodo con fecha debito = $fecha_debito";
+				    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
-                        } else {
-                                $data['mensaje1'] = "No se pudo procesar archivo";
-                        	$data['ection'] = 'ppal-mensaje';
-                		// Grabo log de cambios
-                		$id_entidad = $this->session->userdata('id_entidad');
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "debtarj";
-                		$operacion = 5;
-                		$llave = $id_marca;
-                		$observ = "no pudo subir archivo de $id_marca para el periodo $periodo con fecha debito = $fecha_debito";
-                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                        }
-                        $this->load->view("admin",$data);
-			break;
-                case 'gen_nvo':
-                        $id_entidad = $this->session->userdata('id_entidad');
-                        $id_marca = $this->uri->segment(4);
-                        $periodo = $this->uri->segment(5);
-                        $this->load->model("debtarj_model");
-                        $this->load->model("pagos_model");
-			// Si me viene el parametro de forzar ...
-			if ( $this->uri->segment(6) ) {
-				$this->debtarj_model->anula_periodo_marca($id_entidad, $periodo, $id_marca);
-			} else {
-			// Chequeo si el periodo esta generado y quiero volver a generarlo
-				if ( $this->debtarj_model->exist_periodo_marca($id_entidad,$periodo, $id_marca) ) {
-                        		redirect(base_url()."admin/debtarj/gen-debtarj/1/".$periodo);
-		        	}
-			}
-                        $debtarjs = $this->debtarj_model->get_debtarjs($id_entidad);
-			$result=array();
-			$renglon=1;
-			$asoc_gen=0;
-			$total_gen=0;
-                        foreach ($debtarjs as $debtarj){
-                                // Solo genero los que son de la marca pasado por parametro y que esten en estado (descarta baja(estado=0) y stop debit(estado=2))
-                                if ( $debtarj->id_marca == $id_marca ) {
-					$mensaje="";
-					if ( $debtarj->estado == 1 ) {
-                                        	// Busco la cuota social del mes
-                                        	$cuota_socio = $this->pagos_model->get_monto_socio($debtarj->sid);
-                                        	// Busco el saldo del asociado
-                                        	$saldo = $this->pagos_model->get_saldo($debtarj->sid);
-                                        	// Si tiene saldo a favor lo descuento, sino la cuota mensual
-                                        	if ( $saldo != 0 ) {
-                                                	$importe = $cuota_socio['total'] + $saldo;
-                                        	} else {
-                                                	$importe = $cuota_socio['total'] ;
-                                        	}
+			    } else {
+				    $data['mensaje1'] = "No se pudo procesar archivo";
+				    $data['section'] = 'ppal-mensaje';
+				    // Grabo log de cambios
+				    $login = $this->session->userdata('username');
+				    $nivel_acceso = $this->session->userdata('rango');
+				    $tabla = "debtarj";
+				    $operacion = 5;
+				    $llave = $id_marca;
+				    $observ = "no pudo subir archivo de $id_marca para el periodo $periodo con fecha debito = $fecha_debito";
+				    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+			    }
+			    $data['username'] = $this->session->userdata('username');
+			    $data['rango'] = $this->session->userdata('rango');
+			    $this->load->view("admin",$data);
+			    break;
+		    case 'gen_nvo':
+			    $data = $this->carga_data();
+			    $id_marca = $this->uri->segment(4);
+			    $id_entidad = $data['id_entidad'];
+			    $periodo = $this->uri->segment(5);
+			    $this->load->model("debtarj_model");
+			    $this->load->model("pagos_model");
+			    // Si me viene el parametro de forzar ...
+			    if ( $this->uri->segment(6) ) {
+				    $this->debtarj_model->anula_periodo_marca($id_entidad, $periodo, $id_marca);
+			    } else {
+				    // Chequeo si el periodo esta generado y quiero volver a generarlo
+				    if ( $this->debtarj_model->exist_periodo_marca($id_entidad, $periodo, $id_marca) ) {
+					    redirect(base_url()."admin/debtarj/gen-debtarj/1/".$periodo."/".$id_marca);
+				    }
+			    }
 
-                                        	// Busco si tiene financiacion activa
-                        			$financiacion = $this->pagos_model->get_financiado_mensual($id_entidad, $id_socio);
-						$cuota_fin=0;
-                        			if ( $financiacion ) {
-                                			$fin=$financiacion[0];
-							$cuota_fin=($fin->monto/$fin->cuotas);
-							// Sumo al importe a debitar la cuota de la financiacion
-							$importe = $importe + $cuota_fin;
-						}
-                                        	// Si quedo algo a pagar lo debito
-						$cta=$cuota_socio['total'];
-                                        	if ( $importe > 0 ) {
-							if ( $saldo != 0 ) {
-								if ( $cuota_fin > 0 ) {
-									$mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo y cuota de financiacion de $cuota_fin\n";
-								} else {
-									$mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo\n";
-								}
-							} else {
-								$mensaje="Tiene cuota mensual de $ $cta \n";
-							}
-                                                	$id_debito = $debtarj->id;
-                                                	$fecha = date('Y-m-d');
-                                                	$ts = date('Y-m-d H:i:s');
-                                                	// Inserto el debito del mes
-                                                	$this->debtarj_model->insert_debito($id_entidad, $id_debito, $fecha, $importe );
+			    // Inserto cabecera del periodo
+			    $fecha_debito=date('Y-m-d');
+			    $datos['id_marca'] = $id_marca;
+			    $datos['id_entidad'] = $id_entidad;
+			    $datos['periodo'] = $periodo;
+			    $datos['fecha_debito'] = $fecha_debito;
+			    $datos['fecha_acreditacion'] = null;
+			    $datos['cant_generada'] = 0;
+			    $datos['total_generado'] = 0;
+			    $datos['cant_acreditada'] = 0;
+			    $datos['total_acreditado'] = 0;
+			    $datos['estado'] = 1;
+			    $datos['id'] = 0;
 
-                                                	// Actualizo el ultimo periodo y fecha de generacion
-                                                	$debtarj->ult_periodo_generado=$periodo;
-                                                	$debtarj->ult_fecha_generacion=$fecha;
-                                                	$debtarj->id_entidad=$id_entidad;
-                                                	$this->debtarj_model->actualizar($debtarj->id, $debtarj);
+			    $id_cabecera = $this->debtarj_model->insert_periodo_marca($datos);
 
-							$asoc_gen++;
-							$total_gen = $total_gen + $importe;
-                                        	} else {
-							$mensaje="Tiene cuota mensual de $ $cta pero no se le descuenta porque tiene diferencia anterior de $ $saldo\n";
-						}
-					} else {
-						switch ( $debtarj->estado ) {
-							case 0: $estado = "BAJA"; break;
-							case 2: $estado = "STOP DEBIT"; break;
-							default: $estado = "INDEFINIDO"; break;
-						}
-						$mensaje="No se genera porque tiene estado $estado \n";
-					}
-					$result[]=array('renglon'=>$renglon++,'sid'=>$debtarj->sid,'mensaje'=>$mensaje);
-                                }
-                        }
+			    $debtarjs = $this->debtarj_model->get_debtarjs($id_entidad);
+			    $result=array();
+			    $renglon=1;
+			    $asoc_gen=0;
+			    $total_gen=0;
+			    foreach ($debtarjs as $debtarj){
+				    // Solo genero los que son de la marca pasado por parametro y que esten en estado (descarta baja(estado=0) y stop debit(estado=2))
+				    if ( $debtarj->id_marca == $id_marca ) {
+					    $mensaje="";
+					    if ( $debtarj->estado == 1 ) {
+						    // Busco la cuota social del mes
+						    $cuota_socio = $this->pagos_model->get_monto_socio($debtarj->sid);
+						    // Busco el saldo del asociado
+						    $saldo = $this->pagos_model->get_saldo($debtarj->sid);
+						    // Si tiene saldo a favor lo descuento, sino la cuota mensual
+						    if ( $saldo != 0 ) {
+							    $importe = $cuota_socio['total'] + $saldo;
+						    } else {
+							    $importe = $cuota_socio['total'] ;
+						    }
 
-                        $datos['id_entidad'] = $id_entidad;
-                        $datos['id_marca'] = $id_marca;
-			$datos['periodo'] = $periodo;
-			$datos['fecha_debito'] = date('Y-m-d');
-			$datos['cant_generada'] = $asoc_gen;
-			$datos['total_generado'] = $total_gen;
-			$datos['cant_acreditada'] = 0;
-			$datos['total_acreditado'] = 0;
-			$datos['estado'] = 1;
-			$datos['id'] = 0;
+						    // Busco si tiene financiacion activa
+						    $financiacion = $this->pagos_model->get_financiado_mensual($debtarj->sid);
+						    $cuota_fin=0;
+						    if ( $financiacion ) {
+							    $fin=$financiacion[0];
+							    $cuota_fin=($fin->monto/$fin->cuotas);
+							    // Sumo al importe a debitar la cuota de la financiacion
+							    $importe = $importe + $cuota_fin;
+						    }
+						    // Si quedo algo a pagar lo debito
+						    $cta=$cuota_socio['total'];
+						    if ( $importe > 0 ) {
+							    if ( $saldo != 0 ) {
+								    if ( $cuota_fin > 0 ) {
+									    $mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo y cuota de financiacion de $cuota_fin\n";
+								    } else {
+									    $mensaje="Tiene cuota mensual de $ $cta y se le descuenta $ $importe porque tiene diferencia anterior de $ $saldo\n";
+								    }
+							    } else {
+								    $mensaje="Tiene cuota mensual de $ $cta \n";
+							    }
+							    $id_debito = $debtarj->id;
+							    $fecha = date('Y-m-d');
+							    $ts = date('Y-m-d H:i:s');
+							    // Inserto el debito del mes
+							    $this->debtarj_model->insert_debito($id_entidad, $id_debito, $id_cabecera, $importe, $renglon );
 
-			$this->debtarj_model->insert_periodo_marca($datos);
+							    // Actualizo el ultimo periodo y fecha de generacion
+							    $debtarj->ult_periodo_generado=$periodo;
+							    $debtarj->ult_fecha_generacion=$fecha;
+							    $this->debtarj_model->actualizar($debtarj->id, $debtarj);
 
-			$data = $this->carga_data();
-               	 	$data['result'] = $result;
+							    $asoc_gen++;
+							    $total_gen = $total_gen + $importe;
+					            	    $result[]=array('renglon'=>$renglon++,'sid'=>$debtarj->sid,'mensaje'=>$mensaje);
+						    } else {
+							    $mensaje="Tiene cuota mensual de $ $cta pero no se le descuenta porque tiene diferencia anterior de $ $saldo\n";
+						    }
+					    } else {
+						    switch ( $debtarj->estado ) {
+							    case 0: $estado = "BAJA"; break;
+							    case 2: $estado = "STOP DEBIT"; break;
+							    default: $estado = "INDEFINIDO"; break;
+						    }
+						    $mensaje="No se genera porque tiene estado $estado \n";
+					    }
+				    }
+			    }
 
-               		// Grabo log de cambios
-               		$id_entidad = $this->session->userdata('id_entidad');
-               		$login = $this->session->userdata('username');
-               		$nivel_acceso = $this->session->userdata('rango');
-               		$tabla = "debtarj";
-               		$operacion = 5;
-               		$llave = $id_marca;
-               		$observ = "Genero debitos de $id_marca para el periodo $periodo con fecha debito = $fecha_debito por un total de $total_gen para $asoc_gen socios";
-               		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+			    $debupd['cant_generada'] = $asoc_gen;
+			    $debupd['total_generado'] = $total_gen;
 
-	                $data['section'] = "gen-debtarj-result";
-                 	$this->load->view('admin',$data);
-                        break;
+			    $this->debtarj_model->upd_gen($id_entidad, $id_cabecera, $debupd);
 
-		case 'baja_arch':
-               		$id_entidad = $this->session->userdata('id_entidad');
-        		$id_marca = $this->input->post('id_marca');
-        		$periodo = $this->input->post('periodo');
-        		$totales = $this->input->get('tot');
+			    $data['result'] = $result;
 
-			$resultado=false;
-			switch ( $id_marca ) {
-				case 1:
-					$ok=$this->_genera_VISA($id_entidad,$id_marca, $periodo);
-					break;
-				case 2:
-                    			if ( $totales ) {
-					    $ok=$this->_genera_COOPEPLUS_TOTAL($id_entidad,$id_marca, $periodo);
-                    			} else {
-					    $ok=$this->_genera_COOPEPLUS($id_entidad,$id_marca, $periodo);
-                    			}
-					break;
-				case 3:
-                    			if ( $totales ) {
-					    $ok=$this->_genera_BBPS_TOTAL($id_entidad,$id_marca, $periodo);
-                    			} else {
-					    $ok=$this->_genera_BBPS($id_entidad,$id_marca, $periodo);
-                    			}
-					break;
-			}
-               		// Grabo log de cambios
-               		$id_entidad = $this->session->userdata('id_entidad');
-               		$login = $this->session->userdata('username');
-               		$nivel_acceso = $this->session->userdata('rango');
-               		$tabla = "debtarj";
-               		$operacion = 5;
-               		$llave = $id_marca;
-               		$observ = "Bajo archivo de $id_marca para el periodo $periodo ";
-               		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-			break;
-		case 'print':
-			break;
-	    case 'listdebitos':
-		$result=$this->arma_listdebitos();
-        	$datos = json_encode($result);
-        	echo $datos;
-		break;
+			    // Grabo log de cambios
+			    $login = $this->session->userdata('username');
+			    $nivel_acceso = $this->session->userdata('rango');
+			    $tabla = "debtarj";
+			    $operacion = 5;
+			    $llave = $id_marca;
+			    $observ = "Genero debitos de $id_marca para el periodo $periodo con fecha debito = $fecha_debito por un total de $total_gen para $asoc_gen socios";
+			    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
-            case 'gen-debtarj':
-                 $this->load->model('debtarj_model');
-                 $this->load->model('tarjeta_model');
-                 $id_entidad = $this->session->userdata('id_entidad');
-		 $data = $this->carga_data();
-               	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
-               	 $data['debitos_gen'] = $this->debtarj_model->get_debitos_gen($id_entidad);
-               	 $mes = date('m');
-               	 $anio = date('Y');
-		 $a1=$anio+1;
-		 $ultd = date('Ym') + 1;
-		 if ( $mes == 12 ) {
-               	 	$data['ult_debito'] = $a1.'01';
-		 } else {
-               	 	$data['ult_debito'] = $ultd;
-		 }
+			    $data['section'] = "gen-debtarj-result";
+			    $this->load->view('admin',$data);
+			    break;
 
-                 if ( $this->uri->segment(4) ) {
-			$data['flag'] = 1;
-			$data['ult_debito'] = $this->uri->segment(5);
-		 } else {
-			$data['flag'] = 0;
-		 }
-                 $data['section'] = "gen-debtarj";
-                 $this->load->view('admin',$data);
-                break;
-            case 'load-debtarj':
-                 $this->load->model('debtarj_model');
-                 $this->load->model('tarjeta_model');
-                 $id_entidad = $this->session->userdata('id_entidad');
-		 $data = $this->carga_data();
-               	 $data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
-                 $data['section'] = "load-debtarj";
-                 $this->load->view('admin',$data);
-                break;
-            case 'list-debtarj':
-                 $this->load->model('debtarj_model');
-		 $data = $this->carga_data();
-                 if ( $this->uri->segment(4) ) {
-                 	if ( $this->uri->segment(4) == "excel" ) {
-				$result = $this->arma_listdebitos();
-                                $archivo="Debitos_Tarjeta_".date('Ymd');
-                                $fila1=null;
-                                $titulo="DebitosTarj#".date('Ymd');
-                                $headers=array();
-                                $headers[]="id Debito";
-                                $headers[]="SID";
-                                $headers[]="DNI";
-                                $headers[]="Apellido Nombre";
-                                $headers[]="Ultimo Debito";
-                                $headers[]="Marca";
-                                $headers[]="Nro Tarjeta";
-                                $headers[]="Importe";
-                                $headers[]="Estado";
-                                $datos=$result;
-                                $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
-			}
-		 } else {
-                 	$data['section'] = "list-debtarj";
-                 	$this->load->view('admin',$data);
-		 }
-                break;
-		case 'imprimir':
-               		$this->load->model('socios_model');
-               		$this->load->model('debtarj_model');
-		 	$data = $this->carga_data();
-			$debtarj = $this->debtarj_model->get_debtarj($this->uri->segment(4));
-			$data['debtarj'] = $debtarj;
-               		$socio = $this->socios_model->get_socio($debtarj->sid);
-               		$data['socio'] = $socio;
-			$data['post'] = $this->input->post('id_marca');
-               		$data['section'] = 'debtarj-print';
-               		$this->load->view('admin',$data);
-			break;
-		case 'grabar':
-                	$datos['id'] = $this->input->post('id_debito');
-               		$datos['id_entidad'] = $this->session->userdata('id_entidad');
-                	$datos['sid'] = $this->input->post('sid');
-                	$datos['id_marca'] = $this->input->post('id_marca');
-                	$datos['nro_tarjeta'] = $this->input->post('nro_tarjeta');
-                	$fecha_view = $this->input->post('fecha_adhesion');
-                	$datos['fecha_adhesion'] = substr($fecha_view,6,4)."-".substr($fecha_view,3,2)."-".substr($fecha_view,0,2);
-                	$datos['estado'] = 1;
+		    case 'baja_arch':
+			    $data = $this->carga_data();
+			    $id_entidad = $data['id_entidad'];
+			    $id_marca = $this->input->post('id_marca');
+			    $periodo = $this->input->post('periodo');
+			    $totales = $this->input->get('tot');
 
-                	$this->load->model('debtarj_model');
-                	if($datos['sid']){
-                    		if ( $datos['id'] == 0 )  {
-                    			// Alta
-                            		$aid = $this->debtarj_model->grabar($datos);
-                			// Grabo log de cambios
-                			$id_entidad = $this->session->userdata('id_entidad');
-                			$login = $this->session->userdata('username');
-                			$nivel_acceso = $this->session->userdata('rango');
-                			$tabla = "debtarj";
-                			$operacion = 1;
-                			$llave = $aid;
-					$observ = substr(json_encode($datos), 0, 255);
-                			$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                    		} else {
-                    			// Modificacion
-                            		$id = $datos['id'];
-                            		$this->debtarj_model->actualizar($id, $datos);
-                			// Grabo log de cambios
-                			$id_entidad = $this->session->userdata('id_entidad');
-                			$login = $this->session->userdata('username');
-                			$nivel_acceso = $this->session->userdata('rango');
-                			$tabla = "debtarj";
-                			$operacion = 2;
-                			$llave = $id;
-					$observ = substr(json_encode($datos), 0, 255);
-                			$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                    		}
-			}
+			    $resultado=false;
+			    switch ( $id_marca ) {
+				    case 1:
+					    $ok=$this->_genera_VISA($id_entidad, $id_marca, $periodo);
+					    break;
+				    case 2:
+					    if ( $totales ) {
+						    $ok=$this->_genera_COOPEPLUS_TOTAL($id_entidad, $id_marca, $periodo);
+					    } else {
+						    $ok=$this->_genera_COOPEPLUS($id_entidad, $id_marca, $periodo);
+					    }
+					    break;
+				    case 3:
+					    if ( $totales ) {
+						    $ok=$this->_genera_BBPS_TOTAL($id_entidad, $id_marca, $periodo);
+					    } else {
+						    $ok=$this->_genera_BBPS($id_entidad, $id_marca, $periodo);
+					    }
+					    break;
+			    }
+			    // Grabo log de cambios
+			    $login = $this->session->userdata('username');
+			    $nivel_acceso = $this->session->userdata('rango');
+			    $tabla = "debtarj";
+			    $operacion = 5;
+			    $llave = $id_marca;
+			    $observ = "Bajo archivo de $id_marca para el periodo $periodo ";
+			    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+			    break;
+		    case 'print':
+			    break;
+		    case 'listdebitos':
+			    $result=$this->arma_listdebitos();
+			    $datos = json_encode($result);
+			    echo $datos;
+			    break;
+
+		    case 'gen-debtarj':
+			    $data = $this->carga_data();
+			    $id_entidad = $data['id_entidad'];
+			    $this->load->model('debtarj_model');
+			    $this->load->model('tarjeta_model');
+			    $data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
+			    $data['debitos_gen'] = $this->debtarj_model->get_debitos_gen($id_entidad);
+			    $mes = date('m');
+			    $anio = date('Y');
+			    $a1=$anio+1;
+			    $ultd = date('Ym') + 1;
+			    if ( $mes == 12 ) {
+				    $data['ult_debito'] = $a1.'01';
+			    } else {
+				    $data['ult_debito'] = $ultd;
+			    }
+
+			    $data['id_marca_sel'] = 0;
+			    if ( $this->uri->segment(4) ) {
+				    $data['flag'] = 1;
+				    $data['ult_debito'] = $this->uri->segment(5);
+				    if ( $this->uri->segment(6) ) {
+				    	$data['id_marca_sel'] = $this->uri->segment(6);
+				    } 
+			    } else {
+				    $data['flag'] = 0;
+			    }
+			    $data['section'] = "gen-debtarj";
+			    $this->load->view('admin',$data);
+			    break;
+		    case 'load-debtarj':
+			    $this->load->model('debtarj_model');
+			    $this->load->model('tarjeta_model');
+			    $data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
+			    $data['username'] = $this->session->userdata('username');
+			    $data['rango'] = $this->session->userdata('rango');
+			    $data['baseurl'] = base_url();
+			    $data['section'] = "load-debtarj";
+			    $this->load->view('admin',$data);
+			    break;
+		    case 'list-debtarj':
+			    $this->load->model('debtarj_model');
+			    $data['username'] = $this->session->userdata('username');
+			    $data['rango'] = $this->session->userdata('rango');
+			    $data['baseurl'] = base_url();
+			    if ( $this->uri->segment(4) ) {
+				    if ( $this->uri->segment(4) == "excel" ) {
+					    $result = $this->arma_listdebitos();
+					    $archivo="Debitos_Tarjeta_".date('Ymd');
+					    $fila1=null;
+					    $titulo="DebitosTarj#".date('Ymd');
+					    $headers=array();
+					    $headers[]="Id Debito";
+					    $headers[]="SID";
+					    $headers[]="DNI";
+					    $headers[]="Apellido Nombre";
+					    $headers[]="Ultimo Debito";
+					    $headers[]="Marca";
+					    $headers[]="Nro Tarjeta";
+					    $headers[]="Importe";
+					    $headers[]="Estado";
+					    $datos=$result;
+					    $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
+				    }
+			    } else {
+				    $data['section'] = "list-debtarj";
+				    $this->load->view('admin',$data);
+			    }
+			    break;
+		    case 'imprimir':
+			    $this->load->model('socios_model');
+			    $this->load->model('debtarj_model');
+			    $data['baseurl'] = base_url();
+			    $data['username'] = $this->session->userdata('username');
+			    $data['rango'] = $this->session->userdata('rango');
+			    $debtarj = $this->debtarj_model->get_debtarj($this->uri->segment(4));
+			    $data['debtarj'] = $debtarj;
+			    $socio = $this->socios_model->get_socio($debtarj->sid);
+			    $data['socio'] = $socio;
+			    $data['post'] = $this->input->post('id_marca');
+			    $data['section'] = 'debtarj-print';
+			    $this->load->view('admin',$data);
+			    break;
+		    case 'regrabar':
+			    $datos['id'] = $this->input->post('id_debito');
+			    $datos['sid'] = $this->input->post('sid');
+			    $datos['id_marca'] = $this->input->post('id_marca');
+			    $datos['nro_tarjeta'] = $this->input->post('nro_tarjeta');
+			    $fecha_view = $this->input->post('fecha_adhesion');
+			    $datos['fecha_adhesion'] = substr($fecha_view,6,4)."-".substr($fecha_view,3,2)."-".substr($fecha_view,0,2);
+			    $datos['estado'] = 1;
+
+			    $this->load->model('debtarj_model');
+			    // Modificacion
+			    $id = $datos['id'];
+			    $this->debtarj_model->actualizar($id, $datos);
+			    // Grabo log de cambios
+			    $login = $this->session->userdata('username');
+			    $nivel_acceso = $this->session->userdata('rango');
+			    $tabla = "debtarj";
+			    $operacion = 2;
+			    $llave = $id;
+			    $observ = substr(json_encode($datos), 0, 255);
+			    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+			    $data['baseurl'] = base_url();
+			    $data['mensaje1'] = "El debito se actualizo correctamente";
+			    $data['msj_boton'] = "Volver a debitos";
+			    $data['url_boton'] = base_url()."admin/debtarj/";
+			    $data['section'] = 'ppal-mensaje';
+			    $data['username'] = $this->session->userdata('username');
+			    $data['rango'] = $this->session->userdata('rango');
+			    $this->load->view("admin",$data);
+
+			    break;
+
+		    case 'grabar':
+			    $data = $this->carga_data();
+			    $datos['sid'] = $this->input->post('sid');
+			    $datos['id_marca'] = $this->input->post('id_marca');
+			    $datos['nro_tarjeta'] = $this->input->post('nro_tarjeta');
+			    $datos['id_entidad'] = $data['id_entidad'];
+			    $fecha_view = $this->input->post('fecha_adhesion');
+			    $datos['fecha_adhesion'] = substr($fecha_view,6,4)."-".substr($fecha_view,3,2)."-".substr($fecha_view,0,2);
+			    $datos['estado'] = 1;
+
+			    $this->load->model('debtarj_model');
+			    // Alta
+			    $aid = $this->debtarj_model->grabar($datos);
+
+			    // Grabo log de cambios
+			    $login = $this->session->userdata('username');
+			    $nivel_acceso = $this->session->userdata('rango');
+			    $tabla = "debtarj";
+			    $operacion = 1;
+			    $llave = $aid;
+			    $observ = substr(json_encode($datos), 0, 255);
+			    $this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+			    $data['mensaje1'] = "El debito se actualizo correctamente";
+			    $data['msj_boton'] = "Volver a debitos";
+			    $data['url_boton'] = base_url()."admin/debtarj/";
+			    $data['section'] = 'ppal-mensaje';
+			    $this->load->view("admin",$data);
+
 			break;
 
                 case 'contracargo':
-			$id_entidad = $this->session->userdata('id_entidad');
                         if ( !$this->uri->segment(4) ) {
 				$this->load->model('debtarj_model');
 				$this->load->model('tarjeta_model');
-				$data = $this->carga_data();
-				$data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
+				$data['tarjetas'] = $this->tarjeta_model->get_tarjetas();
+				$data['username'] = $this->session->userdata('username');
+                  		$data['rango'] = $this->session->userdata('rango');
+				$data['baseurl'] = base_url();
 				$data['section'] = "contracargos";
 				$this->load->view('admin',$data);
 			} else  {
 				$accion=$this->uri->segment(4);
                                 switch ( $accion ) {
                                         case 'getcab':
-                				$id_marca = $this->uri->segment(5);
-                				$periodo = $this->uri->segment(6);
+                				$id_marca = $this->input->post('marca');
+                				$periodo = $this->input->post('periodo');
 	                                        $this->load->model('debtarj_model');
-                                        	$gen = $this->debtarj_model->get_periodo_marca($id_entidad,$periodo, $id_marca);
+                                        	$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
 						if ($gen) { 
-							$salida=json_encode($gen); 
-						} else { 
-							$salida=null; 
+							if ( $gen->cant_acreditada > 0 ) {
+	                                                        $data['baseurl'] = base_url();
+                                                        	$data['mensaje1'] = "Ese periodo/tarjeta ya esta acreditado";
+                                                        	$data['msj_boton'] = "Volver a contracargo manual";
+                                                        	$data['url_boton'] = base_url()."admin/debtarj/contracargo";
+                                                        	$data['section'] = 'ppal-mensaje';
+                                                        	$data['username'] = $this->session->userdata('username');
+                                                        	$data['rango'] = $this->session->userdata('rango');
+                                                        	$this->load->view("admin",$data);
+ 							} else {
+                                                        	redirect(base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo);
+							}
+						} else {
+                                                                $data['baseurl'] = base_url();
+                                                                $data['mensaje1'] = "Ese periodo/tarjeta NO EXISTE";
+                                                                $data['msj_boton'] = "Volver a contracargo manual";
+                                                                $data['url_boton'] = base_url()."admin/debtarj/contracargo";
+                                                                $data['section'] = 'ppal-mensaje';
+                                                                $data['username'] = $this->session->userdata('username');
+                                                                $data['rango'] = $this->session->userdata('rango');
+                                                                $this->load->view("admin",$data);
 						}
-						echo $salida;
+						break;
+                                        case 'do-final':
+                                                $id_cabecera = $this->input->post('id_cabecera');
+                                                $this->load->model('debtarj_model');
+                                                $this->debtarj_model->cierre_contracargo($id_cabecera);
+
+                                                $data['baseurl'] = base_url();
+                                                $data['mensaje1'] = "Periodo cerrado de contracargos";
+                                                $data['msj_boton'] = "Volver a menu";
+                                                $data['url_boton'] = base_url()."admin/";
+                                                $data['section'] = 'ppal-mensaje';
+                                                $data['username'] = $this->session->userdata('username');
+                                                $data['rango'] = $this->session->userdata('rango');
+                                                $this->load->view("admin",$data);
+
 						break;
                                         case 'do':
-                				$id_marca = $this->uri->segment(5);
-                				$periodo = $this->uri->segment(6);
+                				$id_marca = $this->input->post('id_marca');
+                				$periodo = $this->input->post('periodo');
+                				$id_cabecera = $this->input->post('id_cabecera');
                                                 $fecha_debito = $this->input->post('fecha_debito');
                                                 $nrotarjeta = $this->input->post('nrotarjeta');
+                                                $nrorenglon = $this->input->post('nrorenglon');
                                                 $importe = $this->input->post('importe');
                                                 $this->load->model('debtarj_model');
-                                                $retact = $this->debtarj_model->mete_contracargo($id_entidad,$periodo, $id_marca, $nrotarjeta, $importe);
+
+                                                $retact = $this->debtarj_model->mete_contracargo($id_cabecera, $nrotarjeta, $nrorenglon, $importe);
 
 
                                                 if ( $retact ) {
                 					// Grabo log de cambios
-                					$id_entidad = $this->session->userdata('id_entidad');
                 					$login = $this->session->userdata('username');
                 					$nivel_acceso = $this->session->userdata('rango');
                 					$tabla = "debtarj";
@@ -2215,21 +2301,25 @@ class Admin extends CI_Controller {
                 					$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                                                         redirect(base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo);
                                                 } else {
-							$data = $this->carga_data();
+                                                        $data['baseurl'] = base_url();
                                                         $data['mensaje1'] = "No se encuentra esa tarjeta importe para hacer contracargo";
                                                         $data['msj_boton'] = "Volver a contracargo manual";
+                                                        $data['url_boton'] = base_url()."admin/debtarj/contracargo/view/".$id_marca."/".$periodo;
                                                         $data['section'] = 'ppal-mensaje';
+                					$data['username'] = $this->session->userdata('username');
+                					$data['rango'] = $this->session->userdata('rango');
                                                         $this->load->view("admin",$data);
                                                 }
                                                 break;
                                         case 'view':
-                				$id_entidad = $this->session->userdata('id_entidad');
+			    			$data = $this->carga_data();
+                				$id_entidad = $data['id_entidad'];
                 				$id_marca = $this->uri->segment(5);
                 				$periodo = $this->uri->segment(6);
 	                                        $this->load->model('debtarj_model');
                                         	$this->load->model('tarjeta_model');
                                         	$data['tarjeta'] = $this->tarjeta_model->get($id_marca);
-                                        	$gen = $this->debtarj_model->get_periodo_marca($id_entidad,$periodo, $id_marca);
+                                        	$gen = $this->debtarj_model->get_periodo_marca($periodo, $id_marca);
                                         	if ( $gen ) {
                                                 	// Si es la primera vez que entro actualizo masivamente socios_debitos y actualizo cabecera socios_debitos_gen
                                                 	if ( $gen->cant_acreditada == 0 ) {
@@ -2237,26 +2327,36 @@ class Admin extends CI_Controller {
                                                 	}
                                                 	// Si encuentro contracargos ya realizados los traigo sino arranco con un array vacio
                                                 	$contras = $this->debtarj_model->get_contracargos($id_entidad, $periodo, $id_marca);
+							$cant_rechazados = 0;
+							$impo_rechazados = 0;
                                                 	if ( $contras ) {
                                                         	$tabla=$contras;
+								foreach ( $contras as $rechazo ) {
+									$cant_rechazados++;
+									$impo_rechazados=$impo_rechazados+$rechazo->importe;
+								}
                                                 	} else {
                                                         	$tabla=array();
                                                 	}
-							$data = $this->carga_data();
                                                 	$data['id_marca'] = $id_marca;
                                                 	$data['periodo'] = $periodo;
                                                 	$data['fecha_debito'] = $gen->fecha_debito;
                                                 	$data['cant_generada'] = $gen->cant_generada;
                                                 	$data['total_generado'] = $gen->total_generado;
+                                                	$data['cant_rechazados'] = $cant_rechazados;
+                                                	$data['impo_rechazados'] = $impo_rechazados;
+                                                	$data['id_cabecera'] = $gen->id;
                                                 	$data['tabla'] = $tabla;
                                                 	$data['section'] = 'contracargos-get';
                                                 	$this->load->view('admin',$data);
 						} else {
-							$data = $this->carga_data();
+                                                        $data['baseurl'] = base_url();
                                                         $data['mensaje1'] = "No existe ese periodo para esa marca";
                                                         $data['msj_boton'] = "Volver a contracargo manual";
                                                         $data['url_boton'] = base_url()."admin/debtarj/contracargo/";
                                                         $data['section'] = 'ppal-mensaje';
+                					$data['username'] = $this->session->userdata('username');
+                					$data['rango'] = $this->session->userdata('rango');
                                                         $this->load->view("admin",$data);
 						}
 						break;
@@ -2265,28 +2365,32 @@ class Admin extends CI_Controller {
 			}
 			break;
                 case 'stopdebit':
+			$data = $this->carga_data();
+			$id_entidad = $data['id_entidad'];
                         $this->load->model('debtarj_model');
-                        $this->debtarj_model->stopdebit($this->uri->segment(4));
+                        $this->debtarj_model->stopdebit($this->uri->segment(4),true);
                         $debtarj=$this->debtarj_model->get_debtarj($this->uri->segment(4));
                         $id_socio=$debtarj->sid;
-                	// Grabo log de cambios
-                	$id_entidad = $this->session->userdata('id_entidad');
-                	$login = $this->session->userdata('username');
-                	$nivel_acceso = $this->session->userdata('rango');
-                	$tabla = "debtarj";
-                	$operacion = 2;
-                	$llave = $debtarj->id;
-			$observ = substr(json_encode($debtarj), 0, 255);
-                	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-			$data = $this->carga_data();
+                		// Grabo log de cambios
+                		$login = $this->session->userdata('username');
+                		$nivel_acceso = $this->session->userdata('rango');
+                		$tabla = "debtarj";
+                		$operacion = 2;
+                		$llave = $debtarj->id;
+				$observ = substr(json_encode($debtarj), 0, 255);
+                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         $data['id_socio'] = $id_socio;
                         $data['id_debito'] = $this->uri->segment(4);
-                        if ( $debtarj->estado == 0 ) {
-                                $data['mensaje'] = "El debito se actualizo correctamente...";
+                        if ( $debtarj->estado == 2 ) {
+                                $data['mensaje1'] = "El debito SE STOPEO...";
                         } else {
-                                $data['mensaje'] = "El debito no se modifico .... ERROR!!!";
+                        	if ( $debtarj->estado == 1 ) {
+	                                $data['mensaje1'] = "El debito se ACTIVO NUEVAMENTE ....";
+				}
                         }
-                        $data['section'] = 'debtarj-mensaje';
+                        $data['section'] = 'ppal-mensaje';
+                        $data['msj_boton'] = "Vuelve Listado Debitos";
+                        $data['url_boton'] = base_url()."admin/debtarj/list-debtarj";
                         $this->load->view('admin',$data);
                         break;
 
@@ -2297,7 +2401,6 @@ class Admin extends CI_Controller {
 			$debtarj=$this->debtarj_model->get_debtarj($this->uri->segment(4));
                     	$id_socio=$debtarj->sid;
                 	// Grabo log de cambios
-                	$id_entidad = $this->session->userdata('id_entidad');
                 	$login = $this->session->userdata('username');
                 	$nivel_acceso = $this->session->userdata('rango');
                 	$tabla = "debtarj";
@@ -2305,41 +2408,95 @@ class Admin extends CI_Controller {
                 	$llave = $debtarj->id;
 			$observ = substr(json_encode($debtarj), 0, 255);
                 	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-			$data = $this->carga_data();
                		$data['id_socio'] = $id_socio;
                		$data['id_debito'] = $this->uri->segment(4);
+               		$data['baseurl'] = base_url();
+                	$data['username'] = $this->session->userdata('username');
+                	$data['rango'] = $this->session->userdata('rango');
                     	if ( $debtarj->estado == 0 ) {
-                        	$data['mensaje'] = "El debito de dio de baja correctamente...";
+                        	$data['mensaje1'] = "El debito de dio de baja correctamente...";
                     	} else {
-                        	$data['mensaje'] = "El debito no se dio de baja.... ERROR!!!";
+                        	$data['mensaje1'] = "El debito no se dio de baja.... ERROR!!!";
                     	}
-               		$data['section'] = 'debtarj-mensaje';
+                        $data['msj_boton'] = "Vuelve Listado Debitos";
+                        $data['section'] = 'ppal-mensaje';
+                        $data['username'] = $this->session->userdata('username');
+                        $data['rango'] = $this->session->userdata('rango');
+                        $data['url_boton'] = base_url()."admin/debtarj/list-debtarj";
                		$this->load->view('admin',$data);
                 	break;
 
-		default:
-               		$this->load->model('socios_model');
-               		$this->load->model('debtarj_model');
-               		$this->load->model('tarjeta_model');
-			$fecha=date('d-m-Y');
+		case 'nuevo-get':
 			$data = $this->carga_data();
-               		$data['fecha'] = $fecha;
-               		$id_entidad = $this->session->userdata('id_entidad');
-               		$data['socio'] = $this->socios_model->get_socio($this->uri->segment(3));
-               		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas($id_entidad);
-			$debtarj = $this->debtarj_model->get_debtarj_by_sid($id_entidad, $this->uri->segment(3));
-			$data['debtarj'] = $debtarj;
-			if ($debtarj) {
-				$fdb=$debtarj->fecha_adhesion;
-				$fecha_db=substr($fdb,8,2)."-".substr($fdb,5,2)."-".substr($fdb,0,4);
-               			$data['fecha_db'] = $fecha_db;
+                        $this->load->model('socios_model');
+                    	if ( $this->uri->segment(4) > 0 ) {
+                        	$sid = $this->uri->segment(4);
 			} else {
-               			$data['fecha_db'] = "";
+                        	$sid = $this->input->post('sid');
 			}
-               		$data['section'] = 'debtarj-edit';
-               		$data['js'] = 'debtarj';
+                        $data['socio'] = $this->socios_model->get_socio($sid);
+			if ( $data['socio'] )  { 
+                        	$this->load->model('debtarj_model');
+                        	$debtarj = $this->debtarj_model->get_debtarj_by_sid($sid);
+				if ( $debtarj ) {
+                        		$data['mensaje'] = ' El Asociado ya tiene un debito activo !!! ';
+                        		$data['section'] = 'debtarj-nuevo-get';
+                        		$this->load->view('admin',$data);
+				} else {
+                        		$data['js'] = 'debtarj';
+                        		$fecha=date('d-m-Y');
+                        		$data['fecha'] = $fecha;
+                        		$data['section'] = 'debtarj-nuevo-datos';
+	                        	$this->load->model('tarjeta_model');
+                        		$fecha=date('d-m-Y');
+                        		$data['fecha'] = $fecha;
+                        		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
+                        		$this->load->view('admin',$data);
+				}
+			} else {
+                        	$data['mensaje'] = ' El Asociado ingresado no existe en el padron !!! ';
+                        	$data['section'] = 'debtarj-nuevo-get';
+                        	$this->load->view('admin',$data);
+			}
+                        break;
+		case 'nuevo':
+			$data = $this->carga_data();
+                        $data['mensaje'] = '';
+                        $data['section'] = 'debtarj-nuevo-get';
+                        $this->load->view('admin',$data);
+                        break;
+
+		case 'editar':
+			$data = $this->carga_data();
+                        $this->load->model('socios_model');
+                        $this->load->model('debtarj_model');
+                        $this->load->model('tarjeta_model');
+                        $fecha=date('d-m-Y');
+                        $data['fecha'] = $fecha;
+                        $data['socio'] = $this->socios_model->get_socio($this->uri->segment(4));
+                        $data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
+                        $debtarj = $this->debtarj_model->get_debtarj_by_sid($this->uri->segment(4));
+                        $data['debtarj'] = $debtarj;
+                        if ($debtarj) {
+                                $fdb=$debtarj->fecha_adhesion;
+                                $fecha_db=substr($fdb,8,2)."-".substr($fdb,5,2)."-".substr($fdb,0,4);
+                                $data['fecha_db'] = $fecha_db;
+                        } else {
+                                $data['fecha_db'] = "";
+                        }
+                        $data['section'] = 'debtarj-edit';
+                        $data['js'] = 'debtarj';
+                        $this->load->view('admin',$data);
+                        break;
+
+		default:
+                        $data['username'] = $this->session->userdata('username');
+                        $data['rango'] = $this->session->userdata('rango');
+                        $data['baseurl'] = base_url();
+                        $data['section'] = 'list-debtarj';
                		$this->load->view('admin',$data);
                		break;
+
 	}
     }
 
@@ -2353,7 +2510,7 @@ class Admin extends CI_Controller {
 		$hora=date('Hi');
 
         	$this->load->model("debtarj_model");
-        	$debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad,$id_marca, $periodo);
+        	$debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo);
         	if ( $debitos ) {
 		    header('Content-Type: application/text');
 		    header('Content-Disposition: attachment;filename="DEBLIQC.TXT"');
@@ -2362,7 +2519,7 @@ class Admin extends CI_Controller {
 		    $fila=1;
 		    $serial="";
 		    foreach ( $debitos as $debito ) {
-			    $nro_tarjeta=$debito['nro_tarjeta'];
+			    $nro_tarjeta=$debito->nro_tarjeta;
 			    if ( $fila < 10 ) {
 				    $serial="   0000000".$fila;
 			    } elseif ( $fila < 100 ) {
@@ -2371,7 +2528,7 @@ class Admin extends CI_Controller {
 				    $serial="   00000".$fila;
 			    }
 
-			    $importe=$debito['importe'];
+			    $importe=$debito->importe;
 // Si el debito se genero en 0 no grabamos en ASCII
                             if ( $importe > 0 ) {
 			         $total=$total+$importe;
@@ -2390,7 +2547,7 @@ class Admin extends CI_Controller {
 				      $impo="00".$importe;
 			         }
 
-			         $nro_soc=$debito['sid'];
+			         $nro_soc=$debito->sid;
 			         if ( $nro_soc < 10000 ) {
 				      $nro_socio="00000000000".$nro_soc;
 			         } elseif ( $nro_soc < 100000 ) {
@@ -2400,7 +2557,7 @@ class Admin extends CI_Controller {
 			         }
 
 			         echo "1".$nro_tarjeta.$serial.$fecha."000500000".$impo.$nro_socio."                             *\r\n";
-        			 $this->debtarj_model->upd_debito_rng($debito['id_debito'], $fila);
+        			 $this->debtarj_model->upd_debito_rng($debito->id_debito, $fila);
 			         $fila++;
 
                             }
@@ -2419,7 +2576,7 @@ class Admin extends CI_Controller {
 	return true;
     }
 
-    function _genera_COOPEPLUS($id_entidad,$id_marca, $periodo) {
+    function _genera_COOPEPLUS($id_entidad, $id_marca, $periodo) {
         $exitoso=FALSE;
         $this->config->load("nuevacard");
         $this->load->model('debtarj_model');
@@ -2450,10 +2607,10 @@ class Admin extends CI_Controller {
 	        $cont=0;
                 $serial="";
                 foreach ( $debitos as $debito ) {
-                      $nro_tarjeta=$debito['nro_tarjeta'];
+                      $nro_tarjeta=$debito->nro_tarjeta;
 
-                      $socio=$this->socios_model->get_socio($debito['sid']);
-                      $importe=$debito['importe'];
+                      $socio=$this->socios_model->get_socio($debito->sid);
+                      $importe=$debito->importe;
                       if ( $importe > 0 ) {
 
                            $linea=$nro_comercio.",".$nro_tarjeta.",".$socio->apellido." ".$socio->nombre.",0,".$fecha.",".$importe.",DAU\r\n";
@@ -2489,7 +2646,7 @@ class Admin extends CI_Controller {
         }
 
         $this->load->model("debtarj_model");
-        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_entidad, $id_marca, $periodo);
+        $debitos = $this->debtarj_model->get_debitos_by_marca_periodo($id_marca, $periodo);
 
         if ( $debitos ) {
                 // Armo archivo de detalles
@@ -2499,10 +2656,10 @@ class Admin extends CI_Controller {
                 $cont=0;
                 $serial="";
                 foreach ( $debitos as $debito ) {
-                        $nro_tarjeta=$debito['nro_tarjeta'];
+                        $nro_tarjeta=$debito->nro_tarjeta;
 
-                        $socio=$this->socios_model->get_socio($debito['sid']);
-                        $importe=$debito['importe'];
+                        $socio=$this->socios_model->get_socio($debito->sid);
+                        $importe=$debito->importe;
 
                         if ( $importe > 0 ) {
                              $linea=$nro_comercio.",".$nro_tarjeta.",".$socio->apellido." ".$socio->nombre.",0,".$fecha.",".$importe.",DAU\r\n";
@@ -2547,10 +2704,10 @@ class Admin extends CI_Controller {
 	        $cont=0;
             $serial="";
             foreach ( $debitos as $debito ) {
-                $nro_tarjeta=$debito['nro_tarjeta'];
+                $nro_tarjeta=$debito->nro_tarjeta;
 
-                $socio=$this->socios_model->get_socio($debito['sid']);
-                $importe=$debito['importe'];
+                $socio=$this->socios_model->get_socio($debito->sid);
+                $importe=$debito->importe;
 
                 $total=$total+$importe;
 		        $cont++;
@@ -2596,10 +2753,10 @@ class Admin extends CI_Controller {
                 $cont=0;
             $serial="";
             foreach ( $debitos as $debito ) {
-                $nro_tarjeta=$debito['nro_tarjeta'];
+                $nro_tarjeta=$debito->nro_tarjeta;
 
-                $socio=$this->socios_model->get_socio($debito['sid']);
-                $importe=$debito['importe'];
+                $socio=$this->socios_model->get_socio($debito->sid);
+                $importe=$debito->importe;
 
                 $total=$total+$importe;
                         $cont++;

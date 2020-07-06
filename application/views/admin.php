@@ -1503,6 +1503,66 @@ $("#carga_debtarj_form").submit(function(){
         return false;
 })
 
+$("#edit_debtarj_form").submit(function(){
+
+        var url = "admin/debtarj/regrabar/";
+        var msg = "Seguro que desea modificar este debito?";
+
+        var agree = confirm(msg);
+        if(!agree){return false;}
+        $("#reg-cargando").removeClass('hidden');
+
+        var id_debito = $("#id_debito").val();
+        var id_marca = $("#id_marca").val();
+        var nro_tarjeta = $("#nro_tarjeta").val();
+        var largo = nro_tarjeta.length;
+        var fecha_adhesion = $("#fecha_adhesion").val();
+        var sid = $("#sid").val();
+
+        if ( largo < 16 ) {
+                var sigue = confirm("Seguro que el numero es tan corto?");
+                if (!sigue){return false;}
+        }
+
+        $.post("<?=$baseurl?>"+url,{id_debito: id_debito, sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
+        .done(function(data){
+                alert("Debito correctamente actualizado");
+                $("#reg-cargando").addClass('hidden');
+        })
+
+        return false;
+})
+
+$("#nvo_debtarj_form").submit(function(){
+
+        var url = "admin/debtarj/grabar/";
+        var msg = "Seguro que desea agregar este nuevo debito?";
+
+        var agree = confirm(msg);
+        if(!agree){return false;};
+        $("#reg-cargando").removeClass('hidden');
+
+        var id_marca = $("#id_marca").val();
+        var nro_tarjeta = $("#nro_tarjeta").val();
+        var largo = nro_tarjeta.length;
+        var fecha_adhesion = $("#fecha_adhesion").val();
+        var sid = $("#sid").val();
+
+        if ( largo < 16 ) {
+                var sigue = confirm("Seguro que el numero es tan corto?");
+                if (!sigue){return false;};
+        }
+
+        $.post("<?=$baseurl?>"+url,{sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
+        .done(function(data){
+                alert("Debito correctamente guardado");
+                $("#reg-cargando").addClass('hidden');
+        })
+
+        return false;
+})
+
+
 $("#gen_debtarj_form select").on("change", function(){
     var id_marca = $(this).val();
     if ( id_marca > 1 ) {
@@ -1518,14 +1578,19 @@ $("#gen_debtarj_form button").on("click", function(){
 	var id_marca = $("#id_marca").val();
 	var periodo = $("#periodo").val();
 	var flag = $("#flag").val();
+	var text = $(this).data("text");
 
         var agree = confirm("Seguro que desea "+boton+" el archivo ?");
         if(!agree){return false;}
 
-	if ( flag == 1 ) {
-        	var url = $(this).data("action") + "/" + id_marca + "/" + periodo + "/1";
+	if ( text == "generar" ) {
+		if ( flag == 1 ) {
+        		var url = $(this).data("action") + "/" + id_marca + "/" + periodo + "/1";
+		} else {
+        		var url = $(this).data("action") + "/" + id_marca + "/" + periodo;
+		}
 	} else {
-        	var url = $(this).data("action") + "/" + id_marca + "/" + periodo;
+        		var url = $(this).data("action") ;
 	}
         $("#gen_debtarj_form").attr("action",url);
 

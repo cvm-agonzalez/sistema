@@ -23,7 +23,8 @@
                        <span class=" ui-select">
                        <select name="id_marca" id="id_marca" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
 		       <? foreach ( $tarjetas as $tarjeta ) { ?>
-             		  <option value="<?=$tarjeta->id?>" data-marca="<?=$tarjeta->descripcion?>" ><?=$tarjeta->descripcion?></option>
+              <option value="<?=$tarjeta->id?>" data-marca="<?=$tarjeta->descripcion?>" <? if($id_marca_sel == $tarjeta->id){echo 'selected';} ?> ><?=$tarjeta->descripcion?></option>
+
 			<?}?>
                        </select>
                        </span>
