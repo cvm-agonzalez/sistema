@@ -28,19 +28,20 @@ class Comisiones_model extends CI_Model {
         return $comision;
     }
 
+
     public function resumen($id_entidad, $comision, $periodo, $anio_corte,$suspendido) {
 	/*	Funcion que arma el total de socios y su situacion con la actividad */
         $this->load->model('pagos_model');
 
-	/* Total de socios a revisar porque tienen o tuvieron actividad relacionada de la comision */
-	$qry = "DROP TEMPORARY TABLE IF EXISTS tmp_socios ; ";
+        /* Total de socios a revisar porque tienen o tuvieron actividad relacionada de la comision */
+        $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_socios ; ";
         $this->db->query($qry);
-	$qry = "CREATE TEMPORARY TABLE tmp_socios ( INDEX (sid) )
-		SELECT DISTINCT aa.sid, s.dni, s.apellido, s.nombre, s.suspendido
-		FROM actividades_asociadas aa 
-			JOIN actividades a ON ( a.id_entidad = $id_entidad AND a.comision = $comision AND a.id = aa.aid )
-			JOIN socios s ON ( s.id_entidad = $id_entidad AND aa.sid = s.id AND s.suspendido = $suspendido )
-		WHERE aa.id_entidad = $id_entidad; ";
+        $qry = "CREATE TEMPORARY TABLE tmp_socios ( INDEX (sid) )
+                SELECT DISTINCT aa.sid, s.dni, s.apellido, s.nombre, s.suspendido
+                FROM actividades_asociadas aa 
+                        JOIN actividades a ON ( a.id_entidad = $id_entidad AND a.comision = $comision AND a.id = aa.aid )
+                        JOIN socios s ON ( s.id_entidad = $id_entidad AND aa.sid = s.id AND s.suspendido = $suspendido )
+                WHERE aa.id_entidad = $id_entidad; ";
         $this->db->query($qry);
 
 	/* Saldo de cuotas sociales */
@@ -140,7 +141,7 @@ class Comisiones_model extends CI_Model {
         $this->db->query($qry);
 
 	/* Armo RESUMEN final */
-	$qry = "SELECT a.id, a.nombre descr_activ,
+	$qry = "SELECT a.id, a.aid, a.nombre descr_activ,
 
 			COUNT(DISTINCT(IF(tsa.saldo is NOT NULL ,s.id,NULL))) socios_rel, 
 			COUNT(DISTINCT(IF(tsa.saldo is NOT NULL AND aa.descuento > 0,s.id,NULL))) socios_becados, 
@@ -173,8 +174,8 @@ class Comisiones_model extends CI_Model {
 			JOIN actividades_asociadas aa ON ( a.id = aa.aid )
 			JOIN socios s ON ( aa.sid = s.id )
         		LEFT JOIN tmp_saldos_cuotasoc tsc USING ( sid )
-        		LEFT JOIN tmp_saldos_activ tsa USING ( sid, aid )
-        		LEFT JOIN tmp_saldos_activ_desrel tsad USING ( sid, aid )
+        		LEFT JOIN tmp_saldos_activ tsa ON aa.sid = tsa.sid AND aa.aid = tsa.aid
+				LEFT JOIN tmp_saldos_activ_desrel tsad ON aa.sid = tsad.sid AND aa.aid = tsad.aid
 		WHERE a.id_entidad = $id_entidad AND a.comision = $comision
 		GROUP BY a.id ;";
 
@@ -182,5 +183,6 @@ class Comisiones_model extends CI_Model {
 
         return $resultado;
     }
+
 }  
 ?>

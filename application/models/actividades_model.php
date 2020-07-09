@@ -65,6 +65,12 @@ class Actividades_model extends CI_Model {
         $this->db->update('actividades', $datos);
         return true;   
     }    
+    public function get_actividades_list($id_entidad){
+        $this->db->where("id_entidad",$id_entidad);
+        $this->db->order_by("nombre", "asc");
+        $query = $this->db->get("actividades");
+        return $query->result();
+    }
     public function get_actividades($id_entidad){
         $this->db->order_by("nombre", "asc"); 
         $this->db->where("id_entidad",$id_entidad);
@@ -278,7 +284,7 @@ class Actividades_model extends CI_Model {
 			        JOIN socios s ON aa.sid = s.id 
 			        JOIN actividades a ON aa.aid = a.id ";
         if ( $id_comision > 0 ) {
-                $qry .= "       JOIN tmp_actividades USING ( aid ) ";
+                $qry .= "       JOIN tmp_actividades t ON aa.aid = t.aid ";
         }
         $qry .= "WHERE aa.id_entidad = $id_entidad AND aa.estado = 1 ";
         if ( $id_actividad >= 0 && $id_comision == 0 ) {

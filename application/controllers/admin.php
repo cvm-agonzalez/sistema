@@ -432,6 +432,40 @@ class Admin extends CI_Controller {
     }
 
 
+    public function listado_act(){
+        $id_entidad = $this->session->userdata('id_entidad');
+        $this->load->model("actividades_model");
+        $data['actividades'] = $this->actividades_model->get_actividades_list($id_entidad);
+        foreach ($data['actividades'] as $actividad){
+            switch ( $actividad->estado ) {
+                case 0: $estado="BAJA"; break;
+                case 1: $estado="ACTIVA"; break;
+                case 2: $estado="SUSPENDIDA"; break;
+                default: $estado="XYZ"; break;
+            }
+            switch ( $actividad->solo_socios ) {
+                case 0: $solo_socio="NO"; break;
+                case 1: $solo_socio="SI"; break;
+                default: $solo_socio="XYZ"; break;
+            }
+        $comision = $this->actividades_model->get_comision($actividad->comision)->descripcion;
+
+            $datos[] = array (
+            'id' => $actividad->id,
+            'aid' => $actividad->aid,
+            'name' => $actividad->nombre,
+            'price' => $actividad->precio,
+            'cta_inic' => $actividad->cuota_inicial,
+            'comision' => $comision,
+            'seguro' => $actividad->seguro,
+            'estado' => $estado,
+            'solo_socios' => $solo_socio
+            );
+        }
+        $datos = json_encode($datos);
+        echo $datos;
+    }
+
     public function listado(){
 	$id_entidad = $this->session->userdata('id_entidad');
         $this->load->model("socios_model");
@@ -457,38 +491,6 @@ class Admin extends CI_Controller {
             );
         }
 
-        $datos = json_encode($datos);
-        echo $datos;
-    }
-
-    public function listado_act(){
-	$id_entidad = $this->session->userdata('id_entidad');
-        $this->load->model("actividades_model");
-        $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
-        foreach ($data['actividades'] as $actividad){
-            switch ( $actividad->estado ) {
-                case 0: $estado="BAJA"; break;
-                case 1: $estado="ACTIVA"; break;
-                case 2: $estado="SUSPENDIDA"; break;
-                default: $estado="XYZ"; break;
-            }
-            switch ( $actividad->solo_socios ) {
-                case 0: $solo_socio="NO"; break;
-                case 1: $solo_socio="SI"; break;
-                default: $solo_socio="XYZ"; break;
-            }
-
-            $datos[] = array (
-            'aid' => $actividad->aid,
-            'id' => $actividad->id,
-            'name' => $actividad->nombre,
-            'price' => $actividad->precio,
-            'cta_inic' => $actividad->cuota_inicial,
-            'seguro' => $actividad->seguro,
-            'estado' => $estado,
-            'solo_socios' => $solo_socio
-            );
-        }
         $datos = json_encode($datos);
         echo $datos;
     }

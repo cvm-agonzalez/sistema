@@ -80,6 +80,15 @@
                               data-ng-class="{active: row == '-solo_socios'}"></span>
                     </div></th>
                     <th><div class="th">
+                        Comision
+                        <span class="glyphicon glyphicon-chevron-up"
+                              data-ng-click=" order('comision') "
+                              data-ng-class="{active: row == 'comision'}"></span>
+                        <span class="glyphicon glyphicon-chevron-down"
+                              data-ng-click=" order('-comision') "
+                              data-ng-class="{active: row == '-comision'}"></span>
+                    </div></th>
+                    <th><div class="th">
                         Estado
                         <span class="glyphicon glyphicon-chevron-up"
                               data-ng-click=" order('estado') "
@@ -101,6 +110,7 @@
                     <td align="right">{{store.cta_inic}}</td>
                     <td align="right">{{store.seguro}}</td>
                     <td>{{store.solo_socios}}</td>
+                    <td>{{store.comision}}</td>
                     <td>{{store.estado}}</td>
                     <td>
                         <a href="#" id="imprimir_listado_actividades" data-act="{{store.id}}">Imprimir Listado</a>  

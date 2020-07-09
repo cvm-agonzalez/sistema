@@ -5,6 +5,11 @@
                     <form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/actividades/guardar/<?=$actividad->id?>" method="post">
 
                 <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="hidden" class="form-control" name="aid" id="aid" value="<?=$actividad->aid?>">
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="" class="col-sm-2">Nombre</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control" name="nombre" value="<?=$actividad->nombre?>">

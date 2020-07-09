@@ -19,6 +19,7 @@ class Comisiones extends CI_Controller {
 	public function index()
 	{
 		$id_entidad = $this->session->userdata('id_entidad');
+                $id_comision = $this->session->userdata('id_comision');
 		$actividades = $this->general_model->get_actividades_comision($id_entidad);
 		if($actividades){
 			$data['actividades'] = $actividades;
@@ -30,7 +31,7 @@ class Comisiones extends CI_Controller {
 
 		$this->load->model('comisiones_model');
 
-		$comision = $this->comisiones_model->get_comision();
+		$comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
 		$data['nombre_comision'] = $comision->descripcion;
                 $dia=date('d');
                 if ( $dia < 20 ) {
@@ -45,9 +46,8 @@ class Comisiones extends CI_Controller {
                 }
                 $anio_corte=2017;
 
-                $comision = $this->comisiones_model->get_comision();
-                $data['nombre_comision'] = $comision->descripcion;
-                $data['resumen'] = $this->comisiones_model->resumen($id_entidad, $comision->id, $periodo, $anio_corte);
+                $data['resumen1'] = $this->comisiones_model->resumen($id_entidad, $comision->id, $periodo, $anio_corte, 0);
+                $data['resumen2'] = $this->comisiones_model->resumen($id_entidad, $comision->id, $periodo, $anio_corte, 1);
 
 
 		$this->load->view('comisiones/index', $data, FALSE);
@@ -64,8 +64,8 @@ class Comisiones extends CI_Controller {
 		$this->load->model('actividades_model');
                 $data['baseurl'] = base_url();
                 $data['username'] = $this->session->userdata('username');
-                $comision = $this->comisiones_model->get_comision();
-                $id_comision = $comision->id;
+                $id_comision = $this->session->userdata('id_comision');
+                $comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
                 $data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
                 if ( $id_actividad == 0 ) {
                         $data['id_actividad'] = 0;
@@ -128,8 +128,9 @@ class Comisiones extends CI_Controller {
 		$this->load->model('actividades_model');
                 $data['baseurl'] = base_url();
                 $data['username'] = $this->session->userdata('username');
-                $comision = $this->comisiones_model->get_comision();
-                $id_comision = $comision->id;
+                $id_comision = $this->session->userdata('id_comision');
+                $comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
+
                 $data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
                 if ( $id_actividad == 0 ) {
                         $data['id_actividad'] = 0;
@@ -193,7 +194,8 @@ class Comisiones extends CI_Controller {
 		$this->load->model('actividades_model');
 	        $data['baseurl'] = base_url();
 		$data['username'] = $this->session->userdata('username');
-		$comision = $this->comisiones_model->get_comision();
+                $id_comision = $this->session->userdata('id_comision');
+                $comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
 		$id_comision = $comision->id;
 		$data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
         	if ( $id_actividad == 0 ) {
@@ -299,7 +301,8 @@ class Comisiones extends CI_Controller {
 	        $data['baseurl'] = base_url();
 		$data['id_entidad'] = $id_entidad;
 		$data['section'] = 'liquidacion_mes';
-		$comision = $this->comisiones_model->get_comision();
+                $id_comision = $this->session->userdata('id_comision');
+                $comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
 		$data['nombre_comision'] = $comision->descripcion;
 		$this->load->view('comisiones/index', $data, FALSE);
 	}
@@ -311,7 +314,8 @@ class Comisiones extends CI_Controller {
 	        $data['baseurl'] = base_url();
 		$data['id_entidad'] = $id_entidad;
 		$data['section'] = 'liquidaciones_ant';
-		$comision = $this->comisiones_model->get_comision();
+                $id_comision = $this->session->userdata('id_comision');
+                $comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
 		$data['nombre_comision'] = $comision->descripcion;
 		$this->load->view('comisiones/index', $data, FALSE);
 	}
@@ -476,12 +480,22 @@ class Comisiones extends CI_Controller {
 
 	public function login($error=false)
 	{
+		if ( $this->session->userdata('id_entidad') ) {
+			$data['id_entidad'] = $this->session->userdata('id_entidad');
+			$data['ent_nombre'] = $this->session->userdata('ent_nombre');
+		}
 		$data['error'] = $error;
 		$this->load->view('comisiones/login',$data);
 	}
 
 	public function log($action='')
 	{
+		if ( !$this->session->userdata('id_entidad') ) {
+			$id_entidad = $this->input->post('entidad');
+		} else {
+			$id_entidad = $this->session->userdata('id_entidad');
+		}
+
 		$this->load->model('login_model');
 		$this->load->library('form_validation');
 		$this->form_validation->set_rules('email', 'E-Mail', 'required|valid_email');
@@ -497,14 +511,19 @@ class Comisiones extends CI_Controller {
 
 	public function username_check($pass,$email)
 	{		
-		$id_entidad = $this->session->userdata('id_entidad');
+		if ( !$this->session->userdata('id_entidad') ) {
+			$id_entidad = $this->input->post('entidad');
+		} else {
+			$id_entidad = $this->session->userdata('id_entidad');
+		}
 		if( !$user = $this->login_model->log_comision($id_entidad,$email,$pass) ){
 			$this->form_validation->set_message('username_check', 'El E-Mail y/o Contraseña ingresados son incorrectos');
 			return false;
 		}else{
 			$array = array(
 				'id' => $user->id,
-				'id_entidad' => $id_entidad,
+				'id_entidad' => $user->id_entidad,
+				'id_comision' => $user->comision,
 				'email' => $user->email,
 				'nombre'=>	$user->nombre,				
 				'apellido'=>	$user->apellido,				
