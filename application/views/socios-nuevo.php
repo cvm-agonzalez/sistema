@@ -128,6 +128,7 @@
                     <div class="col-sm-9">
                         <span class=" ui-select">
                             <select id="s_cate" name="categoria" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
+                                <option value="0" data-tipo="0" data-precio="0" selected >Seleccione Categoria</option>
                                 <?
                                 foreach ($categorias as $cat) {                                                           
                                 ?>
@@ -208,7 +209,7 @@
                     </div>
                 </div>  
                 <div class="clearfix"></div>
-                <button type="button" id="save_btn" class="btn btn-success">Guardar</button>
+                <button type="button" id="save_btn" data-accion="alta_socio" class="btn btn-success">Guardar</button>
 
 		</div>
             </form>

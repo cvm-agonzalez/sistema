@@ -1418,7 +1418,11 @@ class Admin extends CI_Controller {
                 $data['section'] = 'socios-nuevo';
                 $data['socio'] = '';
                 $this->load->model("general_model");
-                $data['categorias'] = $this->general_model->get_cats($id_entidad);
+                if ( !$data['categorias'] = $this->general_model->get_cats($id_entidad) ) {
+			$data['mensaje1'] = "No existen categorias para esta entidad....";
+                    	$data['section'] = 'ppal-mensaje';
+                    	$this->load->view('admin',$data);
+		};
 
                 $this->load->model("socios_model");
                 //$data['socios'] = $this->socios_model->get_socios($id_entidad);
@@ -1499,8 +1503,8 @@ class Admin extends CI_Controller {
                     }
 
                     if(date('d') < $this->date_facturacion){ //si la fecha es anterior a la definida
+                        $this->load->model('pagos_model');
                         if($datos['tutor'] == 0){ // y no es un integrante de grupo familiar
-                            $this->load->model('pagos_model');
                             $cuota = $this->pagos_model->get_monto_socio($uid);
 
                             $descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
@@ -1516,15 +1520,39 @@ class Admin extends CI_Controller {
                                 $descripcion .= "$ ".$cuota['cuota_neta']." &nbsp;<label class='label label-info'>".$cuota['descuento']."% BECADO</label>";
                             }
                             $descripcion .= '$ '.$cuota['cuota'].'<br>';
+			    $id_socio = $uid;
+			    $id_tutor = $uid;
+			    $cuota_valor = $cuota['cuota_neta'];
+			    $total = -$cuota_valor;
+			} else {
+			    // si tiene tutor solo pongo cuota de la categoria propia
+                            $this->pagos_model->registrar_pago($id_entidad, 'debe',$uid,0.00,'La facturacion se imputa al tutor: '.$datos['tutor']);
+
+                            $this->load->model('general_model');
+			    $categ = $this->general_model->get_cat($datos['categoria']);
+                            $descripcion = '<strong>Categoría:</strong> '.$categ->nombre;
+                            $descripcion .= 'Cuota Mensual '.$categ->precio.' -';
+                            if($datos['descuento'] > 0.00){
+				$cuota_neta = $categ->precio - ( $categ->precio * $datos['descuento'] / 100 );
+                                $descripcion .= "$ ".$cuota_neta." &nbsp;<label class='label label-info'>".$datos['descuento']."% BECADO</label>";
+                            } else {
+				$cuota_neta = $categ->precio;
+			    }
+			    $id_socio = $uid;
+			    $id_tutor = $datos['tutor'];
+			    $cuota_valor = $cuota_neta;
+			    $saldo = $this->pagos_model->get_saldo($id_tutor);
+			    $total = - ( $saldo + $cuota_valor );
+			}
 
                             $pago = array(
-                                'sid' => $uid,
+                                'sid' => $id_socio,
                                 'id_entidad' => $id_entidad,
-                                'tutor_id' => $uid,
+                                'tutor_id' => $id_tutor,
                                 'aid' => 0,
                                 'generadoel' => date('Y-m-d'),
                                 'descripcion' => $descripcion,
-                                'monto' => $cuota['cuota'],
+                                'monto' => $cuota_valor,
                                 'tipo' => 1,
                                 );
 
@@ -1541,16 +1569,21 @@ class Admin extends CI_Controller {
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "pagos";
                 		$operacion = 1;
-                		$llave = $uid;
+                		$llave = $id_socio;
                 		$observ = substr(json_encode($pago),0,255);
+				if ( $id_socio != $id_tutor ) {
+					$sid = $id_tutor;
+				} else {
+					$sid = $id_socio;
+				}
 
                             	$facturacion = array(
-                                	'sid' => $uid,
+                                	'sid' => $sid,
                                 	'id_entidad' => $id_entidad,
                                 	'descripcion'=>$descripcion,
-                                	'debe' => $cuota['cuota'],
+                                	'debe' => $cuota_valor,
                                 	'haber' => 0,
-                                	'total' => $cuota['cuota']*-1
+                                	'total' => $total
                                 	);
                             	$this->pagos_model->insert_facturacion($facturacion);
 
@@ -1560,12 +1593,10 @@ class Admin extends CI_Controller {
                 		$nivel_acceso = $this->session->userdata('rango');
                 		$tabla = "facturacion";
                 		$operacion = 1;
-                		$llave = $uid;
+                		$llave = $sid;
                 		$observ = substr(json_encode($facturacion),0,255);
                 		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
                         }
-                    }
-
 
                     redirect(base_url()."admin/socios/registrado/".$uid);
 
@@ -1688,8 +1719,11 @@ class Admin extends CI_Controller {
 		unset($datos['sid']);
 		unset($datos['files']);
 		unset($datos['tutor_dni']);
+		unset($datos['mail_orig']);
 		$tutor = $datos['tutor_sid'];
+		$tutor_orig = $datos['tutor_orig'];
 		unset($datos['tutor_sid']);
+		unset($datos['tutor_orig']);
 		$datos['tutor']=$tutor;
 		if ( $datos['tutor'] == '' ) { $datos['tutor'] = 0; }
 
@@ -1704,6 +1738,21 @@ class Admin extends CI_Controller {
 		$llave = $id;
 		$observ = substr(json_encode($datos),0,255);
 		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
+
+		// Verifico cambio de estado de tutor
+		if ( $tutor != $tutor_orig ) {
+                	$this->load->model("pagos_model");
+			// tenia tutor y se lo saco
+			if ( $tutor == 0 ) {
+		        $soc_tutor = $this->socios_model->get_socio($tutor_orig);
+            
+				$this->pagos_model->registrar_pago($id_entidad, 'debe',$id,0.00,'Dejo de estar tutoreado por : '.$tutor_orig."-".$soc_tutor->apellido.", ".$soc_tutor->nombre);
+
+			} else {
+			// no tenia tutor y ahora si
+				$this->pagos_model->pasa_fact_tutor($id_entidad, $id, $tutor);
+			}
+		}
 		
 		if(!isset($error)){
 			$error = '';
@@ -2174,6 +2223,7 @@ class Admin extends CI_Controller {
 			    // Grabo log de cambios
 			    $login = $this->session->userdata('username');
 			    $nivel_acceso = $this->session->userdata('rango');
+			    $id_entidad = $this->session->userdata('id_entidad');
 			    $tabla = "debtarj";
 			    $operacion = 2;
 			    $llave = $id;
@@ -2206,6 +2256,7 @@ class Admin extends CI_Controller {
 			    $aid = $this->debtarj_model->grabar($datos);
 
 			    // Grabo log de cambios
+			    $id_entidad = $this->session->userdata('id_entidad');
 			    $login = $this->session->userdata('username');
 			    $nivel_acceso = $this->session->userdata('rango');
 			    $tabla = "debtarj";
@@ -3125,8 +3176,11 @@ class Admin extends CI_Controller {
 		$data = $this->carga_data();
                 $data['section'] = 'actividades-agregar';
                 $this->load->model("actividades_model");
-                $data['profesores'] = $this->actividades_model->get_profesores($id_entidad);
-                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
+                if ( !$data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad) ) {
+			$data['mensaje1'] = "Esta entidad no tiene comisiones cargadas!!!";
+			$data['section'] = 'ppal-mensaje';
+			$this->load->view('admin',$data);
+		}
                 $this->load->view('admin',$data);
                 break;
 
@@ -3160,7 +3214,11 @@ class Admin extends CI_Controller {
                 $this->load->model('actividades_model');
                 $data['actividad'] = $this->actividades_model->get_actividad($this->uri->segment(4));
                 $data['profesores'] = $this->actividades_model->get_profesores($id_entidad);
-                $data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad);
+                if ( !$data['comisiones'] = $this->actividades_model->get_comisiones($id_entidad) ) {
+			$data['mensaje1'] = "Esta entidad no tiene comisiones cargadas!!!";
+			$data['section'] = 'ppal-mensaje';
+			$this->load->view('admin',$data);
+		}
                 $data['section'] = 'actividades-editar';
                 $this->load->view('admin',$data);
                 break;

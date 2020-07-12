@@ -416,11 +416,12 @@ class Actividades_model extends CI_Model {
 
     public function get_comisiones($id_entidad)
     {
-	if ( $id_entidad > 0 ) {
+        if ( $id_entidad > 0 ) {
     		$this->db->where("id_entidad", $id_entidad); 
-	}
+        }
         $this->db->where('estado','1');
         $query = $this->db->get('comisiones');
+        if ( $query->num_rows() == 0) { return false; }
         return $query->result();
     }
 /* Fin funciones para trabajar con la tabla comisiones */

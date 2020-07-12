@@ -17,9 +17,9 @@
             }else{
             ?>
 		<? if ( $rango < 2 ) { ?>
-            		<form class="form-horizontal ng-pristine ng-valid" action="<?=$baseurl?>admin/socios/guardar/<?=$socio->id?>" method="post">
+            		<form class="form-horizontal ng-pristine ng-valid" id="edit_socio" action="<?=$baseurl?>admin/socios/guardar/<?=$socio->id?>" method="post">
 		<? } else { ?>
-            		<form class="form-horizontal ng-pristine ng-valid" >
+            		<form class="form-horizontal ng-pristine ng-valid" id="edit_socio">
 		<? } ?>
 
                 <div class="form-group col-lg-6">
@@ -114,6 +114,7 @@
                             <div class="col-sm-5">
                                 <input type="number" name="tutor_dni" id="tutor_dni" value='0' class="form-control">
                                 <input type="hidden" name="tutor_sid" id="tutor_sid" value='0' class="form-control">
+                                <input type="hidden" name="tutor_orig" id="tutor_orig" value='<?=$tutor->id?>' class="form-control">
                             </div>
                             <div class="col-sm-4">
                                 <a href="#" id="r-buscar" data-id="tutor_dni" class="btn btn-primary">Buscar</a> <i id="tutor_dni-loading" class="fa fa-spinner fa-spin hidden"></i>
@@ -129,6 +130,7 @@
                     <div class="col-sm-9">
                         <span class=" ui-select">
                             <select name="categoria" id="s_cate" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
+                                <option value="0" data-precio="0" data-tipo="0"  >Seleccione Categoria</option>
                                 <?
                                 foreach ($categorias as $cat) {                                                           
                                 ?>
@@ -216,7 +218,7 @@
                 </div>  
                 <div class="clearfix"></div>
                 <? if ( $rango < 2 ) { ?>
-                	<button type="button" id="save_btn" class="btn btn-success">Guardar</button>
+                	<button type="button" id="save_btn" data-accion="edi_socio" class="btn btn-success">Guardar</button>
                 <? } ?>
 
 

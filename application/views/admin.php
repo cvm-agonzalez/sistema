@@ -417,31 +417,36 @@
                 })
 
 		$("#save_btn").click(function() {
-                    var fecha = $("#fechan").val();
-                    var nacimiento = new Date(fecha);
-                    var hoy = new Date();
+            var fecha = $("#fechan").val();
+            var nacimiento = new Date(fecha);
+            var hoy = new Date();
 			<?  $hoy=date('Y-m-d'); ?>
 		    var edad = ( hoy - nacimiento ) / ( 365 * 24 * 60 * 60 * 1000 );
 
 		    if ( fecha == 0 || fecha == "0000-00-00" ) {
-			alert ("Error en la fecha de nacimiento, no puede ser 0");
-			return false;
-		   };
-                    if ( fecha > '<?=$hoy?>' ) {
-                        alert ("Error en la fecha de nacimiento, no puede ser mayor a hoy");
-                        return false;
-                   };
-	           var tipo_cat = $("#s_cate").find(':selected').attr('data-tipo');
-		   if ( tipo_cat == "m" && edad > 18 ) {
-                        alert ("Error no puede ser categoria menor, tiene mas de 18 años");
-                        return false;
-		   };
-		   if ( tipo_cat == "M" && edad < 18 ) {
-                        alert ("Error no puede ser categoria mayor, tiene menos de 18 años");
-                        return false;
-		   };
-                    var mail = $("#mail").val();
-			var param = encodeURIComponent(mail);
+			    alert ("Error en la fecha de nacimiento, no puede ser 0");
+			    return false;
+		    };
+            if ( fecha > '<?=$hoy?>' ) {
+                alert ("Error en la fecha de nacimiento, no puede ser mayor a hoy");
+                return false;
+            };
+            var tipo_cat = $("#s_cate").find(':selected').attr('data-tipo');
+            if ( tipo_cat == "0" ) {
+                alert ("Tiene que seleccionar una categoria");
+                return false;
+	    }
+            if ( tipo_cat == "m" && edad > 18 ) {
+                alert ("Error no puede ser categoria menor, tiene mas de 18 años");
+                return false;
+            };
+            if ( tipo_cat == "M" && edad < 18 ) {
+                alert ("Error no puede ser categoria mayor, tiene menos de 18 años");
+                return false;
+            };
+            var mail = $("#mail").val();
+            var accion = $(this).data('accion');
+            var param = encodeURIComponent(mail);
             	   $.get("<?=$baseurl?>admin/socios/valid_mail/"+param,function(data){
 			if ( data ) {
 				var validmail = $.parseJSON(data);
@@ -451,7 +456,11 @@
                         		return false;
 				};
 				if ( vm[1] == true ) {
-        	   			$("#form_alta").submit();
+                    if ( accion == "alta_socio" ) {
+                        $("#form_alta").submit();
+                    } else {
+                        $("#edit_socio").submit();
+                    }
 				}
 			} else {
                         	alert ("Direccion de correo no valida");
@@ -478,21 +487,6 @@
                 <?
                 }
                 ?>
-
-                $( "#domicilio" ).focus(function(){
-                    var fecha = $("#fechan").val();
-                    var res = fecha.split("-");
-                    res[1]--;
-                    var d = new Date(res[0],res[1],res[2]);
-                    var n = d.getTime();
-                    if($.now()-d > 567648000000){
-                        $("#menor").hide();
-                        $("#s_cate").val("2");
-                    }else{
-                        $("#menor").show();
-                        $("#s_cate").val("1");
-                    }
-                })
 
                 $('#conf-tab a').click(function (e) {
                   e.preventDefault()
@@ -1530,7 +1524,7 @@ $("#edit_debtarj_form").submit(function(){
                 $("#reg-cargando").addClass('hidden');
         })
 
-        return false;
+        return true;
 })
 
 $("#nvo_debtarj_form").submit(function(){
