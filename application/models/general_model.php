@@ -19,6 +19,7 @@ class General_model extends CI_Model {
         $this->db->where('id_entidad',$id_entidad);
         $this->db->where('estado > 0');
         $query = $this->db->get("categorias");
+        if($query->num_rows() == 0){return false;}
         return $query->result();
     }
 
