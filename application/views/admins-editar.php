@@ -12,7 +12,7 @@
                                                 <?
                                                         foreach ($entidades as $entidad) {
                                                 ?>
-                                                        <option value="<?=$entidad->id?><?if ($admin->id_entidad == $entidad->id) { echo 'selected'; }?>"><?=$entidad->descripcion?></option>
+                                                        <option value="<?=$entidad->id?>"<?if ($admin->id_entidad == $entidad->id) { echo 'selected'; }?>><?=$entidad->descripcion?></option>
                                                 <?
                                                         }
                                                 ?>

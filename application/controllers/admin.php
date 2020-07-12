@@ -761,8 +761,9 @@ class Admin extends CI_Controller {
 		}
     }
 
-    public function admins($action='',$id='')
+    public function admins()
     {
+        $action = $this->uri->segment(3);
         $this->load->model('admins_model');
         $this->login_model->update_lCon();
         $data['id_entidad'] = $this->session->userdata('id_entidad');
@@ -821,8 +822,8 @@ class Admin extends CI_Controller {
                 break;
 
             case 'chgpwd':
-		$data = $this->carga_data();
-        	$id = $this->session->userdata('id_usuario');
+                $data = $this->carga_data();
+                $id = $this->session->userdata('id_usuario');
                 $data['admin'] = $this->admins_model->get_admin($id);
                 $data['action'] = "chgpwd";
                 $data['section'] = 'admins-editar';
@@ -830,10 +831,11 @@ class Admin extends CI_Controller {
                 break;
 
             case 'editar':
-		$data = $this->carga_data();
+                $data = $this->carga_data();
+                $id = $this->uri->segment(4);
                 $data['admin'] = $this->admins_model->get_admin($id);
                 $data['action'] = "edit";
-        	$this->load->model('general_model');
+                $this->load->model('general_model');
                 $data['entidades'] = $this->general_model->get_ents();
                 $data['section'] = 'admins-editar';
                 $this->load->view('admin',$data);
@@ -841,6 +843,7 @@ class Admin extends CI_Controller {
 
             case 'guardar':
                 $admin = $this->input->post(null, true);
+                $id = $this->uri->segment(4);
 		if ( $admin['pass_old'] ) {
 			$pwd_old = sha1($admin['pass_old']);
                 	$rtdo = $this->admins_model->chk_pwd($id,$pwd_old);
@@ -959,9 +962,9 @@ class Admin extends CI_Controller {
                 break;
 
             default:
-		$data = $this->carga_data();
-		$id_entidad  = $this->session->userdata('id_entidad');
-        	$this->load->model('general_model');
+                $data = $this->carga_data();
+                $id_entidad  = $this->session->userdata('id_entidad');
+                $this->load->model('general_model');
                 $data['entidades'] = $this->general_model->get_ents();
                 $data['listaAdmin'] = $this->admins_model->get_admins($id_entidad);
                 $data['section'] = 'admins';
@@ -1526,7 +1529,9 @@ class Admin extends CI_Controller {
 			    $total = -$cuota_valor;
 			} else {
 			    // si tiene tutor solo pongo cuota de la categoria propia
-                            $this->pagos_model->registrar_pago($id_entidad, 'debe',$uid,0.00,'La facturacion se imputa al tutor: '.$datos['tutor']);
+		            $soc_tutor = $this->socios_model->get_socio($datos['tutor']);
+			    $apynom_tutor = $soc_tutor->apellido.", ".$soc_tutor->nombre;
+                            $this->pagos_model->registrar_pago($id_entidad, 'debe',$uid,0.00,'La facturacion se imputa al tutor: '.$datos['tutor']."-".$apynom_tutor);
 
                             $this->load->model('general_model');
 			    $categ = $this->general_model->get_cat($datos['categoria']);
