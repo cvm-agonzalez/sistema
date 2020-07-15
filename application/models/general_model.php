@@ -10,6 +10,24 @@ class General_model extends CI_Model {
         $this->load->database('default');
     }
 
+    public function get_logins($id_entidad, $dias) {
+	$qry = "SELECT DISTINCT login FROM log_cambios WHERE id_entidad = $id_entidad AND log_ts > DATE_SUB(CURDATE(), INTERVAL $dias DAY) ;";
+        $resultado = $this->db->query($qry)->result();
+
+	return $resultado;
+    }
+
+    public function get_logs($id_entidad, $login, $dias) {
+	$qry = "SELECT * FROM log_cambios WHERE id_entidad = $id_entidad ";
+	if ( $login == "todos" ) {
+	} else {
+		$qry .= " AND login = '$login' ";
+	}
+	$qry .= " AND log_ts > DATE_SUB(CURDATE(), INTERVAL $dias DAY) ORDER BY log_ts DESC;";
+        $resultado = $this->db->query($qry)->result();
+	return $resultado;
+    }
+
     public function write_log($log)
     {
         $this->db->insert('log_cambios',$log);

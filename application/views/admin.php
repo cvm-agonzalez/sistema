@@ -97,6 +97,12 @@
                                         	</li>
 					<? } ?>
                                         <li>
+                                            <a href="<?=$baseurl?>admin/admins/ult_movs">
+                                                <i class="fa fa-key"></i>
+                                                <span data-i18n="Ultimos Movimientos"></span>
+                                            </a>
+                                        </li>
+                                        <li>
                                             <a href="<?=$baseurl?>admin/admins/chgpwd">
                                                 <i class="fa fa-key"></i>
                                                 <span data-i18n="Cambiar Contraseña"></span>

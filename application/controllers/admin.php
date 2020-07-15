@@ -524,6 +524,7 @@ class Admin extends CI_Controller {
 
 	public function login()
 	{
+var_dump("login");
 		if ( !$this->session->userdata('id_entidad') ) {
 			$this->form_validation->set_rules('entidad', 'entidad', 'required|trim|min_length[1]|max_length[50]|xss_clean');
 		}
@@ -600,6 +601,7 @@ class Admin extends CI_Controller {
 				$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
 				$data = $this->carga_data();
+var_dump("redirect");
                                 redirect(base_url().'admin');
 
 			}
@@ -764,13 +766,43 @@ class Admin extends CI_Controller {
     public function admins()
     {
         $action = $this->uri->segment(3);
+		$data = $this->carga_data();
         $this->load->model('admins_model');
         $this->login_model->update_lCon();
-        $data['id_entidad'] = $this->session->userdata('id_entidad');
-        $data['username'] = $this->session->userdata('username');
-        $data['rango'] = $this->session->userdata('rango');
-        $data['baseurl'] = base_url();
         switch ($action) {
+            case 'ult_movs':
+                $id_entidad = $this->session->userdata('id_entidad');
+		if ( $this->input->post('dias') ) {
+			$dias = $this->input->post('dias');
+		} else {
+                	$dias = 1;
+		}
+		$logines = array();
+        	$this->load->model('general_model');
+		if ( $this->session->userdata('rango') == 0 ) {
+			$logines = $this->general_model->get_logins($id_entidad, $dias);
+			if ( $this->input->post('login') ) {
+				$login = $this->input->post('login');
+			} else {
+				$login = "todos";
+			}
+		} else {
+			if ( $this->input->post('login') ) {
+				$logines[] = $this->input->post('login');
+				$login = $this->input->post('login');
+			} else {
+                		$logines[] = $this->session->userdata('username');
+				$login = $this->session->userdata('username');
+			}
+		}
+                $data['logines'] = $logines;
+                $data['login'] = $login;
+                $data['dias'] = $dias;
+                $data['section'] = 'log-view';
+                $data['logs'] = $this->general_model->get_logs($id_entidad, $login, $dias);
+
+                $this->load->view('admin',$data);
+                break;
             case 'agregar':
                 $id_entidad = $this->session->userdata('id_entidad');
                 $admin = $this->input->post(null, true);
