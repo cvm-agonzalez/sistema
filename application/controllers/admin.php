@@ -524,7 +524,6 @@ class Admin extends CI_Controller {
 
 	public function login()
 	{
-var_dump("login");
 		if ( !$this->session->userdata('id_entidad') ) {
 			$this->form_validation->set_rules('entidad', 'entidad', 'required|trim|min_length[1]|max_length[50]|xss_clean');
 		}
@@ -601,7 +600,6 @@ var_dump("login");
 				$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
 				$data = $this->carga_data();
-var_dump("redirect");
                                 redirect(base_url().'admin');
 
 			}
