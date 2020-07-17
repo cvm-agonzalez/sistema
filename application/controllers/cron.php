@@ -1478,19 +1478,19 @@ class Cron extends CI_Controller {
         	} else {
             		$txt = date('d/m/Y G:i:s').": Se encontraron ".$query->num_rows()." correos. Enviando... \n";
                 	fwrite($log, $txt);
-			$this->load->library('email');
 			$enviados=0;
 			foreach ($query->result() as $email) {
+
+			$this->load->library('email');
                 		$this->email->reply_to($reply_to);
                 		$this->email->from($email_from,$email_nombre);
                 		$this->email->to($email->email);
-                		$this->email->cco('gsoc.agonzalez@gmail.com');                 
+                		$this->email->bcc('gsoc.agonzalez@gmail.com');                 
 
                 		$asunto='Resumen de Cuenta al '.date('d/m/Y');
                 		$this->email->subject($asunto);                
                 		$this->email->message($email->body); 
                 		$txt = date('d/m/Y G:i:s').": Enviando: ".$email->email;
-
                 		if($this->email->send()){
                     			$txt=$txt." ----> Enviado OK \n";
                     			$this->db->where('id',$email->id);
