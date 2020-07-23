@@ -678,6 +678,10 @@ class Cron extends CI_Controller {
                 	$this->db->delete('facturacion_mails');
                 	$txt = "Truncate de mails de \n";
                 	fwrite($log, $txt);
+
+                	$ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
+                	$head_mail = './entidades/'.$ent_dir.'/email_head.jpg';
+
 	
 			// ciclo cada deudor y armo/grabo los emails en envios
 			foreach ( $deudores as $deudor ) {
@@ -690,8 +694,9 @@ class Cron extends CI_Controller {
                 			$txt_mail  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
                 			$txt_mail .= "<thead>";
                 			$txt_mail .= "<tr style='background-color: #105401 ;'>";
-                			$txt_mail .= "<th> Imagen de la Entidad ABC  ></th>";
-                			$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>ENTIDAD ABC</th>";
+					$txt_mail .= "<th> <img src='$head_mail' alt='' ></th>";
+
+                			//$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>ENTIDAD ABC</th>";
                 			//$txt_mail .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
                 			//$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
                 			$txt_mail .= "</tr>";
