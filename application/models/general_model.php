@@ -379,7 +379,7 @@ COMISIONES
         return $reporte;
     }
 
-    public function armo_cuerpo_email($id_socio) {
+    public function armo_cuerpo_email($id_entidad, $id_socio) {
 	// armo mail
 	$mail = $this->socios_model->get_resumen_mail($id_socio);
 	$deuda = $this->pagos_model->get_deuda($id_socio);

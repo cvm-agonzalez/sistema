@@ -42,6 +42,7 @@ class Cron extends CI_Controller {
 		// Ciclo las entidades para hacer la facturacion de cada una
 	 	$entidades = $this->general_model->get_ents();
 		foreach ($entidades as $entidad) {		
+			echo "Ciclando $entidad->descripcion \n";
 			$this->factura_entidad($xhoy, $entidad);
 		}
 	}
@@ -138,13 +139,9 @@ class Cron extends CI_Controller {
 
             	fwrite($log, date('H:i:s').' - Procesando '.$id_entidad.'-'.$entidad->descripcion.'\n');                        
         	//chequeamos el estado del cron
-        	if(!$cron_state = $this->pagos_model->check_cron($id_entidad, $xperiodo)){
-            		//el cron ya finalizó
-            		$txt = date('H:i:s').": Intento de ejecución de Cron Finalizado! \n";
-            		fwrite($log, $txt);            
-            		exit();
-        	}
+        	$cron_state = $this->pagos_model->check_cron($id_entidad, $xperiodo);
   
+		if ( $cron_state ) {
 		if($cron_state == 'iniciado'){
             		$txt = date('Y-m-d H:i:s').": Inicio de Cron... \n";
             		fwrite($log, $txt);                        
@@ -198,111 +195,83 @@ class Cron extends CI_Controller {
 		// Busco los socios que tienen que pagar
 		$socios = $this->socios_model->get_socios_pagan($id_entidad, true);
 		// Si no encontre ninguno logeo y corto
-        	if(!$socios){ 
-            		$txt = date('H:i:s').": No se encontraron socios a facturar \n";
-            		fwrite($log, $txt);
-            		exit(); 
-        	} else {
+        	if($socios){ 
 			// Logeo la cantidad de total de asociados encontrados para facturar
             		$txt = date('H:i:s').": Se encontraron ".count($socios)." socios a facturar \n";
             		fwrite($log, $txt);            
-        	}
 
-		// Ciclo los asociados a facturar
-		foreach ($socios as $socio) {		
-			// Busco el valor de la cuota social a pagar
-			$cuota = $this->pagos_model->get_monto_socio($socio->id);
+			// Ciclo los asociados a facturar
+			foreach ($socios as $socio) {		
+				// Busco el valor de la cuota social a pagar
+				$cuota = $this->pagos_model->get_monto_socio($socio->id);
 
-			// Si tiene categoria de NO SOCIO no genero cuota
-			$descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
-			if ( $cuota['categ_tipo'] != 'N' ) {
-				// Si es un grupo familiar detallo los integrantes
-				if($cuota['categoria'] == 'Grupo Familiar' || $cuota['categoria'] == 'Tutor'){
-					$descripcion .= '<br><strong>Integrantes:</strong> ';
-					foreach ($cuota['familiares'] as $familiar) {
-		    				$descripcion .= "<li>".$familiar['datos']->nombre." ".$familiar['datos']->apellido."</li>";
-		    			}
+				// Si tiene categoria de NO SOCIO no genero cuota
+				$descripcion = '<strong>Categoría:</strong> '.$cuota['categoria'];
+				if ( $cuota['categ_tipo'] != 'N' ) {
+					// Si es un grupo familiar detallo los integrantes
+					if($cuota['categoria'] == 'Grupo Familiar' || $cuota['categoria'] == 'Tutor'){
+						$descripcion .= '<br><strong>Integrantes:</strong> ';
+						foreach ($cuota['familiares'] as $familiar) {
+		    					$descripcion .= "<li>".$familiar['datos']->nombre." ".$familiar['datos']->apellido."</li>";
+		    				}
+					}
+					$descripcion .= '<br><strong>Detalles</strong>:<br>';
+					$descripcion .= 'Cuota Mensual '.$cuota['categoria'].' -';
+                			if($cuota['descuento'] > 0.00){
+                				$descripcion .= "$ ".$cuota['cuota_neta']." &nbsp;<label class='label label-info'>".$cuota['descuento']."% BECADO</label>";
+            				}
+            				$descripcion .= '$ '.$cuota['cuota'].'<br>';
+	
+					// Inserto el pago de la cuota (tipo=1)
+            				$pago = array(
+                				'sid' => $socio->id, 
+                				'tutor_id' => $socio->id,
+                				'id_entidad' => $id_entidad,
+                				'aid' => 0, 
+                				'generadoel' => $xahora,
+                				'descripcion' => $descripcion,
+                				'monto' => $cuota['cuota'],                
+                				'tipo' => 1,                
+                				);
+					// Si tiene la cuota social bonificada la doy por paga (estado=0)
+                			if($pago['monto'] <= 0){                    
+						$pago['estado'] = 0;
+                    				$pago['pagadoel'] = $xahora;
+                			}
+            				$this->pagos_model->insert_pago_nuevo($pago);
 				}
-				$descripcion .= '<br><strong>Detalles</strong>:<br>';
-				$descripcion .= 'Cuota Mensual '.$cuota['categoria'].' -';
-                		if($cuota['descuento'] > 0.00){
-                			$descripcion .= "$ ".$cuota['cuota_neta']." &nbsp;<label class='label label-info'>".$cuota['descuento']."% BECADO</label>";
-            			}
-            			$descripcion .= '$ '.$cuota['cuota'].'<br>';
-
-				// Inserto el pago de la cuota (tipo=1)
-            			$pago = array(
-                			'sid' => $socio->id, 
-                			'tutor_id' => $socio->id,
-                			'id_entidad' => $id_entidad,
-                			'aid' => 0, 
-                			'generadoel' => $xahora,
-                			'descripcion' => $descripcion,
-                			'monto' => $cuota['cuota'],                
-                			'tipo' => 1,                
-                			);
-				// Si tiene la cuota social bonificada la doy por paga (estado=0)
-                		if($pago['monto'] <= 0){                    
-					$pago['estado'] = 0;
-                    			$pago['pagadoel'] = $xahora;
-                		}
-            			$this->pagos_model->insert_pago_nuevo($pago);
-			}
-
-			// Ciclo las actividades que tiene relacionadas el asociado
-			foreach ($cuota['actividades']['actividad'] as $actividad) {	       
-
-				// Facturamos el valor mensual de la actividad
-                		$descripcion .= 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
-                    		$valor = $actividad->precio;
-                		if($actividad->descuento > 0){
-					if ( $actividad->monto_porcentaje == 0 ) {
-						if ( $actividad->precio > 0 ) {
-                    					$valor = $actividad->precio - $actividad->descuento;
+	
+				// Ciclo las actividades que tiene relacionadas el asociado
+				foreach ($cuota['actividades']['actividad'] as $actividad) {	       
+	
+					// Facturamos el valor mensual de la actividad
+                			$descripcion .= 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
+                    			$valor = $actividad->precio;
+                			if($actividad->descuento > 0){
+						if ( $actividad->monto_porcentaje == 0 ) {
+							if ( $actividad->precio > 0 ) {
+                    						$valor = $actividad->precio - $actividad->descuento;
+							} else {
+								$valor = 0;
+							}
+                    					$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
 						} else {
-							$valor = 0;
+                    					$valor = $actividad->precio - ($actividad->precio * $actividad->descuento / 100);
+                    					$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;                    
 						}
-                    				$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
-					} else {
-                    				$valor = $actividad->precio - ($actividad->precio * $actividad->descuento / 100);
-                    				$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;                    
-					}
-	 			} 
-                		$descripcion .= '<br>';
-	        		$des = 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
-                		if($actividad->descuento > 0){
-					if ( $actividad->monto_porcentaje == 0 ) {
-                    				$des .= '<label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;
-					} else {
-                    				$des .= '<label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;
-					}
-                		}
-                		$des .= '<br>';
-	
-				// Inserto el pago de la actividad (tipo=4)
-                		$pago = array(
-                    			'sid' => $socio->id,
-                    			'tutor_id' => $socio->id,
-                    			'id_entidad' => $id_entidad,
-                    			'aid' => $actividad->id,
-                 			'generadoel' => $xahora,
-                    			'descripcion' => $des,
-                    			'monto' => $valor,
-                    			'tipo' => 4,
-                    		);
-				// Si tiene la actividad bonificada la doy por paga (estado=0)
-                		if($pago['monto'] <= 0){                    
-					$pago['estado'] = 0;
-                    			$pago['pagadoel'] = $xahora;
-                		}
-                		$this->pagos_model->insert_pago_nuevo($pago);
-	
-				// Si la actividad tiene seguro y el socio no es federado de la actividad facturo el seguro
-				if ( $actividad->seguro > 0 && $actividad->federado == 0 ) {
-                			$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
-					$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
-	
-					// Inserto el pago del seguro
+	 				} 
+                			$descripcion .= '<br>';
+	        			$des = 'Cuota Mensual '.$actividad->nombre.' - $ '.$actividad->precio;
+                			if($actividad->descuento > 0){
+						if ( $actividad->monto_porcentaje == 0 ) {
+                    					$des .= '<label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;
+						} else {
+                    					$des .= '<label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;
+						}
+                			}
+                			$des .= '<br>';
+		
+					// Inserto el pago de la actividad (tipo=4)
                 			$pago = array(
                     				'sid' => $socio->id,
                     				'tutor_id' => $socio->id,
@@ -310,211 +279,245 @@ class Cron extends CI_Controller {
                     				'aid' => $actividad->id,
                  				'generadoel' => $xahora,
                     				'descripcion' => $des,
-                    				'monto' => $actividad->seguro,
-                    				'tipo' => 6,
+                    				'monto' => $valor,
+                    				'tipo' => 4,
                     			);
+					// Si tiene la actividad bonificada la doy por paga (estado=0)
+                			if($pago['monto'] <= 0){                    
+						$pago['estado'] = 0;
+                    				$pago['pagadoel'] = $xahora;
+                			}
                 			$this->pagos_model->insert_pago_nuevo($pago);
-				}
-	        	} 
-	
-			// Si tiene familiares a cargo
-	        	if($cuota['familiares'] != 0){
-				// Ciclo cada familiar
-               			foreach ($cuota['familiares'] as $familiar) {
-					// Busco las actividades de ese familiar
-               				foreach($familiar['actividades']['actividad'] as $actividad){		               		
-                    				$descripcion .= 'Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'] - $ '.$actividad->precio;
-						$valor = $actividad->precio;
-                    				if($actividad->descuento > 0){
-                    					if($actividad->monto_porcentaje == 0){
-								if ( $actividad->precio > 0 ) {
-                        						$valor = $actividad->precio - $actividad->descuento;
-								} else { 
-									$valor = 0;
+		
+					// Si la actividad tiene seguro y el socio no es federado de la actividad facturo el seguro
+					if ( $actividad->seguro > 0 && $actividad->federado == 0 ) {
+                				$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+						$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+		
+						// Inserto el pago del seguro
+                				$pago = array(
+                    					'sid' => $socio->id,
+                    					'tutor_id' => $socio->id,
+                    					'id_entidad' => $id_entidad,
+                    					'aid' => $actividad->id,
+                 					'generadoel' => $xahora,
+                    					'descripcion' => $des,
+                    					'monto' => $actividad->seguro,
+                    					'tipo' => 6,
+                    				);
+                				$this->pagos_model->insert_pago_nuevo($pago);
+					}
+	        		} 
+		
+				// Si tiene familiares a cargo
+	        		if($cuota['familiares'] != 0){
+					// Ciclo cada familiar
+               				foreach ($cuota['familiares'] as $familiar) {
+						// Busco las actividades de ese familiar
+               					foreach($familiar['actividades']['actividad'] as $actividad){		               		
+                    					$descripcion .= 'Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'] - $ '.$actividad->precio;
+							$valor = $actividad->precio;
+                    					if($actividad->descuento > 0){
+                    						if($actividad->monto_porcentaje == 0){
+									if ( $actividad->precio > 0 ) {
+                        							$valor = $actividad->precio - $actividad->descuento;
+									} else { 
+										$valor = 0;
+									}
+                        						$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
+								} else {
+                        						$valor = $actividad->precio - ($actividad->precio * $actividad->descuento / 100);
+                        						$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;                    
 								}
-                        					$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
-							} else {
-                        					$valor = $actividad->precio - ($actividad->precio * $actividad->descuento / 100);
-                        					$descripcion .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;                    
-							}
-                    				}
-                    				$descripcion .= '<br>';
-	               				$des = 'Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'] - $ '.$actividad->precio;
-                    				if($actividad->descuento > 0){
-                    					if($actividad->monto_porcentaje == 0){
-                        					$des .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
-							} else {
-                        					$des .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;                    
-							}
-                    				}
-                    				$des = '<br>';	 
-	
-						// Inserto el pago de la actividad del familia (tipo=4)
-                    				$pago = array(
-                        				'sid' => $familiar['datos']->id,
-                        				'tutor_id' => $socio->id,
-                        				'id_entidad' => $id_entidad,
-                        				'aid' => $actividad->id,
-                        				'generadoel' => $xahora,
-                        				'descripcion' => $des,
-                        				'monto' => $valor,
-                        				'tipo' => 4,
-                        				);
+                    					}
+                    					$descripcion .= '<br>';
+	               					$des = 'Cuota Mensual '.$actividad->nombre.' ['.$familiar['datos']->nombre.' '.$familiar['datos']->apellido.'] - $ '.$actividad->precio;
+                    					if($actividad->descuento > 0){
+                    						if($actividad->monto_porcentaje == 0){
+                        						$des .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'$ BECADOS</label> $ '.$valor;                    
+								} else {
+                        						$des .= '&nbsp; <label class="label label-info">'.$actividad->descuento.'% BECADO</label> $ '.$valor;                    
+								}
+                    					}
+                    					$des = '<br>';	 
+		
+							// Inserto el pago de la actividad del familia (tipo=4)
+                    					$pago = array(
+                        					'sid' => $familiar['datos']->id,
+                        					'tutor_id' => $socio->id,
+                        					'id_entidad' => $id_entidad,
+                        					'aid' => $actividad->id,
+                        					'generadoel' => $xahora,
+                        					'descripcion' => $des,
+                        					'monto' => $valor,
+                        					'tipo' => 4,
+                        					);
+					
+							// Si tiene la actividad bonificada la doy por paga (estado=0)
+                					if($pago['monto'] <= 0){                    
+								$pago['estado'] = 0;
+                    						$pago['pagadoel'] = $xahora;
+                					}
+		
+                    					$this->pagos_model->insert_pago_nuevo($pago);
+		
+                        				// Si la actividad tiene seguro y el socio no es federado de la actividad facturo el seguro
+                        				if ( $actividad->seguro > 0 && $actividad->federado == 0 ) {
+                                				$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
+                                				$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
 				
-						// Si tiene la actividad bonificada la doy por paga (estado=0)
-                				if($pago['monto'] <= 0){                    
-							$pago['estado'] = 0;
-                    					$pago['pagadoel'] = $xahora;
-                				}
-	
-                    				$this->pagos_model->insert_pago_nuevo($pago);
-	
-                        			// Si la actividad tiene seguro y el socio no es federado de la actividad facturo el seguro
-                        			if ( $actividad->seguro > 0 && $actividad->federado == 0 ) {
-                                			$descripcion .= 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
-                                			$des = 'Seguro '.$actividad->nombre.' - $ '.$actividad->seguro;
-			
-                                			// Inserto el pago del seguro
-                                			$pago = array(
-                                        			'sid' => $socio->id,
-                                        			'tutor_id' => $socio->id,
-                                        			'id_entidad' => $id_entidad,
-                                        			'aid' => $actividad->id,
-                                        			'generadoel' => $xahora,
-                                        			'descripcion' => $des,
-                                        			'monto' => $actividad->seguro,
-                                        			'tipo' => 6,
-                                			);
-                                			$this->pagos_model->insert_pago_nuevo($pago);
-                        			}
-	
+                                				// Inserto el pago del seguro
+                                				$pago = array(
+                                        				'sid' => $socio->id,
+                                        				'tutor_id' => $socio->id,
+                                        				'id_entidad' => $id_entidad,
+                                        				'aid' => $actividad->id,
+                                        				'generadoel' => $xahora,
+                                        				'descripcion' => $des,
+                                        				'monto' => $actividad->seguro,
+                                        				'tipo' => 6,
+                                				);
+                                				$this->pagos_model->insert_pago_nuevo($pago);
+                        				}
+		
+               					}
                				}
-               			}
-           		}
+           			}
 	
+		
 			// Cuota Excedente
-           		if($cuota['excedente'] >= 1){
-                		$descripcion .= 'Socio Extra (x'.$cuota['excedente'].') - $ '.$cuota['monto_excedente'].'<br>';
-	         		$des = 'Socio Extra (x'.$cuota['excedente'].') - $ '.$cuota['monto_excedente'].'<br>';
-				// Inserto el pago de la cuota excedente
-                		$pago = array(
-                    			'sid' => $socio->id,    
-                    			'tutor_id' => $socio->id,                
-                    			'id_entidad' => $id_entidad,                
-                    			'aid' => 0,
-                    			'generadoel' => $xahora,
-                    			'descripcion' => $des,
-                    			'monto' => $cuota['monto_excedente'],
-                    			'tipo' => 1,
-                    			);
-                			$this->pagos_model->insert_pago_nuevo($pago);
-			}
+           			if($cuota['excedente'] >= 1){
+                			$descripcion .= 'Socio Extra (x'.$cuota['excedente'].') - $ '.$cuota['monto_excedente'].'<br>';
+	         			$des = 'Socio Extra (x'.$cuota['excedente'].') - $ '.$cuota['monto_excedente'].'<br>';
+					// Inserto el pago de la cuota excedente
+                			$pago = array(
+                    				'sid' => $socio->id,    
+                    				'tutor_id' => $socio->id,                
+                    				'id_entidad' => $id_entidad,                
+                    				'aid' => 0,
+                    				'generadoel' => $xahora,
+                    				'descripcion' => $des,
+                    				'monto' => $cuota['monto_excedente'],
+                    				'tipo' => 1,
+                    				);
+                				$this->pagos_model->insert_pago_nuevo($pago);
+				}
 	
-	
-			// Obtiene el saldo total de la ultima fila de facturacion!!!
-	        	$total = $this->pagos_model->get_socio_total($socio->id);
-			// Le agrega la cuota facturada este mes al total del saldo
-	        	$total = $total - ($cuota['total']);
-			$data = array(
-				"sid" => $socio->id,
-				"id_entidad" => $id_entidad,
-				"date" => $xahora,
-				"descripcion" => $descripcion,
-				"debe" => $cuota['total'],
-				"haber" => '0',
-				"total" => $total
-			);
-	
-            		$deuda = $this->pagos_model->get_deuda($socio->id);
-	
-			// Inserta el registro de facturacion del mes
-			$this->pagos_model->insert_facturacion($data);
-	
-			// Actualizo en facturacion_cron el asociado facturado
-			$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,3, 1, $cuota['total']);
-	
-			// armo mail
-			$respuesta = $this->general_model->armo_cuerpo_email($socio->id);
-
-			$acobrar = $respuesta['acobrar'];
-			$cuerpo = $respuesta['cuerpo'];
-			$mail_destino = $respuesta['mail_destino'];
-
-			if ( $acobrar > 0 ) {
-				// Aca grabo el archivo para mandar a cobrar a COL
-				$col_periodo=$xperiodo;
-				$col_socio=$socio->id;
-				$col_dni=$socio->dni;
-				$col_apynom=$socio->apellido." ".$socio->nombre;
-				$col_importe=$acobrar;
-				$col_fecha_lim=$xlim1;
-				$col_recargo="0";
-				$col_fecha_lim2=$xlim2;
-				$txt = '"'.$col_periodo.'","'.$col_socio.'","'.$col_dni.'","'.$col_apynom.'","'.$col_importe.'","'.$col_fecha_lim.'","'.$col_recargo.'","'.$col_fecha_lim2.'"'."\r\n";
-				fwrite($col, $txt);
-	
-				// Actualizo en facturacion_cron el asociado facturado
-				$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,5, 1, $col_importe);
-	
-				// Grabo en el archivo de facturacion_col
-				$facturacion_col = array(
-                                        	'id' => 0,
-                                        	'id_entidad' => $id_entidad,
-                                        	'sid' => $col_socio,
-                                        	'periodo' => $col_periodo,
-                                        	'importe' => $col_importe,
-                                        	'cta_socio' => 0,
-                                        	'actividades' => 0
+		
+		
+				// Obtiene el saldo total de la ultima fila de facturacion!!!
+	        		$total = $this->pagos_model->get_socio_total($socio->id);
+				// Le agrega la cuota facturada este mes al total del saldo
+	        		$total = $total - ($cuota['total']);
+				$data = array(
+					"sid" => $socio->id,
+					"id_entidad" => $id_entidad,
+					"date" => $xahora,
+					"descripcion" => $descripcion,
+					"debe" => $cuota['total'],
+					"haber" => '0',
+					"total" => $total
 				);
-				$this->pagos_model->insert_facturacion_col($facturacion_col);
-
+		
+            			$deuda = $this->pagos_model->get_deuda($socio->id);
+		
+				// Inserta el registro de facturacion del mes
+				$this->pagos_model->insert_facturacion($data);
+		
+				// Actualizo en facturacion_cron el asociado facturado
+				$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,3, 1, $cuota['total']);
+		
+				// armo mail
+				$respuesta = $this->general_model->armo_cuerpo_email($id_entidad, $socio->id);
+	
+				$acobrar = $respuesta['acobrar'];
+				$cuerpo = $respuesta['cuerpo'];
+				$mail_destino = $respuesta['mail_destino'];
+	
+				if ( $acobrar > 0 ) {
+					// Aca grabo el archivo para mandar a cobrar a COL
+					$col_periodo=$xperiodo;
+					$col_socio=$socio->id;
+					$col_dni=$socio->dni;
+					$col_apynom=$socio->apellido." ".$socio->nombre;
+					$col_importe=$acobrar;
+					$col_fecha_lim=$xlim1;
+					$col_recargo="0";
+					$col_fecha_lim2=$xlim2;
+					$txt = '"'.$col_periodo.'","'.$col_socio.'","'.$col_dni.'","'.$col_apynom.'","'.$col_importe.'","'.$col_fecha_lim.'","'.$col_recargo.'","'.$col_fecha_lim2.'"'."\r\n";
+					fwrite($col, $txt);
+		
+					// Actualizo en facturacion_cron el asociado facturado
+					$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,5, 1, $col_importe);
+		
+					// Grabo en el archivo de facturacion_col
+					$facturacion_col = array(
+                                        		'id' => 0,
+                                        		'id_entidad' => $id_entidad,
+                                        		'sid' => $col_socio,
+                                        		'periodo' => $col_periodo,
+                                        		'importe' => $col_importe,
+                                        		'cta_socio' => 0,
+                                        		'actividades' => 0
+					);
+					$this->pagos_model->insert_facturacion_col($facturacion_col);
+	
+				}
+	
+				// Grabo el email en la base de datos para su posterior envio
+        			$email = array(
+                			'email' => $mail_destino,
+                			'id_entidad' => $id_entidad,
+                			'body' => $cuerpo
+        			);
+        			$regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
+        			if(preg_match($regex, $mail_destino)){
+                			$this->db->insert('facturacion_mails',$email);
+        			}
+	
+			 
+				// Registro pago2 verificar.....
+            			$this->pagos_model->registrar_pago2($id_entidad, $socio->id,0);
+		
+				// Actualizado el estado de socios como facturado (facturado=1)
+            			$this->db->where('id', $socio->id);
+            			$this->db->update('socios', array('facturado'=>1));
+		
+				// Registro en el log que asociado facture
+            			$txt = date('H:i:s').": Socio #".$socio->id." DNI=".$socio->dni."-".TRIM($socio->apellido).", ".TRIM($socio->nombre)." facturado \n";
+            			fwrite($log, $txt);            
+		
 			}
-
-			// Grabo el email en la base de datos para su posterior envio
-        		$email = array(
-                		'email' => $mail_destino,
-                		'id_entidad' => $id_entidad,
-                		'body' => $cuerpo
-        		);
-        		$regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
-        		if(preg_match($regex, $mail_destino)){
-                		$this->db->insert('facturacion_mails',$email);
-        		}
-
-		 
-			// Registro pago2 verificar.....
-            		$this->pagos_model->registrar_pago2($id_entidad, $socio->id,0);
+			// Actualizo en la tabla facturacion_cron que termino el proceso de facturacion
+        		$this->db->where('DATE(date) =',$xhoy);
+        		$this->db->where('id_entidad',$id_entidad);
+        		$this->db->update('facturacion_cron', array('id_entidad'=>$id_entidad,'en_curso'=>0));
+			// Registro en el log que el proceso de facturacion termino
+        		$txt = date('H:i:s').": Cron Finalizado \n";
+        		fwrite($log, $txt);            
+        		fclose($log);      
+        		fclose($col);      
 	
-			// Actualizado el estado de socios como facturado (facturado=1)
-            		$this->db->where('id', $socio->id);
-            		$this->db->update('socios', array('facturado'=>1));
-	
-			// Registro en el log que asociado facture
-            		$txt = date('H:i:s').": Socio #".$socio->id." DNI=".$socio->dni."-".TRIM($socio->apellido).", ".TRIM($socio->nombre)." facturado \n";
+			$totales=$this->pagos_model->get_facturacion_cron($id_entidad, $xperiodo);
+			if ( $totales ) {
+				$info_total="Los totales facturados son: <br> Socios Suspendidos: $totales->socios_suspendidos <br> Socios Pasados a Mayores: $totales->socios_cambio_mayor <br> Socios Facturados: $totales->socios_facturados por un total de $ $totales->total_facturado <br> Socios en Debito Tarjeta: $totales->socios_debito por un total de $ $totales->total_debito <br> Mandado a Cobranza COL: $totales->socios_col socios por un total de $ $totales->total_col";
+			} else {
+				$info_total="No encontre registro en facturacion_cron !!!!";
+			}
+		
+			// Me mando email de aviso que el proceso termino OK
+        		mail('gsoc.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
+
+	    } else {
+            		$txt = date('H:i:s').": No se encontraron socios a facturar \n";
+            		fwrite($log, $txt);
+	    }
+	   } else {
+            		//el cron ya finalizó
+            		$txt = date('H:i:s').": Intento de ejecución de Cron Finalizado! \n";
             		fwrite($log, $txt);            
-	
-		}
-		// Actualizo en la tabla facturacion_cron que termino el proceso de facturacion
-        	$this->db->where('DATE(date) =',$xhoy);
-        	$this->db->where('id_entidad',$id_entidad);
-        	$this->db->update('facturacion_cron', array('id_entidad'=>$id_entidad,'en_curso'=>0));
-		// Registro en el log que el proceso de facturacion termino
-        	$txt = date('H:i:s').": Cron Finalizado \n";
-        	fwrite($log, $txt);            
-        	fclose($log);      
-        	fclose($col);      
-
-		$totales=$this->pagos_model->get_facturacion_cron($id_entidad, $xperiodo);
-		if ( $totales ) {
-			$info_total="Los totales facturados son: <br> Socios Suspendidos: $totales->socios_suspendidos <br> Socios Pasados a Mayores: $totales->socios_cambio_mayor <br> Socios Facturados: $totales->socios_facturados por un total de $ $totales->total_facturado <br> Socios en Debito Tarjeta: $totales->socios_debito por un total de $ $totales->total_debito <br> Mandado a Cobranza COL: $totales->socios_col socios por un total de $ $totales->total_col";
-		} else {
-			$info_total="No encontre registro en facturacion_cron !!!!";
-		}
-	
-		// Me mando email de aviso que el proceso termino OK
-        	mail('gsoc.agonzalez@gmail.com', "El proceso de Facturación Finalizó correctamente.", "Este es un mensaje automático generado por el sistema para confirmar que el proceso de facturación finalizó correctamente ".$xahora."\n".$info_total);
+	   }
 	}
-
 
     public function debitos_tarjetas($xperiodo, $log) {
 
