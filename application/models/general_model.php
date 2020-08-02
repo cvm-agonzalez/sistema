@@ -388,13 +388,9 @@ COMISIONES
 
                 $this->load->model("general_model");
                 $ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
-                $head_mail = './entidades/'.$ent_dir.'/email_head.jpg';
+                $head_mail = 'https://gestionsocios.com.ar/entidades/'.$ent_dir.'/email_head.jpg';
 
 	
-	// TODO AHG - Buscar la imagen de encabezado de la entidad, si no tiene vacio
-//                                        $img_path=$baseurl."entidades/".$ent_directorio;
-//                                        $imagen_default=$img_path."/email_head.png";
-
 	// Armo encabezado con escudo y datos de cabecera
 	$cuerpo  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
         $cuerpo .= "<thead>";
