@@ -504,6 +504,7 @@ class Admin extends CI_Controller {
 		if($this->session->userdata('prox_vto') == 1 ){
 			$data = $this->carga_data();
 			$data['mensaje1'] = "La contraseña actual se vence en 10 dias recuerde cambiarla";
+			$data['action'] = 'seguir';
 			$data['section'] = 'ppal-mensaje';
 			$this->load->view('admin',$data);
 		} else {
@@ -1907,7 +1908,36 @@ class Admin extends CI_Controller {
 
 
     public function debtarj() {
+		echo "debtarj";
 	    switch ($this->uri->segment(3)) {
+                case 'get':
+echo "function get";
+                        $data = $this->carga_data();
+                        $this->load->model('socios_model');
+                        $sid = $this->uri->segment(5);
+                        $data['socio'] = $this->socios_model->get_socio($sid);
+                        if ( $data['socio'] )  {
+                                $this->load->model('debtarj_model');
+                                $debtarj = $this->debtarj_model->get_debtarj_by_sid($sid);
+                                if ( $debtarj ) {
+                                        $data['debtarj'] = $debtarj;
+                                        $data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
+echo "Antes de view!";
+                                        $this->load->view('debtarj-edit',$data);
+                                } else {
+echo "es nuevo no edita";
+                                        $data['js'] = 'debtarj';
+                                        $fecha=date('d-m-Y');
+                                        $data['fecha'] = $fecha;
+                                        $this->load->model('tarjeta_model');
+                                        $fecha=date('d-m-Y');
+                                        $data['fecha'] = $fecha;
+                                        $data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
+                                        $this->load->view('debarj-nuevo-datos',$data);
+                                }
+                        }
+                        break;
+
 		    case 'subearchivo':
 			    $data = $this->carga_data();
 			    $id_entidad = $data['id_entidad'];
@@ -2514,39 +2544,6 @@ class Admin extends CI_Controller {
                		$this->load->view('admin',$data);
                 	break;
 
-		case 'nuevo-get':
-			$data = $this->carga_data();
-                        $this->load->model('socios_model');
-                    	if ( $this->uri->segment(4) > 0 ) {
-                        	$sid = $this->uri->segment(4);
-			} else {
-                        	$sid = $this->input->post('sid');
-			}
-                        $data['socio'] = $this->socios_model->get_socio($sid);
-			if ( $data['socio'] )  { 
-                        	$this->load->model('debtarj_model');
-                        	$debtarj = $this->debtarj_model->get_debtarj_by_sid($sid);
-				if ( $debtarj ) {
-                        		$data['mensaje'] = ' El Asociado ya tiene un debito activo !!! ';
-                        		$data['section'] = 'debtarj-nuevo-get';
-                        		$this->load->view('admin',$data);
-				} else {
-                        		$data['js'] = 'debtarj';
-                        		$fecha=date('d-m-Y');
-                        		$data['fecha'] = $fecha;
-                        		$data['section'] = 'debtarj-nuevo-datos';
-	                        	$this->load->model('tarjeta_model');
-                        		$fecha=date('d-m-Y');
-                        		$data['fecha'] = $fecha;
-                        		$data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
-                        		$this->load->view('admin',$data);
-				}
-			} else {
-                        	$data['mensaje'] = ' El Asociado ingresado no existe en el padron !!! ';
-                        	$data['section'] = 'debtarj-nuevo-get';
-                        	$this->load->view('admin',$data);
-			}
-                        break;
 		case 'nuevo':
 			$data = $this->carga_data();
                         $data['mensaje'] = '';

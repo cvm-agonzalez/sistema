@@ -683,7 +683,7 @@ class Cron extends CI_Controller {
                 	fwrite($log, $txt);
 
                 	$ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
-                	$head_mail = './entidades/'.$ent_dir.'/email_head.jpg';
+                	$head_mail = 'https://gestionsocios.com.ar/entidades/'.$ent_dir.'/email_head.jpg';
 
 	
 			// ciclo cada deudor y armo/grabo los emails en envios
