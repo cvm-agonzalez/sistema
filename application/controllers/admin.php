@@ -1312,7 +1312,7 @@ class Admin extends CI_Controller {
                 	$nivel_acceso = $this->session->userdata('rango');
                 	$tabla = "socios";
                 	$llave = $id_socio;
-			$observ = "Des-suspendo ".substr(json_encode($socio),235);
+			$observ = "Des-suspendo ".substr(json_encode($socio),0,235);
                 	$operacion = 2;
                 	$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
 
