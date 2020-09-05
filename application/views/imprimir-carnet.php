@@ -56,7 +56,8 @@
             clear: both;
         }
         .barcode{
-            margin-top: 0px;
+            margin-top: 120px;
+            margin-left: 15px;
         }
 		</style>
 	</head>
@@ -96,19 +97,18 @@
             <div class="nap" style="font-weight:bold">Socio No. <?=$num?></div>
             <div class="nap" style="font-weight:bold">Ingreso <?=$fecha?></div>
         </div>
-<!-- TODO luego poner bien el tema de barra del cupon
         <div align="right" class="barcode">
             <?
-            if( file_exists("images/cupones/".$cupon->id.".png") ){
+            if( file_exists(BASEPATH."../entidades/".$ent_directorio."/cupones/".$cupon->id.".png") ){
+		$barra = base_url()."../entidades/".$ent_directorio."/cupones/".$cupon->id.".png";
             ?>
             <br>
-            <img src="<?=base_url()?>images/cupones/<?=$cupon->id?>.png" >  
+            <img src="<?=$barra?>" >  
             <?
             }
             ?>
         </div>
     </div>
--->
 
     <!--
 		<div style="float:left; width:48%">
