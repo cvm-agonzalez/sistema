@@ -1146,12 +1146,79 @@ class Cron extends CI_Controller {
 
 	}
 
+	function cupon_cd() {           
+        	$this->load->model('general_model');
+		$entidad = $this->general_model->get_ent(5);
+		$ent_dir = $this->general_model->get_ent_dir(5)->dir_name;
+        	if ( $entidad->cd_id > 0 ) {
+			$cuenta_id = $entidad->cd_id;
+			$sid=33;
+			$cid=3;
+                	$concepto  = "adrian gonzalez ( 33 )";
+                	$repetir = true;
+                	$count = 0;
+			$precio = 100;
+                	$result = false;
+                        //$url = 'https://www.cuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
+                	do{
+                        	$count++;
+                        	//$a = file_get_contents($url);
+                        	//$a = trim($a);
+                        	//$xml = simplexml_load_string($a);
+                        	//if (($xml->ACTION) != 'INVOICE_GENERATED') {
+                                	//$repetir = true;
+                                	//sleep(1);
+                        	//} else {
+                                	$repetir = false;
+                                	$result = array(); 
+                                	//$result['image'] = $xml->INVOICE->BARCODEBASE64;
+                                	//$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
+                                	$result['image'] = "iVBORw0KGgoAAAANSUhEUgAAAOYAAAA0AQMAAACkUtbcAAAABlBMVEUAAAAAAAClZ7nPAAAAAXRS TlMAQObYZgAAAPBJREFUOI1jYCAMWF3viruLywYedS+JFTxaKlt4YVR2VHZUdlR2EAJ2BgYWhg8N HA5sIJ5CO0dBk0zhcRnBA2BZjgagbAdDgwMTiBfYMaWzTalLY5GRAkRWqei8TGe7xMdDDIVnGbo6 FnF1KXUoNAXAZLtVmDo6OhyUGLq0Gjo6Fhk0yRQ48kxwgMr+UpEDyjo+YmgCyrYv4mhS6mhimtAA lW1SUepo53BSAss2gGQ7WZh+QtzMsaxJZVlHB4dXEg/Q5IBGkY4mpS4OJSGoj6SKlKU+HpcxXM5T eKJB+R1H8fs5QCT8AMnXHA0EwoRUAADEhygpZ7l09AAAAABJRU5ErkJggg==";
+                                	$result['barcode'] = 01903118822342;
+//echo $xml->INVOICE->BARCODEBASE64;
+//echo $xml->INVOICE->PAYMENTCODE1;
+//echo "Directorio: ".$ent_dir."\n";;
+                        		$path_cupon = "entidades/".$ent_dir."/cupones/".$cid.".png";
+echo "<<<<<<<<<<<<<<<<<<<<-----".$path_cupon."---->>>>>>>>>>>>>>>>>>>>\n";
+                        		$data = base64_decode($result['image']);
+                        		$img = imagecreatefromstring($data);
+echo "<!DOCTYPE html>
+<html>
+  <head>
+    <title>Codigo de Barra</title>
+  </head>
+  <body>
+    <img style='display:block; width:300px;height:100px;' id='base64image'                 
+       src='data:image/jpeg;base64, iVBORw0KGgoAAAANSUhEUgAAAOYAAAA0AQMAAACkUtbcAAAABlBMVEUAAAAAAAClZ7nPAAAAAXRS TlMAQObYZgAAAPBJREFUOI1jYCAMWF3viruLywYedS+JFTxaKlt4YVR2VHZUdlR2EAJ2BgYWhg8N HA5sIJ5CO0dBk0zhcRnBA2BZjgagbAdDgwMTiBfYMaWzTalLY5GRAkRWqei8TGe7xMdDDIVnGbo6 FnF1KXUoNAXAZLtVmDo6OhyUGLq0Gjo6Fhk0yRQ48kxwgMr+UpEDyjo+YmgCyrYv4mhS6mhimtAA lW1SUepo53BSAss2gGQ7WZh+QtzMsaxJZVlHB4dXEg/Q5IBGkY4mpS4OJSGoj6SKlKU+HpcxXM5T eKJB+R1H8fs5QCT8AMnXHA0EwoRUAADEhygpZ7l09AAAAABJRU5ErkJggg==' />
+  </body>
+</html> ";
+//var_dump($img);
+                        		if ($img !== false) {
+echo "entre if";
+						try {
+						header('Content-Type: image/png');
+                            			$result = imagepng($img, $path_cupon,0);
+						var_dump($result);
+						} catch ( Exception $ex ) {
+	 						var_dump($ex);
+						}
+echo "grabe";
+                            			imagedestroy($img);
+					}
+                        	//}
+                        	if ($count > 5) { $repetir = false; };
+                	} while ( $repetir );
+        	} else {
+			echo "NO TIENE ID EN CTA DIGITAL";
+		} 
+	}
+
 	function get_pagos($entidad, $fecha) {           
   
 		$id_entidad = $entidad->id;
 		$cd_control = $entidad->cd_control;
-
-        	$url = 'http://www.cuentadigital.com/exportacion.php?control='.$cd_control;
+		$cd_id = $entidad->cd_id;
+        	$url = 'https://www.cuentadigital.com/exportacion.php?control='.$cd_control;
         	$url .= '&fecha='.$fecha;	    
 		if($a = file_get_contents($url)){
 			$data = explode("\n",$a);
@@ -1357,47 +1424,6 @@ class Cron extends CI_Controller {
 
 	}
 
-    function cuentadigital($sid, $nombre, $precio, $venc=null) 
-    {
-// TODO NO SE SI SE USA
-        $this->config->load("cuentadigital");
-        $cuenta_id = $this->config->item('cd_id');
-        $nombre = substr($nombre,0,40);
-        $concepto  = $nombre.' ('.$sid.')';
-        $repetir = true;
-        $count = 0;
-        $result = false;
-        if(!$venc){
-            $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
-        }else{
-            $url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&venc='.$venc.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';    
-        }
-        
-        do{
-            $count++;
-            $a = file_get_contents($url);
-            $a = trim($a);
-            $xml = simplexml_load_string($a);
-            // $xml = simplexml_import_dom($xml->REQUEST);
-            if (($xml->ACTION) != 'INVOICE_GENERATED') {
-                $repetir = true;
-                echo('Error al generarlo: ');
-                sleep(1);
-                //echo '<a href="'.$url.'" target="_blank"><strong>Reenviar</strong></a>';
-            } else {
-                $repetir = false;
-                //echo('<p>El cupon de aviso se ha enviado correctamente</p>');
-                $result = array();
-                $result['image'] = $xml->INVOICE->BARCODEBASE64;
-                $result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
-                //$result = $xml->INVOICE->INVOICEURL;
-
-            }        
-            if ($count > 5) { $repetir = false; };
-
-        } while ( $repetir );    
-            return $result;
-    }
 
     public function intereses()
     {

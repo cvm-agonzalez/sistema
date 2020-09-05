@@ -72,6 +72,17 @@ class Socios_model extends CI_Model {
         return $socios;
     }
 
+    public function get_prox_nosocio($id_entidad) {
+	$qry="SELECT MIN(nro_socio) min_nsocio FROM socios WHERE id_entidad = $id_entidad; ";
+        $resultado = $this->db->query($qry)->result();
+	if ( $resultado[0]->min_nsocio >= 0 ) { 
+		$proximo = -1;
+	} else {
+		$proximo = $resultado[0]->min_nsocio-1;
+	}
+	return $proximo;
+    }
+
     public function get_prox_nsocio($id_entidad) {
 	$qry="SELECT MAX(nro_socio) max_nsocio FROM socios WHERE id_entidad = $id_entidad; ";
         $resultado = $this->db->query($qry)->result();
@@ -258,6 +269,7 @@ class Socios_model extends CI_Model {
     }
 
 
+
     public function cupon_cobro( $datos ) {
 	// Asigno variables
 	$sid = $datos['id'];
@@ -265,19 +277,21 @@ class Socios_model extends CI_Model {
 	// Busco cupon
         $this->load->model('pagos_model');
         $cupon = $this->pagos_model->get_cupon($sid, $id_entidad );
-        if ( $cupon->monto == 0 ) {
+        if ( !$cupon ) {
                 // Si no tiene lo genero
         	$this->load->model('general_model');
 		$entidad = $this->general_model->get_ent($id_entidad);
+		$ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
         	if ( $entidad->cd_id > 0 ) {
 			$cuenta_id = $entidad->cd_id;
-                	$nombre = substr($datos['nombre'],0,40);
-                	$concepto  = $nombre.' ('.$sid.')';
+                	$nombre = trim(substr($datos['nombre'],0,40));
+                	$apellido = trim(substr($datos['apellido'],0,40));
+                	$concepto  = $apellido.", ".$nombre.' ('.$sid.')';
                 	$repetir = true;
                 	$count = 0;
 			$precio = 100;
                 	$result = false;
-                        $url = 'https://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
+                        $url = 'https://www.cuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
                 	do{
                         	$count++;
                         	$a = file_get_contents($url);
@@ -292,20 +306,20 @@ class Socios_model extends CI_Model {
                                 	$result['image'] = $xml->INVOICE->BARCODEBASE64;
                                 	$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
 					// Insertar cupon en la BD
-					$this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
+					$cid = $this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
 					// Poner imagen en directorio cupones
+                        		$path_cupon = "entidades/".$ent_dir."/cupones/".$cid.".png";
+                        		$data = base64_decode($result['image']);
+                        		$img = imagecreatefromstring($data);
+                        		if ($img !== false) {
+                                                header('Content-Type: image/png');
+                            			imagepng($img,$path_cupon,0);
+                            			imagedestroy($img);
+					}
                         	}
                         	if ($count > 5) { $repetir = false; };
                 	} while ( $repetir );
-        	} else {
-			$result = array(); 
-			$result['image'] = TODO;
-			$result['barcode'] = $datos['dni'];
-			$precio = 100;
-			// Insertar cupon en la BD
-			$this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
-			// Poner imagen en directorio cupones
-		}
+        	} 
         }
     }
 

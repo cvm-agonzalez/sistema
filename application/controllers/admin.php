@@ -1509,6 +1509,10 @@ class Admin extends CI_Controller {
                         $datos['validmail_st']=1;
                         $datos['validmail_ts']=date('Y-m-d H:i:s');
                     }
+		    if ( $datos['nro_socio'] == 0 ) {
+			// Los no socios los agrego con numeros negativos
+			$datos['nro_socio'] = $this->socios_model->get_prox_nosocio($id_entidad);
+		    }
 
                     $uid = $this->socios_model->register($datos);
 
@@ -1908,13 +1912,11 @@ class Admin extends CI_Controller {
 
 
     public function debtarj() {
-		echo "debtarj";
 	    switch ($this->uri->segment(3)) {
                 case 'get':
-echo "function get";
                         $data = $this->carga_data();
                         $this->load->model('socios_model');
-                        $sid = $this->uri->segment(5);
+                        $sid = $this->uri->segment(4);
                         $data['socio'] = $this->socios_model->get_socio($sid);
                         if ( $data['socio'] )  {
                                 $this->load->model('debtarj_model');
@@ -1922,10 +1924,8 @@ echo "function get";
                                 if ( $debtarj ) {
                                         $data['debtarj'] = $debtarj;
                                         $data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
-echo "Antes de view!";
                                         $this->load->view('debtarj-edit',$data);
                                 } else {
-echo "es nuevo no edita";
                                         $data['js'] = 'debtarj';
                                         $fecha=date('d-m-Y');
                                         $data['fecha'] = $fecha;
@@ -1933,7 +1933,7 @@ echo "es nuevo no edita";
                                         $fecha=date('d-m-Y');
                                         $data['fecha'] = $fecha;
                                         $data['tarjetas'] = $this->tarjeta_model->get_tarjetas(0);
-                                        $this->load->view('debarj-nuevo-datos',$data);
+                                        $this->load->view('debtarj-nuevo-datos',$data);
                                 }
                         }
                         break;
@@ -3453,72 +3453,6 @@ echo "es nuevo no edita";
                 $this->load->view('admin',$data);
                 break;
 
-            case 'cupon':
-                switch($this->uri->segment(4)){
-                    case 'imprimir':
-                        $this->load->model('pagos_model');
-			$data = $this->carga_data();
-                        $id_entidad = $this->session->userdata('id_entidad');
-                        $data['cupon'] = $this->pagos_model->get_cupon_by_id($this->uri->segment(5));
-                        $this->load->view('cupon-imprimir',$data);
-                        break;
-                    case 'get':
-                	$id_entidad = $this->session->userdata('id_entidad');
-			$data = $this->carga_data();
-                        $data['sid'] = $this->uri->segment(5);
-                        $this->load->model('pagos_model');
-                        $data['cupon'] = $this->pagos_model->get_cupon($data['sid'], $id_entidad);
-                        $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
-                        $this->load->view('pagos-cupon-get',$data);
-                        break;
-                    case 'generar':
-                        if($_POST['id'] && $_POST['monto']){
-                	    $ent_dir = $this->session->userdata('ent_directorio');
-                	    $id_entidad = $this->session->userdata('id_entidad');
-                            $this->load->model('socios_model');
-                            $socio = $this->socios_model->get_socio($_POST['id']);
-                            $cupon = $this->cuentadigital($_POST['id'],$socio->nombre.' '.$socio->apellido,$_POST['monto']);
-                            if($cupon){
-                                $this->load->model('pagos_model');
-                                $cupon_id = $this->pagos_model->generar_cupon($id_entidad,$_POST['id'],$_POST['monto'],$cupon);
-                                $data = base64_decode($cupon['image']);
-                                $img = imagecreatefromstring($data);
-                		// Grabo log de cambios
-                		$login = $this->session->userdata('username');
-                		$nivel_acceso = $this->session->userdata('rango');
-                		$tabla = "cuentadigital";
-                		$operacion = 1;
-                		$llave = $_POST['id'];
-				$observ = "genere el cupon ".$cupon_id." con data ".$data;
-                		$this->log_cambios($id_entidad, $login, $nivel_acceso, $tabla, $operacion, $llave, $observ);
-                                    if ($img !== false) {
-                                        @header('Content-Type: image/png');
-                                        imagepng($img,'entidades/'.$ent_dir.'/images/cupones/'.$cupon_id.'.png',0);
-                                        imagedestroy($img);
-                                    }
-                                    else {
-                                        echo 'Ocurrió un error.';
-                                    }
-                                echo $_POST['id'];
-                            }
-                        }
-                        break;
-                    default:
-                        $id_entidad = $this->session->userdata('id_entidad');
-			$data = $this->carga_data();
-                        $data['section'] = 'pagos-cupon';
-                        $data['sid'] = $this->uri->segment(4);
-                        $this->load->model('socios_model');
-                        if($data['sid']){
-                            $this->load->model('pagos_model');
-                            $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
-                        }
-                        $data['socio'] = $this->socios_model->get_socio($data['sid']);
-                        $this->load->view('admin',$data);
-                        break;
-                    }
-                    break;
-
             case 'deuda':
                 $id_entidad = $this->session->userdata('id_entidad');
                 switch ($this->uri->segment(4)) {
@@ -3937,52 +3871,6 @@ echo "es nuevo no edita";
         return $fecha[2].'/'.$fecha[1].'/'.$fecha[0];
     }
 
-    function cuentadigital($sid, $nombre, $precio, $venc=null)
-    {
-        $this->config->load("cuentadigital");
-        $cuenta_id = $this->config->item('cd_id');
-	if ( $cuenta_id > 0 ) {
-        	$nombre = substr($nombre,0,40);
-        	$concepto  = $nombre.' ('.$sid.')';
-        	$repetir = true;
-        	$count = 0;
-        	$result = false;
-        	if(!$venc){
-            		$url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
-        	}else{
-            		$url = 'http://www.CuentaDigital.com/api.php?id='.$cuenta_id.'&venc='.$venc.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
-        	}
-
-        	do{
-            		$count++;
-            		$a = file_get_contents($url);
-            		$a = trim($a);
-            		$xml = simplexml_load_string($a);
-            		// $xml = simplexml_import_dom($xml->REQUEST);
-            		if (($xml->ACTION) != 'INVOICE_GENERATED') {
-                		$repetir = true;
-                		echo('Error al generarlo: ');
-                		sleep(1);
-                		//echo '<a href="'.$url.'" target="_blank"><strong>Reenviar</strong></a>';
-            		} else {
-                		$repetir = false;
-                		//echo('<p>El cupon de aviso se ha enviado correctamente</p>');
-                		$result = array();
-                		$result['image'] = $xml->INVOICE->BARCODEBASE64;
-                		$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
-                		//$result = $xml->INVOICE->INVOICEURL;
-		
-            		}
-            		if ($count > 5) { $repetir = false; };
-
-         	} while ( $repetir );
-	} else {
-			echo "Sin CD";
-			die;
-	}
-
-            return $result;
-    }
 
     public function envios($action='',$id='')
     {

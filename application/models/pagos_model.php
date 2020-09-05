@@ -24,9 +24,7 @@ class Pagos_model extends CI_Model {
         $this->db->where('sid',$sid);
         $query = $this->db->get('cupones');
         if($query->num_rows() == 0){
-            $cupon = new stdClass();
-            $cupon->monto = '0';
-            return $cupon;
+            return false;
         }else{
             return $query->row();
         }
