@@ -305,6 +305,7 @@ class Socios_model extends CI_Model {
                                 	$result = array(); 
                                 	$result['image'] = $xml->INVOICE->BARCODEBASE64;
                                 	$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
+                                	$result['codlink'] = substr($xml->INVOICE->PAYMENTCODE2,-10);
 					// Insertar cupon en la BD
 					$cid = $this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
 					// Poner imagen en directorio cupones

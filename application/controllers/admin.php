@@ -3396,6 +3396,47 @@ class Admin extends CI_Controller {
     public function pagos()
     {
         switch ($this->uri->segment(3)) {
+            case 'cupon':
+                switch($this->uri->segment(4)){
+                    case 'imprimir':
+                        $this->load->model('pagos_model');
+			$data = $this->carga_data();
+                        $data['cupon'] = $this->pagos_model->get_cupon_by_id($this->uri->segment(5));
+                        $this->load->view('cupon-imprimir',$data);
+                        break;
+                    case 'get':
+                        $this->load->model('pagos_model');
+                	$id_entidad = $this->session->userdata('id_entidad');
+                	$login = $this->session->userdata('username');
+                	$nivel_acceso = $this->session->userdata('rango');
+			$data = $this->carga_data();
+                        $data['sid'] = $this->uri->segment(5);
+                        $data['cupon'] = $this->pagos_model->get_cupon($data['sid'], $id_entidad);
+                        $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
+                        $this->load->view('pagos-cupon-get',$data);
+                        break;
+                    case 'generar':
+                        if($_POST['id'] && $_POST['monto']){
+                            $this->load->model('socios_model');
+                            $socio = $this->socios_model->get_socio($_POST['id']);
+                	    $id_entidad = $this->session->userdata('id_entidad');
+                            $cupon = $this->cuentadigital($id_entidad, $_POST['id'],$socio->nombre.', '.$socio->apellido,$_POST['monto']);
+                        }
+                        break;
+                    default:
+			$data = $this->carga_data();
+                        $data['section'] = 'pagos-cupon';
+                        $data['sid'] = $this->uri->segment(4);
+                        $this->load->model('socios_model');
+                        if($data['sid']){
+                            $this->load->model('pagos_model');
+                            $data['cuota'] = $this->pagos_model->get_monto_socio($data['sid']);
+                        }
+                        $data['socio'] = $this->socios_model->get_socio($data['sid']);
+                        $this->load->view('admin',$data);
+                        break;
+                    }
+                    break;
             case 'registrar':
                 switch($this->uri->segment(4)){
                     case 'do':
@@ -3603,6 +3644,55 @@ class Admin extends CI_Controller {
 	}
     }
 
+
+    public function cuentadigital( $id_entidad, $sid, $apynom, $monto ) {
+	// Busco cupon
+        $this->load->model('pagos_model');
+        $cupon = $this->pagos_model->get_cupon($sid, $id_entidad );
+        if ( !$cupon ) {
+                // Si no tiene lo genero
+        	$this->load->model('general_model');
+		$entidad = $this->general_model->get_ent($id_entidad);
+		$ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
+        	if ( $entidad->cd_id > 0 ) {
+			$cuenta_id = $entidad->cd_id;
+                	$concepto  = $apynom.' ('.$sid.')';
+                	$repetir = true;
+                	$count = 0;
+			$precio = 100;
+                	$result = false;
+                        $url = 'https://www.cuentaDigital.com/api.php?id='.$cuenta_id.'&codigo='.urlencode($sid).'&precio='.urlencode($precio).'&concepto='.urlencode($concepto).'&xml=1';
+                	do{
+                        	$count++;
+                        	$a = file_get_contents($url);
+                        	$a = trim($a);
+                        	$xml = simplexml_load_string($a);
+                        	if (($xml->ACTION) != 'INVOICE_GENERATED') {
+                                	$repetir = true;
+                                	sleep(1);
+                        	} else {
+                                	$repetir = false;
+                                	$result = array(); 
+                                	$result['image'] = $xml->INVOICE->BARCODEBASE64;
+                                	$result['barcode'] = $xml->INVOICE->PAYMENTCODE1;
+                                	$result['codlink'] = substr($xml->INVOICE->PAYMENTCODE2,-10);
+					// Insertar cupon en la BD
+					$cid = $this->pagos_model->generar_cupon($id_entidad, $sid, $precio, $result);
+					// Poner imagen en directorio cupones
+                        		$path_cupon = "entidades/".$ent_dir."/cupones/".$cid.".png";
+                        		$data = base64_decode($result['image']);
+                        		$img = imagecreatefromstring($data);
+                        		if ($img !== false) {
+                                                header('Content-Type: image/png');
+                            			imagepng($img,$path_cupon,0);
+                            			imagedestroy($img);
+					}
+                        	}
+                        	if ($count > 5) { $repetir = false; };
+                	} while ( $repetir );
+        	} 
+        }
+    }
     public function reportes() {
 	$funcion = $this->uri->segment(3);
 	$data = $this->carga_data();
