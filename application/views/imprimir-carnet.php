@@ -25,8 +25,8 @@
         $ent_directorio = $this->session->userdata('ent_directorio');
 	switch ($socio->categoria) {
                 default:
-                        $frente=base_url()."entidades/".$ent_directorio."/carnet-frente.png";
-                        $dorso=base_url()."entidades/".$ent_directorio."/carnet-dorso.png";
+                        $frente=base_url()."entidades/".$ent_directorio."/carnet-frente.jpg";
+                        $dorso=base_url()."entidades/".$ent_directorio."/carnet-dorso.jpg";
 			break;
 	}
 
@@ -48,7 +48,7 @@
         .datos{
             float:right;
             width: 165px;
-            color: #FFF;
+            color: #000;
             margin-top:50px;
             line-height: 15px;
         }
@@ -56,7 +56,7 @@
             clear: both;
         }
         .barcode{
-            margin-top: 120px;
+            margin-top: 125px;
             margin-left: 15px;
         }
 		</style>
