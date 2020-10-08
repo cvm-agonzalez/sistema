@@ -52,7 +52,9 @@
 					<label for="entidad" class="col-sm-2">Entidad</label>
 					<div class="col-sm-10">
 					<select style="padding:5px;" id="select_ent" name="select_ent" class="form-control">							
-                                                        <option value="0">Todas las Entidades</option>
+                                                        <? if ( $grupo_user == 0 ) { ?>
+								<option value="0">Todas las Entidades del Grupo</option>
+							<? } ?>
 						<?
                            				foreach ($entidades as $entidad) {
                            			?>

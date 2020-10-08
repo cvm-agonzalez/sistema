@@ -9,6 +9,7 @@
 					<th>Descripcion</th>
 					<th>CUIT</th>
 					<th>Email Origen</th>
+					<th>Grupo</th>
 					<th>Opciones</th>
 				</tr>
 			</thead>
@@ -20,6 +21,7 @@
 					<td><?=$aa->descripcion?></td>
 					<td><?=$aa->cuit?></td>
 					<td><?=$aa->email_sistema?></td>
+					<td><?=$aa->grupo?></td>
 					<td>
 						<a href="<?=base_url()?>admin/entidades/editar/<?=$aa->id?>"><i class="fa fa-gear"></i> Editar</a>  | 
 					</td>
@@ -75,6 +77,22 @@
 					<label for="pass" class="col-sm-2">Email Origen</label>
 					<div class="col-sm-10">
 						<input type="email" name="email_sistema" id="email_sistema" class="form-control" required>
+					</div>
+				</div> 
+				<div class="form-group">
+					<label for="pass" class="col-sm-2">Grupo</label>
+					<div class="col-sm-10">
+                                        	<select style="padding:5px;" id="grupo" name="grupo" class="form-control">                                             
+                                                        <option value="0">Todos los Grupos</option>
+                                                <?
+                                                        foreach ($grupos as $grupo) {
+                                                ?>
+                                                        <option value="<?=$grupos->id?>"><?=$grupo->descripcion?></option>
+                                                <?
+                                                        }
+                                                ?>
+                                        	</select>
+
 					</div>
 				</div> 
 				<button type="submit" class="btn btn-success">Agregar</button>

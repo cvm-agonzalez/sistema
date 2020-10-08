@@ -46,6 +46,23 @@
                                                 <input type="email" name="email_sistema" id="email_sistema" class="form-control" value="<?=$entidad->email_sistema?>" required>
                                         </div>
                                 </div>
+                                <div class="form-group">
+                                        <label for="pass" class="col-sm-2">Grupo</label>
+                                        <div class="col-sm-10">
+                                                <select style="padding:5px;" id="grupo" name="grupo" class="form-control">                                     
+                                                        <option value="0">Todos los Grupos</option>
+                                                <?
+                                                        foreach ($grupos as $grupo) {
+                                                ?>
+                                                        <option value="<?=$grupo->id?>" <? if($entidad->grupo == $grupo->id){echo 'selected';} ?> ><?=$grupo->descripcion?></option>
+                                                <?
+                                                        }
+                                                ?>
+                                                </select>
+
+                                        </div>
+                                </div>
+
 				<button type="submit" class="btn btn-success">Agregar</button>
 				<a href="<?=base_url()?>admin/entidades" type="submit" class="btn btn-warning">Cancelar</a>
 			</form>

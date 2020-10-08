@@ -23,11 +23,34 @@ class Admins_model extends CI_Model {
 		$admins = $query->result();
 		$query->free_result();
 
+		$this->db->where('id', $id_entidad);
+		$this->db->where('estado', 1);
+		$query = $this->db->get('entidades');
+		$entidad = $query->row();
+		if ( $entidad ) {
+			$this->db->where('id_entidad', 0);
+			$this->db->where('grupo', $entidad->grupo);
+			$this->db->where('estado', 1);
+			$query = $this->db->get('admin');
+			$admins0 = $query->result();
+			$query->free_result();
+		} else {
+			$this->db->where('id_entidad', 0);
+			$this->db->where('estado', 1);
+			$query = $this->db->get('admin');
+			$admins0 = $query->result();
+			$query->free_result();
+		}
+
 		$this->db->where('id_entidad', 0);
+		$this->db->where('grupo', 0);
 		$this->db->where('estado', 1);
 		$query = $this->db->get('admin');
-		$admins0 = $query->result();
+		$admin_root = $query->result();
 		$query->free_result();
+		if ( $admin_root ) {
+			$admins0 = array_merge($admins0,$admin_root);
+		}
 
 		$ret_admins = array_merge($admins,$admins0);
 		return $ret_admins;

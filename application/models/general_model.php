@@ -141,6 +141,34 @@ class General_model extends CI_Model {
     	$this->db->where('id',$id);
 	$this->db->update('entidades',array('estado'=>0));
     }
+
+/* grupo entidad */
+
+    public function get_grupos_ent($id_entidad){
+        $query = "SELECT ge.* FROM grupo_entidad ge JOIN entidades e ON e.id = $id_entidad AND e.grupo = ge.id; ";
+        $resultado = $this->db->query($query)->result();
+        return $resultado;
+    }
+
+    public function get_grupos(){
+        $query = $this->db->get("grupo_entidad");
+        return $query->result();
+    }
+
+    public function get_grupo($id){
+        $this->db->where('id',$id);
+        $query = $this->db->get("grupo_entidad");
+        return $query->row();
+    }
+
+    public function get_ents_grupo($id){
+        $this->db->where('grupo',$id);
+        $query = $this->db->get("entidades");
+        return $query->result();
+    }
+
+/**/
+
 /**
 ENVIOS
 **/

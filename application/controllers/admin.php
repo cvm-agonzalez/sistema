@@ -22,6 +22,7 @@ class Admin extends CI_Controller {
 		$data['ent_abreviatura'] = $this->session->userdata('abreviatura');
 		$data['email_reply'] = $this->session->userdata('email_sistema');
 		$data['id_entidad'] = $this->session->userdata('id_entidad');
+		$data['grupo'] = $this->session->userdata('grupo');
 		$data['username'] = $this->session->userdata('username');
 		$data['rango'] = $this->session->userdata('rango');
 		$data['baseurl'] = base_url();
@@ -581,6 +582,7 @@ class Admin extends CI_Controller {
 						'rango'        =>        $check_user->rango,
 						'mail'        =>        $check_user->mail,
 						'username'         =>         $check_user->user,
+						'grupo'         =>         $check_user->grupo,
 						'ent_abreviatura' => $entidad->abreviatura,
 						'email_sistema' => $entidad->email_sistema,
 						'ent_nombre' => $entidad->descripcion,
@@ -767,6 +769,7 @@ class Admin extends CI_Controller {
         $action = $this->uri->segment(3);
 		$data = $this->carga_data();
         $this->load->model('admins_model');
+        $this->load->model('general_model');
         $this->login_model->update_lCon();
         switch ($action) {
             case 'ult_movs':
@@ -856,6 +859,8 @@ class Admin extends CI_Controller {
                 $data = $this->carga_data();
                 $id = $this->session->userdata('id_usuario');
                 $data['admin'] = $this->admins_model->get_admin($id);
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data['grupos'] = $this->general_model->get_grupos_ent($id_entidad);
                 $data['action'] = "chgpwd";
                 $data['section'] = 'admins-editar';
                 $this->load->view('admin',$data);
@@ -863,11 +868,18 @@ class Admin extends CI_Controller {
 
             case 'editar':
                 $data = $this->carga_data();
-                $id = $this->uri->segment(4);
-                $data['admin'] = $this->admins_model->get_admin($id);
-                $data['action'] = "edit";
                 $this->load->model('general_model');
-                $data['entidades'] = $this->general_model->get_ents();
+                $id = $this->uri->segment(4);
+                $id_entidad = $this->session->userdata('id_entidad');
+		$data['grupos'] = $this->general_model->get_grupos_ent($id_entidad);
+                $admin = $this->admins_model->get_admin($id);
+                $data['admin'] = $admin;
+                $data['action'] = "edit";
+		if ( $admin->grupo == 0 ) {
+                	$data['entidades'] = $this->general_model->get_ents();
+		} else {
+                	$data['entidades'] = $this->general_model->get_ents_grupo($admin->grupo);
+ 		}
                 $data['section'] = 'admins-editar';
                 $this->load->view('admin',$data);
                 break;
@@ -997,6 +1009,7 @@ class Admin extends CI_Controller {
                 $id_entidad  = $this->session->userdata('id_entidad');
                 $this->load->model('general_model');
                 $data['entidades'] = $this->general_model->get_ents();
+                $data['grupo_user'] = $this->session->userdata('grupo');
                 $data['listaAdmin'] = $this->admins_model->get_admins($id_entidad);
                 $data['section'] = 'admins';
                 $this->load->view('admin',$data);
@@ -1049,6 +1062,7 @@ class Admin extends CI_Controller {
 		$data = $this->carga_data();
 		$id_ent =  $this->uri->segment(4);
 		$data['entidad'] = $this->general_model->get_ent($id_ent);
+		$data['grupos'] = $this->general_model->get_grupos();
                 $data['action'] = "edit";
                 $data['section'] = 'entidades-editar';
                 $this->load->view('admin',$data);
@@ -1092,6 +1106,7 @@ class Admin extends CI_Controller {
 		$data = $this->carga_data();
 		$id_entidad  = $this->session->userdata('id_entidad');
                 $data['listaEntidades'] = $this->general_model->get_ents();
+		$data['grupos'] = $this->general_model->get_grupos();
                 $data['section'] = 'entidades';
                 $this->load->view('admin',$data);
                 break;

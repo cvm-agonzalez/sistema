@@ -25,7 +25,7 @@
             <?
             }*/
             ?>
-        <link rel="icon" href="<?=$baseurl?>images/favicon.png" type="image/x-icon" />
+        <link rel="icon" href="<?=$baseurl?>images/favicon32.png" type="image/x-icon" />
     </head>
     <body data-ng-app="app" id="app" data-custom-background="" data-off-canvas-nav="">
         <!--[if lt IE 9]>
@@ -284,6 +284,17 @@
 			}
             	})
 
+		if ( nsocio == 0 ) {
+                	var agree = confirm("Seguro que desea dar de alta un NO SOCIO?");
+                	if(agree) {	
+				$("#result_OK").addClass('hidden');
+				$("#result_OK0").removeClass('hidden');
+			} else {
+                                $("#nro_socio").focus();
+			}
+		}
+		
+
         	});
 
 	   <? } ?>
@@ -450,6 +461,11 @@
                 alert ("Error no puede ser categoria mayor, tiene menos de 18 años");
                 return false;
             };
+            var nsocio = $("#nro_socio").val();
+	    if ( nsocio == 0 && tipo_cat != "N" ) {
+                alert ("Tiene que seleccionar categoria NO SOCIO!!!!");
+                return false;
+	    }
             var mail = $("#mail").val();
             var accion = $(this).data('accion');
             var param = encodeURIComponent(mail);
@@ -762,12 +778,64 @@
 
             }
 
+	})
+         </script>
+	<? } ?>
 
+        <? if($section == 'debtarj-nuevo-get'){ ?>
+
+        <script language="JavaScript">
+
+        $(document).ready(function(){
+            a= $('#r2').autocomplete({ serviceUrl:'<?=$baseurl?>autocomplete/get/socios-dni|nombre|apellido',
+                onSelect: function (suggestion) {
+                $('#r2').val(suggestion.data);
+                }
+            });
+
+            $("#debtarj_reg_form").submit(function(){
+                var id = 'r2';
+                $("#"+id+"-loading").removeClass('hidden');
+                var dni = $("#"+id).val();
+                $.get("<?=$baseurl?>autocomplete/buscar_socio/dni/"+dni,function(data){
+                    $("#"+id+"-loading").addClass('hidden');
+                    if(data){
+                        var socio = $.parseJSON(data);
+                        var close_link = '<a href="#" onclick="cliar(\''+id+'\')" title="Quitar" style="color:#F00"><i class="fa fa-times" ></i></a>'
+                        $("#"+id+"-result").html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+socio[0].nro_socio+'-'+socio[0].nombre+' '+socio[0].apellido+' ('+socio[0].dni+') '+close_link);
+                        $("#"+id+"-data").addClass('hidden');
+                        $("#"+id+"-result").removeClass('hidden');
+                        $("#"+id+"-id").val(socio[0].id);
+
+                        $("#acceso_editar").attr('href','<?=$baseurl?>admin/socios/editar/'+socio[0].id);
+                        $("#acceso_actividad").attr('href','<?=$baseurl?>admin/actividades/asociar/'+socio[0].id);
+                        $("#acceso_ver_resumen").attr('href','<?=$baseurl?>admin/socios/resumen/'+socio[0].id);
+                        $("#acceso_cupon").attr('href','<?=$baseurl?>admin/pagos/cupon/'+socio[0].id);
+                        $("#acceso_deuda").attr('href','<?=$baseurl?>admin/pagos/deuda/'+socio[0].id);
+                        $("#acceso_resumen").attr('href','<?=$baseurl?>admin/socios/enviar_resumen/'+socio[0].id);
+                        $("#accesos_directos").removeClass('hidden');
+
+                        get_debtarj(socio[0].id);
+                    }else{
+                        alert("El DNI ingresado no se encuentra en la Base de Datos.")
+                    }
+                })
+            })
+            function get_debtarj(id){
+                 $("#debtarj-div").html('<i class="fa fa-spinner fa-spin"></i> Cargando...');
+                 $.get( "<?=$baseurl?>admin/debtarj/get/"+id ).done(function(data){
+                    $("#debtarj-div").html(data);
+                    $("#debtarj-div").slideDown();
+
+                })
+
+            }
+
+        })
 
             <? if($socio->id && $socio->id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->id?>"); <? } ?>
 
 
-        })
 
         function cliar(id){
                 $("#"+id+"-data").removeClass('hidden');
@@ -996,12 +1064,12 @@
 
             }
 
+        })
 
 
             <? if($socio->id && $socio->id != 0){ ?> $("#pago-div").slideDown(); get_pago("<?=$socio->id?>"); <? } ?>
 
 
-        })
 
         function cleear(id){
                 $("#"+id+"-data").removeClass('hidden');
@@ -1464,45 +1532,6 @@ $("#load-debtarj-form").submit(function(){
 })
 
 
-$("#carga_debtarj_form").submit(function(){
-
-        var boton = $("#boton-deb").data("text");
-        switch ( boton ) {      
-                case "btnmodif":
-                        var url = "admin/debtarj/grabar/";
-			var msg = "Seguro que desea modificar este debito?";
-                        break;
-                case "btnagregar":
-                        var url = "admin/debtarj/grabar/0";
-			var msg = "Seguro que desea registrar este debito?";
-                        break;
-        }
-
-        var agree = confirm(msg);
-        if(!agree){return false;}
-        $("#reg-cargando").removeClass('hidden');
-
-        var id_debito = $("#id_debito").val();
-        var id_marca = $("#id_marca").val();
-        var nro_tarjeta = $("#nro_tarjeta").val();
-	var largo = nro_tarjeta.length;
-	if ( largo < 16 ) {
-		var sigue = confirm("Seguro que el numero es tan corto?");
-		if (!sigue){return false;}
-	}
-        var fecha_adhesion = $("#fecha_adhesion").val();
-        var sid = $("#sid").val();
-        var id_debito = $("#id_debito").val();
-
-        $.post("<?=$baseurl?>"+url,{id_debito: id_debito, sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
-        .done(function(data){
-		alert("Debito correctamente actualizado");
-                $("#reg-cargando").addClass('hidden');
-        })
-
-        return false;
-})
-
 $("#edit_debtarj_form").submit(function(){
 
         var url = "admin/debtarj/regrabar/";
@@ -1553,6 +1582,8 @@ $("#nvo_debtarj_form").submit(function(){
                 if (!sigue){return false;};
         }
 
+alert("boton nuevo");
+alert(url);
         $.post("<?=$baseurl?>"+url,{sid: sid, id_marca: id_marca, nro_tarjeta: nro_tarjeta, fecha_adhesion: fecha_adhesion })
         .done(function(data){
                 alert("Debito correctamente guardado");

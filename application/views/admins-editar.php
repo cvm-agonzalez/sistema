@@ -5,6 +5,26 @@
 			<form autocomplete="off" class="form-horizontal ng-pristine ng-valid" id="edi_admin" action="<?=$baseurl?>admin/admins/guardar/<?=$admin->id?>" method="post">
 
                                 <div class="form-group">
+                                        <label for="grupo" class="col-sm-2">Grupo</label>
+                                        <div class="col-sm-10">
+                                        <select style="padding:5px;" id="grupo" name="grupo" class="form-control">
+                                                <?
+							if ( $admin->grupo == 0 ) { ?>
+                                                        	<option value="0" selected>Todos los Grupos</option>
+							<?
+							}
+
+                                                        foreach ($grupos as $grupo) {
+                                                ?>
+                                                        <option value="<?=$grupo->id?>"<?if ($admin->grupo == $grupo->id) { echo 'selected'; }?>><?=$grupo->descripcion?></option>
+                                                <?
+                                                        }
+                                                ?>
+                                        </select>
+                                        </div>
+                                </div>
+
+                                <div class="form-group">
                                         <label for="entidad" class="col-sm-2">Entidad</label>
                                         <div class="col-sm-10">
                                         <select style="padding:5px;" id="select_ent" name="select_ent" class="form-control">
