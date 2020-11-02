@@ -154,7 +154,7 @@ class ws_api extends CI_Controller {
 	}
 
 	function url_CVM($funcion, $dni='') {
-    		$url = "localhost/CVM_online/ws_api/".$funcion;
+    		$url = "http://clubvillamitre.com/ws_api/".$funcion;
     
     		//Prueba villa mitre
     		$login = $this->login;
