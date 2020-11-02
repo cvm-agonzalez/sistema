@@ -7,6 +7,7 @@ class Admins_model extends CI_Model {
     
     public function __construct() {
         parent::__construct();
+        $this->load->database('default');
     }
     
 	public function insert_admin($admin='')
@@ -96,6 +97,24 @@ class Admins_model extends CI_Model {
 	{
 		$this->db->where('id', $id);
 		$this->db->update('admin', $admin);
+	}
+
+	public function get_user_app($login, $token)
+	{
+		$this->db->where('login', $login);
+		$this->db->where('token', $token);
+		$query = $this->db->get('user_app');
+		if( $query->num_rows() == 0 ){ return false; }
+		return $query->row();
+	}
+
+	public function get_user_app_dni($login, $dni)
+	{
+		$this->db->where('login', $login);
+		$this->db->where('dni', $dni);
+		$query = $this->db->get('user_app');
+		if( $query->num_rows() == 0 ){ return false; }
+		return $query->row();
 	}
 }
 ?>
