@@ -12,6 +12,7 @@ class ws_api extends CI_Controller {
 	protected $token_ok = FALSE;
 	protected $sistemaCVM = FALSE;
 	protected $entidad = null;
+	protected $log = null;
 
 	public function __construct()
     	{
@@ -26,6 +27,14 @@ class ws_api extends CI_Controller {
         	$dni_user = $this->input->get_post('dni_user');
 
 
+		//log
+        	$file = './application/logs/wsapi.log';
+        	if( !file_exists($file) ){
+                	$this->log = fopen($file,'w');
+        	} else {
+                	$this->log = fopen($file,'a');
+        	}
+
 		//echo "\n\nLogin: ".$login." Authorization token: ".$authorization_str[0]." \n" ;
 
 
@@ -39,13 +48,16 @@ class ws_api extends CI_Controller {
                 		$this->dni = $dni;
                 		$this->login_user = $login_user;
                 		$this->dni_user = $dni_user;
+                		fwrite($this->log, "Logeo exitoso-".date('Y-m-d G:i:s')."-".$login." parametros: ".$login_user."-".$dni_user." CVM=".$this->sistemaCVM."\n");
             		} else {
                 		//No existe la combinacion token - usuario
 				echo json_encode($this->array_to_utf8(array("estado" => "100", "result" => (object) array(), "msg" => "No existe usuario-token")));
+                		fwrite($this->log, "Error 100-".date('Y-m-d G:i:s')."-".$login." parametros: ".$login_user."-".$dni_user."\n");
             		}
         	}  else {
                 		//No tiene permiso para esta funcion
 				echo json_encode($this->array_to_utf8(array("estado" => "101", "result" => (object) array(), "msg" => "No vino token de validacion")));
+                		fwrite($this->log, "Error 101-".date('Y-m-d G:i:s')."-".$login." parametros: ".$login_user."-".$dni_user."\n");
 		}
             
     	}
@@ -73,6 +85,7 @@ class ws_api extends CI_Controller {
 		if ( $this->token_ok ) {
 			$arr_ret = array ( 'nivel' => $this->nivel, 'login' => $this->login, 'entidad' => $this->entidad );
 			$result = json_encode($this->array_to_utf8(array("estado" => "0", "result" => (object) $arr_ret, "msg" => "Acceso permitido y validado")));
+                	fwrite($this->log, "Usuario generico OK-".date('Y-m-d G:i:s')."-".$this->login." entidad: ".$this->entidad."- nivel ".$this->nivel."\n");
 			echo $result;
 		}
 	}
@@ -84,9 +97,11 @@ class ws_api extends CI_Controller {
 			if ( $usuario ) {
 				$arr_ret = array ( 'nivel' => $usuario->nivel, 'token' => $usuario->token, 'entidad' => $usuario->id_entidad, 'email' => $usuario->email );
 				$result = json_encode($this->array_to_utf8(array("estado" => "0", "result" => (object) $arr_ret, "msg" => "Usuario permitido y validado")));
+                		fwrite($this->log, "Obtuvo Usuario OK-".date('Y-m-d G:i:s')."-".$this->login_user." entidad: ".$usuario->id_entidad."- nivel ".$usuario->nivel."\n");
 				echo $result;
 			} else {
 				$result = json_encode($this->array_to_utf8(array("estado" => "107", "result" => (object) null, "msg" => "Usuario inexistente".$this->login_user."--".$this->dni_user)));
+                		fwrite($this->log, "Error 107-".date('Y-m-d G:i:s')."-".$this->login_user."\n");
 				echo $result;
 			}
 		}
@@ -115,9 +130,11 @@ class ws_api extends CI_Controller {
 						$result = json_encode($this->array_to_utf8(array("estado" => "103", "result" => null, "msg" => "No se pudo procesar padron entidad")));
 					}
 				}
+                		fwrite($this->log, "Obtuvo padron OK -".date('Y-m-d G:i:s')."-".count($padron)." socios"."\n");
 				echo $result;
 			} else {
 				$result = json_encode($this->array_to_utf8(array("estado" => "106", "result" => (object) null, "msg" => "Usuario sin nivel para esta funcion")));
+                		fwrite($this->log, "Error 106 -".date('Y-m-d G:i:s')."-".$this->login."\n");
 				echo $result;
 			}
 		}
@@ -134,6 +151,7 @@ class ws_api extends CI_Controller {
 						$result = $socio;
 					} else {
 						$result = json_encode($this->array_to_utf8(array("estado" => "104", "result" => null, "msg" => "No se pudo obtener el socio CVM")));
+                				fwrite($this->log, "Error 104 -".date('Y-m-d G:i:s')."-".$this->login."\n");
 					}
 				} else {
 					$this->load->model('socios_model');
@@ -142,7 +160,65 @@ class ws_api extends CI_Controller {
 						$result = json_encode($this->array_to_utf8(array("estado" => "0", "result" => (object) $socio, "msg" => "Proceso OK")));
 					} else {
 						$result = json_encode($this->array_to_utf8(array("estado" => "105", "result" => null, "msg" => "No se pudo obtener el socio entidad")));
+                				fwrite($this->log, "Error 105 -".date('Y-m-d G:i:s')."-".$this->login."\n");
 					}
+				}
+		
+                		fwrite($this->log, "Obtuvo socio OK -".date('Y-m-d G:i:s')."-".$this->dni."\n");
+				echo $result;
+			} else {
+				$result = json_encode($this->array_to_utf8(array("estado" => "106", "result" => (object) null, "msg" => "Usuario sin nivel para esta funcion")));
+                		fwrite($this->log, "Error 106 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+				echo $result;
+			}
+		}
+	}
+
+	function check_estado() { // esta funcion devuelve el estado de deuda de un socio puntual a partir de su DNI y en base a la entidad correspondiente al usuario logueado
+		// Si no esta validado el usuario-token devuelvo false
+		if ( $this->token_ok ) {
+			if ( $this->nivel > 0 ) {
+				if ( $this->sistemaCVM ) {
+					// Conecto con el sitio de CVM y traigo datos del socio desde ahi
+					$socio = $this->url_CVM('check_estado', $this->dni);
+					$socio_decode = json_decode($socio);
+					if ( $socio_decode->estado == 0 ) {
+						if ( $socio_decode->result->suspendido == 0 ) {
+							if ( $socio_decode->result->semaforo == 1  || $socio_decode->result->semaforo == 10 ) {
+								$result = json_encode($this->array_to_utf8(array("estado" => "0", "result" => null, "msg" => "Socio OK")));
+                						fwrite($this->log, "Socio al dia -".date('Y-m-d G:i:s')."-".$this->dni."\n");
+							} else {
+								$result = json_encode($this->array_to_utf8(array("estado" => "108", "result" => null, "msg" => "Socio con deuda")));
+                						fwrite($this->log, "Error 108 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+							}
+						} else {
+							$result = json_encode($this->array_to_utf8(array("estado" => "109", "result" => null, "msg" => "Socio suspendido")));
+                					fwrite($this->log, "Error 109 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+						}
+					} else {
+						$result = json_encode($this->array_to_utf8(array("estado" => "110", "result" => null, "msg" => "Socio inexistente")));
+                				fwrite($this->log, "Error 110 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+					}
+				} else {
+					$this->load->model('socios_model');
+					$socio = $this->socios_model->get_status_by_dni($this->entidad, $this->dni);
+                                        if ( $socio ) {
+                                                if ( $socio->suspendido == 0 ) {
+                                                        if ( $socio->semaforo == 1 || $socio->semaforo == 10 ) {
+                                                                $result = json_encode($this->array_to_utf8(array("estado" => "0", "result" => null, "msg" => "Socio OK")));
+                						fwrite($this->log, "Socio al dia -".date('Y-m-d G:i:s')."-".$this->dni."\n");
+                                                        } else {
+                                                                $result = json_encode($this->array_to_utf8(array("estado" => "108", "result" => null, "msg" => "Socio con deuda")));
+                						fwrite($this->log, "Error 108 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+                                                        }
+                                                } else {
+                                                        $result = json_encode($this->array_to_utf8(array("estado" => "109", "result" => null, "msg" => "Socio suspendido")));
+                					fwrite($this->log, "Error 109 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+                                                }
+                                        } else {
+                                                $result = json_encode($this->array_to_utf8(array("estado" => "110", "result" => null, "msg" => "Socio inexistente")));
+                				fwrite($this->log, "Error 110 -".date('Y-m-d G:i:s')."-".$this->login."\n");
+                                        }
 				}
 		
 				echo $result;
@@ -154,7 +230,7 @@ class ws_api extends CI_Controller {
 	}
 
 	function url_CVM($funcion, $dni='') {
-    		$url = "http://clubvillamitre.com/ws_api/".$funcion;
+    		$url = "localhost/CVM_online/ws_api/".$funcion;
     
     		//Prueba villa mitre
     		$login = $this->login;

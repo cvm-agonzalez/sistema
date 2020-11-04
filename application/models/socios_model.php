@@ -548,5 +548,29 @@ class Socios_model extends CI_Model {
         return $result;
     }
 
+    public function get_status_by_dni($dni)
+    {
+                $query="DROP TEMPORARY TABLE IF EXISTS tmp_saldos; ";
+                $this->db->query($query);
+                $query="CREATE TEMPORARY TABLE tmp_saldos ( INDEX ( sid ) )
+                        SELECT p.tutor_id sid, MAX(IF(p.estado = 1,DATE_FORMAT(p.generadoel,'%Y%m'),0)) ult_impago, SUM(p.pagado-p.monto) saldo, IF(SUM(p.pagado-p.monto)>=0,1,0) aldia
+                        FROM pagos p
+                                JOIN socios s ON s.dni = $dni AND s.id = p.tutor_id
+                        GROUP BY 1; ";
+                $this->db->query($query);
+                $query="SELECT s.dni, s.id sid, CONCAT(s.apellido,', ',s.nombre) apynom, c.barcode, p.saldo, 
+                                CASE WHEN aldia=0 AND p.ult_impago < DATE_FORMAT(CURDATE(), '%Y%m') THEN 99
+                                     WHEN aldia=0 AND p.ult_impago = DATE_FORMAT(CURDATE(), '%Y%m') THEN 10
+                                     WHEN aldia=1 THEN 1
+                                END semaforo
+                        FROM socios s 
+                                LEFT JOIN cupones c ON ( s.id = c.sid AND c.estado = 1 ) 
+                                LEFT JOIN tmp_saldos p ON ( s.id = p.sid ) 
+                        WHERE s.dni = $dni 
+                        GROUP BY s.id; ";
+                $result = $this->db->query($query)->row();
+                return $result;
+     }
+
 }  
 ?>
