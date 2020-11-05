@@ -553,9 +553,10 @@ class Socios_model extends CI_Model {
                 $query="DROP TEMPORARY TABLE IF EXISTS tmp_saldos; ";
                 $this->db->query($query);
                 $query="CREATE TEMPORARY TABLE tmp_saldos ( INDEX ( sid ) )
-                        SELECT p.tutor_id sid, MAX(IF(p.estado = 1,DATE_FORMAT(p.generadoel,'%Y%m'),0)) ult_impago, SUM(p.pagado-p.monto) saldo, IF(SUM(p.pagado-p.monto)>=0,1,0) aldia
+                        SELECT p.tutor_id sid, MIN(IF(p.estado = 1,IF (p.tipo != 5 ,DATE_FORMAT(p.generadoel,'%Y%m'),'2100-01-01'),0)) ult_impago, SUM(p.pagado-p.monto) saldo, IF(SUM(p.pagado-p.monto)>=0,1,0) aldia
                         FROM pagos p
                                 JOIN socios s ON s.dni = $dni AND s.id = p.tutor_id
+			WHERE p.estado = 1
                         GROUP BY 1; ";
                 $this->db->query($query);
                 $query="SELECT s.dni, s.id sid, CONCAT(s.apellido,', ',s.nombre) apynom, c.barcode, p.saldo, 
