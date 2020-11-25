@@ -573,5 +573,26 @@ class Socios_model extends CI_Model {
                 return $result;
      }
 
+    public function get_carnet_by_dni($id_entidad, $dni)
+    {
+        $this->load->model('general_model');
+        $this->db->where('id_entidad', $id_entidad);
+        $this->db->where('dni', $dni);
+        $query = $this->db->get('socios');
+        if( $query->num_rows() == 0 ){ return false; }
+        $socio = $query->row();
+	$ent_directorio = $this->general_model->get_ent_dir($id_entidad)->dir_name;
+	if(file_exists( BASEPATH."../entidades/".$ent_directorio."/socios/".$socio->id.".jpg" )){
+                $url_foto = "entidades/".$ent_directorio."/socios/".$socio->id.".jpg";
+	} else {
+		$url_foto = "sinfoto";
+	}
+
+	$ret_socio = array('nro_socio' => $socio->nro_socio, 'apynom' => $socio->apellido.', '.$socio->nombre, 'domicilio' => $socio->domicilio, 'nacimiento' => $socio->nacimiento, 'ingreso' => $socio->alta, 'estado' => $socio->suspendido, 'foto' => urlencode($url_foto));
+        $query->free_result();
+        return $ret_socio;
+    }
+
+
 }  
 ?>
