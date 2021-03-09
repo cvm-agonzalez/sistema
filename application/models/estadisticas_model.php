@@ -178,7 +178,7 @@ class Estadisticas_model extends CI_Model {
         $this->db->query($qry);
 
 	$qry = "SELECT t.periodo, t.socios, t.cuotas, t.facturado, t.pagado_mes, t.pagado_mes_mes,
-			ROUND((t.pagado_mes/t.facturado)*100,2) porc_cobranza,
+			ROUND((t.pagado_mes_mes/t.facturado)*100,2) porc_cobranza,
 			t.pagado_mora, 
 			ROUND((t.pagado_mora/t.facturado)*100,2) porc_mora,
 			t.pago_parcial, t.impago,

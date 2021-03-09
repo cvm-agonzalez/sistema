@@ -19,15 +19,19 @@ class Pagos_model extends CI_Model {
             return $this->get_cupon($socio->tutor);
         }
 
-        $this->db->where('id_entidad',$id_entidad);
-        $this->db->where('estado',1);
-        $this->db->where('sid',$sid);
-        $query = $this->db->get('cupones');
-        if($query->num_rows() == 0){
-            return false;
-        }else{
-            return $query->row();
-        }
+	if ( $socio ) {
+        	$this->db->where('id_entidad',$id_entidad);
+        	$this->db->where('estado',1);
+        	$this->db->where('sid',$sid);
+        	$query = $this->db->get('cupones');
+        	if($query->num_rows() == 0){
+            		return false;
+        	}else{
+            		return $query->row();
+        	}
+	} else {
+		return false;
+	}
     }
 
     public function get_cupones_old($id_entidad) 
