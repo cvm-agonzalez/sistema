@@ -1314,6 +1314,11 @@ $("#comi-activ-form").submit(function(){
             window.open('<?=base_url()?>imprimir/carnet/'+id,'','menubar=yes,toolbar=yes,width=800,height=600');
         })
 
+        $(document).on("click","#imprimir_carnets_lote",function(){
+            var id = $(this).data('id');
+            window.open('<?=base_url()?>imprimir/carnets/','','menubar=yes,toolbar=yes,width=800,height=600');
+        })
+
         $("#grupo-select").change(function(){
             var grupo = $(this).val();
             $("#grupo-categorias").slideUp();

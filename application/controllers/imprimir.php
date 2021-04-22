@@ -392,6 +392,23 @@ class Imprimir extends CI_Controller {
 	}
     }
 
+    public function carnets(){
+        $id_entidad = $this->session->userdata('id_entidad');
+        $data['id_entidad'] = $id_entidad;
+        $this->load->model('socios_model');
+        $this->load->model('pagos_model');
+        $socios = $this->socios_model->get_socios($id_entidad);
+        if(!$socios){die;}
+	$soc_carnets=array();
+	foreach ( $socios as $socio ) {
+                $cupon = $this->pagos_model->get_cupon($socio->id, $id_entidad);
+                $monto = $this->pagos_model->get_monto_socio($socio->id)['total'];
+		$soc_carnets[] = array('socio'=>$socio, 'cupon'=>$cupon, 'monto'=>$monto);
+	}
+	$data['socios'] = $soc_carnets;
+        $this->load->view('imprimir-carnets-lote',$data);
+    }
+
     function cuentadigital($sid, $nombre, $precio, $venc=null) 
     {
         $this->config->load("cuentadigital");
