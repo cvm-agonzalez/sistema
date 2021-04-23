@@ -39,8 +39,8 @@
 	    background-size: 100% 100%;
         }
         .imagen{
-            margin-top:50px;
-            margin-left: 15px;
+            margin-top:44px;
+            margin-left: 30px;
             width: 80px;
             float: left;
         }
@@ -117,6 +117,7 @@
             			}
             			?>
         		</div>
+		</div>
 
 	<?
 	}
