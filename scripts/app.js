@@ -894,7 +894,7 @@ function () {
                 $http({method:'GET', url:'listado'})
                     .success(function(data){                        
                         succescb(data);
-                        $("#cargando_socios").html('<a href="socios/agregar" class="btn btn-success"><i class="fa fa-plus"></i> Nuevo Socio</a> <a href="#" id="imprimir_carnets_lote" class="btn btn-success"><i class="fa fa-plus"></i> Carnets</a>');
+                        $("#cargando_socios").html('<a href="socios/agregar" class="btn btn-success"><i class="fa fa-plus"></i> Nuevo Socio</a> <a href="socios/carnets" class="btn btn-success"><i class="fa fa-plus"></i> Carnets</a>');
                     })
                     .error(function(data){
                         $log.warn(data);    

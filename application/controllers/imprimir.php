@@ -393,17 +393,25 @@ class Imprimir extends CI_Controller {
     }
 
     public function carnets(){
+        $hoja = $this->uri->segment(3);
         $id_entidad = $this->session->userdata('id_entidad');
-        $data['id_entidad'] = $id_entidad;
+        $categoria = $this->input->post('cat_sel');
+        $foto = $this->input->post('foto_sel');
+        $actividad = $this->input->post('act_sel');
         $this->load->model('socios_model');
+	$socios = $this->socios_model->get_carnets($id_entidad, $categoria, $foto, $actividad);
+        $data['id_entidad'] = $id_entidad;
         $this->load->model('pagos_model');
-        $socios = $this->socios_model->get_socios($id_entidad);
         if(!$socios){die;}
 	$soc_carnets=array();
+	$cont=1;
 	foreach ( $socios as $socio ) {
-                $cupon = $this->pagos_model->get_cupon($socio->id, $id_entidad);
-                $monto = $this->pagos_model->get_monto_socio($socio->id)['total'];
-		$soc_carnets[] = array('socio'=>$socio, 'cupon'=>$cupon, 'monto'=>$monto);
+		if ( $cont >= ($hoja*5)-4 && $cont <= ($hoja*5) ) {
+                	$cupon = $this->pagos_model->get_cupon($socio->id, $id_entidad);
+			$monto = $this->pagos_model->get_monto_socio($socio->id)['total'];
+			$soc_carnets[] = array('socio'=>$socio, 'cupon'=>$cupon, 'monto'=>$monto);
+		}
+		$cont++;
 	}
 	$data['socios'] = $soc_carnets;
         $this->load->view('imprimir-carnets-lote',$data);

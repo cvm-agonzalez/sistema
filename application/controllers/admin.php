@@ -1112,12 +1112,65 @@ class Admin extends CI_Controller {
                 break;
         }
     }
+
+    public function get_img() {
+        $this->load->model('general_model');
+        $this->load->model('pagos_model');
+        $id_entidad = $this->uri->segment(2);
+        $id_socio = $this->uri->segment(3);
+		$ent_dir = $this->general_model->get_ent_dir($id_entidad)->dir_name;
+echo $ent_dir;
+        if ( $ent_dir != '' ) {
+		    $cupon = $this->pagos_model->get_cupon($id_socio, $id_entidad);
+var_dump($cupon);
+            if ( $cupon ) {
+                $archivo = "entidades/".$ent_dir."/cupones/".$cupon->id.".png";
+                echo $archivo;
+            } else {
+                echo "cupon inexistente \n";
+            }
+        } else {
+            echo "Entidad inexistente \n";
+        }
+
+        break;
+    }
+
     public function socios()
     {
         switch ($this->uri->segment(3)) {
             /**
 
             **/
+            case 'carnets-do':
+		$categoria = $this->input->post('categoria');
+		$foto = $this->input->post('foto');
+		$actividad = $this->input->post('actividad');
+                $data = $this->carga_data();
+                $id_entidad = $this->session->userdata('id_entidad');
+                $this->load->model('general_model');
+                $this->load->model('actividades_model');
+		$data['categorias']=$this->general_model->get_cats($id_entidad);
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+                $this->load->model('socios_model');
+		$data['carnets'] = $this->socios_model->get_carnets($id_entidad, $categoria, $foto, $actividad);
+		$data['cat_sel'] = $categoria;
+		$data['foto_sel'] = $foto;
+		$data['act_sel'] = $actividad;
+                $data['section'] = 'imprimir-carnets';
+                $this->load->view('admin',$data);
+		break;
+            case 'carnets':
+                $data = $this->carga_data();
+                $id_entidad = $this->session->userdata('id_entidad');
+                $this->load->model('general_model');
+                $this->load->model('actividades_model');
+		$data['categorias']=$this->general_model->get_cats($id_entidad);
+                $data['actividades'] = $this->actividades_model->get_actividades($id_entidad);
+                $data['carnets'] = null;
+                $data['section'] = 'imprimir-carnets';
+                $this->load->view('admin',$data);
+		break;
             case 'valid_mail':
 		$mail = $this->uri->segment(4);
 		$rta = $this->valid_mail($mail);

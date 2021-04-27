@@ -1162,6 +1162,17 @@ $("#estad-comi-form").submit(function(){
         return true;
 })
 
+$("button#btn_print_hoja").click(function(){
+        var hoja = $("input[name='hojas']:checked", "#carnets_hojas").val();
+	if ( !hoja ) {
+		alert("Debe Seleccionar una Hoja");
+		return false;
+	}
+        window.open('<?=base_url()?>imprimir/carnets/'+hoja,'','menubar=yes,toolbar=yes,width=800,height=600');
+
+	return true;
+})
+
 $("button#estad_ing_excel").click(function(){
 	$("#arma_excel").val('1');
         var mes = $("#meses").val();

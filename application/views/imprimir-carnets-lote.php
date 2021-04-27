@@ -19,6 +19,7 @@
             width: 600px;
 	}
         .carnet{
+            margin-top:2px;
             width: 300px;
             height: 194px;
             float: left;

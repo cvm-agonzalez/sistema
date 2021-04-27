@@ -199,6 +199,26 @@ class Socios_model extends CI_Model {
         return $result;
     }
 
+    public function get_carnets($id_entidad, $categoria, $foto, $actividad)
+    {
+	$query="SELECT s.* 
+		FROM socios s 
+			LEFT JOIN actividades_asociadas aa ON ( s.id = aa.sid AND aa.estado = 1 ) 
+		WHERE s.id_entidad = $id_entidad "; 
+	if ( $categoria > 0 ) {
+		$query .= " AND s.categoria = $categoria ";
+	}
+	if ( $actividad == -1 ) {
+		$query .= " AND aa.sid IS NULL ";
+	}
+	if ( $actividad > 0 ) {
+		$query .= " AND aa.aid = $actividad AND aa.sid = s.id ";
+	}
+	$query .= "; ";
+        $result = $this->db->query($query)->result(); 
+        return $result;
+    }
+
     public function get_socios_export($id_entidad)
     {
 	$query="SELECT s.* , CONCAT(c.id,'-',c.nombre) categ_nombre, IF(t.apellido IS NULL,'', CONCAT(t.id,'#',t.nombre,', ',t.apellido)) apynom_tutor, SUM(p.pagado-p.monto) saldo
