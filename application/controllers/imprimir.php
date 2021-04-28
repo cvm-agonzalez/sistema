@@ -27,7 +27,7 @@ class Imprimir extends CI_Controller {
                 $this->load->library('PHPExcel');
                 $this->phpexcel->getProperties()->setCreator($ent_nombre)
                                              ->setLastModifiedBy($ent_nombre)
-                                             ->setTitle($titulo)
+                                             ->setTitle(substr($titulo,0,30))
                                              ->setSubject($titulo);
 
 		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
@@ -82,7 +82,7 @@ class Imprimir extends CI_Controller {
 		}
 
                 // Renombramos la hoja de trabajo
-                $this->phpexcel->getActiveSheet()->setTitle("$titulo");
+                $this->phpexcel->getActiveSheet()->setTitle("substr($titulo,0,30)");
 
 		$col = 0;
 	 	while ( $col <= $cant_col ) {
