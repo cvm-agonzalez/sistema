@@ -58,9 +58,6 @@
 		    <a href="<?=base_url()?>imprimir/cobros_actividad_excel/<?=$fecha1?>/<?=$fecha2?>/<?=$actividad_s?>/<?=$categoria?>" class="btn btn-success"><i class="fa fa-cloud-download"></i> Excel</a>
 		</div>
 		<h3 class="page-header">Pagos ingresados del <?=date('d/m/Y',strtotime($fecha1))?> al <?=date('d/m/Y',strtotime($fecha2))?></h3>
-		<? if(isset($actividad_info)){ 
-var_dump($actividad_info);
-?>
         <h3>ACTIVIDAD: <?=$actividad_info->nombre?></h3>
         <? } ?>
 	</div>
