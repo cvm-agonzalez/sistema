@@ -24,10 +24,11 @@ class Imprimir extends CI_Controller {
 	        $ent_abrev = $this->session->userdata('ent_abreviatura');
         	$ent_nombre = $this->session->userdata('ent_nombre');
 
+		$titulo=substr($titulo,0,29);
                 $this->load->library('PHPExcel');
                 $this->phpexcel->getProperties()->setCreator($ent_nombre)
                                              ->setLastModifiedBy($ent_nombre)
-                                             ->setTitle(substr($titulo,0,30))
+                                             ->setTitle($titulo)
                                              ->setSubject($titulo);
 
 		$letras="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
@@ -82,7 +83,7 @@ class Imprimir extends CI_Controller {
 		}
 
                 // Renombramos la hoja de trabajo
-                $this->phpexcel->getActiveSheet()->setTitle("substr($titulo,0,30)");
+                $this->phpexcel->getActiveSheet()->setTitle("$titulo");
 
 		$col = 0;
 	 	while ( $col <= $cant_col ) {
