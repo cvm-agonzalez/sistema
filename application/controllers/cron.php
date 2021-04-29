@@ -420,15 +420,15 @@ class Cron extends CI_Controller {
 				);
 		
             			$deuda = $this->pagos_model->get_deuda($socio->id);
+
+				// armo mail
+				$respuesta = $this->general_model->armo_cuerpo_email($id_entidad, $socio->id);
 		
 				// Inserta el registro de facturacion del mes
 				$this->pagos_model->insert_facturacion($data);
 		
 				// Actualizo en facturacion_cron el asociado facturado
 				$this->pagos_model->update_facturacion_cron($id_entidad,$xperiodo,3, 1, $cuota['total']);
-		
-				// armo mail
-				$respuesta = $this->general_model->armo_cuerpo_email($id_entidad, $socio->id);
 	
 				$acobrar = $respuesta['acobrar'];
 				$cuerpo = $respuesta['cuerpo'];
@@ -696,7 +696,7 @@ class Cron extends CI_Controller {
                 			// Armo encabezado con escudo y datos de cabecera
                 			$txt_mail  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
                 			$txt_mail .= "<thead>";
-                			$txt_mail .= "<tr style='background-color: #105401 ;'>";
+                			$txt_mail .= "<tr>";
 					$txt_mail .= "<th> <img src='$head_mail' alt='' ></th>";
 
                 			//$txt_mail .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>ENTIDAD ABC</th>";
@@ -725,8 +725,6 @@ class Cron extends CI_Controller {
 					$txt_mail .= "<br>";
 		
                 			$txt_mail .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
-	                		$txt_mail .= "<p style='font-family:verdana'> <b>ENTIDAD ABC - BAHIA BLANCA</b></p>";
-                			$txt_mail .= "<p style='font-family:verdana'> <b>Domicilio     - (291)-Telefono</b> </p>";
                 			$txt_mail .= "<br> <br>";
 		
                 			//$txt_mail .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";

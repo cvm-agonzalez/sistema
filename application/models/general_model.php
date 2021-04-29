@@ -422,7 +422,7 @@ COMISIONES
 	// Armo encabezado con escudo y datos de cabecera
 	$cuerpo  = "<table class='table table-hover' style='font-family:verdana' width='100%' >";
         $cuerpo .= "<thead>";
-	$cuerpo .= "<tr style='background-color: #105401 ;'>";
+	$cuerpo .= "<tr>";
 	$cuerpo .= "<th> <img src='$head_mail' alt='' ></th>";
 	//$cuerpo .= "<th> <img src='http://clubvillamitre.com/images/Escudo-CVM_100.png' alt='' ></th>";
         //$cuerpo .= "<th style='font-size:30; background-color: #105401; color:#FFF' align='center'>CLUB VILLA MITRE</th>";
@@ -636,8 +636,6 @@ COMISIONES
 	
 	$cuerpo .= "<br> <br>";
 	$cuerpo .= "<p style='font-family:verdana'> <b>ADMINISTRACION</b></p>";
-	$cuerpo .= "<p style='font-family:verdana'> <b>ENTIDAD ABC      - BAHIA BLANCA</b></p>";
-	$cuerpo .= "<p style='font-family:verdana'> <b>Domicilio     - (291)-Telefono</b> </p>";
 	$cuerpo .= "<br> <br>";
 	//$cuerpo .= "<img src='http://clubvillamitre.com/images/2doZocalo3.png' alt=''>";
 	
