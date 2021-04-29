@@ -395,10 +395,10 @@ class Imprimir extends CI_Controller {
 
     public function carnets(){
         $hoja = $this->uri->segment(3);
+        $actividad = $this->uri->segment(4);
+        $foto = $this->uri->segment(5);
+        $categoria = $this->uri->segment(6);
         $id_entidad = $this->session->userdata('id_entidad');
-        $categoria = $this->input->post('cat_sel');
-        $foto = $this->input->post('foto_sel');
-        $actividad = $this->input->post('act_sel');
         $this->load->model('socios_model');
 	$socios = $this->socios_model->get_carnets($id_entidad, $categoria, $foto, $actividad);
         $data['id_entidad'] = $id_entidad;

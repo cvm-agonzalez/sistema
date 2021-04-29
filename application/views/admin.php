@@ -1164,11 +1164,14 @@ $("#estad-comi-form").submit(function(){
 
 $("button#btn_print_hoja").click(function(){
         var hoja = $("input[name='hojas']:checked", "#carnets_hojas").val();
+        var act = $("#act_sel").val();
+        var foto = $("#foto_sel").val();
+        var cat = $("#cat_sel").val();
 	if ( !hoja ) {
 		alert("Debe Seleccionar una Hoja");
 		return false;
 	}
-        window.open('<?=base_url()?>imprimir/carnets/'+hoja,'','menubar=yes,toolbar=yes,width=800,height=600');
+        window.open('<?=base_url()?>imprimir/carnets/'+hoja+'/'+act+'/'+foto+'/'+cat,'','menubar=yes,toolbar=yes,width=800,height=600');
 
 	return true;
 })

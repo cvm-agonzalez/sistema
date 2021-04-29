@@ -29,8 +29,8 @@
                     <label for="" class="col-sm-2">Actividad</label>
                     <div class="col-sm-10">
                         <select name="actividad" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
-                        <option value="-1" <? if ( $act_sel ) { if ( $act_sel == -1 ) { echo 'selected'; } } ?>> SIN ACTIVIDAD </option>
                         <option value="0" <? if ( $act_sel ) { if ( $act_sel == 0 ) { echo 'selected'; } } ?>> TODAS </option>
+                        <option value="-1" <? if ( $act_sel ) { if ( $act_sel == -1 ) { echo 'selected'; } } ?>> SIN ACTIVIDAD </option>
                         <? foreach ( $actividades as $actividad ) {  ?>
                                 <option value="<?=$actividad->id?>" <? if ( $act_sel ) { if ( $act_sel == $actividad->id ) { echo 'selected'; } } ?>> <?=$actividad->nombre?> </option>
                         <? } ?>
@@ -42,13 +42,13 @@
 
             </form>
 	<? if ( $carnets ) { ?>
-            <form class="form-horizontal ng-pristine ng-valid" id="carnets_hojas">
+            <form class="form-horizontal ng-pristine ng-valid" id="carnets_hojas" method="post">
 		<br> <br>
                 <div class="form-group">
                     <label for="" class="col-sm-2" style="font-weight:bold" align="center"><b>Carnets para imprimir <?=count($carnets)?></b></label>
-			<input type="hidden" name="cat_sel" value="<?=$cat_sel?>">                                
-			<input type="hidden" name="foto_sel" value="<?=$foto_sel?>">                                
-			<input type="hidden" name="act_sel" value="<?=$act_sel?>">                                
+			<input type="hidden" name="cat_sel" id="cat_sel" value="<?=$cat_sel?>">                                
+			<input type="hidden" name="foto_sel" id="foto_sel" value="<?=$foto_sel?>">                                
+			<input type="hidden" name="act_sel" id="act_sel" value="<?=$act_sel?>">                                
 		</div>
 
 		<div>
@@ -70,7 +70,7 @@
 		</div>
 		<br>
 		<div>
-                	<button id="btn_print_hoja" value="" class="btn btn-success">Imprimir Hoja Seleccionada</button>
+                	<button id="btn_print_hoja" class="btn btn-success">Imprimir Hoja Seleccionada</button>
 		</div>
             </form>
 	<? } else {?>

@@ -216,6 +216,23 @@ class Socios_model extends CI_Model {
 	}
 	$query .= "; ";
         $result = $this->db->query($query)->result(); 
+	if ( $foto == "SI" || $foto == "NO" ) {
+        	$this->load->model('general_model');
+        	$ent_directorio = $this->general_model->get_ent_dir($id_entidad)->dir_name;
+		$result_new = array();
+		foreach ( $result as $reg ) {
+        		if (file_exists( BASEPATH."../entidades/".$ent_directorio."/socios/".$reg->id.".jpg" )){
+				if ( $foto == "SI" ) {
+					$result_new[] = $reg;
+				}
+			} else {
+				if ( $foto == "NO" ) {
+					$result_new[] = $reg;
+				}
+			}
+		}
+		$result = $result_new;
+	}
         return $result;
     }
 
