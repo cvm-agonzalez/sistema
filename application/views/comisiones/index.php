@@ -1050,15 +1050,39 @@ $("#comi-activ-form").submit(function(){
 
         return true;
 })
-$("#comsoc-activ-form").submit(function(){
+$("#btn_procesar_list").click(function(){
         var actividad = $("#actividad").val();
-        var url = "<?=$baseurl?>comisiones/lista_socios_act/view" + "/" + actividad;
+        var estado = $("#estado").val();
+        var mora = $("#mora").val();
+	if ( mora == 1 ) {
+        	var url = "<?=$baseurl?>comisiones/lista_morosos/view" + "/" + actividad + "/" + estado;
+	} else {
+        	var url = "<?=$baseurl?>comisiones/lista_socios_act/view" + "/" + actividad + "/" + estado;
+	}
 
         $("#comsoc-activ-form").attr("action",url);
         $("#comsoc-activ-form").submit();
 
         return true;
 })
+
+$("#btn_excel_list").click(function(){
+        var actividad = $("#actividad").val();
+        var estado = $("#estado").val();
+        var mora = $("#mora").val();
+
+        if ( mora == 1 ) {
+                var url = "<?=$baseurl?>comisiones/lista_morosos/excel" + "/" + actividad + "/" + estado;
+        } else {
+                var url = "<?=$baseurl?>comisiones/lista_socios_act/excel" + "/" + actividad + "/" + estado;
+        }
+
+        $("#comsoc-activ-form").attr("action",url);
+        $("#comsoc-activ-form").submit();
+
+        return true;
+})
+
 
 
 </script>

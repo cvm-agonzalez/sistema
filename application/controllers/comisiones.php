@@ -18,6 +18,17 @@ class Comisiones extends CI_Controller {
 
 	public function index()
 	{
+                $data = array();
+                $data['ent_nombre'] = $this->session->userdata('ent_nombre');
+                $data['ent_directorio'] = $this->session->userdata('ent_directorio');
+                $data['ent_abreviatura'] = $this->session->userdata('abreviatura');
+                $data['email_reply'] = $this->session->userdata('email_sistema');
+                $data['id_entidad'] = $this->session->userdata('id_entidad');
+                $data['grupo'] = $this->session->userdata('grupo');
+                $data['username'] = $this->session->userdata('username');
+                $data['rango'] = $this->session->userdata('rango');
+                $data['baseurl'] = base_url();
+
 		$id_entidad = $this->session->userdata('id_entidad');
                 $id_comision = $this->session->userdata('id_comision');
 		$actividades = $this->general_model->get_actividades_comision($id_entidad);
@@ -26,7 +37,6 @@ class Comisiones extends CI_Controller {
 		}else{
 			$data['actividades'] = false;
 		}
-	        $data['baseurl'] = base_url();
 		$data['section'] = 'principal';
 
 		$this->load->model('comisiones_model');
@@ -49,7 +59,6 @@ class Comisiones extends CI_Controller {
                 $data['resumen1'] = $this->comisiones_model->resumen($id_entidad, $comision->id, $periodo, $anio_corte, 0);
                 $data['resumen2'] = $this->comisiones_model->resumen($id_entidad, $comision->id, $periodo, $anio_corte, 1);
 
-
 		$this->load->view('comisiones/index', $data, FALSE);
 
 	}
@@ -59,20 +68,33 @@ class Comisiones extends CI_Controller {
 		$id_entidad = $this->session->userdata('id_entidad');
                 $accion=$this->uri->segment(3);
                 $id_actividad = $this->uri->segment(4);
+                $id_estado = $this->uri->segment(5);
+                if ( $id_estado != 0 ) { 
+                        $data['estado'] = $id_estado;
+                } else {
+                        $data['estado'] = -1;
+                }
 
+                $this->load->model('general_model');
                 $this->load->model('comisiones_model');
 		$this->load->model('actividades_model');
+                $entidad = $this->general_model->get_ent_dir($id_entidad);
+                $ent_directorio = $entidad->dir_name;
+                $data['ent_nombre'] = $entidad->descripcion;
+                $data['ent_directorio'] = $ent_directorio;
                 $data['baseurl'] = base_url();
                 $data['username'] = $this->session->userdata('username');
                 $id_comision = $this->session->userdata('id_comision');
                 $comision = $this->comisiones_model->get_comision($id_entidad, $id_comision);
                 $data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
+
+
                 if ( $id_actividad == 0 ) {
                         $data['id_actividad'] = 0;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, -1, $id_comision);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, -1, $id_comision, 0, $data['estado']);
                 } else {
                         $data['id_actividad'] = $id_actividad;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, $id_actividad, 0);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, $id_actividad, 0, 0, $data['estado']);
                 }
 
 		switch ( $accion ) {
@@ -86,7 +108,9 @@ class Comisiones extends CI_Controller {
                                 		'domicilio' => $socio->domicilio,
                                 		'email' => $socio->mail,
                                 		'estado' => $socio->suspendido,
-                                		'saldo' => $socio->mora,
+                                                'deuda_cs' => $socio->mora_cs,
+                                                'deuda_act' => $socio->mora_act,
+                                                'deuda_seg' => $socio->mora_seg,
                                 		'ult_pago' => $socio->ult_pago,
                                 		);
 					$result[]=$socact;
@@ -103,7 +127,9 @@ class Comisiones extends CI_Controller {
                                 $headers[]="Domicilio";
                                 $headers[]="Email";
                                 $headers[]="Estado";
-                                $headers[]="Saldo";
+                                $headers[]="Deuda Cuota Social";
+                                $headers[]="Deuda Actividad";
+                                $headers[]="Deuda Seguro";
                                 $headers[]="Ult Pago";
                                 $datos=$result;
                                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
@@ -123,9 +149,19 @@ class Comisiones extends CI_Controller {
 		$id_entidad = $this->session->userdata('id_entidad');
                 $accion=$this->uri->segment(3);
                 $id_actividad = $this->uri->segment(4);
+                $id_estado = $this->uri->segment(5);
+                if ( $id_estado != 0 ) {
+                        $data['estado'] = $id_estado;
+                } else {
+                        $data['estado'] = -1;
+                }
 
+                $this->load->model('general_model');
                 $this->load->model('comisiones_model');
 		$this->load->model('actividades_model');
+                $entidad = $this->general_model->get_ent_Dir($id_entidad);
+                $data['ent_nombre'] = $entidad->descripcion;
+                $data['ent_directorio'] = $entidad->dir_name;
                 $data['baseurl'] = base_url();
                 $data['username'] = $this->session->userdata('username');
                 $id_comision = $this->session->userdata('id_comision');
@@ -134,10 +170,10 @@ class Comisiones extends CI_Controller {
                 $data['actividades'] = $this->general_model->get_actividades_comision($id_entidad);
                 if ( $id_actividad == 0 ) {
                         $data['id_actividad'] = 0;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, -1, $id_comision, 1);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, -1, $id_comision, 1, $data['estado']);
                 } else {
                         $data['id_actividad'] = $id_actividad;
-                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, $id_actividad, 0, 1);
+                        $data['socioact_tabla'] = $this->actividades_model->get_socactiv($id_entidad, $id_actividad, 0, 1, $data['estado']);
                 }
 
 		switch ( $accion ) {
@@ -151,7 +187,9 @@ class Comisiones extends CI_Controller {
                                 		'domicilio' => $socio->domicilio,
                                 		'email' => $socio->mail,
                                 		'estado' => $socio->suspendido,
-                                		'saldo' => $socio->mora,
+                                                'deuda_cs' => $socio->mora_cs,
+                                                'deuda_act' => $socio->mora_act,
+                                                'deuda_seg' => $socio->mora_seg,
                                 		'ult_pago' => $socio->ult_pago,
                                 		);
 					$result[]=$socact;
@@ -168,7 +206,9 @@ class Comisiones extends CI_Controller {
                                 $headers[]="Domicilio";
                                 $headers[]="Email";
                                 $headers[]="Estado";
-                                $headers[]="Saldo";
+                                $headers[]="Deuda Cuota Social";
+                                $headers[]="Deuda Actividad";
+                                $headers[]="Deuda Seguro";
                                 $headers[]="Ult Pago";
                                 $datos=$result;
                                 $this->gen_EXCEL($headers, $datos, $titulo, $archivo, $fila1);
@@ -190,8 +230,13 @@ class Comisiones extends CI_Controller {
                 $id_actividad = $this->uri->segment(4);
 
 		$this->load->model('estadisticas_model');
+		$this->load->model('general_model');
 		$this->load->model('comisiones_model');
 		$this->load->model('actividades_model');
+		$entidad = $this->general_model->get_ent_dir($id_entidad);
+		$ent_directorio = $entidad->dir_name;
+		$data['ent_nombre'] = $entidad->descripcion;
+		$data['ent_directorio'] = $ent_directorio;
 	        $data['baseurl'] = base_url();
 		$data['username'] = $this->session->userdata('username');
                 $id_comision = $this->session->userdata('id_comision');
@@ -264,8 +309,12 @@ class Comisiones extends CI_Controller {
 		$id_socio=$this->uri->segment(3);
 		$accion=$this->uri->segment(4);
 
+		$this->load->model('general_model');
 		$this->load->model('socios_model');
 		$this->load->model('pagos_model');
+		$entidad = $this->general_model->get_ent_dir($id_entidad);
+		$data['ent_nombre'] = $entidad->descripcion;
+		$data['ent_directorio'] = $entidad->dir_name;
 		$data['username'] = $this->session->userdata('username');
 		$data['baseurl'] = base_url();
 		$data['socio'] = $this->socios_model->get_socio($id_socio);

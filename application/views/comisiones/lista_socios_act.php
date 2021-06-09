@@ -7,7 +7,7 @@
     	<div class="panel panel-default">
         	<div class="panel-body">
 
-		<form class="form-horizontal ng-pristine ng-valid" action="#" method="post" id="comsoc-activ-form" enctype="multipart/form-data">
+		<form class="form-horizontal ng-pristine ng-valid" method="post" id="comsoc-activ-form" enctype="multipart/form-data">
 
 
                 	<div class="form-group col-lg-18">
@@ -30,7 +30,7 @@
                                         <span class=" ui-select">
                                         <select name="estado" id="estado" style="margin:0px; width:100%; border:1px solid #cbd5dd; padding:8px 15px 7px 10px;">
                                         	<option value="-1" <? if($estado < 0){ echo 'selected'; } ?>>Todos los socios</option>
-                                                <option value="0" <? if($estado == 0){ echo 'selected'; } ?>>Socios Activos</option>
+                                                <option value="99" <? if($estado == 99){ echo 'selected'; } ?>>Socios Activos</option>
                                                 <option value="1" <? if($estado == 1){ echo 'selected'; } ?>>Socios Suspendidos</option>
                                         </select>
                                         </span>
@@ -40,11 +40,11 @@
 	
                 	<div class="form-group col-lg-18">
                      		<div class="col-sm-5">
-                                       <button class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
+                                       <button name="btn_procesar_list" id="btn_procesar_list" class="btn btn-success">Procesar</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
+				       <input type="hidden" name="mora" id="mora" value='<?=$mora?>' class="form-control">
                      		</div>
                      		<div class="col-sm-5">
-					<? if ( $mora == 1 ) { $xlink="lista_morosos"; } else { $xlink="lista_socios_act"; } ?>
-					<a class="btn btn-primary" href="<?=$baseurl?>comisiones/<?=$xlink?>/excel/<?=$id_actividad?>">Baja a Excel</a>
+                                       <button name="btn_excel_list" id="btn_excel_list" class="btn btn-success">Bajar a EXCEL</button> <i id="reg-cargando" class="fa fa-spinner fa-spin hidden"></i>
                      		</div>
 
                 	</div>

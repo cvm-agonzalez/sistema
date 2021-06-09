@@ -266,7 +266,7 @@ class Actividades_model extends CI_Model {
         return true;
     } 
 
-    public function get_socactiv($id_entidad, $id_actividad=-1,$id_comision=0,$mora=0){
+    public function get_socactiv($id_entidad, $id_actividad=-1,$id_comision=0,$mora=0,$id_estado=-1){
         $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_socios_activos;";
         $this->db->query($qry);
 
@@ -279,7 +279,7 @@ class Actividades_model extends CI_Model {
         }
 
         $qry = "CREATE TEMPORARY TABLE tmp_socios_activos
-		        SELECT aa.aid, a.nombre descr_act, s.*
+                SELECT aa.aid, a.nombre descr_act, IF(aa.descuento>0, IF(aa.monto_porcentaje=1, CONCAT(aa.descuento,' % becado'), CONCAT(aa.descuento, ' $ becados')), 'normal') beca, aa.federado, s.*
                 FROM actividades_asociadas aa 
 			        JOIN socios s ON aa.sid = s.id 
 			        JOIN actividades a ON aa.aid = a.id ";
@@ -290,27 +290,36 @@ class Actividades_model extends CI_Model {
         if ( $id_actividad >= 0 && $id_comision == 0 ) {
                 $qry .= "AND aa.aid = $id_actividad ";
         }
+        if ( $id_estado > 0 ) {
+		if ( $id_estado == 99 ) {
+                	$qry .= "AND s.suspendido = 0 ";
+		} else {
+                	$qry .= "AND s.suspendido = $id_estado ";
+		}
+        }
+
         $qry .= "ORDER BY aa.aid, s.id; ";
         $this->db->query($qry);
 
         $qry = "DROP TEMPORARY TABLE IF EXISTS tmp_pagos;";
         $this->db->query($qry);
 
-        $qry = "CREATE TEMPORARY TABLE tmp_pagos
-		        SELECT ta.id sid, SUM(monto-pagado) saldo, MAX(pagadoel) ult_pago
+       $qry = "CREATE TEMPORARY TABLE tmp_pagos
+                SELECT ta.id sid, p.tipo, SUM(pagado-monto) saldo, MAX(pagadoel) ult_pago
                 FROM tmp_socios_activos ta
-			        JOIN pagos p ON ( p.id_entidad = $id_entidad AND ta.id = p.tutor_id )
-		        GROUP BY 1; ";
+                        JOIN pagos p ON ( p.id_entidad = $id_entidad AND ta.id = p.tutor_id )
+                GROUP BY 1,2; ";
         $this->db->query($qry);
 
-        $qry = "SELECT ta.*, IFNULL(tp.saldo,0) mora, IFNULL(tp.ult_pago,'') ult_pago
-		        FROM tmp_socios_activos ta		
-			        LEFT JOIN tmp_pagos tp ON ta.id = tp.sid ";
-	    if ( $mora == 0 ) {
-		    $qry .= "; ";
-	    } else {
-		    $qry .= "WHERE tp.saldo > 0; ";
-	    }
+        $qry = "SELECT ta.*, SUM(IF(tp.tipo=1,tp.saldo,0)) mora_cs, SUM(IF(tp.tipo=4,tp.saldo,0)) mora_act, SUM(IF(tp.tipo=6,tp.saldo,0)) mora_seg, SUM(IF(tp.tipo NOT IN (1,4,6),tp.saldo,0)) mora_otro, 
+                                SUM(tp.saldo) saldo, IFNULL(tp.ult_pago,'') ult_pago
+                FROM tmp_socios_activos ta              
+                        LEFT JOIN tmp_pagos tp ON ta.id = tp.sid ";
+        if ( $mora != 0 ) {
+                $qry .= "WHERE tp.saldo < 0 AND tp.saldo is NOT NULL ";
+        }
+        $qry .= "GROUP BY ta.id; ";
+
 	
         $socactiv = $this->db->query($qry);
         return $socactiv->result();

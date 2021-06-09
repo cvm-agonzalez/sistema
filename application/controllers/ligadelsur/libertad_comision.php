@@ -19,6 +19,7 @@ class libertad_comision extends CI_Controller
 		$data['ent_abreviatura'] = $entidad->abreviatura;
 		$data['ent_nombre'] = $entidad->descripcion;
 		$data['ent_directorio'] = $entidad->dir_name;
+var_dump($data);
 
 		$this->session->set_userdata($data);
 
